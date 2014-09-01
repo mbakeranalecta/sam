@@ -71,12 +71,15 @@ class Source:
 
         :param filename: The filename of the source to parse.
         """
+        self.filename = filename
         self.sourceFile = open(filename, encoding='utf-8')
         self.currentLine = None
+        self.currentLineNumber = 0
 
     @property
     def nextLine(self):
         self.currentLine = self.sourceFile.readline()
+        self.currentLineNumber += 1
         return self.currentLine
 
 
@@ -168,7 +171,7 @@ def listContinue(source):
         print('<li>' + match.group(2).strip() + '</li>')
         return "LIST", source
     else:
-        raise Exception("Broken list")
+        raise Exception("Broken list at line " + str(source.currentLineNumber) + " " + source.filename)
 
 def numListStart(source):
     line = source.currentLine
@@ -188,7 +191,7 @@ def numListContinue(source):
         print('<li>' + match.group(2).strip() + '</li>')
         return "NUM-LIST", source
     else:
-        raise Exception("Broken num list")
+        raise Exception("Broken num list at line " + str(source.currentLineNumber) + " " + source.filename)
 
 
 def recordStart(source):
