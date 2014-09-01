@@ -13,7 +13,8 @@ patterns = {
     'record-start': re.compile('\s*[a-zA-Z0-9-_]+::(.*)'),
     'annotation': re.compile('(\[[^\[]+\]\([^\(]+\))'),
     'annotation-split': re.compile('\[([^\[]+)\]\(([^\(]+)\)'),
-    'list-item': re.compile('(\s*)\*\s(.*)')
+    'list-item': re.compile('(\s*)\*\s(.*)'),
+    'num-list-item': re.compile('(\s*)[0-9]+\.\s(.*)')
 }
 
 
@@ -169,6 +170,26 @@ def listContinue(source):
     else:
         raise Exception("Broken list")
 
+def numListStart(source):
+    line = source.currentLine
+    print(docStructure.pushElement(Element('ol'), 0))
+    match = patterns['num-list-item'].match(line)
+    print('<li>' + match.group(2).strip() + '</li>')
+    return "NUM-LIST", source
+
+
+def numListContinue(source):
+    line = source.nextLine
+    if patterns['blank-line'].match(line):
+        print(docStructure.popElement)
+        return "SAM", source
+    elif patterns['num-list-item'].match(line):
+        match = patterns['num-list-item'].match(line)
+        print('<li>' + match.group(2).strip() + '</li>')
+        return "NUM-LIST", source
+    else:
+        raise Exception("Broken num list")
+
 
 def recordStart(source):
     line = source.currentLine
@@ -213,6 +234,8 @@ def sam(source):
         return "CODEBLOCK-START", source
     elif patterns['list-item'].match(line):
         return "LIST-START", source
+    elif patterns['num-list-item'].match(line):
+        return "NUM-LIST-START", source
     elif patterns['paragraph-start'].match(line):
         return "PARAGRAPH-START", source
     elif line != "":
@@ -246,6 +269,8 @@ if __name__ == "__main__":
     stateMachine.add_state("RECORD", record)
     stateMachine.add_state("LIST-START", listStart)
     stateMachine.add_state("LIST", listContinue)
+    stateMachine.add_state("NUM-LIST-START", numListStart)
+    stateMachine.add_state("NUM-LIST", numListContinue)
     stateMachine.add_state("END", None, end_state=1)
     stateMachine.set_start("NEW")
 

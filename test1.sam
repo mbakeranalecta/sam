@@ -47,6 +47,10 @@ feature-topic:
     If a fragment is defined inline, it is included where it occurs. Fragments in fragment files are not included
     anywhere unless they are pulled in by a fragment reference.
 
+    0. One
+    4. Seven
+    80976. Two
+
     A fragment reference inserts a fragment by ID at the place it occurs in the text.
 
     Fragments are recursive. That is, fragments can contain other fragments and fragment references.
