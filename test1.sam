@@ -39,7 +39,11 @@ feature-topic:
 </fragment-ref>
     ```
         
-    Fragments can be defined inline in a topic file, or they can be defined in separate fragment collections.
+    Fragments can be defined:
+
+    * inline in a topic file
+    * in separate fragment collections
+
     If a fragment is defined inline, it is included where it occurs. Fragments in fragment files are not included
     anywhere unless they are pulled in by a fragment reference.
 

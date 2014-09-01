@@ -12,7 +12,8 @@ patterns = {
     'blank-line': re.compile('^\s*$'),
     'record-start': re.compile('\s*[a-zA-Z0-9-_]+::(.*)'),
     'annotation': re.compile('(\[[^\[]+\]\([^\(]+\))'),
-    'annotation-split': re.compile('\[([^\[]+)\]\(([^\(]+)\)')
+    'annotation-split': re.compile('\[([^\[]+)\]\(([^\(]+)\)'),
+    'list-item': re.compile('(\s*)\*\s(.*)')
 }
 
 
@@ -148,6 +149,26 @@ def paragraph(source):
         docStructure.paragraphAppend(line)
         return "PARAGRAPH", source
 
+def listStart(source):
+    line = source.currentLine
+    print(docStructure.pushElement(Element('ul'), 0))
+    match = patterns['list-item'].match(line)
+    print('<li>' + match.group(2).strip() + '</li>')
+    return "LIST", source
+
+
+def listContinue(source):
+    line = source.nextLine
+    if patterns['blank-line'].match(line):
+        print(docStructure.popElement)
+        return "SAM", source
+    elif patterns['list-item'].match(line):
+        match = patterns['list-item'].match(line)
+        print('<li>' + match.group(2).strip() + '</li>')
+        return "LIST", source
+    else:
+        raise Exception("Broken list")
+
 
 def recordStart(source):
     line = source.currentLine
@@ -190,6 +211,8 @@ def sam(source):
         return "SAM", source
     elif patterns['codeblock-start'].match(line):
         return "CODEBLOCK-START", source
+    elif patterns['list-item'].match(line):
+        return "LIST-START", source
     elif patterns['paragraph-start'].match(line):
         return "PARAGRAPH-START", source
     elif line != "":
@@ -221,6 +244,8 @@ if __name__ == "__main__":
     stateMachine.add_state("PARAGRAPH", paragraph)
     stateMachine.add_state("RECORD-START", recordStart)
     stateMachine.add_state("RECORD", record)
+    stateMachine.add_state("LIST-START", listStart)
+    stateMachine.add_state("LIST", listContinue)
     stateMachine.add_state("END", None, end_state=1)
     stateMachine.set_start("NEW")
 
