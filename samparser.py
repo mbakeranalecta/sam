@@ -2,49 +2,49 @@ from statemachine import StateMachine
 import re
 from collections import OrderedDict
 
-patterns = {
-            'comment': re.compile('\s*#.*'),
-            'block-start': re.compile('(\s*)([a-zA-Z0-9-_]+):(.*)'),
-            'codeblock-start': re.compile('(\s*)```(.*)'),
-            'codeblock-end': re.compile('(\s*)```\s*$'),
-            'paragraph-start': re.compile('\w*'),
-            'blank-line': re.compile('^\s*$'),
-            'record-start': re.compile('\s*[a-zA-Z0-9-_]+::(.*)'),
-            'annotation': re.compile('(\[[^\[]+\]\([^\(]+\))'),
-            'annotation-split': re.compile('\[([^\[]+)\]\(([^\(]+)\)'),
-            'list-item': re.compile('(\s*)\*\s(.*)'),
-            'num-list-item': re.compile('(\s*)[0-9]+\.\s(.*)')
-        }
 
 class SamParser:
     def __init__(self):
 
         self.stateMachine = StateMachine()
-        self.stateMachine.add_state("NEW", self.new_file)
-        self.stateMachine.add_state("SAM", self.sam)
-        self.stateMachine.add_state("BLOCK", self.block)
-        self.stateMachine.add_state("CODEBLOCK-START", self.codeblockStart)
-        self.stateMachine.add_state("CODEBLOCK", self.codeblock)
-        self.stateMachine.add_state("PARAGRAPH-START", self.paragraphStart)
-        self.stateMachine.add_state("PARAGRAPH", self.paragraph)
-        self.stateMachine.add_state("RECORD-START", self.recordStart)
-        self.stateMachine.add_state("RECORD", self.record)
-        self.stateMachine.add_state("LIST-START", self.listStart)
-        self.stateMachine.add_state("LIST", self.listContinue)
-        self.stateMachine.add_state("NUM-LIST-START", self.numListStart)
-        self.stateMachine.add_state("NUM-LIST", self.numListContinue)
+        self.stateMachine.add_state("NEW", self.__new_file)
+        self.stateMachine.add_state("SAM", self.__sam)
+        self.stateMachine.add_state("BLOCK", self.__block)
+        self.stateMachine.add_state("CODEBLOCK-START", self.__codeblockStart)
+        self.stateMachine.add_state("CODEBLOCK", self.__codeblock)
+        self.stateMachine.add_state("PARAGRAPH-START", self.__paragraphStart)
+        self.stateMachine.add_state("PARAGRAPH", self.__paragraph)
+        self.stateMachine.add_state("RECORD-START", self.__recordStart)
+        self.stateMachine.add_state("RECORD", self.__record)
+        self.stateMachine.add_state("LIST-START", self.__listStart)
+        self.stateMachine.add_state("LIST", self.__listContinue)
+        self.stateMachine.add_state("NUM-LIST-START", self.__numListStart)
+        self.stateMachine.add_state("NUM-LIST", self.__numListContinue)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("NEW")
 
         self.docStructure = DocStructure()
 
+        self.patterns = {
+                    'comment': re.compile('\s*#.*'),
+                    'block-start': re.compile('(\s*)([a-zA-Z0-9-_]+):(.*)'),
+                    'codeblock-start': re.compile('(\s*)```(.*)'),
+                    'codeblock-end': re.compile('(\s*)```\s*$'),
+                    'paragraph-start': re.compile('\w*'),
+                    'blank-line': re.compile('^\s*$'),
+                    'record-start': re.compile('\s*[a-zA-Z0-9-_]+::(.*)'),
+                    'annotation': re.compile('(\[[^\[]+\]\([^\(]+\))'),
+                    'annotation-split': re.compile('\[([^\[]+)\]\(([^\(]+)\)'),
+                    'list-item': re.compile('(\s*)\*\s(.*)'),
+                    'num-list-item': re.compile('(\s*)[0-9]+\.\s(.*)')
+                }
 
 
     def parse (self, source):
         self.source = Source(source)
         self.stateMachine.run(self.source)
 
-    def new_file(self, source):
+    def __new_file(self, source):
         line = source.nextLine
         if line[:4] == 'sam:':
             print('<?xml version="1.0" encoding="UTF-8"?>')
@@ -52,9 +52,9 @@ class SamParser:
         else:
             raise Exception("Not a SAM file!")
 
-    def block(self, source):
+    def __block(self, source):
         line = source.currentLine
-        match = patterns['block-start'].match(line)
+        match = self.patterns['block-start'].match(line)
         localIndent = len(match.group(1))
         localElement = Element(match.group(2))
         localContent = match.group(3).strip()
@@ -78,17 +78,17 @@ class SamParser:
             return "SAM", source
 
 
-    def codeblockStart(self, source):
+    def __codeblockStart(self, source):
         line = source.currentLine
-        match = patterns['codeblock-start'].match(line)
+        match = self.patterns['codeblock-start'].match(line)
         language = match.group(2).strip()
         print(self.docStructure.pushElement(Element('codeblock',{'language' : language}), 0) + '<![CDATA[')
         return "CODEBLOCK", source
 
 
-    def codeblock(self, source):
+    def __codeblock(self, source):
         line = source.nextLine
-        if patterns['codeblock-end'].match(line):
+        if self.patterns['codeblock-end'].match(line):
             print("]]>" + self.docStructure.popElement)
             return "SAM", source
         else:
@@ -96,74 +96,74 @@ class SamParser:
             return "CODEBLOCK", source
 
 
-    def paragraphStart(self, source):
+    def __paragraphStart(self, source):
         line = source.currentLine
         print(self.docStructure.pushElement(Element('p'), 0), end="")
         self.docStructure.paragraphStart(line)
         return "PARAGRAPH", source
 
 
-    def paragraph(self, source):
+    def __paragraph(self, source):
         line = source.nextLine
-        if patterns['blank-line'].match(line):
-            self.processParagraph(self.docStructure.currentParagraph)
+        if self.patterns['blank-line'].match(line):
+            self.__processParagraph(self.docStructure.currentParagraph)
             print(self.docStructure.popElement)
             return "SAM", source
         else:
             self.docStructure.paragraphAppend(line)
             return "PARAGRAPH", source
 
-    def listStart(self, source):
+    def __listStart(self, source):
         line = source.currentLine
         print(self.docStructure.pushElement(Element('ul'), 0))
-        match = patterns['list-item'].match(line)
+        match = self.patterns['list-item'].match(line)
         print('<li>' + match.group(2).strip() + '</li>')
         return "LIST", source
 
 
-    def listContinue(self, source):
+    def __listContinue(self, source):
         line = source.nextLine
-        if patterns['blank-line'].match(line):
+        if self.patterns['blank-line'].match(line):
             print(self.docStructure.popElement)
             return "SAM", source
-        elif patterns['list-item'].match(line):
-            match = patterns['list-item'].match(line)
+        elif self.patterns['list-item'].match(line):
+            match = self.patterns['list-item'].match(line)
             print('<li>' + match.group(2).strip() + '</li>')
             return "LIST", source
         else:
             raise Exception("Broken list at line " + str(source.currentLineNumber) + " " + source.filename)
 
-    def numListStart(self, source):
+    def __numListStart(self, source):
         line = source.currentLine
         print(self.docStructure.pushElement(Element('ol'), 0))
-        match = patterns['num-list-item'].match(line)
+        match = self.patterns['num-list-item'].match(line)
         print('<li>' + match.group(2).strip() + '</li>')
         return "NUM-LIST", source
 
 
-    def numListContinue(self, source):
+    def __numListContinue(self, source):
         line = source.nextLine
-        if patterns['blank-line'].match(line):
+        if self.patterns['blank-line'].match(line):
             print(self.docStructure.popElement)
             return "SAM", source
-        elif patterns['num-list-item'].match(line):
-            match = patterns['num-list-item'].match(line)
+        elif self.patterns['num-list-item'].match(line):
+            match = self.patterns['num-list-item'].match(line)
             print('<li>' + match.group(2).strip() + '</li>')
             return "NUM-LIST", source
         else:
             raise Exception("Broken num list at line " + str(source.currentLineNumber) + " " + source.filename)
 
 
-    def recordStart(self, source):
+    def __recordStart(self, source):
         line = source.currentLine
-        fieldNames = [x.strip() for x in patterns['record-start'].match(line).group(1).split(',')]
+        fieldNames = [x.strip() for x in self.patterns['record-start'].match(line).group(1).split(',')]
         self.docStructure.fields = fieldNames
         return "RECORD", source
 
 
-    def record(self, source):
+    def __record(self, source):
         line = source.nextLine
-        if patterns['blank-line'].match(line):
+        if self.patterns['blank-line'].match(line):
             self.docStructure.popElement
             return "SAM", source
         else:
@@ -176,7 +176,7 @@ class SamParser:
             return "RECORD", source
 
 
-    def sam(self, source):
+    def __sam(self, source):
         line = source.nextLine
         if line == "":
             while True:
@@ -185,21 +185,21 @@ class SamParser:
                 except IndexError:
                     break
             return "END", source
-        elif patterns['comment'].match(line):
+        elif self.patterns['comment'].match(line):
             print('<!--' + line.strip() + '-->')
             return "SAM", source
-        elif patterns['block-start'].match(line):
+        elif self.patterns['block-start'].match(line):
             return "BLOCK", source
-        elif patterns['blank-line'].match(line):
+        elif self.patterns['blank-line'].match(line):
             print()
             return "SAM", source
-        elif patterns['codeblock-start'].match(line):
+        elif self.patterns['codeblock-start'].match(line):
             return "CODEBLOCK-START", source
-        elif patterns['list-item'].match(line):
+        elif self.patterns['list-item'].match(line):
             return "LIST-START", source
-        elif patterns['num-list-item'].match(line):
+        elif self.patterns['num-list-item'].match(line):
             return "NUM-LIST-START", source
-        elif patterns['paragraph-start'].match(line):
+        elif self.patterns['paragraph-start'].match(line):
             return "PARAGRAPH-START", source
         elif line != "":
             print('*NOT MATCHED* ' + line, end='')
@@ -207,10 +207,10 @@ class SamParser:
         else:
             raise Exception("I'm confused")
 
-    def processParagraph (self, paragraph):
-        parts = patterns['annotation'].split(paragraph)
+    def __processParagraph (self, paragraph):
+        parts = self.patterns['annotation'].split(paragraph)
         for part in parts:
-            p = patterns['annotation-split'].match(part)
+            p = self.patterns['annotation-split'].match(part)
             if p is None:
                 print(part, end="")
             else:
