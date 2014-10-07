@@ -18,8 +18,8 @@ feature-topic:
     body: Fragments
     [Fragments](feature) are a [content reuse](task) feature of the [EPPO-simple](feature) [plugin]( feature).
     
-    A fragment is an \[arbitrary\]\\ sequence of text structures (paragraphs, lists, etc.) that has been given an id so that
-    it can be included by reference at other points in the content. 
+    A fragment is an \[arbitrary\]\\ sequence of *text structures* (paragraphs, lists, etc.) that _has been given_ an id so that
+    it can be included by reference at other \_points_ in the content.
     
     ```xml
 <fragment id="test-fragment">

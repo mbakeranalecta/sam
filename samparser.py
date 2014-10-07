@@ -1,4 +1,5 @@
 from statemachine import StateMachine
+from SamParaParser import SamParaParser
 import re
 from collections import OrderedDict
 
@@ -33,8 +34,6 @@ class SamParser:
             'paragraph-start': re.compile('\w*'),
             'blank-line': re.compile('^\s*$'),
             'record-start': re.compile('\s*[a-zA-Z0-9-_]+::(.*)'),
-            'annotation': re.compile('(\[[^\[]+\]\([^\(]+\))'),
-            'annotation-split': re.compile('\[([^\[]+)\]\(([^\(]+)\)'),
             'list-item': re.compile('(\s*)\*\s(.*)'),
             'num-list-item': re.compile('(\s*)[0-9]+\.\s(.*)')
         }
@@ -107,8 +106,8 @@ class SamParser:
         line = source.nextLine
         if self.patterns['blank-line'].match(line):
 
-            paraParser = SamParaParser()
-            paraParser.parse(self.docStructure.currentParagraph)
+            paraParser = SamParaParser(self.docStructure.currentParagraph)
+            paraParser.parse()
             #self.__processParagraph(self.docStructure.currentParagraph)
 
             print(self.docStructure.popElement)
@@ -221,44 +220,6 @@ class SamParser:
             else:
                 print('<annotation type="' + p.group(2).strip() + '">' + p.group(1) + '</annotation>', end="")
 
-
-class SamParaParser:
-    def __init__(self):
-
-        self.stateMachine = StateMachine()
-        self.stateMachine.add_state("PARA", self.__para)
-        self.stateMachine.add_state("ESCAPE", self.__escape)
-        self.stateMachine.add_state("END", None, end_state=1)
-        self.stateMachine.set_start("PARA")
-        self.patterns = {
-            'escape': re.compile('\\\\'),
-            'escaped-chars': re.compile('[\\\\\[\(\]]')
-        }
-
-    def parse(self, para):
-        self.para = Para(para)
-        self.stateMachine.run(self.para)
-
-    def __para(self, para):
-        try:
-            char = para.nextChar
-        except IndexError:
-            return "END", para
-        if char == '\\':
-            return "ESCAPE", para
-        else:
-            print(char, end='')
-            return "PARA", para
-
-    def __escape(self,para):
-        char = para.nextChar
-        if self.patterns['escaped-chars'].match(char):
-            print(char, end='')
-        else:
-            print('\\' + char, end='')
-        return "PARA", para
-
-
 class Element:
     def __init__(self, name, attributes={}):
         self.name = name
@@ -323,21 +284,6 @@ class Source:
         self.currentLine = self.sourceFile.readline()
         self.currentLineNumber += 1
         return self.currentLine
-
-
-class Para:
-    def __init__(self, para):
-        self.para = para
-        self.currentCharNumber = -1
-
-    @property
-    def nextChar(self):
-        self.currentCharNumber += 1
-        return self.para[self.currentCharNumber]
-
-    @property
-    def currentChar(self):
-        return self.para[self.currentCharNumber]
 
 
 if __name__ == "__main__":
