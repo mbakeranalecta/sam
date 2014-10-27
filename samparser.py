@@ -79,6 +79,9 @@ class SamParser:
 
     def __codeblockStart(self, source):
         line = source.currentLine
+        localIndent = len(line) - len(line.lstrip(' '))
+        while localIndent <= self.docStructure.currentIndent:
+            print(self.docStructure.popElement)
         match = self.patterns['codeblock-start'].match(line)
         language = match.group(2).strip()
         print(self.docStructure.pushElement(Element('codeblock', {'language': language}), 0) + '<![CDATA[')
@@ -97,6 +100,9 @@ class SamParser:
 
     def __paragraphStart(self, source):
         line = source.currentLine
+        localIndent = len(line) - len(line.lstrip(' '))
+        while localIndent <= self.docStructure.currentIndent:
+            print(self.docStructure.popElement)
         print(self.docStructure.pushElement(Element('p'), 0), end="")
         self.docStructure.paragraphStart(line)
         return "PARAGRAPH", source
@@ -118,6 +124,9 @@ class SamParser:
 
     def __listStart(self, source):
         line = source.currentLine
+        localIndent = len(line) - len(line.lstrip(' '))
+        while localIndent <= self.docStructure.currentIndent:
+            print(self.docStructure.popElement)
         print(self.docStructure.pushElement(Element('ul'), 0))
         match = self.patterns['list-item'].match(line)
         print('<li>' + match.group(2).strip() + '</li>')
@@ -138,6 +147,9 @@ class SamParser:
 
     def __numListStart(self, source):
         line = source.currentLine
+        localIndent = len(line) - len(line.lstrip(' '))
+        while localIndent <= self.docStructure.currentIndent:
+            print(self.docStructure.popElement)
         print(self.docStructure.pushElement(Element('ol'), 0))
         match = self.patterns['num-list-item'].match(line)
         print('<li>' + match.group(2).strip() + '</li>')
@@ -172,8 +184,8 @@ class SamParser:
         else:
             print("<" + self.docStructure.currentElement.name + ">")
             fieldValues = [x.strip() for x in line.split(',')]
-            record = OrderedDict(zip(self.docStructure.fields, fieldValues))
-            for key, value in record.items():
+            record = zip(self.docStructure.fields, fieldValues)
+            for key, value in record:
                 print('<' + key + '>' + value + '</' + key + '>')
             print("</" + self.docStructure.currentElement.name + ">")
             return "RECORD", source

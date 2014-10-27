@@ -16,12 +16,12 @@ feature-topic:
                 feature, fragments
 
     body: Fragments
-    [Fragments](feature) are a [content reuse](task) feature of the [EPPO-simple](feature) [plugin]( feature).
-    
-    A fragment is an \[arbitrary\]\\ sequence of *text structures* (paragraphs, lists, etc.) that _has been given_ an id so that
-    it can be included by reference at other \_points_ in the content.
-    
-    ```xml
+        [Fragments](feature) are a [content reuse](task) feature of the [EPPO-simple](feature) [plugin]( feature).
+
+        A fragment is an \[arbitrary\]\\ sequence of *text structures* (paragraphs, lists, etc.) that _has been given_ an id so that
+        it can be included by reference at other \_points_ in the content.
+
+        ```xml
 <fragment id="test-fragment">
     <local-strings>
         <string id="test-string-1"><bold>test string one</bold></string>
@@ -37,26 +37,32 @@ feature-topic:
         <string id="test-string-1"><code>this is test string number one</code></string>
     </local-strings>
 </fragment-ref>
-    ```
-        
-    Fragments can be defined:
+        ```
 
-    * inline in a topic file
-    * in separate fragment collections
+        table:
+            row:: cell, cell, cell
+                foo, bar, baz
+                a, b, c
+                hi, lo, med
 
-    If a fragment is defined inline, it is included where it occurs. Fragments in fragment files are not included
-    anywhere unless they are pulled in by a fragment reference.
+        Fragments can be defined:
 
-    0. One
-    4. Seven
-    80976. Two
+        * inline in a topic file
+        * in separate fragment collections
 
-    A fragment reference inserts a fragment by ID at the place it occurs in the text.
+        If a fragment is defined inline, it is included where it occurs. Fragments in fragment files are not included
+        anywhere unless they are pulled in by a fragment reference.
 
-    Fragments are recursive. That is, fragments can contain other fragments and fragment references.
+        0. One
+        4. Seven
+        80976. Two
 
-    Because you often want to change some part of a text when it is being reused, fragments and fragment
-    references can both define local [strings](feature). Any [string references](feature
-    ) inside a fragment will be resolved by looking first at local-strings defined in the fragment reference,
-    then at local strings defined in the fragment definition, and then at global strings. In effect, this means
-    that you can define string substitutions whenever you insert a fragment into your content.
+        A fragment reference inserts a fragment by ID at the place it occurs in the text.
+
+        Fragments are recursive. That is, fragments can contain other fragments and fragment references.
+
+        Because you often want to change some part of a text when it is being reused, fragments and fragment
+        references can both define local [strings](feature). Any [string references](feature
+        ) inside a fragment will be resolved by looking first at local-strings defined in the fragment reference,
+        then at local strings defined in the fragment definition, and then at global strings. In effect, this means
+        that you can define string substitutions whenever you insert a fragment into your content.
