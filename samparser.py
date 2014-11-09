@@ -1,7 +1,8 @@
 from statemachine import StateMachine
 from SamParaParser import SamParaParser
 import re
-from collections import OrderedDict
+import sys
+
 
 
 class SamParser:
@@ -58,22 +59,20 @@ class SamParser:
         localElement = Element(match.group(2))
         localContent = match.group(3).strip()
 
-        if localIndent > self.docStructure.currentIndent:
-            if self.docStructure.currentElement:
-                print()
+        if self.docStructure.pendingContent:
+            print(self.docStructure.pendingContent, end="")
+            self.docStructure.pendingContent = None
 
+        while localIndent <= self.docStructure.currentIndent:
+            print(self.docStructure.popElement)
+
+        if localContent[:1] == ':':
             self.docStructure.pushElement(localElement, localIndent)
-
-            if localContent[:1] == ':':
-                return "RECORD-START", source
-            else:
-                print("<" + self.docStructure.currentElement.name + ">", end="")
-                print(localContent, end="")
-                return "SAM", source
+            return "RECORD-START", source
         else:
-            while localIndent <= self.docStructure.currentIndent:
-                print(self.docStructure.popElement)
-            print(self.docStructure.pushElement(localElement, localIndent))
+            print(self.docStructure.pushElement(localElement, localIndent), end="")
+            if localContent.strip() != "":
+                self.docStructure.pendingContent = localContent
             return "SAM", source
 
 
@@ -208,6 +207,8 @@ class SamParser:
         elif self.patterns['blank-line'].match(line):
             print()
             return "SAM", source
+        elif self.docStructure.pendingContent:
+            raise Exception("Unmatched content found: " + self.docStructure.pendingContent )
         elif self.patterns['codeblock-start'].match(line):
             return "CODEBLOCK-START", source
         elif self.patterns['list-item'].match(line):
@@ -244,9 +245,10 @@ class DocStructure:
         self.elements = []
         self.fields = []
         self.currentParagraph = ""
+        self.pendingContent = None
 
-    def pushElement(self, element, indent):
-        self.elements.append({'element': element, 'indent': indent})
+    def pushElement(self, element, currentIndent):
+        self.elements.append({'element': element, 'indent': currentIndent})
         tag = "<" + element.name
         for key, value in element.attributes.items():
             tag += " " + key + '="' + value + '"'
@@ -300,7 +302,8 @@ class Source:
 
 if __name__ == "__main__":
     samParser = SamParser()
-    samParser.parse('test1.sam')
+    filename = sys.argv[-1]
+    samParser.parse(filename)
 
 
 
