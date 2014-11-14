@@ -60,8 +60,7 @@ class SamParser:
         localContent = match.group(3).strip()
 
         if self.docStructure.pendingContent:
-            print(self.docStructure.pendingContent, end="")
-            self.docStructure.pendingContent = None
+            print(self.docStructure.getPendingContent(), end="")
 
         while localIndent <= self.docStructure.currentIndent:
             print(self.docStructure.popElement)
@@ -72,7 +71,7 @@ class SamParser:
         else:
             print(self.docStructure.pushElement(localElement, localIndent), end="")
             if localContent.strip() != "":
-                self.docStructure.pendingContent = localContent
+                self.docStructure.setPendingContent(localContent)
             return "SAM", source
 
 
@@ -193,6 +192,9 @@ class SamParser:
     def __sam(self, source):
         line = source.nextLine
         if line == "":
+            if self.docStructure.pendingContent is not None:
+                print(self.docStructure.getPendingContent(), end='')
+
             while True:
                 try:
                     print(self.docStructure.popElement)
@@ -200,6 +202,8 @@ class SamParser:
                     break
             return "END", source
         elif self.patterns['comment'].match(line):
+            if self.docStructure.pendingContent is not None:
+                print(self.docStructure.getPendingContent(), end='')
             print('<!--' + line.strip()[1:] + '-->')
             return "SAM", source
         elif self.patterns['block-start'].match(line):
@@ -274,6 +278,17 @@ class DocStructure:
             return -1
         else:
             return self.elements[-1]["indent"]
+
+
+    def getPendingContent(self):
+        p = self.pendingContent
+        self.pendingContent = None
+        return p
+
+    def setPendingContent(self, content):
+        assert self.pendingContent is None
+        self.pendingContent = content
+
 
     def paragraphStart(self, line):
         self.currentParagraph = line.strip()
