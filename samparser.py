@@ -103,7 +103,7 @@ class SamParser:
         local_indent = len(line) - len(line.lstrip(' '))
         self.doc.new_block('ul', '', local_indent)
         match = self.patterns['list-item'].match(line)
-        self.doc.new_block('li', 'str(match.group(2)).strip()', local_indent)
+        self.doc.new_block('li', str(match.group(2)).strip(), local_indent+4)
         return "LIST", source
 
     def _list_continue(self, source):
@@ -113,7 +113,7 @@ class SamParser:
             return "SAM", source
         elif self.patterns['list-item'].match(line):
             match = self.patterns['list-item'].match(line)
-            self.doc.new_block('li', 'str(match.group(2)).strip()', local_indent)
+            self.doc.new_block('li', str(match.group(2)).strip(), local_indent+4)
             return "LIST", source
         else:
             raise Exception("Broken list at line " + str(source.currentLineNumber) + " " + source.filename)
@@ -123,7 +123,7 @@ class SamParser:
         local_indent = len(line) - len(line.lstrip(' '))
         self.doc.new_block('ul', '', local_indent)
         match = self.patterns['num-list-item'].match(line)
-        self.doc.new_block('li', 'str(match.group(2)).strip()', local_indent)
+        self.doc.new_block('li', str(match.group(2)).strip(), local_indent+4)
         return "NUM-LIST", source
 
     def _num_list_continue(self, source):
@@ -133,7 +133,7 @@ class SamParser:
             return "SAM", source
         elif self.patterns['num-list-item'].match(line):
             match = self.patterns['num-list-item'].match(line)
-            self.doc.new_block('li', 'str(match.group(2)).strip()', local_indent)
+            self.doc.new_block('li', str(match.group(2)).strip(), local_indent+4)
             return "NUM-LIST", source
         else:
             raise Exception("Broken num list at line " + str(source.currentLineNumber) + " " + source.filename)
@@ -218,9 +218,9 @@ class Block:
 
     def add_at_indent(self, b, indent):
         x = self.parent
-        while x.indent > indent:
+        while x.indent >= indent:
             x = x.parent
-        b.parent = x.parent
+        b.parent = x
         x.children.append(b)
 
     def __str__(self):
@@ -258,6 +258,7 @@ class DocStructure:
         print(self.doc)
         print('-----------------------------------------------------')
 
+
     def new_record_set(self, local_element, field_names, local_indent):
         self.current_record = {'local_element': local_element, 'local_indent': local_indent}
         self.fields = field_names
@@ -269,7 +270,7 @@ class DocStructure:
         for name, content in record:
             b = Block(name, content, self.current_block.indent+4)
             self.current_block.add_child(b)
-
+        self.current_block = self.current_block.parent
 
     @property
     def current_element(self):
