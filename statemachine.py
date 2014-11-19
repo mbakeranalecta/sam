@@ -17,9 +17,9 @@ class StateMachine:
         try:
             handler = self.handlers[self.startState]
         except:
-            raise "InitializationError"("must call .set_start() before .run()")
+            raise Exception("InitializationError: must call .set_start() before .run()")
         if not self.endStates:
-            raise "InitializationError"("at least one state must be an end_state")
+            raise Exception("InitializationError: at least one state must be an end_state")
 
         while 1:
             (newState, cargo) = handler(cargo)
