@@ -1,6 +1,18 @@
-from statemachine import StateMachine
-import regex as re
 import sys
+from statemachine import StateMachine
+
+try:
+    import regex as re
+    re_supports_unicode_categories = True
+except ImportError:
+    import re
+    re_supports_unicode_categories = False
+    print(
+        """Regular expression support for Unicode categories not available.
+IDs starting with non-ASCII lowercase letters will not be recognized and
+will be treated as titles. Please install Python regex module.
+
+""", file=sys.stderr)
 
 
 class SamParser:
@@ -56,7 +68,7 @@ class SamParser:
     def _new_file(self, source):
         line = source.next_line
         if line[:4] == 'sam:':
-
+            self.doc.new_root('sam', line[5:])
             return "SAM", source
         else:
             raise Exception("Not a SAM file!")
@@ -173,12 +185,11 @@ class SamParser:
         if line == "":
             return "END", source
         elif self.patterns['comment'].match(line):
-            print('<!--' + line.strip()[1:] + '-->')
+            self.doc.new_comment(Comment('', line.strip()[1:]))
             return "SAM", source
         elif self.patterns['block-start'].match(line):
             return "BLOCK", source
         elif self.patterns['blank-line'].match(line):
-            print()
             return "SAM", source
         elif self.patterns['codeblock-start'].match(line):
             return "CODEBLOCK-START", source
@@ -188,9 +199,6 @@ class SamParser:
             return "NUM-LIST-START", source
         elif self.patterns['paragraph-start'].match(line):
             return "PARAGRAPH-START", source
-        elif line != "":
-            print('*NOT MATCHED* ' + line, end='')
-            return "SAM", source
         else:
             raise Exception("I'm confused")
 
@@ -198,15 +206,8 @@ class SamParser:
         return self.doc.serialize(serialize_format)
 
 
-class Element:
-    def __init__(self, name, attributes=None):
-        self.name = name
-        assert isinstance(attributes, dict)
-        self.attributes = attributes
-
-
 class Block:
-    def __init__(self, name, content, indent):
+    def __init__(self, name='', content='', indent=0):
         self.name = name
         self.content = content
         self.indent = indent
@@ -242,19 +243,22 @@ class Block:
     def serialize_xml(self):
         if self.children:
             if self.content:
+                re_id = re.compile(r'^[\p{Ll}_]\S*$') if re_supports_unicode_categories else re.compile(r'[a-z_]\S*$')
+                re_id_and_label = re.compile(r'^([\p{Ll}_]\S*)\s*["\'](.+)["\']$') if re_supports_unicode_categories else re.compile(r'^([a-z_]\S*)\s*["\'](.+)["\']$')
                 if self.name == 'codeblock' and self.content:
                     yield '<{0} language="{1}">\n'.format(self.name, self.content)
-                elif re.match(r'^[\p{Ll}_]\S*$', self.content) is not None:
+                elif re.match(re_id, self.content) is not None:
                     yield '<{0}>\n<id>{1}</id>\n'.format(self.name, self.content)
-                elif re.match(r'^[\p{Ll}_]\S*\s*["\'].+["\']$', self.content) is not None:
-                    match = re.match(r'^([\p{Ll}_]\S*)\s*["\'](.+)["\']$', self.content)
+                elif re.match(re_id_and_label, self.content) is not None:
+                    match = re.match(re_id_and_label, self.content)
                     yield '<{0}>\n<id>{1}</id>\n<label>{2}</label>\n'.format(self.name, match.group(1), match.group(2))
-
                 else:
                     yield "<{0}>\n".format(self.name)
                     yield "<title>{0}</title>\n".format(self.content)
             else:
                 yield "<{0}>".format(self.name)
+                if type(self.children[0]) is not Flow:
+                    yield "\n"
             for x in self.children:
                 yield from x.serialize_xml()
             yield "</{0}>\n".format(self.name)
@@ -262,7 +266,25 @@ class Block:
             yield "<{0}>{1}</{0}>\n".format(self.name, self.content)
 
 
-class Flow:
+class Comment(Block):
+    def __str__(self):
+        return "[%s:'%s']" % ('#comment', self.content)
+
+    def serialize_xml(self):
+        yield '<!-- {0} -->\n'.format(self.content)
+
+
+class Root(Block):
+    def __init__(self, name='', content='', indent=-1):
+        super().__init__(name, content, -1)
+
+    def serialize_xml(self):
+        yield '<?xml version="1.0" encoding="UTF-8"?>\n'
+        for x in self.children:
+            yield from x.serialize_xml()
+
+
+class Flow(Block):
     def __init__(self, thing=None):
         self.flow = []
         if thing:
@@ -284,7 +306,6 @@ class Flow:
 
 
 class Pre(Flow):
-
     def serialize_xml(self):
         yield "<![CDATA["
         for x in self.flow:
@@ -310,10 +331,11 @@ class Annotation:
         if self.canonical:
             yield ' canonical="{0}"'.format(self.canonical)
         if self.namespace:
-            yield ' namespace="{0}'.format(self.namespace)
+            yield ' namespace="{0}"'.format(self.namespace)
         yield '>{0}</annotation>'.format(self.text)
 
-class Decoration:
+
+class Decoration(Block):
     def __init__(self, decoration_type, text):
         self.decoration_type = decoration_type
         self.text = text
@@ -332,10 +354,15 @@ class DocStructure:
         self.current_record = None
         self.current_block = None
 
+    def new_root(self, block_type, text):
+        r = Root(block_type, text)
+        self.doc = r
+        self.current_block = r
+
     def new_block(self, block_type, text, indent):
         b = Block(block_type, text, indent)
         if self.doc is None:
-            self.doc = b
+            raise Exception('No root element found.')
         elif self.current_block.indent < indent:
             self.current_block.add_child(b)
         elif self.current_block.indent == indent:
@@ -343,11 +370,16 @@ class DocStructure:
         else:
             self.current_block.add_at_indent(b, indent)
         self.current_block = b
-        print(self.doc)
-        print('-----------------------------------------------------')
+        # Useful lines for debugging the build of the tree
+        # print(self.doc)
+        # print('-----------------------------------------------------')
 
     def new_flow(self, flow):
         self.current_block.add_child(flow)
+
+    def new_comment(self, comment):
+        self.current_block.add_child(comment)
+
 
     def new_record_set(self, local_element, field_names, local_indent):
         self.current_record = {'local_element': local_element, 'local_indent': local_indent}
@@ -364,7 +396,6 @@ class DocStructure:
 
     def serialize(self, serialize_format):
         if serialize_format.upper() == 'XML':
-            yield '<?xml version="1.0" encoding="UTF-8"?>\n'
             yield from self.doc.serialize_xml()
         else:
             raise Exception("Unknown serialization protocol{0}".format(serialize_format))
@@ -442,7 +473,7 @@ class SamParaParser:
             text = match.group(1)
             canonical = match.group(4) if match.group(4) is not None else None
             namespace = match.group(6) if match.group(6) is not None else None
-            self.flow.append(Annotation(annotation_type, text, canonical))
+            self.flow.append(Annotation(annotation_type, text, canonical, namespace))
             para.advance(len(match.group(0)) - 1)
             return "PARA", para
         else:
@@ -499,7 +530,6 @@ class Para:
         return self.para[self.currentCharNumber:]
 
     def advance(self, count):
-        print('count', count)
         self.currentCharNumber += count
 
 

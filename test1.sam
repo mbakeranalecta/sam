@@ -3,7 +3,7 @@ sam: utf-8 http://spfeopentoolkit.org/spfe-docs/topic-types/feature-topic/schema
 # This file is part of the SPFE Open Toolkit. See the accompanying license.txt file for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2012 All Rights Reserved. 
 
-feature-topic: feature-fragments
+feature-topic: ëfeature-fragments
     head:
         foo: bar
         baz: bat
@@ -90,7 +90,7 @@ feature-topic: feature-fragments
             state: jammed "clear paper jam"
                 printer: beeps twice
                 indicator: yellow
-            state: broken "call the service desk"
+            state: ëbroken "call the service desk"
                 printer: beeps twice
                 indicator: red
 
