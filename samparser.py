@@ -306,11 +306,12 @@ class Annotation:
         return '[%s](%s "%s" (%s))' % (self.text, self.annotation_type, self.canonical, self.namespace)
 
     def serialize_xml(self):
-        yield '<annotation type="{0}" canonical="{2}" namespace="{3}">{1}</annotation>'.format(self.text,
-                                                                                               self.annotation_type,
-                                                                                               self.canonical,
-                                                                                               self.namespace)
-
+        yield '<annotation type="{0}"'.format(self.annotation_type)
+        if self.canonical:
+            yield ' canonical="{0}"'.format(self.canonical)
+        if self.namespace:
+            yield ' namespace="{0}'.format(self.namespace)
+        yield '>{0}</annotation>'.format(self.text)
 
 class Decoration:
     def __init__(self, decoration_type, text):
@@ -402,7 +403,7 @@ class SamParaParser:
         self.patterns = {
             'escape': re.compile(r'\\'),
             'escaped-chars': re.compile(r'[\\\[\(\]_]'),
-            'annotation': re.compile(r'\[([^\[]*[^\\])\]\(([^\(]*[^\\])\)'),
+            'annotation': re.compile(r'\[([^\[]*?[^\\])\]\(([^\(]\w*?\s*[^\\"\'])(["\'](.*?)["\'])??\s*(\((\w+)\))?\)'),
             'bold': re.compile(r'\*(\S.+?\S)\*'),
             'italic': re.compile(r'_(\S.*?\S)_')
         }
@@ -437,7 +438,11 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Annotation(str(match.group(2)).strip(), match.group(1)))
+            annotation_type = str(match.group(2)).strip()
+            text = match.group(1)
+            canonical = match.group(4) if match.group(4) is not None else None
+            namespace = match.group(6) if match.group(6) is not None else None
+            self.flow.append(Annotation(annotation_type, text, canonical))
             para.advance(len(match.group(0)) - 1)
             return "PARA", para
         else:

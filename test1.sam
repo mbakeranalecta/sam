@@ -18,7 +18,7 @@ feature-topic: feature-fragments
 
     body: How Fragments Work
 
-        [Fragments](feature) are a [content reuse](task) feature of the [EPPO-simple](feature)
+        [Fragments](feature) are a [content reuse](task "reusing content" (foo)) feature of the [EPPO-simple](feature)
         [plugin]( feature).
 
         A fragment is an \[arbitrary\]\\ sequence of *text structures* (paragraphs, lists,
