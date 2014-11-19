@@ -290,19 +290,23 @@ class Flow(Block):
         if thing:
             self.append(thing)
 
+    def __str__(self):
+        return "[{0}]".format(''.join([str(x) for x in self.flow]))
+
     def append(self, thing):
         if not thing == '':
             self.flow.append(thing)
-
-    def __str__(self):
-        return "[{0}]".format(''.join([str(x) for x in self.flow]))
 
     def serialize_xml(self):
         for x in self.flow:
             try:
                 yield from x.serialize_xml()
             except AttributeError:
-                yield x
+                yield self._escape_for_xml(x)
+
+    def _escape_for_xml(self, s):
+        t = dict(zip([ord('<'), ord('>'), ord('&')],['@lt;', '@gt;','@amp;']))
+        return s.translate(t)
 
 
 class Pre(Flow):

@@ -70,7 +70,7 @@ feature-topic: ëfeature-fragments
         fragment references.
 
         Because you often want to change some part of a text when it is being
-        reused, fragments and fragment references can both define local [strings](feature).
+        reused, <fragments> & fragment references can both define local [strings](feature).
         Any [string references](feature) inside a fragment will be resolved by looking first
         at local-strings defined in the fragment reference, then at local strings defined
         in the fragment definition, and then at global strings. In effect, this means
