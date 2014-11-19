@@ -1,6 +1,5 @@
 from statemachine import StateMachine
-from SamParaParser import SamParaParser
-import re
+import regex as re
 import sys
 
 
@@ -23,24 +22,36 @@ class SamParser:
         self.stateMachine.add_state("NUM-LIST", self._num_list_continue)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("NEW")
-
+        self.current_paragraph = None
         self.doc = DocStructure()
         self.source = None
         self.patterns = {
-            'comment': re.compile('\s*#.*'),
-            'block-start': re.compile('(\s*)([a-zA-Z0-9-_]+):(.*)'),
-            'codeblock-start': re.compile('(\s*)```(.*)'),
-            'codeblock-end': re.compile('(\s*)```\s*$'),
-            'paragraph-start': re.compile('\w*'),
-            'blank-line': re.compile('^\s*$'),
-            'record-start': re.compile('\s*[a-zA-Z0-9-_]+::(.*)'),
-            'list-item': re.compile('(\s*)\*\s(.*)'),
-            'num-list-item': re.compile('(\s*)[0-9]+\.\s(.*)')
+            'comment': re.compile(r'\s*#.*'),
+            'block-start': re.compile(r'(\s*)([a-zA-Z0-9-_]+):(.*)'),
+            'codeblock-start': re.compile(r'(\s*)```(.*)'),
+            'codeblock-end': re.compile(r'(\s*)```\s*$'),
+            'paragraph-start': re.compile(r'\w*'),
+            'blank-line': re.compile(r'^\s*$'),
+            'record-start': re.compile(r'\s*[a-zA-Z0-9-_]+::(.*)'),
+            'list-item': re.compile(r'(\s*)\*\s(.*)'),
+            'num-list-item': re.compile(r'(\s*)[0-9]+\.\s(.*)')
         }
 
     def parse(self, source):
         self.source = Source(source)
         self.stateMachine.run(self.source)
+
+    def paragraph_start(self, line):
+        self.current_paragraph = line.strip()
+
+    def paragraph_append(self, line):
+        self.current_paragraph += " " + line.strip()
+
+    def pre_start(self, line):
+        self.current_paragraph = line
+
+    def pre_append(self, line):
+        self.current_paragraph += line
 
     def _new_file(self, source):
         line = source.next_line
@@ -68,34 +79,34 @@ class SamParser:
         local_indent = len(line) - len(line.lstrip(' '))
         match = self.patterns['codeblock-start'].match(line)
         language = match.group(2).strip()
-        self.doc.new_block('codeblock', '', local_indent)
+        self.doc.new_block('codeblock', language, local_indent)
+        self.pre_start('')
         return "CODEBLOCK", source
 
     def _codeblock(self, source):
         line = source.next_line
         if self.patterns['codeblock-end'].match(line):
+            self.doc.new_flow(Pre(self.current_paragraph))
             return "SAM", source
         else:
+            self.pre_append(line)
             return "CODEBLOCK", source
 
     def _paragraph_start(self, source):
         line = source.currentLine
         local_indent = len(line) - len(line.lstrip(' '))
         self.doc.new_block('p', '', local_indent)
-        self.doc.paragraph_start(line)
+        self.paragraph_start(line)
         return "PARAGRAPH", source
 
     def _paragraph(self, source):
         line = source.next_line
         if self.patterns['blank-line'].match(line):
-
-            para_parser = SamParaParser(self.doc.currentParagraph)
+            para_parser = SamParaParser(self.current_paragraph, self.doc)
             para_parser.parse()
-            #self.__process_paragraph(self.doc.currentParagraph)
-
             return "SAM", source
         else:
-            self.doc.paragraph_append(line)
+            self.paragraph_append(line)
             return "PARAGRAPH", source
 
     def _list_start(self, source):
@@ -103,7 +114,7 @@ class SamParser:
         local_indent = len(line) - len(line.lstrip(' '))
         self.doc.new_block('ul', '', local_indent)
         match = self.patterns['list-item'].match(line)
-        self.doc.new_block('li', str(match.group(2)).strip(), local_indent+4)
+        self.doc.new_block('li', str(match.group(2)).strip(), local_indent + 4)
         return "LIST", source
 
     def _list_continue(self, source):
@@ -113,7 +124,7 @@ class SamParser:
             return "SAM", source
         elif self.patterns['list-item'].match(line):
             match = self.patterns['list-item'].match(line)
-            self.doc.new_block('li', str(match.group(2)).strip(), local_indent+4)
+            self.doc.new_block('li', str(match.group(2)).strip(), local_indent + 4)
             return "LIST", source
         else:
             raise Exception("Broken list at line " + str(source.currentLineNumber) + " " + source.filename)
@@ -123,7 +134,7 @@ class SamParser:
         local_indent = len(line) - len(line.lstrip(' '))
         self.doc.new_block('ul', '', local_indent)
         match = self.patterns['num-list-item'].match(line)
-        self.doc.new_block('li', str(match.group(2)).strip(), local_indent+4)
+        self.doc.new_block('li', str(match.group(2)).strip(), local_indent + 4)
         return "NUM-LIST", source
 
     def _num_list_continue(self, source):
@@ -133,7 +144,7 @@ class SamParser:
             return "SAM", source
         elif self.patterns['num-list-item'].match(line):
             match = self.patterns['num-list-item'].match(line)
-            self.doc.new_block('li', str(match.group(2)).strip(), local_indent+4)
+            self.doc.new_block('li', str(match.group(2)).strip(), local_indent + 4)
             return "NUM-LIST", source
         else:
             raise Exception("Broken num list at line " + str(source.currentLineNumber) + " " + source.filename)
@@ -183,15 +194,8 @@ class SamParser:
         else:
             raise Exception("I'm confused")
 
-    def _process_paragraph(self, paragraph):
-
-        parts = self.patterns['annotation'].split(paragraph)
-        for part in parts:
-            p = self.patterns['annotation-split'].match(part)
-            if p is None:
-                print(part, end="")
-            else:
-                print('<annotation type="' + str(p.group(2)).strip() + '">' + p.group(1) + '</annotation>', end="")
+    def serialize(self, serialize_format):
+        return self.doc.serialize(serialize_format)
 
 
 class Element:
@@ -199,6 +203,7 @@ class Element:
         self.name = name
         assert isinstance(attributes, dict)
         self.attributes = attributes
+
 
 class Block:
     def __init__(self, name, content, indent):
@@ -231,9 +236,92 @@ class Block:
         yield "[%s:'%s'" % (self.name, self.content)
         for x in self.children:
             yield "\n"
-            yield ''.join(x._output_block())
+            yield str(x)
         yield "]"
 
+    def serialize_xml(self):
+        if self.children:
+            if self.content:
+                if self.name == 'codeblock' and self.content:
+                    yield '<{0} language="{1}">\n'.format(self.name, self.content)
+                elif re.match(r'^[\p{Ll}_]\S*$', self.content) is not None:
+                    yield '<{0}>\n<id>{1}</id>\n'.format(self.name, self.content)
+                elif re.match(r'^[\p{Ll}_]\S*\s*["\'].+["\']$', self.content) is not None:
+                    match = re.match(r'^([\p{Ll}_]\S*)\s*["\'](.+)["\']$', self.content)
+                    yield '<{0}>\n<id>{1}</id>\n<label>{2}</label>\n'.format(self.name, match.group(1), match.group(2))
+
+                else:
+                    yield "<{0}>\n".format(self.name)
+                    yield "<title>{0}</title>\n".format(self.content)
+            else:
+                yield "<{0}>".format(self.name)
+            for x in self.children:
+                yield from x.serialize_xml()
+            yield "</{0}>\n".format(self.name)
+        else:
+            yield "<{0}>{1}</{0}>\n".format(self.name, self.content)
+
+
+class Flow:
+    def __init__(self, thing=None):
+        self.flow = []
+        if thing:
+            self.append(thing)
+
+    def append(self, thing):
+        if not thing == '':
+            self.flow.append(thing)
+
+    def __str__(self):
+        return "[{0}]".format(''.join([str(x) for x in self.flow]))
+
+    def serialize_xml(self):
+        for x in self.flow:
+            try:
+                yield from x.serialize_xml()
+            except AttributeError:
+                yield x
+
+
+class Pre(Flow):
+
+    def serialize_xml(self):
+        yield "<![CDATA["
+        for x in self.flow:
+            try:
+                yield from x.serialize_xml()
+            except AttributeError:
+                yield x
+        yield "]]>"
+
+
+class Annotation:
+    def __init__(self, annotation_type, text, canonical='', namespace=''):
+        self.annotation_type = annotation_type
+        self.text = text
+        self.canonical = canonical
+        self.namespace = namespace
+
+    def __str__(self):
+        return '[%s](%s "%s" (%s))' % (self.text, self.annotation_type, self.canonical, self.namespace)
+
+    def serialize_xml(self):
+        yield '<annotation type="{0}" canonical="{2}" namespace="{3}">{1}</annotation>'.format(self.text,
+                                                                                               self.annotation_type,
+                                                                                               self.canonical,
+                                                                                               self.namespace)
+
+
+class Decoration:
+    def __init__(self, decoration_type, text):
+        self.decoration_type = decoration_type
+        self.text = text
+
+    def __str__(self):
+        return '[%s](%s)' % (self.text, self.decoration_type)
+
+    def serialize_xml(self):
+        yield '<decoration type="{1}">{0}</decoration>'.format(self.text, self.decoration_type)
 
 
 class DocStructure:
@@ -241,7 +329,6 @@ class DocStructure:
         self.doc = None
         self.fields = None
         self.current_record = None
-        self.current_paragraph = None
         self.current_block = None
 
     def new_block(self, block_type, text, indent):
@@ -258,6 +345,8 @@ class DocStructure:
         print(self.doc)
         print('-----------------------------------------------------')
 
+    def new_flow(self, flow):
+        self.current_block.add_child(flow)
 
     def new_record_set(self, local_element, field_names, local_indent):
         self.current_record = {'local_element': local_element, 'local_indent': local_indent}
@@ -268,39 +357,26 @@ class DocStructure:
         self.current_block.add_child(b)
         self.current_block = b
         for name, content in record:
-            b = Block(name, content, self.current_block.indent+4)
+            b = Block(name, content, self.current_block.indent + 4)
             self.current_block.add_child(b)
         self.current_block = self.current_block.parent
 
-    @property
-    def current_element(self):
-        if not self.elements:
-            return None
+    def serialize(self, serialize_format):
+        if serialize_format.upper() == 'XML':
+            yield '<?xml version="1.0" encoding="UTF-8"?>\n'
+            yield from self.doc.serialize_xml()
         else:
-            return self.elements[-1]['element']
-
-    @property
-    def current_indent(self):
-        if not self.stack[-1]['indent']:
-            return -1
-        else:
-            return self.stack[-1]["indent"]
-
-    def paragraph_start(self, line):
-        self.currentParagraph = line.strip()
-
-    def paragraph_append(self, line):
-        self.currentParagraph += " " + line.strip()
+            raise Exception("Unknown serialization protocol{0}".format(serialize_format))
 
 
 class Source:
-    def __init__(self, filename):
+    def __init__(self, file_to_parse):
         """
 
-        :param filename: The filename of the source to parse.
+        :param file_to_parse: The filename of the source to parse.
         """
-        self.filename = filename
-        self.sourceFile = open(filename, encoding='utf-8')
+        self.file_to_parse = file_to_parse
+        self.sourceFile = open(file_to_parse, encoding='utf-8')
         self.currentLine = None
         self.currentLineNumber = 0
 
@@ -311,7 +387,119 @@ class Source:
         return self.currentLine
 
 
+class SamParaParser:
+    def __init__(self, para, doc):
+        self.doc = doc
+        self.para = Para(para)
+        self.stateMachine = StateMachine()
+        self.stateMachine.add_state("PARA", self._para)
+        self.stateMachine.add_state("ESCAPE", self._escape)
+        self.stateMachine.add_state("END", None, end_state=1)
+        self.stateMachine.add_state("ANNOTATION-START", self._annotation_start)
+        self.stateMachine.add_state("BOLD-START", self._bold_start)
+        self.stateMachine.add_state("ITALIC-START", self._italic_start)
+        self.stateMachine.set_start("PARA")
+        self.patterns = {
+            'escape': re.compile(r'\\'),
+            'escaped-chars': re.compile(r'[\\\[\(\]_]'),
+            'annotation': re.compile(r'\[([^\[]*[^\\])\]\(([^\(]*[^\\])\)'),
+            'bold': re.compile(r'\*(\S.+?\S)\*'),
+            'italic': re.compile(r'_(\S.*?\S)_')
+        }
+        self.current_string = ''
+        self.flow = Flow()
+
+    def parse(self):
+        self.stateMachine.run(self.para)
+
+    def _para(self, para):
+        try:
+            char = para.next_char
+        except IndexError:
+            self.flow.append(self.current_string)
+            self.current_string = ''
+            self.doc.new_flow(self.flow)
+            return "END", para
+        if char == '\\':
+            return "ESCAPE", para
+        elif char == '[':
+            return "ANNOTATION-START", para
+        elif char == "*":
+            return "BOLD-START", para
+        elif char == "_":
+            return "ITALIC-START", para
+        else:
+            self.current_string += char
+            return "PARA", para
+
+    def _annotation_start(self, para):
+        match = self.patterns['annotation'].match(para.rest_of_para)
+        if match:
+            self.flow.append(self.current_string)
+            self.current_string = ''
+            self.flow.append(Annotation(str(match.group(2)).strip(), match.group(1)))
+            para.advance(len(match.group(0)) - 1)
+            return "PARA", para
+        else:
+            self.current_string += '['
+            return "PARA", para
+
+    def _bold_start(self, para):
+        match = self.patterns['bold'].match(para.rest_of_para)
+        if match:
+            self.flow.append(self.current_string)
+            self.current_string = ''
+            self.flow.append(Decoration('bold', match.group(1)))
+            para.advance(len(match.group(0)) - 1)
+        else:
+            self.current_string += '*'
+        return "PARA", para
+
+    def _italic_start(self, para):
+        match = self.patterns['italic'].match(para.rest_of_para)
+        if match:
+            self.flow.append(self.current_string)
+            self.current_string = ''
+            self.flow.append(Decoration('italic', match.group(1)))
+            para.advance(len(match.group(0)) - 1)
+        else:
+            self.current_string += '_'
+        return "PARA", para
+
+    def _escape(self, para):
+        char = para.next_char
+        if self.patterns['escaped-chars'].match(char):
+            self.current_string += char
+        else:
+            self.current_string += '\\' + char
+        return "PARA", para
+
+
+class Para:
+    def __init__(self, para):
+        self.para = para
+        self.currentCharNumber = -1
+
+    @property
+    def next_char(self):
+        self.currentCharNumber += 1
+        return self.para[self.currentCharNumber]
+
+    @property
+    def current_char(self):
+        return self.para[self.currentCharNumber]
+
+    @property
+    def rest_of_para(self):
+        return self.para[self.currentCharNumber:]
+
+    def advance(self, count):
+        print('count', count)
+        self.currentCharNumber += count
+
+
 if __name__ == "__main__":
     samParser = SamParser()
     filename = sys.argv[-1]
     samParser.parse(filename)
+    print("".join(samParser.serialize('xml')))
