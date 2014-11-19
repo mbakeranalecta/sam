@@ -3,10 +3,10 @@ sam: utf-8 http://spfeopentoolkit.org/spfe-docs/topic-types/feature-topic/schema
 # This file is part of the SPFE Open Toolkit. See the accompanying license.txt file for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2012 All Rights Reserved. 
 
-feature-topic: 
+feature-topic: ëfeature-fragments
     head:
-        id: feature-fragments
-        foo:bar
+        foo: bar
+        baz: bat
         history:
             revision:: date, author, comment, status
                 2014-06-23, mbaker, New Topic, In progress
@@ -16,8 +16,9 @@ feature-topic:
                 feature, fragment
                 feature, fragments
 
-    body:
-        [Fragments](feature) are a [content reuse](task) feature of the [EPPO-simple](feature)
+    body: How Fragments Work
+
+        [Fragments](feature) are a [content reuse](task "reusing content" (foo)) feature of the [EPPO-simple](feature)
         [plugin]( feature).
 
         A fragment is an \[arbitrary\]\\ sequence of *text structures* (paragraphs, lists,
@@ -74,3 +75,22 @@ feature-topic:
         at local-strings defined in the fragment reference, then at local strings defined
         in the fragment definition, and then at global strings. In effect, this means
         that you can define string substitutions whenever you insert a fragment into your content.
+
+        state-detection:
+            sign: printer "the printer"
+                signal: chirps
+                signal: beeps twice
+            sign: indicator "the indicator"
+                signal: red
+                signal: yellow
+                signal: green
+            state: success "retrieve print job"
+                printer: chirps
+                indicator: green
+            state: jammed "clear paper jam"
+                printer: beeps twice
+                indicator: yellow
+            state: ëbroken "call the service desk"
+                printer: beeps twice
+                indicator: red
+
