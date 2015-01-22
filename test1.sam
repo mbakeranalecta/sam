@@ -1,9 +1,9 @@
 sam: utf-8 http://spfeopentoolkit.org/spfe-docs/topic-types/feature-topic/schemas/feature-topic.sams
 
 # This file is part of the SPFE Open Toolkit. See the accompanying license.txt file for applicable licenses.
-# (c) Copyright Analecta Communications Inc. 2012 All Rights Reserved. 
+# (c) Copyright Analecta Communications Inc. 2014 All Rights Reserved.
 
-feature-topic: ëfeature-fragments
+feature-topic: feature-fragments
     head:
         foo: bar
         baz: bat
@@ -90,7 +90,7 @@ feature-topic: ëfeature-fragments
             state: jammed "clear paper jam"
                 printer: beeps twice
                 indicator: yellow
-            state: ëbroken "call the service desk"
+            state: broken "call the service desk"
                 printer: beeps twice
                 indicator: red
 

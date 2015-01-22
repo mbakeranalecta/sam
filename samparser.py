@@ -1,5 +1,6 @@
 import sys
 from statemachine import StateMachine
+import io
 
 try:
     import regex as re
@@ -50,7 +51,7 @@ class SamParser:
         }
 
     def parse(self, source):
-        self.source = Source(source)
+        self.source = source
         self.stateMachine.run(self.source)
 
     def paragraph_start(self, line):
@@ -405,7 +406,7 @@ class DocStructure:
             raise Exception("Unknown serialization protocol{0}".format(serialize_format))
 
 
-class Source:
+class FileSource:
     def __init__(self, file_to_parse):
         """
 
@@ -419,6 +420,23 @@ class Source:
     @property
     def next_line(self):
         self.currentLine = self.sourceFile.readline()
+        self.currentLineNumber += 1
+        return self.currentLine
+
+
+class StringSource:
+    def __init__(self, string_to_parse):
+        """
+
+        :param string_to_parse: The string to parse.
+        """
+        self.currentLine = None
+        self.currentLineNumber = 0
+        self.buf = io.StringIO(string_to_parse)
+
+    @property
+    def next_line(self):
+        self.currentLine = self.buf.readline()
         self.currentLineNumber += 1
         return self.currentLine
 
@@ -540,5 +558,8 @@ class Para:
 if __name__ == "__main__":
     samParser = SamParser()
     filename = sys.argv[-1]
-    samParser.parse(filename)
+    test = """sam:
+        this:
+            is: a test"""
+    samParser.parse(StringSource(test))
     print("".join(samParser.serialize('xml')))
