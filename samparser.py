@@ -4,9 +4,11 @@ import io
 
 try:
     import regex as re
+
     re_supports_unicode_categories = True
 except ImportError:
     import re
+
     re_supports_unicode_categories = False
     print(
         """Regular expression support for Unicode categories not available.
@@ -33,6 +35,7 @@ class SamParser:
         self.stateMachine.add_state("LIST", self._list_continue)
         self.stateMachine.add_state("NUM-LIST-START", self._num_list_start)
         self.stateMachine.add_state("NUM-LIST", self._num_list_continue)
+        self.stateMachine.add_state("BLOCK-INSERT", self._block_insert)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("NEW")
         self.current_paragraph = None
@@ -47,7 +50,8 @@ class SamParser:
             'blank-line': re.compile(r'^\s*$'),
             'record-start': re.compile(r'\s*[a-zA-Z0-9-_]+::(.*)'),
             'list-item': re.compile(r'(\s*)\*\s(.*)'),
-            'num-list-item': re.compile(r'(\s*)[0-9]+\.\s(.*)')
+            'num-list-item': re.compile(r'(\s*)[0-9]+\.\s(.*)'),
+            'block-insert': re.compile(r'\s*>>\(.*?\)\w*')
         }
 
     def parse(self, source):
@@ -162,6 +166,13 @@ class SamParser:
         else:
             raise Exception("Broken num list at line " + str(source.currentLineNumber) + " " + source.filename)
 
+    def _block_insert(self, source):
+        line = source.currentLine
+        attribute_pattern = re.compile(r'\s*>>\((.*?)\)')
+        match = attribute_pattern.match(line)
+        self.doc.new_block_insert(BlockInsert(parse_insert(match.group(1))))
+        return "SAM", source
+
     def _record_start(self, source):
         line = source.currentLine
         match = self.patterns['block-start'].match(line)
@@ -186,7 +197,7 @@ class SamParser:
         if line == "":
             return "END", source
         elif self.patterns['comment'].match(line):
-            self.doc.new_comment(Comment('', line.strip()[1:]))
+            self.doc.new_comment(Comment(line.strip()[1:]))
             return "SAM", source
         elif self.patterns['block-start'].match(line):
             return "BLOCK", source
@@ -198,6 +209,8 @@ class SamParser:
             return "LIST-START", source
         elif self.patterns['num-list-item'].match(line):
             return "NUM-LIST-START", source
+        elif self.patterns['block-insert'].match(line):
+            return "BLOCK-INSERT", source
         elif self.patterns['paragraph-start'].match(line):
             return "PARAGRAPH-START", source
         else:
@@ -245,7 +258,9 @@ class Block:
         if self.children:
             if self.content:
                 re_id = re.compile(r'^[\p{Ll}_]\S*$') if re_supports_unicode_categories else re.compile(r'[a-z_]\S*$')
-                re_id_and_label = re.compile(r'^([\p{Ll}_]\S*)\s*["\'](.+)["\']$') if re_supports_unicode_categories else re.compile(r'^([a-z_]\S*)\s*["\'](.+)["\']$')
+                re_id_and_label = re.compile(
+                    r'^([\p{Ll}_]\S*)\s*["\'](.+)["\']$') if re_supports_unicode_categories else re.compile(
+                    r'^([a-z_]\S*)\s*["\'](.+)["\']$')
                 if self.name == 'codeblock' and self.content:
                     yield '<{0} language="{1}">\n'.format(self.name, self.content)
                 elif re.match(re_id, self.content) is not None:
@@ -268,11 +283,31 @@ class Block:
 
 
 class Comment(Block):
+    def __init__(self, content='', indent=0):
+        super().__init__(name='comment', content=content, indent=indent)
+
     def __str__(self):
         return "[%s:'%s']" % ('#comment', self.content)
 
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content)
+
+
+class BlockInsert(Block):
+    def __init__(self, content='', indent=0):
+        super().__init__(name='insert', content=content, indent=indent)
+
+    def __str__(self):
+        return "[%s:'%s']" % ('#insert', self.content)
+
+    def serialize_xml(self):
+        yield '<insert type="{0}" href="{1}" ids="{2}" conditions="{3}"/>\n'.format(
+            self.content[0],
+            self.content[1],
+            ' '.join(self.content[2]),
+            ' '.join(self.content[3])
+
+        )
 
 
 class Root(Block):
@@ -306,7 +341,7 @@ class Flow(Block):
                 yield self._escape_for_xml(x)
 
     def _escape_for_xml(self, s):
-        t = dict(zip([ord('<'), ord('>'), ord('&')],['@lt;', '@gt;','@amp;']))
+        t = dict(zip([ord('<'), ord('>'), ord('&')], ['@lt;', '@gt;', '@amp;']))
         return s.translate(t)
 
 
@@ -352,6 +387,22 @@ class Decoration(Block):
         yield '<decoration type="{1}">{0}</decoration>'.format(self.text, self.decoration_type)
 
 
+class InlineInsert(Block):
+    def __init__(self,  content):
+        self.content = content
+
+
+    def __str__(self):
+        return "[#insert:'%s']" % (self.content)
+
+    def serialize_xml(self):
+        yield '<insert type="{0}" href="{1}" ids="{2}" conditions="{3}"/>'.format(
+            self.content[0],
+            self.content[1],
+            ' '.join(self.content[2]),
+            ' '.join(self.content[3])
+        )
+
 class DocStructure:
     def __init__(self):
         self.doc = None
@@ -385,6 +436,8 @@ class DocStructure:
     def new_comment(self, comment):
         self.current_block.add_child(comment)
 
+    def new_block_insert(self, insert):
+        self.current_block.add_sibling(insert)
 
     def new_record_set(self, local_element, field_names, local_indent):
         self.current_record = {'local_element': local_element, 'local_indent': local_indent}
@@ -452,13 +505,15 @@ class SamParaParser:
         self.stateMachine.add_state("ANNOTATION-START", self._annotation_start)
         self.stateMachine.add_state("BOLD-START", self._bold_start)
         self.stateMachine.add_state("ITALIC-START", self._italic_start)
+        self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\'),
             'escaped-chars': re.compile(r'[\\\[\(\]_]'),
             'annotation': re.compile(r'\[([^\[]*?[^\\])\]\(([^\(]\w*?\s*[^\\"\'])(["\'](.*?)["\'])??\s*(\((\w+)\))?\)'),
             'bold': re.compile(r'\*(\S.+?\S)\*'),
-            'italic': re.compile(r'_(\S.*?\S)_')
+            'italic': re.compile(r'_(\S.*?\S)_'),
+            'inline-insert': re.compile(r'>>\((.*?)\)')
         }
         self.current_string = ''
         self.flow = Flow()
@@ -482,6 +537,8 @@ class SamParaParser:
             return "BOLD-START", para
         elif char == "_":
             return "ITALIC-START", para
+        elif char == ">":
+            return "INLINE-INSERT", para
         else:
             self.current_string += char
             return "PARA", para
@@ -524,6 +581,17 @@ class SamParaParser:
             self.current_string += '_'
         return "PARA", para
 
+    def _inline_insert(self, para):
+        match= self.patterns['inline-insert'].match(para.rest_of_para)
+        if match:
+            self.flow.append(self.current_string)
+            self.current_string=''
+            self.flow.append(InlineInsert(parse_insert(match.group(1))))
+            para.advance(len(match.group(0))-1)
+        else:
+            self.current_string += '>'
+        return "PARA", para
+
     def _escape(self, para):
         char = para.next_char
         if self.patterns['escaped-chars'].match(char):
@@ -555,11 +623,27 @@ class Para:
         self.currentCharNumber += count
 
 
+def parse_insert(insert_string):
+    attributes_list = insert_string.split()
+    insert_type = attributes_list.pop(0)
+    insert_url = attributes_list.pop(0)
+    insert_id = [x[1:] for x in attributes_list if x[0] == '#']
+    insert_condition = [x[1:] for x in attributes_list if x[0] == '?']
+    unexpected_attributes = [x for x in attributes_list if not(x[0] in '?#')]
+    if unexpected_attributes:
+        raise Exception("Unexpected insert attribute(s): {0} \nIn line: {1}".format(unexpected_attributes, line))
+    return insert_type, insert_url, insert_id, insert_condition
+
 if __name__ == "__main__":
     samParser = SamParser()
     filename = sys.argv[-1]
-    test = """sam:
+    try:
+        with open(filename, "r") as myfile:
+            test = myfile.read()
+    except:
+        test = """sam:
         this:
             is: a test"""
+
     samParser.parse(StringSource(test))
     print("".join(samParser.serialize('xml')))

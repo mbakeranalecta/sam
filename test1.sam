@@ -21,6 +21,8 @@ feature-topic: feature-fragments
         [Fragments](feature) are a [content reuse](task "reusing content" (foo)) feature of the [EPPO-simple](feature)
         [plugin]( feature).
 
+        >>(image foo.gif #foo #bar ?baz ?bat)
+
         A fragment is an \[arbitrary\]\\ sequence of *text structures* (paragraphs, lists,
         etc.) that _has been given_ an id so that it can be included by reference at other
         \_points_ in the content.
@@ -69,7 +71,7 @@ feature-topic: feature-fragments
         Fragments are recursive. That is, fragments can contain other fragments and
         fragment references.
 
-        Because you often want to change some part of a text when it is being
+        Because you often want to >>(image foo.gif #foo #bar ?baz ?bat) change some part of a text when it is being
         reused, <fragments> & fragment references can both define local [strings](feature).
         Any [string references](feature) inside a fragment will be resolved by looking first
         at local-strings defined in the fragment reference, then at local strings defined
