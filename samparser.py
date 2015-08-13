@@ -18,6 +18,7 @@ will be treated as titles. Please install Python regex module.
 """, file=sys.stderr)
 
 
+
 class SamParser:
     def __init__(self):
 
@@ -31,10 +32,8 @@ class SamParser:
         self.stateMachine.add_state("PARAGRAPH", self._paragraph)
         self.stateMachine.add_state("RECORD-START", self._record_start)
         self.stateMachine.add_state("RECORD", self._record)
-        self.stateMachine.add_state("LIST-START", self._list_start)
-        self.stateMachine.add_state("LIST", self._list_continue)
-        self.stateMachine.add_state("NUM-LIST-START", self._num_list_start)
-        self.stateMachine.add_state("NUM-LIST", self._num_list_continue)
+        self.stateMachine.add_state("LIST-ITEM", self._list_item)
+        self.stateMachine.add_state("NUM-LIST-ITEM", self._num_list_item)
         self.stateMachine.add_state("BLOCK-INSERT", self._block_insert)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("NEW")
@@ -44,13 +43,13 @@ class SamParser:
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(r'(\s*)([a-zA-Z0-9-_]+):(.*)'),
-            'codeblock-start': re.compile(r'(\s*)```(.*)'),
+            'codeblock-start': re.compile(r'(\s*)```\S*(.*)'),
             'codeblock-end': re.compile(r'(\s*)```\s*$'),
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
             'record-start': re.compile(r'\s*[a-zA-Z0-9-_]+::(.*)'),
-            'list-item': re.compile(r'(\s*)\*\s(.*)'),
-            'num-list-item': re.compile(r'(\s*)[0-9]+\.\s(.*)'),
+            'list-item': re.compile(r'(\s*)(\*\s+)(.*)'),
+            'num-list-item': re.compile(r'(\s*)([0-9]+\.\s+)(.*)'),
             'block-insert': re.compile(r'\s*>>\(.*?\)\w*')
         }
 
@@ -119,52 +118,30 @@ class SamParser:
     def _paragraph(self, source):
         line = source.next_line
         if self.patterns['blank-line'].match(line):
-            para_parser = SamParaParser(self.current_paragraph, self.doc)
-            para_parser.parse()
+            para_parser.parse(self.current_paragraph, self.doc)
             return "SAM", source
         else:
             self.paragraph_append(line)
             return "PARAGRAPH", source
 
-    def _list_start(self, source):
+    def _list_item(self, source):
         line = source.currentLine
-        local_indent = len(line) - len(line.lstrip(' '))
-        self.doc.new_block('ul', '', local_indent)
         match = self.patterns['list-item'].match(line)
-        self.doc.new_block('li', str(match.group(2)).strip(), local_indent + 4)
-        return "LIST", source
+        local_indent = len(match.group(1))
+        content_indent = local_indent + len(match.group(2))
+        self.doc.new_unordered_list_item(local_indent, content_indent)
+        self.paragraph_start(str(match.group(3)).strip())
+        return "PARAGRAPH", source
 
-    def _list_continue(self, source):
-        line = source.next_line
-        local_indent = len(line) - len(line.lstrip(' '))
-        if self.patterns['blank-line'].match(line):
-            return "SAM", source
-        elif self.patterns['list-item'].match(line):
-            match = self.patterns['list-item'].match(line)
-            self.doc.new_block('li', str(match.group(2)).strip(), local_indent + 4)
-            return "LIST", source
-        else:
-            raise Exception("Broken list at line " + str(source.currentLineNumber) + " " + source.filename)
 
-    def _num_list_start(self, source):
+    def _num_list_item(self, source):
         line = source.currentLine
-        local_indent = len(line) - len(line.lstrip(' '))
-        self.doc.new_block('ul', '', local_indent)
         match = self.patterns['num-list-item'].match(line)
-        self.doc.new_block('li', str(match.group(2)).strip(), local_indent + 4)
-        return "NUM-LIST", source
-
-    def _num_list_continue(self, source):
-        line = source.next_line
-        local_indent = len(line) - len(line.lstrip(' '))
-        if self.patterns['blank-line'].match(line):
-            return "SAM", source
-        elif self.patterns['num-list-item'].match(line):
-            match = self.patterns['num-list-item'].match(line)
-            self.doc.new_block('li', str(match.group(2)).strip(), local_indent + 4)
-            return "NUM-LIST", source
-        else:
-            raise Exception("Broken num list at line " + str(source.currentLineNumber) + " " + source.filename)
+        local_indent = len(match.group(1))
+        content_indent = local_indent + len(match.group(2))
+        self.doc.new_ordered_list_item(local_indent, content_indent)
+        self.paragraph_start(str(match.group(3)).strip())
+        return "PARAGRAPH", source
 
     def _block_insert(self, source):
         line = source.currentLine
@@ -206,9 +183,9 @@ class SamParser:
         elif self.patterns['codeblock-start'].match(line):
             return "CODEBLOCK-START", source
         elif self.patterns['list-item'].match(line):
-            return "LIST-START", source
+            return "LIST-ITEM", source
         elif self.patterns['num-list-item'].match(line):
-            return "NUM-LIST-START", source
+            return "NUM-LIST-ITEM", source
         elif self.patterns['block-insert'].match(line):
             return "BLOCK-INSERT", source
         elif self.patterns['paragraph-start'].match(line):
@@ -320,7 +297,7 @@ class Root(Block):
             yield from x.serialize_xml()
 
 
-class Flow(Block):
+class Flow:
     def __init__(self, thing=None):
         self.flow = []
         if thing:
@@ -387,13 +364,12 @@ class Decoration(Block):
         yield '<decoration type="{1}">{0}</decoration>'.format(self.text, self.decoration_type)
 
 
-class InlineInsert(Block):
-    def __init__(self,  content):
+class InlineInsert:
+    def __init__(self, content):
         self.content = content
 
-
     def __str__(self):
-        return "[#insert:'%s']" % (self.content)
+        return "[#insert:'%s']" % self.content
 
     def serialize_xml(self):
         yield '<insert type="{0}" href="{1}" ids="{2}" conditions="{3}"/>'.format(
@@ -402,6 +378,7 @@ class InlineInsert(Block):
             ' '.join(self.content[2]),
             ' '.join(self.content[3])
         )
+
 
 class DocStructure:
     def __init__(self):
@@ -420,6 +397,8 @@ class DocStructure:
         if self.doc is None:
             raise Exception('No root element found.')
         elif self.current_block.indent < indent:
+            if self.current_block.name == 'p' and block_type == 'p' and self.current_block.indent != indent:
+                raise Exception('Inconsistent paragraph indentation after "' + str(self.current_block.children[0]) + '".' )
             self.current_block.add_child(b)
         elif self.current_block.indent == indent:
             self.current_block.add_sibling(b)
@@ -429,6 +408,30 @@ class DocStructure:
         # Useful lines for debugging the build of the tree
         # print(self.doc)
         # print('-----------------------------------------------------')
+
+    def new_unordered_list_item(self, indent, content_indent):
+        uli = Block('li', '', indent)
+        if self.current_block.parent.name == 'li':
+            self.current_block.parent.add_sibling(uli)
+        else:
+            ul = Block('ul', '', indent)
+            self.current_block.add_sibling(ul)
+            ul.add_child(uli)
+        p = Block('p','',content_indent)
+        uli.add_child(p)
+        self.current_block = p
+
+    def new_ordered_list_item(self, indent, content_indent):
+        oli = Block('li', '', indent)
+        if self.current_block.parent.name == 'li':
+            self.current_block.parent.add_sibling(oli)
+        else:
+            ol = Block('ol', '', indent)
+            self.current_block.add_sibling(ol)
+            ol.add_child(oli)
+        p = Block('p','',content_indent)
+        oli.add_child(p)
+        self.current_block = p
 
     def new_flow(self, flow):
         self.current_block.add_child(flow)
@@ -456,7 +459,7 @@ class DocStructure:
         if serialize_format.upper() == 'XML':
             yield from self.doc.serialize_xml()
         else:
-            raise Exception("Unknown serialization protocol{0}".format(serialize_format))
+            raise Exception("Unknown serialization protocol {0}".format(serialize_format))
 
 
 class FileSource:
@@ -495,9 +498,13 @@ class StringSource:
 
 
 class SamParaParser:
-    def __init__(self, para, doc):
-        self.doc = doc
-        self.para = Para(para)
+    def __init__(self):
+        # These attributes are set by the parse method
+        self.doc = None
+        self.para = None
+        self.current_string = None
+        self.flow = None
+
         self.stateMachine = StateMachine()
         self.stateMachine.add_state("PARA", self._para)
         self.stateMachine.add_state("ESCAPE", self._escape)
@@ -515,10 +522,12 @@ class SamParaParser:
             'italic': re.compile(r'_(\S.*?\S)_'),
             'inline-insert': re.compile(r'>>\((.*?)\)')
         }
+
+    def parse(self, para, doc):
+        self.doc = doc
+        self.para = Para(para)
         self.current_string = ''
         self.flow = Flow()
-
-    def parse(self):
         self.stateMachine.run(self.para)
 
     def _para(self, para):
@@ -582,10 +591,10 @@ class SamParaParser:
         return "PARA", para
 
     def _inline_insert(self, para):
-        match= self.patterns['inline-insert'].match(para.rest_of_para)
+        match = self.patterns['inline-insert'].match(para.rest_of_para)
         if match:
             self.flow.append(self.current_string)
-            self.current_string=''
+            self.current_string = ''
             self.flow.append(InlineInsert(parse_insert(match.group(1))))
             para.advance(len(match.group(0))-1)
         else:
@@ -631,8 +640,10 @@ def parse_insert(insert_string):
     insert_condition = [x[1:] for x in attributes_list if x[0] == '?']
     unexpected_attributes = [x for x in attributes_list if not(x[0] in '?#')]
     if unexpected_attributes:
-        raise Exception("Unexpected insert attribute(s): {0} \nIn line: {1}".format(unexpected_attributes, line))
+        raise Exception("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
     return insert_type, insert_url, insert_id, insert_condition
+
+para_parser = SamParaParser()
 
 if __name__ == "__main__":
     samParser = SamParser()
@@ -640,7 +651,7 @@ if __name__ == "__main__":
     try:
         with open(filename, "r") as myfile:
             test = myfile.read()
-    except:
+    except FileNotFoundError:
         test = """sam:
         this:
             is: a test"""

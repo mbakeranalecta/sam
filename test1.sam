@@ -1,7 +1,8 @@
 sam: utf-8 http://spfeopentoolkit.org/spfe-docs/topic-types/feature-topic/schemas/feature-topic.sams
 
-# This file is part of the SPFE Open Toolkit. See the accompanying license.txt file for applicable licenses.
-# (c) Copyright Analecta Communications Inc. 2014 All Rights Reserved.
+# This file is part of the SPFE Open Toolkit. See the accompanying license.txt file
+# for applicable licenses.
+# (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
 feature-topic: feature-fragments
     head:
@@ -27,7 +28,7 @@ feature-topic: feature-fragments
         etc.) that _has been given_ an id so that it can be included by reference at other
         \_points_ in the content.
 
-        ```xml
+        ```$$$(xml)
 <fragment id="test-fragment">
     <local-strings>
         <string id="test-string-1"><bold>test string one</bold></string>
@@ -55,13 +56,25 @@ feature-topic: feature-fragments
         Fragments can be defined:
 
         * inline in a topic file
-        * in separate fragment collections
+
+        * in separate fragment
+          collections
+
+          foobar
+
+        * batman
+
 
         If a fragment is defined inline, it is included where it occurs. Fragments in fragment
         files are not included anywhere unless they are pulled in by a fragment reference.
 
         0. One
+           Hundred
+
+           Fifty
+
         4. Seven
+
         80976. Two
 
 

@@ -41,12 +41,19 @@ title: Semantic Authoring Markdown (SAM)
 
         Block metadata can include:
 
-        * Conditions
-        * IDs
+        * Condition token, which start with a ?
+        * IDs, which start with #
+        * A string, in quotes. This can be interpreted on a per element basis. So, for
+        example, the string for a blockquote can be interpreted as a citation. Part of
+        the schema definition for a block can be an RE  or a pattern
+        for interpreting its string into a set of named attributes. For example:
+
+        author ',' year ',' page
 
      section: Fragments
 
-        Fragments are created by a token followed by an open curly brace at the start of a line:
+        Fragments are created by a token followed by an open curly brace at the start
+        of a line:
 
         ```sam
         my-fragment{
@@ -70,53 +77,177 @@ title: Semantic Authoring Markdown (SAM)
 		```sam
 		This is a picture of a kitten. >>(image "#kitten") It is funny.
 		```
-		Resolution of the image name to an actual image is delegated to downstream processing. However, you can also specify a URL:
+		Resolution of the image name to an actual image is delegated to downstream
+		processing. However, you can also specify a URL:
 
-		It is up to the downstream processing whether to use the image name or the URL to locate the image to display.
+		It is up to the downstream processing whether to use the image name or
+		the URL to locate the image to display.
 
-
-		Images at the paragraph level are indicated as a paragraph containing only an image:
+		Images at the paragraph level are indicated as a paragraph
+		containing only an image:
 
 		```sam
 		>>(image kitten.jpg)
 		```
 
-		You can also specify a variable for an image:
+		Images can be assigned ids:
 
 		```sam
-		$kitten = '(image kitten.jpg)'
+		>>(image kitten.jpg #kitten)
+		```
 
-		This is a picture of a kitten. >>$kitten It is funny.
+		You can insert the image by referencing the image id:
+
+		```sam
+		>>#kitten
+		```
+
+
+		You can also specify a macro for an image:
+
+		```sam
+		%kitten = '(image kitten.jpg)'
+
+		This is a picture of a kitten.
+
+		>>%kitten
+
+		It is funny.
 		```
     section: fragments
         Fragments are included with the include instruction with type "fragment":
 
         ```sam
-        >>(fragment foo)
+        >>{foo}
         ```
 
         Local string definitions are indicated like this:
 
         ```sam
-        >>(fragment foo bar="baz" ban="bonk")
+        >>{foo $bar="baz" $ban="bonk"}
 		
-	section: variables
-	
-		You can declare variables 
-		
-
-
-
 	section: Shortcuts for inserts
-
+        # string
 		>>$this.string
 
+		# reference
 		>>#this.ref
 
-		>>&this.fragment(bar="baz", ban="bonk")
+    section: Blockquotes
 
-		>>@http://foo.com/bar
+    ```(sam)
+    """(citation)
+    Quoted
+    """
+    ```
+
+    Block quotes without end markers. The quoted material must be indented. This is
+    always allowed, since it is plain SAM. But the issue is whether the rules of
+    block annotation allow for a correct citation.
+
+    ```(sam)
+    quote:(citation)
+        Indented quote
+
+    This is not part of the quote.
+    ```
+
+    The alternative would be make the citation a block in its own right:
+
+    ```(sam)
+    quote:
+        citation: citation
+
+        Indented quote
+
+    This is not part of the quote.
+    ```
 
 
-# Should SAM support the long paragraph break -- extra space between paras that
-# indicates a change of subject, but without a heading?
+
+
+    What happens when you need to format part of your document differently, but your document domain language does not have a document domain structure for the document element you are creating? For example, if your document domain language is HTML, it does not have any structures for common document domain objects like procedures, sidebars, of bibliographies.
+
+Of course, you can create these things in an HTML document, using regular features like lists, divs, and paragraphs. To indicate how they are to be formatted, though, you will have to either apply style information directly in the file, or else add some kind of metadata that indicates the special role that the list, div, or paragraph is playing. In HTML, the normal strategy is to use a class attribute. So, you could support special styling of a procedure list by giving it a class attribute of "procedure":
+
+```(HTML)
+<ol class="procedure">
+	<li>Lather.</li>
+	<li>Rinse.</li>
+	<li>Repeat.</li>
+<ol>
+```
+
+This is, in some ways, like giving HTML a procedure document domain object. We can now format as a procedure. And because we are using a hierarchical system, we don't need to add class attributes to the li elements to format them different. We can set an invariant rule that all li elements that are children of an ol element of class "procedure" will be formatted a certain way.
+
+```(CSS)
+ol.procedure li
+{
+}
+```
+
+We said that when we define a style, we are extending the media domain. In the same way, if we work in the document domain, we often need to extend the document domain we are working in. HTML is not an extensible language. To fill the need for an extensible document domain language, the W3C adopted XML (eXtensible Markup Language). XML allows you to extend your document domain (or any other domain) in two ways:
+
+1. by creating brand new structures in that domain.
+2. by using attributes to specify additional type information for an existing structure.
+
+Another method for extending the document domain is provided by [DITA](system) through it specialization mechanism, which allows you to create a new structure by specializing an existing one. In practice, this means defining a new structure but with the difference that the system knows about the new structures relationship to the old one, so that if you specialize a numbered list, the system knows that your new list is a type of numbered list.
+
+Yet another method is provided by [SPFE](system), which supports creating a library of structures from which you can select the ones you want to build a set of document domain (or other domain) structures for your use.
+
+
+
+We will look in detail later at ways of extending your document domain objects. For now, lets begin by looking at what the document domain looks like, and why you want to add additional kinds of document domain objects.
+
+
+    The difference between code ``` and quote """ is that code signals a different encoding.
+    The content of the code block is not processed as sam markup until the closing ``` is
+    seen.
+
+    Need to work out how escaping of ``` in a code block would work. If not SAM, then backslash
+    escape is not active. Best maybe to allow writer to add arbitrary characters to after
+    ``` at the top to ensure that the closing ``` is distinct.
+
+    In a blockquote, however, the material inside the quote block is still SAM markup and is
+    processed as such.
+
+    Maybe we also need a non-interpreted signal that does not also form a codeblock. This could be
+    done with tildes. This would be the equivalent of cdata sections in XML. The main reason for
+    doing this would be to allow you to create named blocks (other than [codeblock](element-name))
+    that would contain non-sam markup.
+
+section: Lists
+
+    You can create any kind of list you like by using nested blocks.
+
+    ```(SAM)
+    ul:
+        li: Dog
+        li: Hen
+        li: Spoon
+
+    ```
+
+    Shortcuts for ordered and unordered lists are supported.
+
+    Unordered lists begin with a line starting with an asterisk.
+
+    ```(SAM)
+    * Dog
+    * Hen
+    * Spoon
+    ```
+
+    Ordered lists begin with
+
+
+    Lists continue until:
+
+    * The next non-blank line at the same indent that does not start with an asterisk.
+    * The next non-blank line that is less indented.
+    * The end of the file.
+
+    List items continue until:
+
+    * The next list at the same indent that starts with an asterisk.
+    * The end of the list.

@@ -16,7 +16,7 @@ def ones_counter(val):
             print("  @ %2.1f+" % val, end=' ')
         val = math_func(val)
     print("  >>")
-    return (newState, val)
+    return newState, val
 
 def tens_counter(val):
     print("TENS State:    ", end=' ')
