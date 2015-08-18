@@ -55,7 +55,11 @@ class SamParser:
 
     def parse(self, source):
         self.source = source
-        self.stateMachine.run(self.source)
+        try:
+            self.stateMachine.run(self.source)
+        except EOFError:
+            raise Exception("Document ended before structure was complete. At:\n\n"
+                            + self.current_paragraph)
 
     def paragraph_start(self, line):
         self.current_paragraph = line.strip()
@@ -170,10 +174,11 @@ class SamParser:
             return "RECORD", source
 
     def _sam(self, source):
-        line = source.next_line
-        if line == "":
+        try:
+            line = source.next_line
+        except EOFError:
             return "END", source
-        elif self.patterns['comment'].match(line):
+        if self.patterns['comment'].match(line):
             self.doc.new_comment(Comment(line.strip()[1:]))
             return "SAM", source
         elif self.patterns['block-start'].match(line):
@@ -462,24 +467,6 @@ class DocStructure:
             raise Exception("Unknown serialization protocol {0}".format(serialize_format))
 
 
-class FileSource:
-    def __init__(self, file_to_parse):
-        """
-
-        :param file_to_parse: The filename of the source to parse.
-        """
-        self.file_to_parse = file_to_parse
-        self.sourceFile = open(file_to_parse, encoding='utf-8')
-        self.currentLine = None
-        self.currentLineNumber = 0
-
-    @property
-    def next_line(self):
-        self.currentLine = self.sourceFile.readline()
-        self.currentLineNumber += 1
-        return self.currentLine
-
-
 class StringSource:
     def __init__(self, string_to_parse):
         """
@@ -493,6 +480,8 @@ class StringSource:
     @property
     def next_line(self):
         self.currentLine = self.buf.readline()
+        if self.currentLine == "":
+            raise EOFError("End of file")
         self.currentLineNumber += 1
         return self.currentLine
 

@@ -77,6 +77,8 @@ feature-topic: feature-fragments
 
         80976. Two
 
+               Two and a half
+
 
 
         A fragment reference inserts a fragment by ID at the place it occurs in the text.
