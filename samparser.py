@@ -43,7 +43,7 @@ class SamParser:
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(r'(\s*)([a-zA-Z0-9-_]+):(.*)'),
-            'codeblock-start': re.compile(r'(\s*)```\S*(.*)'),
+            'codeblock-start': re.compile(r'(\s*)```(.*)'),
             'codeblock-end': re.compile(r'(\s*)```\s*$'),
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
@@ -96,7 +96,7 @@ class SamParser:
 
     def _codeblock_start(self, source):
         line = source.currentLine
-        local_indent = len(line) - len(line.lstrip(' '))
+        local_indent = len(line) - len(line.lstrip())
         match = self.patterns['codeblock-start'].match(line)
         language = match.group(2).strip()
         self.doc.new_block('codeblock', language, local_indent)
@@ -114,7 +114,7 @@ class SamParser:
 
     def _paragraph_start(self, source):
         line = source.currentLine
-        local_indent = len(line) - len(line.lstrip(' '))
+        local_indent = len(line) - len(line.lstrip())
         self.doc.new_block('p', '', local_indent)
         self.paragraph_start(line)
         return "PARAGRAPH", source
@@ -243,7 +243,7 @@ class Block:
                 re_id_and_label = re.compile(
                     r'^([\p{Ll}_]\S*)\s*["\'](.+)["\']$') if re_supports_unicode_categories else re.compile(
                     r'^([a-z_]\S*)\s*["\'](.+)["\']$')
-                if self.name == 'codeblock' and self.content:
+                if self.name == 'codeblock':
                     yield '<{0} language="{1}">\n'.format(self.name, self.content)
                 elif re.match(re_id, self.content) is not None:
                     yield '<{0}>\n<id>{1}</id>\n'.format(self.name, self.content)
@@ -298,8 +298,10 @@ class Root(Block):
 
     def serialize_xml(self):
         yield '<?xml version="1.0" encoding="UTF-8"?>\n'
+        yield '<sam>' # should include namespace and schema
         for x in self.children:
             yield from x.serialize_xml()
+        yield '</sam>'
 
 
 class Flow:
