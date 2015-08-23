@@ -42,7 +42,7 @@ class SamParser:
         self.source = None
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
-            'block-start': re.compile(r'(\s*)([a-zA-Z0-9-_]+):(.*)'),
+            'block-start': re.compile(r'(\s*)([a-zA-Z0-9-_]+):(?:\((.*?)\))?(.*)'),
             'codeblock-start': re.compile(r'(\s*)```(.*)'),
             'codeblock-end': re.compile(r'(\s*)```\s*$'),
             'paragraph-start': re.compile(r'\w*'),
@@ -50,7 +50,7 @@ class SamParser:
             'record-start': re.compile(r'\s*[a-zA-Z0-9-_]+::(.*)'),
             'list-item': re.compile(r'(\s*)(\*\s+)(.*)'),
             'num-list-item': re.compile(r'(\s*)([0-9]+\.\s+)(.*)'),
-            'block-insert': re.compile(r'\s*>>\(.*?\)\w*')
+            'block-insert': re.compile(r'(\s*)>>\(.*?\)\w*')
         }
 
     def parse(self, source):
@@ -84,22 +84,24 @@ class SamParser:
     def _block(self, source):
         line = source.currentLine
         match = self.patterns['block-start'].match(line)
-        local_indent = len(match.group(1))
-        local_element = match.group(2).strip()
-        local_content = match.group(3).strip()
+        indent = len(match.group(1))
+        element = match.group(2).strip()
+        attributes = match.group(3)
+        content = match.group(4).strip()
 
-        if local_content[:1] == ':':
+        if content[:1] == ':':
             return "RECORD-START", source
         else:
-            self.doc.new_block(local_element, local_content, local_indent)
+            self.doc.new_block(element, attributes, content, indent)
             return "SAM", source
 
     def _codeblock_start(self, source):
         line = source.currentLine
         local_indent = len(line) - len(line.lstrip())
         match = self.patterns['codeblock-start'].match(line)
-        language = match.group(2).strip()
-        self.doc.new_block('codeblock', language, local_indent)
+        attributes = re.compile(r'\((.*?)\)').match(match.group(2).strip())
+        language = attributes.group(1)
+        self.doc.new_block('codeblock', language, None, local_indent)
         self.pre_start('')
         return "CODEBLOCK", source
 
@@ -115,7 +117,7 @@ class SamParser:
     def _paragraph_start(self, source):
         line = source.currentLine
         local_indent = len(line) - len(line.lstrip())
-        self.doc.new_block('p', '', local_indent)
+        self.doc.new_block('p', None, '', local_indent)
         self.paragraph_start(line)
         return "PARAGRAPH", source
 
@@ -149,9 +151,10 @@ class SamParser:
 
     def _block_insert(self, source):
         line = source.currentLine
+        indent = len(source.currentLine) - len(source.currentLine.lstrip())
         attribute_pattern = re.compile(r'\s*>>\((.*?)\)')
         match = attribute_pattern.match(line)
-        self.doc.new_block_insert(BlockInsert(parse_insert(match.group(1))))
+        self.doc.new_block('insert', text='', attributes=parse_insert(match.group(1)), indent=indent)
         return "SAM", source
 
     def _record_start(self, source):
@@ -203,8 +206,9 @@ class SamParser:
 
 
 class Block:
-    def __init__(self, name='', content='', indent=0):
+    def __init__(self, name='', attributes='', content='', indent=0):
         self.name = name
+        self.attributes = attributes
         self.content = content
         self.indent = indent
         self.parent = None
@@ -237,31 +241,34 @@ class Block:
         yield "]"
 
     def serialize_xml(self):
+        yield '<{0}'.format(self.name)
         if self.children:
-            if self.content:
-                re_id = re.compile(r'^[\p{Ll}_]\S*$') if re_supports_unicode_categories else re.compile(r'[a-z_]\S*$')
-                re_id_and_label = re.compile(
-                    r'^([\p{Ll}_]\S*)\s*["\'](.+)["\']$') if re_supports_unicode_categories else re.compile(
-                    r'^([a-z_]\S*)\s*["\'](.+)["\']$')
+            if self.attributes:
                 if self.name == 'codeblock':
-                    yield '<{0} language="{1}">\n'.format(self.name, self.content)
-                elif re.match(re_id, self.content) is not None:
-                    yield '<{0}>\n<id>{1}</id>\n'.format(self.name, self.content)
-                elif re.match(re_id_and_label, self.content) is not None:
-                    match = re.match(re_id_and_label, self.content)
-                    yield '<{0}>\n<id>{1}</id>\n<label>{2}</label>\n'.format(self.name, match.group(1), match.group(2))
+                    yield ' language="{0}"'.format(self.attributes)
                 else:
-                    yield "<{0}>\n".format(self.name)
-                    yield "<title>{0}</title>\n".format(self.content)
-            else:
-                yield "<{0}>".format(self.name)
-                if type(self.children[0]) is not Flow:
-                    yield "\n"
+                    try:
+                        yield ' ids="{0}"'.format(' '.join(self.attributes[0]))
+                    except (IndexError, TypeError):
+                        pass
+                    try:
+                        yield ' conditions="{0}"'.format(' '.join(self.attributes[1]))
+                    except (IndexError, TypeError):
+                        pass
+
+            yield ">"
+
+            if self.content:
+                    yield "\n<title>{0}</title>".format(self.content)
+
+            if type(self.children[0]) is not Flow:
+                yield "\n"
+
             for x in self.children:
                 yield from x.serialize_xml()
             yield "</{0}>\n".format(self.name)
         else:
-            yield "<{0}>{1}</{0}>\n".format(self.name, self.content)
+            yield ">{1}</{0}>\n".format(self.name, self.content)
 
 
 class Comment(Block):
@@ -276,6 +283,7 @@ class Comment(Block):
 
 
 class BlockInsert(Block):
+    # Should not really inherit from Block as cannot have children, etc
     def __init__(self, content='', indent=0):
         super().__init__(name='insert', content=content, indent=indent)
 
@@ -283,18 +291,24 @@ class BlockInsert(Block):
         return "[%s:'%s']" % ('#insert', self.content)
 
     def serialize_xml(self):
-        yield '<insert type="{0}" href="{1}" ids="{2}" conditions="{3}"/>\n'.format(
-            self.content[0],
-            self.content[1],
-            ' '.join(self.content[2]),
-            ' '.join(self.content[3])
-
-        )
+        yield '<insert type="{0}"'.format(self.content[0])
+        yield ' item="{0}"'.format(self.content[1])
+        try:
+            if self.content[2]:
+                yield ' ids="{0}"'.format(' '.join(self.content[2]))
+        except IndexError:
+            pass
+        try:
+            if self.content[3]:
+                yield ' conditions="{0}"'.format(' '.join(self.content[3]))
+        except IndexError:
+            pass
+        yield '/>\n'
 
 
 class Root(Block):
     def __init__(self, name='', content='', indent=-1):
-        super().__init__(name, content, -1)
+        super().__init__(name, None, content, -1)
 
     def serialize_xml(self):
         yield '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -379,12 +393,20 @@ class InlineInsert:
         return "[#insert:'%s']" % self.content
 
     def serialize_xml(self):
-        yield '<insert type="{0}" href="{1}" ids="{2}" conditions="{3}"/>'.format(
-            self.content[0],
-            self.content[1],
-            ' '.join(self.content[2]),
-            ' '.join(self.content[3])
-        )
+        # This duplicates block insert, but is it inherently the same
+        # or only incidentally the same? Does DNRY apply?
+        yield '<insert type="{0}"'.format(self.content[0])
+        yield ' item="{0}"'.format(self.content[1])
+        try:
+            yield ' ids="{0}"'.format(' '.join(self.content[2]))
+        except IndexError:
+            pass
+        try:
+            yield ' conditions="{0}"'.format(' '.join(self.content[3]))
+        except IndexError:
+            pass
+        yield '/>'
+
 
 
 class DocStructure:
@@ -399,8 +421,13 @@ class DocStructure:
         self.doc = r
         self.current_block = r
 
-    def new_block(self, block_type, text, indent):
-        b = Block(block_type, text, indent)
+    def new_block(self, block_type, attributes, text, indent):
+        if block_type == 'codeblock':
+            b = Block(block_type, attributes, text, indent)
+        elif block_type == 'insert':
+            b = BlockInsert(attributes, indent)
+        else:
+            b = Block(block_type, parse_block_attributes(attributes), text, indent)
         if self.doc is None:
             raise Exception('No root element found.')
         elif self.current_block.indent < indent:
@@ -417,26 +444,26 @@ class DocStructure:
         # print('-----------------------------------------------------')
 
     def new_unordered_list_item(self, indent, content_indent):
-        uli = Block('li', '', indent)
+        uli = Block('li', None, '', indent)
         if self.current_block.parent.name == 'li':
             self.current_block.parent.add_sibling(uli)
         else:
-            ul = Block('ul', '', indent)
+            ul = Block('ul', None, '', indent)
             self.current_block.add_sibling(ul)
             ul.add_child(uli)
-        p = Block('p','',content_indent)
+        p = Block('p',None,'',content_indent)
         uli.add_child(p)
         self.current_block = p
 
     def new_ordered_list_item(self, indent, content_indent):
-        oli = Block('li', '', indent)
+        oli = Block('li', None, '', indent)
         if self.current_block.parent.name == 'li':
             self.current_block.parent.add_sibling(oli)
         else:
-            ol = Block('ol', '', indent)
+            ol = Block('ol', None, '', indent)
             self.current_block.add_sibling(ol)
             ol.add_child(oli)
-        p = Block('p','',content_indent)
+        p = Block('p', None,'',content_indent)
         oli.add_child(p)
         self.current_block = p
 
@@ -446,19 +473,20 @@ class DocStructure:
     def new_comment(self, comment):
         self.current_block.add_child(comment)
 
-    def new_block_insert(self, insert):
-        self.current_block.add_sibling(insert)
+    def new_block_insert(self, insert, indent):
+        bi = BlockInsert(insert, indent)
+        self.current_block.add_sibling(bi)
 
     def new_record_set(self, local_element, field_names, local_indent):
         self.current_record = {'local_element': local_element, 'local_indent': local_indent}
         self.fields = field_names
 
     def new_record(self, record):
-        b = Block(self.current_record['local_element'], '', self.current_record['local_indent'])
+        b = Block(self.current_record['local_element'], None, '', self.current_record['local_indent'])
         self.current_block.add_child(b)
         self.current_block = b
         for name, content in record:
-            b = Block(name, content, self.current_block.indent + 4)
+            b = Block(name, None, content, self.current_block.indent + 4)
             self.current_block.add_child(b)
         self.current_block = self.current_block.parent
 
@@ -511,7 +539,8 @@ class SamParaParser:
             'annotation': re.compile(r'\[([^\[]*?[^\\])\]\(([^\(]\w*?\s*[^\\"\'])(["\'](.*?)["\'])??\s*(\((\w+)\))?\)'),
             'bold': re.compile(r'\*(\S.+?\S)\*'),
             'italic': re.compile(r'_(\S.*?\S)_'),
-            'inline-insert': re.compile(r'>>\((.*?)\)')
+            'inline-insert': re.compile(r'>>\((.*?)\)'),
+            'inline-insert-id': re.compile(r'>>#(\w*)')
         }
 
     def parse(self, para, doc):
@@ -589,6 +618,24 @@ class SamParaParser:
             self.flow.append(InlineInsert(parse_insert(match.group(1))))
             para.advance(len(match.group(0))-1)
         else:
+            match = self.patterns['inline-insert-id'].match(para.rest_of_para)
+            if match:
+                self.flow.append(self.current_string)
+                self.current_string = ''
+                self.flow.append(InlineInsert(('reference', match.group(1))))
+                para.advance(len(match.group(0))-1)
+            else:
+                self.current_string += '>'
+        return "PARA", para
+
+    def _inline_insert_id(self, para):
+        match = self.patterns['inline-insert_id'].match(para.rest_of_para)
+        if match:
+            self.flow.append(self.current_string)
+            self.current_string = ''
+            self.flow.append(InlineInsert('reference', match.group(2)))
+            para.advance(len(match.group(0))-1)
+        else:
             self.current_string += '>'
         return "PARA", para
 
@@ -623,6 +670,19 @@ class Para:
         self.currentCharNumber += count
 
 
+def parse_block_attributes(attributes_string):
+    try:
+        attributes_list = attributes_string.split()
+    except AttributeError:
+        return None, None
+    ids = [x[1:] for x in attributes_list if x[0] == '#']
+    conditions = [x[1:] for x in attributes_list if x[0] == '?']
+    unexpected_attributes = [x for x in attributes_list if not(x[0] in '?#')]
+    if unexpected_attributes:
+        raise Exception("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
+    return ids if ids else None, conditions if conditions else None
+
+
 def parse_insert(insert_string):
     attributes_list = insert_string.split()
     insert_type = attributes_list.pop(0)
@@ -632,7 +692,10 @@ def parse_insert(insert_string):
     unexpected_attributes = [x for x in attributes_list if not(x[0] in '?#')]
     if unexpected_attributes:
         raise Exception("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
-    return insert_type, insert_url, insert_id, insert_condition
+    return insert_type, \
+           insert_url, \
+           insert_id if insert_id else None, \
+           insert_condition if insert_condition else None
 
 para_parser = SamParaParser()
 
