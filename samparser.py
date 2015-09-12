@@ -1,5 +1,6 @@
 import sys
 from statemachine import StateMachine
+from lxml import etree
 import io
 
 try:
@@ -207,12 +208,22 @@ class SamParser:
 
 class Block:
     def __init__(self, name='', attributes='', content='', indent=0):
+
+        # Test for a valid block name. Must be valid XML name.
+        try:
+            x = etree.Element(name)
+        except ValueError:
+            raise Exception("Invalid block name: " + name)
+
         self.name = name
         self.attributes = attributes
         self.content = content
         self.indent = indent
         self.parent = None
         self.children = []
+
+
+
 
     def add_child(self, b):
         b.parent = self
@@ -339,7 +350,7 @@ class Flow:
                 yield self._escape_for_xml(x)
 
     def _escape_for_xml(self, s):
-        t = dict(zip([ord('<'), ord('>'), ord('&')], ['@lt;', '@gt;', '@amp;']))
+        t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
         return s.translate(t)
 
 
@@ -355,22 +366,22 @@ class Pre(Flow):
 
 
 class Annotation:
-    def __init__(self, annotation_type, text, canonical='', namespace=''):
+    def __init__(self, annotation_type, text, specifically='', namespace=''):
         self.annotation_type = annotation_type
         self.text = text
-        self.canonical = canonical
+        self.specifically = specifically
         self.namespace = namespace
 
     def __str__(self):
-        return '[%s](%s "%s" (%s))' % (self.text, self.annotation_type, self.canonical, self.namespace)
+        return '[%s](%s "%s" (%s))' % (self.text, self.annotation_type, self.specifically, self.namespace)
 
     def serialize_xml(self):
         yield '<annotation type="{0}"'.format(self.annotation_type)
-        if self.canonical:
-            yield ' canonical="{0}"'.format(self.canonical)
+        if self.specifically:
+            yield ' specifically="{0}"'.format(escape_for_xml(self.specifically))
         if self.namespace:
             yield ' namespace="{0}"'.format(self.namespace)
-        yield '>{0}</annotation>'.format(self.text)
+        yield '>{0}</annotation>'.format(escape_for_xml(self.text))
 
 
 class Decoration(Block):
@@ -536,7 +547,7 @@ class SamParaParser:
         self.patterns = {
             'escape': re.compile(r'\\'),
             'escaped-chars': re.compile(r'[\\\[\(\]_]'),
-            'annotation': re.compile(r'\[([^\[]*?[^\\])\]\(([^\(]\w*?\s*[^\\"\'])(["\'](.*?)["\'])??\s*(\((\w+)\))?\)'),
+            'annotation': re.compile(r'\[([^\[]*?[^\\])\]\(([^\(]\S*?\s*[^\\"\'])(["\'](.*?)["\'])??\s*(\((\w+)\))?\)'),
             'bold': re.compile(r'\*(\S.+?\S)\*'),
             'italic': re.compile(r'_(\S.*?\S)_'),
             'inline-insert': re.compile(r'>>\((.*?)\)'),
@@ -579,9 +590,9 @@ class SamParaParser:
             self.current_string = ''
             annotation_type = str(match.group(2)).strip()
             text = match.group(1)
-            canonical = match.group(4) if match.group(4) is not None else None
+            specifically = match.group(4) if match.group(4) is not None else None
             namespace = match.group(6) if match.group(6) is not None else None
-            self.flow.append(Annotation(annotation_type, text, canonical, namespace))
+            self.flow.append(Annotation(annotation_type, text, specifically, namespace))
             para.advance(len(match.group(0)) - 1)
             return "PARA", para
         else:
@@ -696,6 +707,10 @@ def parse_insert(insert_string):
            insert_url, \
            insert_id if insert_id else None, \
            insert_condition if insert_condition else None
+
+def escape_for_xml(s):
+    t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
+    return s.translate(t)
 
 para_parser = SamParaParser()
 

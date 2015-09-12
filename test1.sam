@@ -28,7 +28,7 @@ feature-topic: feature-fragments
         etc.) that _has been given_ an id so that it can be included by reference at other
         \_points_ in the content.
 
-        ```$$$(xml)
+        ```(xml)
 <fragment id="test-fragment">
     <local-strings>
         <string id="test-string-1"><bold>test string one</bold></string>
