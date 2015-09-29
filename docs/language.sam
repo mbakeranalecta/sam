@@ -32,7 +32,7 @@ title: Semantic Authoring Markdown (SAM)
 
         Blocks are indicated by a token followed by a semicolon at the start of a line.
 
-        Blocks can have metadata in parens that follow the semicolon with no space:
+        Blocks can have metadata in parens that follow the colon with no space:
 
         ```
         section:(?ultra)
