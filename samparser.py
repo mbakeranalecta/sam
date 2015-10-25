@@ -384,7 +384,7 @@ class Annotation:
         yield '>{0}</annotation>'.format(escape_for_xml(self.text))
 
 
-class Decoration(Block):
+class Decoration:
     def __init__(self, decoration_type, text):
         self.decoration_type = decoration_type
         self.text = text
