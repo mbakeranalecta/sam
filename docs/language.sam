@@ -71,7 +71,7 @@ title: Semantic Authoring Markdown (SAM)
 
 
 		```sam
-		This is a picture of a kitten. >>(image "kitten.jpg") It is funny.
+		This is a picture of a kitten. >>(image kitten.jpg) It is funny.
 		```
 
 		```sam

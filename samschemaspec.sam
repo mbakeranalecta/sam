@@ -1,0 +1,166 @@
+sam:
+
+spec: SAM Schema Spec
+
+introduction:
+
+    This is the specification for the SAM schema. It consists of a set of rules
+    that specify how a sam schema is written and interpreted.
+
+rule:(#encoding) Encoding
+
+    A SAM Schemas is encoded in UTF8
+
+rule:(#names) Names
+
+    Element names must be valid XML names.
+
+rule:(#header) SAM Schema Header
+
+    A SAM Schema being with a SAM Schema Header
+
+    A SAM schema header consists of the word "samschema" followed by a semicolon
+    followed optionally by a namespace URI in curly braces. For example:
+
+    ```(samschema)
+    samschema:{http://spfeopentoolkit.org/ns/spfe-doc}
+    ```
+
+    If specified, the namespace URI specifies the default namespace of all the
+    elements defined in the schema.
+
+rule:(#namespaces) Namespaces
+
+    A SAM element may be placed in a namespace. Unlike XML, in which an element
+    is placed in a schema in the instance, in SAM, a element is placed in a namespace
+    by the schema. There is no indication of the namespace in the instance. Elements
+    are assigned to their namespaces by the parser, based on the definitions in
+    the schema.
+
+    If there is no schema specified for a document, then all elements are in the
+    default namespace.
+
+    This imposes the restriction that there cannot be a place in the schema where
+    the same elements name could occur in more than one namespace, since there is
+    no way to distinguish them in the namespace.
+
+rule:(#root) Root element declaration
+
+    Unlike an XML schema, which declares a collection of elements, several of which
+    might be suitable for document roots, SAM schemas always declare a document
+    root element.
+
+    The document root element is declared as a valid element name beginning in the
+    first column. It is the first element declaration following the SAM schema
+    header and any [include statements](rule "#include").
+
+rule:(#includes) Includes
+
+    You can include another samschema in the current samschema document using
+    and include statement.
+
+    Included samschemas are processed as if they were part of the current
+    samschema with the following provisions:
+
+    * The included sam schema may not include a [root element declaration[(rule "#root").
+    This means that any elements declared in an included samschama must be
+    declared inside [named structures](rule "#stuctures").
+
+    * If the included sam schema contains a default namespace, it will be used
+    as the namespace for the elements defined in the included samschema.
+
+    * If the included sam schema does not contain a default namespace declaration,
+    and the including sam schema does contain a namespace declaration,
+    the elements in the included sameschema will be placed in the declared namespace
+    of the including samschema. This rule is applied down the tree of includes from
+    the top level schema and is evaluated as each include statement is processed
+    from the top down.
+
+rule:(#blocks) blocks declarations
+
+    An SAM document consists of blocks, fields, records, and flows. Blocks and
+    fileds are declared the same way. The distinction between a block and a
+    field is that a block has children and a field does not.
+
+    For a field, SAM interprets any content after the field tag as the value of
+    the field.
+
+    For a block tag, SAM interprets any content after the block tag as an
+    implicit [title](rule "#implicit") field.
+
+rule:(#implicit) Implicit elements
+
+    SAM recognized certain elements by their context in the SAM document. They
+    do not have explicit tags in the content. These implicit are delineated either by
+    punctuation or by their position relative to other elements.
+
+    Implicit elements are implicit in the instance. They must be declared in the
+    schema. It is an error if an implicit element occurs in the instance in a
+    position in which it is not permitted in the schema.
+
+    The implicit elements are as follows:
+
+        |p| The p element represents a paragraph. It is recognized as a block of
+        lines with no leading tag. It ends with a blank line. p elements are the
+        only elements that can contain decorations and annotations.
+
+        |bold| The bold element is a decoration occurring within text and is
+        indicated by surrounding the text with asterisks.
+
+        |italic| The italic decoration is indicated by surrounding the text
+        with underscores.
+
+        |quotes| The quotes decoration is indicated by surrounding the text
+        in straight quotes.
+
+        |pre| The pre decoration is indicated by backticks
+
+        |title| The title element is implicit if there is text on the same line as
+        a block tag, and if a title field is allowed as the first filed of the block.
+        Text in this position is an error if a title field is not allowed in
+        this location by a the schema of if the title element that is allowed is
+        a block element rather than a field element.
+
+        |blockquote| The blockquote block element is indicated by opening and closing
+        with three double quotes on a line by themselves, plus any parameters on
+        the opening quotes.
+
+        |codeblock| The codeblock block element is indicates by opening and closing with
+        three backtick on a line by themselves, plus any attributes on the
+        opening backticks.
+
+rule:(#implicit-structures) Implicit structures
+    SPFE also recognized implicit structures. An implicit structure occurs where
+    more than one element is recognized by context. The implicit structures are:
+
+        |unordered lists| Unordered lists are indicated by starting a line with an
+        asterisk. The root element of the structure in ul.
+
+        |ordered lists| Ordered lists are indicated by starting a line with a number.
+        Numbers do not have to be sequential. The root element of the structure in ol.
+
+        |labled lists| Labeled lists are indicated by surrounding the lable text with
+        pipe characters at the start of a paragraph.  The root element of the structure
+        in ll.
+
+rule:(#rename-implicit)
+
+    You can rename the implicit elements so that the output of the SAM parser
+    gives them different names. To rename an implicit element, use the new name
+    followed by an equals sign, followed by the implicit element name.
+
+    Thus, to create a paragraph element named para instead of p, specify the
+    element as follows:
+
+    ```(samschema)
+    para=p
+    ```
+
+
+
+
+
+
+
+
+
