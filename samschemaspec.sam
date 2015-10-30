@@ -79,7 +79,7 @@ rule:(#includes) Includes
 rule:(#blocks) blocks declarations
 
     An SAM document consists of blocks, fields, records, and flows. Blocks and
-    fileds are declared the same way. The distinction between a block and a
+    fields are declared the same way. The distinction between a block and a
     field is that a block has children and a field does not.
 
     For a field, SAM interprets any content after the field tag as the value of
@@ -143,7 +143,7 @@ rule:(#implicit-structures) Implicit structures
         pipe characters at the start of a paragraph.  The root element of the structure
         in ll.
 
-rule:(#rename-implicit)
+rule:(#rename-implicit) Renaming implicit structures
 
     You can rename the implicit elements so that the output of the SAM parser
     gives them different names. To rename an implicit element, use the new name
@@ -156,7 +156,13 @@ rule:(#rename-implicit)
     para=p
     ```
 
+rule: (#create-implicit) Creating implicit structures
 
+rule: (#order-number) Order and number of elements in structures
+
+    You can indicate the order and number of elements in a structure.
+
+    |~| All the items in the structure in any order.
 
 
 
