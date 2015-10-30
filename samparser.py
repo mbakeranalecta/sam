@@ -542,14 +542,16 @@ class SamParaParser:
         self.stateMachine.add_state("ANNOTATION-START", self._annotation_start)
         self.stateMachine.add_state("BOLD-START", self._bold_start)
         self.stateMachine.add_state("ITALIC-START", self._italic_start)
+        self.stateMachine.add_state("MONO-START", self._mono_start)
         self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\'),
-            'escaped-chars': re.compile(r'[\\\[\(\]_]'),
+            'escaped-chars': re.compile(r'[\\\[\(\]_\*`]'),
             'annotation': re.compile(r'\[([^\[]*?[^\\])\]\(([^\(]\S*?\s*[^\\"\'])(["\'](.*?)["\'])??\s*(\((\w+)\))?\)'),
             'bold': re.compile(r'\*(\S.+?\S)\*'),
             'italic': re.compile(r'_(\S.*?\S)_'),
+            'mono': re.compile(r'`(\S.*?\S)`'),
             'inline-insert': re.compile(r'>>\((.*?)\)'),
             'inline-insert-id': re.compile(r'>>#(\w*)')
         }
@@ -577,6 +579,8 @@ class SamParaParser:
             return "BOLD-START", para
         elif char == "_":
             return "ITALIC-START", para
+        elif char == "`":
+            return "MONO-START", para
         elif char == ">":
             return "INLINE-INSERT", para
         else:
@@ -619,6 +623,17 @@ class SamParaParser:
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '_'
+        return "PARA", para
+
+    def _mono_start(self, para):
+        match = self.patterns['mono'].match(para.rest_of_para)
+        if match:
+            self.flow.append(self.current_string)
+            self.current_string = ''
+            self.flow.append(Decoration('mono', match.group(1)))
+            para.advance(len(match.group(0)) - 1)
+        else:
+            self.current_string += '`'
         return "PARA", para
 
     def _inline_insert(self, para):
