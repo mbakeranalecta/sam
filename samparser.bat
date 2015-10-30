@@ -1,1 +1,2 @@
-py -3 %~dp0samparser.py %*
+@py -3 %~dp0samparser.py %*
+
