@@ -70,6 +70,9 @@ feature-topic: feature-fragments
         '''(this is the citation)
             The quick brown fox jumps over the lazy dog.
 
+        '''
+            This is a blockquote without a citation.
+
         Fragments can be defined:
 
         * inline in a topic file

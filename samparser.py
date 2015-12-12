@@ -47,8 +47,7 @@ class SamParser:
             'block-start': re.compile(r'(\s*)([a-zA-Z0-9-_]+):(?:\((.*?)\))?(.*)'),
             'codeblock-start': re.compile(r'(\s*)```(.*)'),
             'codeblock-end': re.compile(r'(\s*)```\s*$'),
-            'blockquote-start': re.compile(r'(?P<indent>\s*)((""")|(\'\'\'))\((?P<citation>.*)\)'),
-
+            'blockquote-start': re.compile(r'(?P<indent>\s*)((""")|(\'\'\'))(\((?P<citation>.*)\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
             'record-start': re.compile(r'\s*[a-zA-Z0-9-_]+::(.*)'),
