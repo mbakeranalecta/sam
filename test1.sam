@@ -52,6 +52,23 @@ feature-topic: feature-fragments
                 a, b, c
                 hi, lo, med
 
+        After this paragraph, there is a blockquote:
+
+        """(this is the citation)
+            The quick brown fox jumps over the lazy dog.
+
+            And the cow jumps over the moon.
+
+        blockquote:(this is another citation)
+            Wafting zyphers quickly vexed jumbo.
+
+            Far and few are the lands where the jumblies live.
+
+
+        This is another paragraph. Then there is an alternate blockquote:
+
+        '''(this is the citation)
+            The quick brown fox jumps over the lazy dog.
 
         Fragments can be defined:
 

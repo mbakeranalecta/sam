@@ -2,6 +2,19 @@ sam: utf-8
 
 title: Semantic Authoring Markdown (SAM)
 
+    section: Annotations
+
+    section: Repeated annotations
+
+        If you are annotating the same phrase more than one in the same file. You
+        can skip the annotation metadata and just use square brackets around the phrase.
+        The parser will
+        copy the metadata from the last occurring instance of that same phrase.
+
+        ```(sam)
+        [foo](bar "baz") gruznatz [foo]
+        ```
+
 	section: Inserts
 
 	    Insertions are indicated by >> followed by parentheses containing the type and identity of the
@@ -135,11 +148,34 @@ title: Semantic Authoring Markdown (SAM)
 
     section: Blockquotes
 
+    Three quotation marks in a row are a shortcut for the implicit
+    element "blockquote".
+
     ```(sam)
     """(citation)
-    Quoted
-    """
+        Quoted
     ```
+
+    You can achieve the same effect by using the literal name blockquote
+    (which is then just like any other block element, except that its
+    attribute is recognized as a citation):
+
+    ```(sam)
+    blockquote:(citation)
+        Quoted
+    ```
+
+
+    section: Alternate blockquotes
+
+    Standard backqoutes may conflict with embedding in other languages such as
+    Python docstrings.
+
+    ```(sam)
+    '''(citation)
+    Quoted
+    '''
+
 
     Block quotes without end markers. The quoted material must be indented. This is
     always allowed, since it is plain SAM. But the issue is whether the rules of

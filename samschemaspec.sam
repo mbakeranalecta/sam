@@ -113,7 +113,7 @@ rule:(#implicit) Implicit elements
         |quotes| The quotes decoration is indicated by surrounding the text
         in straight quotes.
 
-        |pre| The pre decoration is indicated by backticks
+        |mono| The mono decoration is indicated by backticks
 
         |title| The title element is implicit if there is text on the same line as
         a block tag, and if a title field is allowed as the first filed of the block.
@@ -121,9 +121,10 @@ rule:(#implicit) Implicit elements
         this location by a the schema of if the title element that is allowed is
         a block element rather than a field element.
 
-        |blockquote| The blockquote block element is indicated by opening and closing
+        |blockquote| The blockquote block element is indicated by opening
         with three double quotes on a line by themselves, plus any parameters on
-        the opening quotes.
+        the opening quotes. The quoted material must be indented from the blockquote
+        markers
 
         |codeblock| The codeblock block element is indicates by opening and closing with
         three backtick on a line by themselves, plus any attributes on the

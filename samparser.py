@@ -29,6 +29,7 @@ class SamParser:
         self.stateMachine.add_state("BLOCK", self._block)
         self.stateMachine.add_state("CODEBLOCK-START", self._codeblock_start)
         self.stateMachine.add_state("CODEBLOCK", self._codeblock)
+        self.stateMachine.add_state("BLOCKQUOTE-START", self._blockquote_start)
         self.stateMachine.add_state("PARAGRAPH-START", self._paragraph_start)
         self.stateMachine.add_state("PARAGRAPH", self._paragraph)
         self.stateMachine.add_state("RECORD-START", self._record_start)
@@ -46,6 +47,8 @@ class SamParser:
             'block-start': re.compile(r'(\s*)([a-zA-Z0-9-_]+):(?:\((.*?)\))?(.*)'),
             'codeblock-start': re.compile(r'(\s*)```(.*)'),
             'codeblock-end': re.compile(r'(\s*)```\s*$'),
+            'blockquote-start': re.compile(r'(?P<indent>\s*)((""")|(\'\'\'))\((?P<citation>.*)\)'),
+
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
             'record-start': re.compile(r'\s*[a-zA-Z0-9-_]+::(.*)'),
@@ -114,6 +117,15 @@ class SamParser:
         else:
             self.pre_append(line)
             return "CODEBLOCK", source
+
+    def _blockquote_start(self, source):
+        line = source.currentLine
+        match = self.patterns['blockquote-start'].match(line)
+        citation = match.group("citation")
+        local_indent = len(match.group('indent'))
+        self.doc.new_block('blockquote', citation, None, local_indent)
+        return "SAM", source
+
 
     def _paragraph_start(self, source):
         line = source.currentLine
@@ -191,6 +203,8 @@ class SamParser:
             return "SAM", source
         elif self.patterns['codeblock-start'].match(line):
             return "CODEBLOCK-START", source
+        elif self.patterns['blockquote-start'].match(line):
+            return "BLOCKQUOTE-START", source
         elif self.patterns['list-item'].match(line):
             return "LIST-ITEM", source
         elif self.patterns['num-list-item'].match(line):
@@ -257,6 +271,8 @@ class Block:
             if self.attributes:
                 if self.name == 'codeblock':
                     yield ' language="{0}"'.format(self.attributes)
+                if self.name == 'blockquote':
+                    yield ' citation="{0}"'.format(self.attributes)
                 else:
                     try:
                         yield ' ids="{0}"'.format(' '.join(self.attributes[0]))
@@ -435,6 +451,8 @@ class DocStructure:
     def new_block(self, block_type, attributes, text, indent):
         if block_type == 'codeblock':
             b = Block(block_type, attributes, text, indent)
+        elif block_type == 'blockquote':
+            b = Block(block_type, attributes, text, indent)
         elif block_type == 'insert':
             b = BlockInsert(attributes, indent)
         else:
@@ -543,6 +561,7 @@ class SamParaParser:
         self.stateMachine.add_state("BOLD-START", self._bold_start)
         self.stateMachine.add_state("ITALIC-START", self._italic_start)
         self.stateMachine.add_state("MONO-START", self._mono_start)
+        self.stateMachine.add_state("QUOTES-START", self._quotes_start)
         self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
         self.stateMachine.set_start("PARA")
         self.patterns = {
@@ -552,6 +571,7 @@ class SamParaParser:
             'bold': re.compile(r'\*(\S.+?\S)\*'),
             'italic': re.compile(r'_(\S.*?\S)_'),
             'mono': re.compile(r'`(\S.*?\S)`'),
+            'quotes': re.compile(r'"(\S.*?\S)"'),
             'inline-insert': re.compile(r'>>\((.*?)\)'),
             'inline-insert-id': re.compile(r'>>#(\w*)')
         }
@@ -581,6 +601,8 @@ class SamParaParser:
             return "ITALIC-START", para
         elif char == "`":
             return "MONO-START", para
+        elif char == '"':
+            return "QUOTES-START", para
         elif char == ">":
             return "INLINE-INSERT", para
         else:
@@ -634,6 +656,17 @@ class SamParaParser:
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '`'
+        return "PARA", para
+
+    def _quotes_start(self, para):
+        match = self.patterns['quotes'].match(para.rest_of_para)
+        if match:
+            self.flow.append(self.current_string)
+            self.current_string = ''
+            self.flow.append(Decoration('quotes', match.group(1)))
+            para.advance(len(match.group(0)) - 1)
+        else:
+            self.current_string += '"'
         return "PARA", para
 
     def _inline_insert(self, para):
