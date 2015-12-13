@@ -44,16 +44,16 @@ class SamParser:
         self.source = None
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
-            'block-start': re.compile(r'(\s*)([a-zA-Z0-9-_]+):(?:\((.*?)\))?(.*)'),
-            'codeblock-start': re.compile(r'(\s*)```(.*)'),
+            'block-start': re.compile(r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(?P<attributes>\((.*?)\))?(?P<content>.*)'),
+            'codeblock-start': re.compile(r'(?P<indent>\s*)```(?P<attributes>.*)'),
             'codeblock-end': re.compile(r'(\s*)```\s*$'),
             'blockquote-start': re.compile(r'(?P<indent>\s*)((""")|(\'\'\'))(\((?P<citation>.*)\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
-            'record-start': re.compile(r'\s*[a-zA-Z0-9-_]+::(.*)'),
-            'list-item': re.compile(r'(\s*)(\*\s+)(.*)'),
-            'num-list-item': re.compile(r'(\s*)([0-9]+\.\s+)(.*)'),
-            'block-insert': re.compile(r'(\s*)>>\(.*?\)\w*')
+            'record-start': re.compile(r'(?P<indent>\s*)(?P<record_name>[a-zA-Z0-9-_]+)::(?P<field_names>.*)'),
+            'list-item': re.compile(r'(?P<indent>\s*)(?P<marker>\*\s+)(?P<content>.*)'),
+            'num-list-item': re.compile(r'(?P<indent>\s*)(?P<marker>[0-9]+\.\s+)(?P<content>.*)'),
+            'block-insert': re.compile(r'(?P<indent>\s*)>>\((?P<attributes>.*?)\)\w*')
         }
 
     def parse(self, source):
@@ -80,140 +80,181 @@ class SamParser:
         line = source.next_line
         if line[:4] == 'sam:':
             self.doc.new_root('sam', line[5:])
-            return "SAM", source
+            return "SAM", (source, None)
         else:
             raise Exception("Not a SAM file!")
 
-    def _block(self, source):
+    def _block(self, context):
+        source, match = context
         line = source.currentLine
-        match = self.patterns['block-start'].match(line)
-        indent = len(match.group(1))
-        element = match.group(2).strip()
-        attributes = match.group(3)
-        content = match.group(4).strip()
+        indent = len(match.group("indent"))
+        element = match.group("element").strip()
+        attributes = match.group("attributes")
+        content = match.group("content").strip()
+        self.doc.new_block(element, attributes, content, indent)
+        return "SAM", context
 
-        if content[:1] == ':':
-            return "RECORD-START", source
-        else:
-            self.doc.new_block(element, attributes, content, indent)
-            return "SAM", source
-
-    def _codeblock_start(self, source):
+    def _codeblock_start(self, context):
+        source, match = context
         line = source.currentLine
-        local_indent = len(line) - len(line.lstrip())
-        match = self.patterns['codeblock-start'].match(line)
-        attributes = re.compile(r'\((.*?)\)').match(match.group(2).strip())
+        indent = len(match.group("indent"))
+        attributes = re.compile(r'\((.*?)\)').match(match.group("attributes").strip())
         language = attributes.group(1)
-        self.doc.new_block('codeblock', language, None, local_indent)
+        self.doc.new_block('codeblock', language, None, indent)
         self.pre_start('')
-        return "CODEBLOCK", source
+        return "CODEBLOCK", context
 
-    def _codeblock(self, source):
+    def _codeblock(self, context):
+        source, match = context
         line = source.next_line
         if self.patterns['codeblock-end'].match(line):
             self.doc.new_flow(Pre(self.current_paragraph))
-            return "SAM", source
+            return "SAM", context
         else:
             self.pre_append(line)
-            return "CODEBLOCK", source
+            return "CODEBLOCK", context
 
-    def _blockquote_start(self, source):
-        line = source.currentLine
-        match = self.patterns['blockquote-start'].match(line)
+    def _blockquote_start(self, context):
+        source, match = context
         citation = match.group("citation")
-        local_indent = len(match.group('indent'))
-        self.doc.new_block('blockquote', citation, None, local_indent)
-        return "SAM", source
+        indent = len(match.group('indent'))
+        self.doc.new_block('blockquote', citation, None, indent)
+        return "SAM", context
 
-
-    def _paragraph_start(self, source):
+    def _paragraph_start(self, context):
+        source, match = context
         line = source.currentLine
         local_indent = len(line) - len(line.lstrip())
         self.doc.new_block('p', None, '', local_indent)
         self.paragraph_start(line)
-        return "PARAGRAPH", source
+        return "PARAGRAPH", context
 
-    def _paragraph(self, source):
+    def _paragraph(self, context):
+        source, match = context
         line = source.next_line
         if self.patterns['blank-line'].match(line):
             para_parser.parse(self.current_paragraph, self.doc)
-            return "SAM", source
+            return "SAM", context
         else:
             self.paragraph_append(line)
-            return "PARAGRAPH", source
+            return "PARAGRAPH", context
 
-    def _list_item(self, source):
+    def _list_item(self, context):
+        source, match = context
         line = source.currentLine
-        match = self.patterns['list-item'].match(line)
-        local_indent = len(match.group(1))
-        content_indent = local_indent + len(match.group(2))
-        self.doc.new_unordered_list_item(local_indent, content_indent)
-        self.paragraph_start(str(match.group(3)).strip())
-        return "PARAGRAPH", source
+        indent = len(match.group("indent"))
+        content_indent = indent + len(match.group("marker"))
+        self.doc.new_unordered_list_item(indent, content_indent)
+        self.paragraph_start(str(match.group("content")).strip())
+        return "PARAGRAPH", context
 
-
-    def _num_list_item(self, source):
+    def _num_list_item(self, context):
+        source, match = context
         line = source.currentLine
-        match = self.patterns['num-list-item'].match(line)
-        local_indent = len(match.group(1))
-        content_indent = local_indent + len(match.group(2))
-        self.doc.new_ordered_list_item(local_indent, content_indent)
-        self.paragraph_start(str(match.group(3)).strip())
-        return "PARAGRAPH", source
+        indent = len(match.group("indent"))
+        content_indent = indent + len(match.group("marker"))
+        self.doc.new_ordered_list_item(indent, content_indent)
+        self.paragraph_start(str(match.group("content")).strip())
+        return "PARAGRAPH", context
 
-    def _block_insert(self, source):
+    def _block_insert(self, context):
+        source, match = context
+        indent = len(match.group("indent"))
+        self.doc.new_block('insert', text='', attributes=parse_insert(match.group("attributes")), indent=indent)
+        return "SAM", context
+
+    def _record_start(self, context):
+        source, match = context
         line = source.currentLine
-        indent = len(source.currentLine) - len(source.currentLine.lstrip())
-        attribute_pattern = re.compile(r'\s*>>\((.*?)\)')
-        match = attribute_pattern.match(line)
-        self.doc.new_block('insert', text='', attributes=parse_insert(match.group(1)), indent=indent)
-        return "SAM", source
+        indent = len(match.group("indent"))
+        record_name = match.group("record_name").strip()
+        field_names = [x.strip() for x in match.group("field_names").split(',')]
+        self.doc.new_record_set(record_name, field_names, indent)
+        return "RECORD", context
 
-    def _record_start(self, source):
-        line = source.currentLine
-        match = self.patterns['block-start'].match(line)
-        local_indent = len(match.group(1))
-        local_element = match.group(2).strip()
-        field_names = [x.strip() for x in self.patterns['record-start'].match(line).group(1).split(',')]
-        self.doc.new_record_set(local_element, field_names, local_indent)
-        return "RECORD", source
-
-    def _record(self, source):
+    def _record(self, context):
+        source, match = context
         line = source.next_line
         if self.patterns['blank-line'].match(line):
-            return "SAM", source
+            return "SAM", context
         else:
             field_values = [x.strip() for x in line.split(',')]
             record = list(zip(self.doc.fields, field_values))
             self.doc.new_record(record)
-            return "RECORD", source
+            return "RECORD", context
 
-    def _sam(self, source):
+    def _sam(self, context):
+        source, match = context
         try:
             line = source.next_line
         except EOFError:
-            return "END", source
-        if self.patterns['comment'].match(line):
+            return "END", context
+
+        match = self.patterns['comment'].match(line)
+        if match is not None:
             self.doc.new_comment(Comment(line.strip()[1:]))
-            return "SAM", source
-        elif self.patterns['block-start'].match(line):
-            return "BLOCK", source
-        elif self.patterns['blank-line'].match(line):
-            return "SAM", source
-        elif self.patterns['codeblock-start'].match(line):
-            return "CODEBLOCK-START", source
-        elif self.patterns['blockquote-start'].match(line):
-            return "BLOCKQUOTE-START", source
-        elif self.patterns['list-item'].match(line):
-            return "LIST-ITEM", source
-        elif self.patterns['num-list-item'].match(line):
-            return "NUM-LIST-ITEM", source
-        elif self.patterns['block-insert'].match(line):
-            return "BLOCK-INSERT", source
-        elif self.patterns['paragraph-start'].match(line):
-            return "PARAGRAPH-START", source
-        else:
-            raise Exception("I'm confused")
+            return "SAM", (source, match)
+
+        match = self.patterns['record-start'].match(line)
+        if match is not None:
+            return "RECORD-START", (source, match)
+
+        match = self.patterns['block-start'].match(line)
+        if match is not None:
+            return "BLOCK", (source, match)
+
+        match = self.patterns['blank-line'].match(line)
+        if match is not None:
+            return "SAM", (source, match)
+
+        match = self.patterns['codeblock-start'].match(line)
+        if match is not None:
+            return "CODEBLOCK-START", (source, match)
+
+        match = self.patterns['blockquote-start'].match(line)
+        if match is not None:
+            return "BLOCKQUOTE-START", (source, match)
+
+        match = self.patterns['list-item'].match(line)
+        if match is not None:
+            return "LIST-ITEM", (source, match)
+
+        match = self.patterns['num-list-item'].match(line)
+        if match is not None:
+            return "NUM-LIST-ITEM", (source, match)
+
+        match = self.patterns['block-insert'].match(line)
+        if match is not None:
+            return "BLOCK-INSERT", (source, match)
+
+        match = self.patterns['paragraph-start'].match(line)
+        if match is not None:
+            return "PARAGRAPH-START", (source, match)
+
+        raise Exception("I'm confused")
+
+
+        # if self.patterns['comment'].match(line):
+        #     self.doc.new_comment(Comment(line.strip()[1:]))
+        #     return "SAM", source
+        # elif self.patterns['block-start'].match(line):
+        #     return "BLOCK", source
+        # elif self.patterns['blank-line'].match(line):
+        #     return "SAM", source
+        # elif self.patterns['codeblock-start'].match(line):
+        #     return "CODEBLOCK-START", source
+        # elif self.patterns['blockquote-start'].match(line):
+        #     return "BLOCKQUOTE-START", source
+        # elif self.patterns['list-item'].match(line):
+        #     return "LIST-ITEM", source
+        # elif self.patterns['num-list-item'].match(line):
+        #     return "NUM-LIST-ITEM", source
+        # elif self.patterns['block-insert'].match(line):
+        #     return "BLOCK-INSERT", source
+        # elif self.patterns['paragraph-start'].match(line):
+        #     return "PARAGRAPH-START", source
+        # else:
+        #     raise Exception("I'm confused")
 
     def serialize(self, serialize_format):
         return self.doc.serialize(serialize_format)
@@ -566,7 +607,7 @@ class SamParaParser:
         self.patterns = {
             'escape': re.compile(r'\\'),
             'escaped-chars': re.compile(r'[\\\[\(\]_\*`]'),
-            'annotation': re.compile(r'\[([^\[]*?[^\\])\]\(([^\(]\S*?\s*[^\\"\'])(["\'](.*?)["\'])??\s*(\((\w+)\))?\)'),
+            'annotation': re.compile(r'\[(?P<text>[^\[]*?[^\\])\]\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\)'),
             'bold': re.compile(r'\*(\S.+?\S)\*'),
             'italic': re.compile(r'_(\S.*?\S)_'),
             'mono': re.compile(r'`(\S.*?\S)`'),
@@ -613,10 +654,10 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            annotation_type = str(match.group(2)).strip()
-            text = match.group(1)
-            specifically = match.group(4) if match.group(4) is not None else None
-            namespace = match.group(6) if match.group(6) is not None else None
+            annotation_type = str(match.group('type')).strip()
+            text = match.group("text")
+            specifically = match.group('specifically') if match.group('specifically') is not None else None
+            namespace = match.group('namespace') if match.group('namespace') is not None else None
             self.flow.append(Annotation(annotation_type, text, specifically, namespace))
             para.advance(len(match.group(0)) - 1)
             return "PARA", para
