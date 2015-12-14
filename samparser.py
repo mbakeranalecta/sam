@@ -45,7 +45,7 @@ class SamParser:
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(?P<attributes>\((.*?)\))?(?P<content>.*)'),
-            'codeblock-start': re.compile(r'(?P<indent>\s*)```(?P<attributes>.*)'),
+            'codeblock-start': re.compile(r'(?P<indent>\s*)```\((?P<attributes>.*?)\)'),
             'codeblock-end': re.compile(r'(\s*)```\s*$'),
             'blockquote-start': re.compile(r'(?P<indent>\s*)((""")|(\'\'\'))(\((?P<citation>.*)\))?'),
             'paragraph-start': re.compile(r'\w*'),
@@ -98,8 +98,8 @@ class SamParser:
         source, match = context
         line = source.currentLine
         indent = len(match.group("indent"))
-        attributes = re.compile(r'\((.*?)\)').match(match.group("attributes").strip())
-        language = attributes.group(1)
+        # FIXME: Does codeblock allow other attributes? If not, test?
+        language = match.group("attributes").strip()
         self.doc.new_block('codeblock', language, None, indent)
         self.pre_start('')
         return "CODEBLOCK", context
@@ -288,7 +288,7 @@ class Block:
             if self.attributes:
                 if self.name == 'codeblock':
                     yield ' language="{0}"'.format(self.attributes)
-                if self.name == 'blockquote':
+                elif self.name == 'blockquote':
                     yield ' citation="{0}"'.format(self.attributes)
                 else:
                     try:
