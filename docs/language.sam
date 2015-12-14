@@ -240,17 +240,12 @@ We will look in detail later at ways of extending your document domain objects. 
     The content of the code block is not processed as sam markup until the closing ``` is
     seen.
 
-    Need to work out how escaping of ``` in a code block would work. If not SAM, then backslash
-    escape is not active. Best maybe to allow writer to add arbitrary characters to after
-    ``` at the top to ensure that the closing ``` is distinct.
+    In the event that the end marker for the codeblock would appear in the
+    codeblock, the writer can add arbitrary characters after
+    ``` in the top and bottom markers to assure they are distinct.
 
     In a blockquote, however, the material inside the quote block is still SAM markup and is
     processed as such.
-
-    Maybe we also need a non-interpreted signal that does not also form a codeblock. This could be
-    done with tildes. This would be the equivalent of cdata sections in XML. The main reason for
-    doing this would be to allow you to create named blocks (other than [codeblock](element-name))
-    that would contain non-sam markup.
 
 section: Lists
 

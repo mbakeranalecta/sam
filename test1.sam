@@ -24,6 +24,13 @@ feature-topic: feature-fragments
 
         >>(image foo.gif #foo #bar ?baz ?bat)
 
+        This sentence contains a unmatched [ followed by an [annotated](word).
+
+        This [sentence](grammatical-construct) contains a repeated annotation: the word
+        [sentence] without any annotation metadata. It should be annotated the same as
+        the previous instance. If you just want square brackets around the word
+        \[sentence] you need to preceed it with a backslash.
+
         A fragment is an \[arbitrary\]\\ sequence of *text structures* (paragraphs, lists,
         etc.) that _has been given_ an id so that it can be [included](bold) by reference at other
         \_points_ in the content.

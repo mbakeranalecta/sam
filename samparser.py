@@ -376,6 +376,14 @@ class Flow:
         if not thing == '':
             self.flow.append(thing)
 
+    def find_last_annotation(self, text):
+        for i in reversed(self.flow):
+            if type(i) is Annotation:
+                if i.text == text:
+                    return i
+        return None
+
+
     def serialize_xml(self):
         for x in self.flow:
             try:
@@ -585,7 +593,7 @@ class SamParaParser:
         self.patterns = {
             'escape': re.compile(r'\\'),
             'escaped-chars': re.compile(r'[\\\[\(\]_\*`]'),
-            'annotation': re.compile(r'\[(?P<text>[^\[]*?[^\\])\]\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\)'),
+            'annotation': re.compile(r'\[(?P<text>[^\[]*?[^\\])\](\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
             'italic': re.compile(r'_(?P<text>\S.*?\S)_'),
             'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
@@ -632,11 +640,18 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            annotation_type = str(match.group('type')).strip()
+            annotation_type = match.group('type')
             text = match.group("text")
-            specifically = match.group('specifically') if match.group('specifically') is not None else None
-            namespace = match.group('namespace') if match.group('namespace') is not None else None
-            self.flow.append(Annotation(annotation_type, text, specifically, namespace))
+            if annotation_type is None:
+                previous = self.flow.find_last_annotation(text)
+                if previous is not None:
+                    self.flow.append(previous)
+                else:
+                    raise Exception("Blank annotation found: [" + text + "]")
+            else:
+                specifically = match.group('specifically') if match.group('specifically') is not None else None
+                namespace = match.group('namespace') if match.group('namespace') is not None else None
+                self.flow.append(Annotation(annotation_type, text, specifically, namespace))
             para.advance(len(match.group(0)) - 1)
             return "PARA", para
         else:
