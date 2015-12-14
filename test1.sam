@@ -31,6 +31,8 @@ feature-topic: feature-fragments
         the previous instance. If you just want square brackets around the word
         \[sentence] you need to preceed it with a backslash.
 
+        This sentence also references the word [sentence] and should be annotated on output.
+
         A fragment is an \[arbitrary\]\\ sequence of *text structures* (paragraphs, lists,
         etc.) that _has been given_ an id so that it can be [included](bold) by reference at other
         \_points_ in the content.
@@ -92,7 +94,7 @@ feature-topic: feature-fragments
         * batman
 
 
-        If a fragment is defined inline, it is included where it occurs. Fragments in fragment
+        If a fragment is defined inline, it is included where it occurs. [Fragments] in fragment
         files are not included anywhere unless they are pulled in by a fragment reference.
 
         0. One

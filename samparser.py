@@ -545,6 +545,23 @@ class DocStructure:
             self.current_block.add_child(b)
         self.current_block = self.current_block.parent
 
+    def find_last_annotation(self, text, node=None):
+        if node is None:
+            node= self.doc
+        if type(node) is Flow:
+            result = node.find_last_annotation(text)
+            if result is not None:
+                return result
+        else:
+            try:
+                for i in reversed(node.children):
+                    result = self.find_last_annotation(text, i)
+                    if result is not None:
+                        return result
+            except(AttributeError):
+                pass
+        return None
+
     def serialize(self, serialize_format):
         if serialize_format.upper() == 'XML':
             yield from self.doc.serialize_xml()
@@ -642,12 +659,31 @@ class SamParaParser:
             self.current_string = ''
             annotation_type = match.group('type')
             text = match.group("text")
+            # If there is an annotated phrase with no annotation, look back
+            # to see if it has been annotated already, and if so, copy the
+            # closest preceding annotation.
             if annotation_type is None:
+                # First look back in the current flow
+                # (which is not part of the doc structure yet).
                 previous = self.flow.find_last_annotation(text)
                 if previous is not None:
                     self.flow.append(previous)
                 else:
-                    raise Exception("Blank annotation found: [" + text + "]")
+                    # Then look back in the document.
+                    previous = self.doc.find_last_annotation(text)
+                    if previous is not None:
+                        self.flow.append(previous)
+
+                    # Else raise an exception.
+                    else:
+                        raise Exception(
+                                "Blank annotation found: [" + text + "] " +
+                                "If you are trying to insert square brackets " +
+                                "into the document, use \[" + text +
+                                "]. Otherwise, make sure annotated text matches "
+                                "previous annotation exactly."
+                        )
+
             else:
                 specifically = match.group('specifically') if match.group('specifically') is not None else None
                 namespace = match.group('namespace') if match.group('namespace') is not None else None
