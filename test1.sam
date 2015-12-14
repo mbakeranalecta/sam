@@ -25,7 +25,7 @@ feature-topic: feature-fragments
         >>(image foo.gif #foo #bar ?baz ?bat)
 
         A fragment is an \[arbitrary\]\\ sequence of *text structures* (paragraphs, lists,
-        etc.) that _has been given_ an id so that it can be included by reference at other
+        etc.) that _has been given_ an id so that it can be [included](bold) by reference at other
         \_points_ in the content.
 
         ```(xml)

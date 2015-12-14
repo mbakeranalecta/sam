@@ -233,29 +233,6 @@ class SamParser:
 
         raise Exception("I'm confused")
 
-
-        # if self.patterns['comment'].match(line):
-        #     self.doc.new_comment(Comment(line.strip()[1:]))
-        #     return "SAM", source
-        # elif self.patterns['block-start'].match(line):
-        #     return "BLOCK", source
-        # elif self.patterns['blank-line'].match(line):
-        #     return "SAM", source
-        # elif self.patterns['codeblock-start'].match(line):
-        #     return "CODEBLOCK-START", source
-        # elif self.patterns['blockquote-start'].match(line):
-        #     return "BLOCKQUOTE-START", source
-        # elif self.patterns['list-item'].match(line):
-        #     return "LIST-ITEM", source
-        # elif self.patterns['num-list-item'].match(line):
-        #     return "NUM-LIST-ITEM", source
-        # elif self.patterns['block-insert'].match(line):
-        #     return "BLOCK-INSERT", source
-        # elif self.patterns['paragraph-start'].match(line):
-        #     return "PARAGRAPH-START", source
-        # else:
-        #     raise Exception("I'm confused")
-
     def serialize(self, serialize_format):
         return self.doc.serialize(serialize_format)
 
@@ -379,7 +356,7 @@ class Root(Block):
 
     def serialize_xml(self):
         yield '<?xml version="1.0" encoding="UTF-8"?>\n'
-        yield '<sam>' # should include namespace and schema
+        yield '<sam>\n'  # should include namespace and schema
         for x in self.children:
             yield from x.serialize_xml()
         yield '</sam>'
@@ -608,12 +585,12 @@ class SamParaParser:
             'escape': re.compile(r'\\'),
             'escaped-chars': re.compile(r'[\\\[\(\]_\*`]'),
             'annotation': re.compile(r'\[(?P<text>[^\[]*?[^\\])\]\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\)'),
-            'bold': re.compile(r'\*(\S.+?\S)\*'),
-            'italic': re.compile(r'_(\S.*?\S)_'),
-            'mono': re.compile(r'`(\S.*?\S)`'),
-            'quotes': re.compile(r'"(\S.*?\S)"'),
-            'inline-insert': re.compile(r'>>\((.*?)\)'),
-            'inline-insert-id': re.compile(r'>>#(\w*)')
+            'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
+            'italic': re.compile(r'_(?P<text>\S.*?\S)_'),
+            'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
+            'quotes': re.compile(r'"(?P<text>\S.*?\S)"'),
+            'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)'),
+            'inline-insert-id': re.compile(r'>>#(?P<id>\w*)')
         }
 
     def parse(self, para, doc):
@@ -670,7 +647,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('bold', match.group(1)))
+            self.flow.append(Decoration('bold', match.group("text")))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '*'
@@ -681,7 +658,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('italic', match.group(1)))
+            self.flow.append(Decoration('italic', match.group("text")))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '_'
@@ -692,7 +669,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('mono', match.group(1)))
+            self.flow.append(Decoration('mono', match.group("text")))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '`'
@@ -703,7 +680,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('quotes', match.group(1)))
+            self.flow.append(Decoration('quotes', match.group("text")))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '"'
@@ -714,14 +691,14 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(InlineInsert(parse_insert(match.group(1))))
+            self.flow.append(InlineInsert(parse_insert(match.group("attributes"))))
             para.advance(len(match.group(0))-1)
         else:
             match = self.patterns['inline-insert-id'].match(para.rest_of_para)
             if match:
                 self.flow.append(self.current_string)
                 self.current_string = ''
-                self.flow.append(InlineInsert(('reference', match.group(1))))
+                self.flow.append(InlineInsert(('reference', match.group("attributes"))))
                 para.advance(len(match.group(0))-1)
             else:
                 self.current_string += '>'
@@ -732,7 +709,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(InlineInsert('reference', match.group(2)))
+            self.flow.append(InlineInsert('reference', match.group("id")))
             para.advance(len(match.group(0))-1)
         else:
             self.current_string += '>'
