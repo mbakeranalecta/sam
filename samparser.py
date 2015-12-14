@@ -558,7 +558,7 @@ class DocStructure:
                     result = self.find_last_annotation(text, i)
                     if result is not None:
                         return result
-            except(AttributeError):
+            except AttributeError:
                 pass
         return None
 
