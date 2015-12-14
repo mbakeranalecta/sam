@@ -28,7 +28,7 @@ feature-topic: feature-fragments
         etc.) that _has been given_ an id so that it can be [included](bold) by reference at other
         \_points_ in the content.
 
-        ```(xml)
+        ```kkk(xml)
 <fragment id="test-fragment">
     <local-strings>
         <string id="test-string-1"><bold>test string one</bold></string>
@@ -44,7 +44,7 @@ feature-topic: feature-fragments
         <string id="test-string-1"><code>this is test string number one</code></string>
     </local-strings>
 </fragment-ref>
-        ```
+        ```kkk
 
         table:
             row:: cell, cell, cell

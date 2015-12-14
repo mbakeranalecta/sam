@@ -45,8 +45,7 @@ class SamParser:
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(?P<attributes>\((.*?)\))?(?P<content>.*)'),
-            'codeblock-start': re.compile(r'(?P<indent>\s*)```\((?P<attributes>.*?)\)'),
-            'codeblock-end': re.compile(r'(\s*)```\s*$'),
+            'codeblock-start': re.compile(r'(?P<indent>\s*)(?P<flag>```.*?)\((?P<attributes>.*?)\)'),
             'blockquote-start': re.compile(r'(?P<indent>\s*)((""")|(\'\'\'))(\((?P<citation>.*)\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
@@ -98,6 +97,8 @@ class SamParser:
         source, match = context
         line = source.currentLine
         indent = len(match.group("indent"))
+        codeblock_flag = match.group("flag")
+        self.patterns['codeblock-end'] = re.compile(r'(\s*)' + codeblock_flag + '\s*$')
         # FIXME: Does codeblock allow other attributes? If not, test?
         language = match.group("attributes").strip()
         self.doc.new_block('codeblock', language, None, indent)
