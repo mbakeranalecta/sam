@@ -5,19 +5,8 @@ import io
 
 try:
     import regex as re
-
-    re_supports_unicode_categories = True
 except ImportError:
     import re
-
-    re_supports_unicode_categories = False
-    print(
-        """Regular expression support for Unicode categories not available.
-IDs starting with non-ASCII lowercase letters will not be recognized and
-will be treated as titles. Please install Python regex module.
-
-""", file=sys.stderr)
-
 
 
 class SamParser:
@@ -36,6 +25,7 @@ class SamParser:
         self.stateMachine.add_state("RECORD", self._record)
         self.stateMachine.add_state("LIST-ITEM", self._list_item)
         self.stateMachine.add_state("NUM-LIST-ITEM", self._num_list_item)
+        self.stateMachine.add_state("LABELED-LIST-ITEM", self._labeled_list_item)
         self.stateMachine.add_state("BLOCK-INSERT", self._block_insert)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("NEW")
@@ -52,6 +42,7 @@ class SamParser:
             'record-start': re.compile(r'(?P<indent>\s*)(?P<record_name>[a-zA-Z0-9-_]+)::(?P<field_names>.*)'),
             'list-item': re.compile(r'(?P<indent>\s*)(?P<marker>\*\s+)(?P<content>.*)'),
             'num-list-item': re.compile(r'(?P<indent>\s*)(?P<marker>[0-9]+\.\s+)(?P<content>.*)'),
+            'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>.+?)\|\s+(?P<content>.*)'),
             'block-insert': re.compile(r'(?P<indent>\s*)>>\((?P<attributes>.*?)\)\w*')
         }
 
@@ -85,7 +76,6 @@ class SamParser:
 
     def _block(self, context):
         source, match = context
-        line = source.currentLine
         indent = len(match.group("indent"))
         element = match.group("element").strip()
         attributes = match.group("attributes")
@@ -95,7 +85,6 @@ class SamParser:
 
     def _codeblock_start(self, context):
         source, match = context
-        line = source.currentLine
         indent = len(match.group("indent"))
         codeblock_flag = match.group("flag")
         self.patterns['codeblock-end'] = re.compile(r'(\s*)' + codeblock_flag + '\s*$')
@@ -155,6 +144,14 @@ class SamParser:
         indent = len(match.group("indent"))
         content_indent = indent + len(match.group("marker"))
         self.doc.new_ordered_list_item(indent, content_indent)
+        self.paragraph_start(str(match.group("content")).strip())
+        return "PARAGRAPH", context
+
+    def _labeled_list_item(self, context):
+        source, match = context
+        indent = len(match.group("indent"))
+        label = match.group("label")
+        self.doc.new_labeled_list_item(indent, label)
         self.paragraph_start(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -224,6 +221,10 @@ class SamParser:
         if match is not None:
             return "NUM-LIST-ITEM", (source, match)
 
+        match = self.patterns['labeled-list-item'].match(line)
+        if match is not None:
+            return "LABELED-LIST-ITEM", (source, match)
+
         match = self.patterns['block-insert'].match(line)
         if match is not None:
             return "BLOCK-INSERT", (source, match)
@@ -266,11 +267,16 @@ class Block:
         self.parent.children.append(b)
 
     def add_at_indent(self, b, indent):
+        x = self.ancestor_at_indent(indent)
+        b.parent = x
+        x.children.append(b)
+
+    def ancestor_at_indent(self, indent):
         x = self.parent
         while x.indent >= indent:
             x = x.parent
-        b.parent = x
-        x.children.append(b)
+        return x
+
 
     def __str__(self):
         return ''.join(self._output_block())
@@ -486,8 +492,9 @@ class DocStructure:
         if self.doc is None:
             raise Exception('No root element found.')
         elif self.current_block.indent < indent:
-            if self.current_block.name == 'p' and block_type == 'p' and self.current_block.indent != indent:
-                raise Exception('Inconsistent paragraph indentation after "' + str(self.current_block.children[0]) + '".' )
+            if self.current_block.name == 'p':
+                raise Exception(
+                    'A paragraph cannot have block children. At \"{0}\".'.format(str(self.current_block.children[0])))
             self.current_block.add_child(b)
         elif self.current_block.indent == indent:
             self.current_block.add_sibling(b)
@@ -522,6 +529,19 @@ class DocStructure:
         oli.add_child(p)
         self.current_block = p
 
+    def new_labeled_list_item(self, indent, label):
+        lli = Block('li', None, '', indent)
+        lli.add_child(Block('label',None,label,indent))
+        if self.current_block.parent.name == 'li':
+            self.current_block.parent.add_sibling(lli)
+        else:
+            ll = Block('ll', None, '', indent)
+            self.current_block.add_sibling(ll)
+            ll.add_child(lli)
+        p = Block('p', None,'',indent)
+        lli.add_child(p)
+        self.current_block = p
+
     def new_flow(self, flow):
         self.current_block.add_child(flow)
 
@@ -547,7 +567,7 @@ class DocStructure:
 
     def find_last_annotation(self, text, node=None):
         if node is None:
-            node= self.doc
+            node = self.doc
         if type(node) is Flow:
             result = node.find_last_annotation(text)
             if result is not None:

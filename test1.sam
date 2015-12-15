@@ -5,6 +5,7 @@ sam: utf-8 http://spfeopentoolkit.org/spfe-docs/topic-types/feature-topic/schema
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
 feature-topic: feature-fragments
+    foo: this is the string foo
     head:
         foo: bar
         baz: bat
@@ -94,7 +95,7 @@ feature-topic: feature-fragments
         * batman
 
 
-        If a fragment is defined inline, it is included where it occurs. [Fragments] in fragment
+        If a fragment is defined inline, it is included where it occurs. [Fragments](song) in fragment
         files are not included anywhere unless they are pulled in by a fragment reference.
 
         0. One
@@ -112,7 +113,7 @@ feature-topic: feature-fragments
 
         A fragment reference inserts a fragment by ID at the place it occurs in the text.
 
-        Fragments are recursive. That is, fragments can contain other fragments and
+        Fragments are recursive. That is, [Fragments] can contain other fragments and
         fragment references.
 
         Because you often want to >>(image foo.gif #foo #bar ?baz ?bat) change some part of a text when it is being
@@ -121,6 +122,8 @@ feature-topic: feature-fragments
         at local-strings defined in the fragment reference, then at local strings defined
         in the fragment definition, and then at global strings. In effect, this means
         that you can define string substitutions whenever you insert a fragment into your content.
+
+        This is an incorrectly indented para.
 
         state-detection:
             sign: printer "the printer"
@@ -139,4 +142,19 @@ feature-topic: feature-fragments
             state: broken "call the service desk"
                 printer: beeps twice
                 indicator: red
+
+        |p| The p element represents a paragraph. It is recognized as a block of
+        lines with no leading tag. It ends with a blank line. p elements are the
+        only elements that can contain decorations and annotations.
+
+        |bold| The bold element is a decoration occurring within text and is
+        indicated by surrounding the text with asterisks.
+
+        |italic| The italic decoration is indicated by surrounding the text
+        with underscores.
+
+        |quotes| The quotes decoration is indicated by surrounding the text
+        in straight quotes.
+
+        |mono| The mono decoration is indicated by backticks
 

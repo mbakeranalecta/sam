@@ -18,17 +18,13 @@ title: Semantic Authoring Markdown (SAM)
 	section: Inserts
 
 	    Insertions are indicated by >> followed by parentheses containing the type and identity of the
-	    thing to be inserted. Things you can insert include:
-
-	    * images
-	    * strings
-	    * fragments
+	    thing to be inserted. SAM knows nothing about the types of things you might
+	    insert. It simply passes on the type to the processing application.
 
 	    The parameters of an insertion are different from those of an annotation. They are:
 
 	    1. the type of the annotation
 	    2. the URI of the material to be inserted
-	    3. parameters in x=y format
 	    4. an id, consisting of a # followed by a name (such as "#foo")
 	    5. one or more conditions, consisting of ? followed by a token
 
@@ -37,8 +33,9 @@ title: Semantic Authoring Markdown (SAM)
         Conditions are indicated in annotations, blocks, and inserts using a question mark followed
         by a token.
 
-        Boolean logic is not supported in conditions. However, you can define a token
-        to stand for a complex boolean expression in the schema.
+        SAM itself does not execute conditions, it merely encodes them for later
+        processing. Therefore it has no idea what the tokens mean or how they will
+        be interpreted. However, using simple tokens is recommended as a best practice.
 
 
     section: Blocks
@@ -56,12 +53,8 @@ title: Semantic Authoring Markdown (SAM)
 
         * Condition token, which start with a ?
         * IDs, which start with #
-        * A string, in quotes. This can be interpreted on a per element basis. So, for
-        example, the string for a blockquote can be interpreted as a citation. Part of
-        the schema definition for a block can be an RE  or a pattern
-        for interpreting its string into a set of named attributes. For example:
-
-        author ',' year ',' page
+        * A string, in quotes, known as the specifically attribute. The specifically
+        attribute exists to specify and clarify what is being annotated.
 
      section: Fragments
 
@@ -76,69 +69,7 @@ title: Semantic Authoring Markdown (SAM)
         Some more stuff
         }
         ```
-        
 
-	section: Images
-
-		Images inside a paragraph are indicated with an insertion of type (image):
-
-
-		```sam
-		This is a picture of a kitten. >>(image kitten.jpg) It is funny.
-		```
-
-		```sam
-		This is a picture of a kitten. >>(image "#kitten") It is funny.
-		```
-		Resolution of the image name to an actual image is delegated to downstream
-		processing. However, you can also specify a URL:
-
-		It is up to the downstream processing whether to use the image name or
-		the URL to locate the image to display.
-
-		Images at the paragraph level are indicated as a paragraph
-		containing only an image:
-
-		```sam
-		>>(image kitten.jpg)
-		```
-
-		Images can be assigned ids:
-
-		```sam
-		>>(image kitten.jpg #kitten)
-		```
-
-		You can insert the image by referencing the image id:
-
-		```sam
-		>>#kitten
-		```
-
-
-		You can also specify a macro for an image:
-
-		```sam
-		%kitten = '(image kitten.jpg)'
-
-		This is a picture of a kitten.
-
-		>>%kitten
-
-		It is funny.
-		```
-    section: fragments
-        Fragments are included with the include instruction with type "fragment":
-
-        ```sam
-        >>{foo}
-        ```
-
-        Local string definitions are indicated like this:
-
-        ```sam
-        >>{foo $bar="baz" $ban="bonk"}
-		
 	section: Shortcuts for inserts
         # string
 		>>$this.string
@@ -168,84 +99,24 @@ title: Semantic Authoring Markdown (SAM)
 
     section: Alternate blockquotes
 
-    Standard backqoutes may conflict with embedding in other languages such as
+    Standard blockquotes may conflict with embedding in other languages such as
     Python docstrings.
 
     ```(sam)
     '''(citation)
-    Quoted
+        Quoted
     '''
 
-
-    Block quotes without end markers. The quoted material must be indented. This is
-    always allowed, since it is plain SAM. But the issue is whether the rules of
-    block annotation allow for a correct citation.
-
-    ```(sam)
-    quote:(citation)
-        Indented quote
-
-    This is not part of the quote.
-    ```
-
-    The alternative would be make the citation a block in its own right:
-
-    ```(sam)
-    quote:
-        citation: citation
-
-        Indented quote
-
-    This is not part of the quote.
-    ```
-
-
-
-
-    What happens when you need to format part of your document differently, but your document domain language does not have a document domain structure for the document element you are creating? For example, if your document domain language is HTML, it does not have any structures for common document domain objects like procedures, sidebars, of bibliographies.
-
-Of course, you can create these things in an HTML document, using regular features like lists, divs, and paragraphs. To indicate how they are to be formatted, though, you will have to either apply style information directly in the file, or else add some kind of metadata that indicates the special role that the list, div, or paragraph is playing. In HTML, the normal strategy is to use a class attribute. So, you could support special styling of a procedure list by giving it a class attribute of "procedure":
-
-```(HTML)
-<ol class="procedure">
-	<li>Lather.</li>
-	<li>Rinse.</li>
-	<li>Repeat.</li>
-<ol>
-```
-
-This is, in some ways, like giving HTML a procedure document domain object. We can now format as a procedure. And because we are using a hierarchical system, we don't need to add class attributes to the li elements to format them different. We can set an invariant rule that all li elements that are children of an ol element of class "procedure" will be formatted a certain way.
-
-```(CSS)
-ol.procedure li
-{
-}
-```
-
-We said that when we define a style, we are extending the media domain. In the same way, if we work in the document domain, we often need to extend the document domain we are working in. HTML is not an extensible language. To fill the need for an extensible document domain language, the W3C adopted XML (eXtensible Markup Language). XML allows you to extend your document domain (or any other domain) in two ways:
-
-1. by creating brand new structures in that domain.
-2. by using attributes to specify additional type information for an existing structure.
-
-Another method for extending the document domain is provided by [DITA](system) through it specialization mechanism, which allows you to create a new structure by specializing an existing one. In practice, this means defining a new structure but with the difference that the system knows about the new structures relationship to the old one, so that if you specialize a numbered list, the system knows that your new list is a type of numbered list.
-
-Yet another method is provided by [SPFE](system), which supports creating a library of structures from which you can select the ones you want to build a set of document domain (or other domain) structures for your use.
-
-
-
-We will look in detail later at ways of extending your document domain objects. For now, lets begin by looking at what the document domain looks like, and why you want to add additional kinds of document domain objects.
-
-
-    The difference between code ``` and quote """ is that code signals a different encoding.
-    The content of the code block is not processed as sam markup until the closing ``` is
-    seen.
+    The difference between code ``` and quote """ is that code signals a different
+    encoding. The content of the code block is not processed as sam markup until
+    the closing ``` is seen.
 
     In the event that the end marker for the codeblock would appear in the
     codeblock, the writer can add arbitrary characters after
     ``` in the top and bottom markers to assure they are distinct.
 
-    In a blockquote, however, the material inside the quote block is still SAM markup and is
-    processed as such.
+    In a blockquote, however, the material inside the quote block is still SAM
+    markup and is processed as such.
 
 section: Lists
 
@@ -269,16 +140,30 @@ section: Lists
     * Spoon
     ```
 
-    Ordered lists begin with
+    Ordered lists begin with a number followed by a period.
+
+    ```(SAM)
+    0. Robot
+    12. Spaceship
+    7. Ray gun
+    ```
+
+    Labeled lists begin with a label between pipe characters.
+
+    ```(SAM)
+    |fa| A long long way to run.
+    |so| A needle pulling thread.
+    |la| A note to follow so.
+    ```
 
 
     Lists continue until:
 
-    * The next non-blank line at the same indent that does not start with an asterisk.
+    * The next non-blank line at the same indent that does not start with a list marker.
     * The next non-blank line that is less indented.
     * The end of the file.
 
     List items continue until:
 
-    * The next list at the same indent that starts with an asterisk.
+    * The next para at the same indent that starts with a list marker.
     * The end of the list.
