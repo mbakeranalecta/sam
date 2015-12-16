@@ -4,6 +4,34 @@ title: Semantic Authoring Markdown (SAM)
 
     section: Annotations
 
+        Annotations clarify what a piece of text is about. The annotated text
+        is placed in square brackets, and the annotation follows immediately
+        in parentheses. (There must be no space between the closing square bracket
+        and the opening parentheses.)
+
+        ```(sam)
+        In [Rio Bravo](movie), [the Duke](actor "John Wayne" (SAG)) plays
+        a union colonel.
+        ```
+
+        There are three parts to the annotation:
+
+        |type| The first word immediately following the opening
+        parentheses is the type of the subject being annotated. In the sample
+        above, "Rio Bravo" is a movie and "the Duke" is an actor.
+
+        |specifically| In some cases, the annotated text may not specify the
+        subject clearly. In this case, the specifically attribute is use
+        to clarify what is meant. In the sample above, "the Duke" means, specifically,
+        "John Wayne".
+
+        |namespace| In some cases, it is necessary to specify the namespace to which
+         the annotated term belongs. In the sample above, the name of the actor
+         "John Wayne" is part of a set of names managed by the Screen Actors Guild
+         which makes sure two actors don't use the same stage name. (In most cases,
+         the namespace is implied by the type, so you will not usually need to
+         specify it.)
+
     section: Repeated annotations
 
         If you are annotating the same phrase more than one in the same file. You
@@ -105,7 +133,7 @@ title: Semantic Authoring Markdown (SAM)
     ```(sam)
     '''(citation)
         Quoted
-    '''
+
 
     The difference between code ``` and quote """ is that code signals a different
     encoding. The content of the code block is not processed as sam markup until

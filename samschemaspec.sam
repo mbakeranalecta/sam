@@ -17,7 +17,7 @@ rule:(#names) Names
 
 rule:(#header) SAM Schema Header
 
-    A SAM Schema being with a SAM Schema Header
+    A SAM Schema begins with a SAM Schema Header
 
     A SAM schema header consists of the word "samschema" followed by a semicolon
     followed optionally by a namespace URI in curly braces. For example:
@@ -32,7 +32,7 @@ rule:(#header) SAM Schema Header
 rule:(#namespaces) Namespaces
 
     A SAM element may be placed in a namespace. Unlike XML, in which an element
-    is placed in a schema in the instance, in SAM, a element is placed in a namespace
+    is placed in a namespace in the instance, in SAM, a element is placed in a namespace
     by the schema. There is no indication of the namespace in the instance. Elements
     are assigned to their namespaces by the parser, based on the definitions in
     the schema.
@@ -57,12 +57,12 @@ rule:(#root) Root element declaration
 rule:(#includes) Includes
 
     You can include another samschema in the current samschema document using
-    and include statement.
+    an include statement.
 
     Included samschemas are processed as if they were part of the current
     samschema with the following provisions:
 
-    * The included sam schema may not include a [root element declaration[(rule "#root").
+    * The included sam schema may not include a [root element declaration](rule "#root").
     This means that any elements declared in an included samschama must be
     declared inside [named structures](rule "#stuctures").
 
@@ -78,14 +78,15 @@ rule:(#includes) Includes
 
 rule:(#blocks) blocks declarations
 
-    An SAM document consists of blocks, fields, records, and flows. Blocks and
+    An SAM document consists of blocks, fields, record sets, flows, decorations,
+    and annotations. Blocks and
     fields are declared the same way. The distinction between a block and a
     field is that a block has children and a field does not.
 
     For a field, SAM interprets any content after the field tag as the value of
     the field.
 
-    For a block tag, SAM interprets any content after the block tag as an
+    For a block, SAM interprets any content after the block tag as an
     implicit [title](rule "#implicit") field.
 
 rule:(#implicit) Implicit elements
@@ -110,10 +111,12 @@ rule:(#implicit) Implicit elements
         |italic| The italic decoration is indicated by surrounding the text
         with underscores.
 
-        |quotes| The quotes decoration is indicated by surrounding the text
-        in straight quotes.
+        |mono| The mono decoration is indicated by back ticks. It indicates that
+        the text should be rendered in a monospaced font.
 
-        |mono| The mono decoration is indicated by backticks
+        |quotes| The quotes decoration is indicated by surrounding the text
+        in straight double quotes. You can use printers quotes in your document
+        but they will be recognized as plain text, not markup.
 
         |title| The title element is implicit if there is text on the same line as
         a block tag, and if a title field is allowed as the first filed of the block.
@@ -131,18 +134,26 @@ rule:(#implicit) Implicit elements
         opening backticks.
 
 rule:(#implicit-structures) Implicit structures
-    SPFE also recognized implicit structures. An implicit structure occurs where
+    SAM also recognized implicit structures. An implicit structure occurs where
     more than one element is recognized by context. The implicit structures are:
 
         |unordered lists| Unordered lists are indicated by starting a line with an
-        asterisk. The root element of the structure in ul.
+        asterisk. The root element of the structure in [ul](element).
+        The container for the list item is [li](element). The container for
+        the text is [p](element).
 
         |ordered lists| Ordered lists are indicated by starting a line with a number.
-        Numbers do not have to be sequential. The root element of the structure in ol.
+        Numbers do not have to be sequential. The root element of the structure in [ol].
+        The container for the list item is [li]. The container for the text is [p].
 
-        |labled lists| Labeled lists are indicated by surrounding the lable text with
+        |labeled lists| Labeled lists are indicated by surrounding the label text with
         pipe characters at the start of a paragraph.  The root element of the structure
-        in ll.
+        in [ll](element). Each labeled list item has the name [li] and contains the label
+        and the labeled paragraph.
+
+        |block titles| When you place text after the name of a block that has nested
+        content (as opposed to one that is merely a field with a single value), that
+        text is treated as [title](element) for the block.
 
 rule:(#rename-implicit) Renaming implicit structures
 
@@ -157,9 +168,9 @@ rule:(#rename-implicit) Renaming implicit structures
     para=p
     ```
 
-rule: (#create-implicit) Creating implicit structures
+rule:(#create-implicit) Creating implicit structures
 
-rule: (#order-number) Order and number of elements in structures
+rule:(#order-number) Order and number of elements in structures
 
     You can indicate the order and number of elements in a structure.
 

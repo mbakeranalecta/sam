@@ -34,9 +34,9 @@ class SamParser:
         self.source = None
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
-            'block-start': re.compile(r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(?P<attributes>\((.*?)\))?(?P<content>.*)'),
+            'block-start': re.compile(r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.*)'),
             'codeblock-start': re.compile(r'(?P<indent>\s*)(?P<flag>```.*?)\((?P<attributes>.*?)\)'),
-            'blockquote-start': re.compile(r'(?P<indent>\s*)((""")|(\'\'\'))(\((?P<citation>.*)\))?'),
+            'blockquote-start': re.compile(r'(?P<indent>\s*)((""")|(\'\'\')|blockquote:)(\((?P<type>[^\(]\S*?)\s*(["\'](?P<citation>.+?)["\'])?\s*(\((?P<format>\w+)\))?\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
             'record-start': re.compile(r'(?P<indent>\s*)(?P<record_name>[a-zA-Z0-9-_]+)::(?P<field_names>.*)'),
@@ -78,7 +78,7 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
         element = match.group("element").strip()
-        attributes = match.group("attributes")
+        attributes = parse_block_attributes(match.group("attributes"))
         content = match.group("content").strip()
         self.doc.new_block(element, attributes, content, indent)
         return "SAM", context
@@ -90,7 +90,7 @@ class SamParser:
         self.patterns['codeblock-end'] = re.compile(r'(\s*)' + codeblock_flag + '\s*$')
         # FIXME: Does codeblock allow other attributes? If not, test?
         language = match.group("attributes").strip()
-        self.doc.new_block('codeblock', language, None, indent)
+        self.doc.new_block('codeblock', {"language":language}, None, indent)
         self.pre_start('')
         return "CODEBLOCK", context
 
@@ -106,9 +106,24 @@ class SamParser:
 
     def _blockquote_start(self, context):
         source, match = context
-        citation = match.group("citation")
         indent = len(match.group('indent'))
-        self.doc.new_block('blockquote', citation, None, indent)
+
+        attributes = {}
+
+        citation_type = match.group("type")
+        if citation_type is not None:
+            attributes['type']= citation_type
+
+        citation = match.group("citation")
+        if citation is not None:
+            attributes["citation"] = citation
+
+        citation_format = match.group("format")
+        if citation_format is not None:
+            attributes["format"] = citation_format
+
+
+        self.doc.new_block('blockquote', attributes, None, indent)
         return "SAM", context
 
     def _paragraph_start(self, context):
@@ -131,7 +146,6 @@ class SamParser:
 
     def _list_item(self, context):
         source, match = context
-        line = source.currentLine
         indent = len(match.group("indent"))
         content_indent = indent + len(match.group("marker"))
         self.doc.new_unordered_list_item(indent, content_indent)
@@ -140,7 +154,6 @@ class SamParser:
 
     def _num_list_item(self, context):
         source, match = context
-        line = source.currentLine
         indent = len(match.group("indent"))
         content_indent = indent + len(match.group("marker"))
         self.doc.new_ordered_list_item(indent, content_indent)
@@ -163,7 +176,6 @@ class SamParser:
 
     def _record_start(self, context):
         source, match = context
-        line = source.currentLine
         indent = len(match.group("indent"))
         record_name = match.group("record_name").strip()
         field_names = [x.strip() for x in match.group("field_names").split(',')]
@@ -197,10 +209,6 @@ class SamParser:
         if match is not None:
             return "RECORD-START", (source, match)
 
-        match = self.patterns['block-start'].match(line)
-        if match is not None:
-            return "BLOCK", (source, match)
-
         match = self.patterns['blank-line'].match(line)
         if match is not None:
             return "SAM", (source, match)
@@ -229,6 +237,10 @@ class SamParser:
         if match is not None:
             return "BLOCK-INSERT", (source, match)
 
+        match = self.patterns['block-start'].match(line)
+        if match is not None:
+            return "BLOCK", (source, match)
+
         match = self.patterns['paragraph-start'].match(line)
         if match is not None:
             return "PARAGRAPH-START", (source, match)
@@ -240,7 +252,7 @@ class SamParser:
 
 
 class Block:
-    def __init__(self, name='', attributes='', content='', indent=0):
+    def __init__(self, name, attributes=None, content=None, indent=0):
 
         # Test for a valid block name. Must be valid XML name.
         try:
@@ -248,15 +260,14 @@ class Block:
         except ValueError:
             raise Exception("Invalid block name: " + name)
 
+        assert isinstance(attributes, dict) or attributes is None
+
         self.name = name
         self.attributes = attributes
         self.content = content
         self.indent = indent
         self.parent = None
         self.children = []
-
-
-
 
     def add_child(self, b):
         b.parent = self
@@ -291,24 +302,26 @@ class Block:
 
     def serialize_xml(self):
         yield '<{0}'.format(self.name)
+
+        if self.attributes:
+            for key, value in self.attributes.items():
+                yield " {0}=\"{1}\" ".format(key, value)
+            # if self.name == 'codeblock':
+            #     yield ' language="{0}"'.format(self.attributes)
+            # elif self.name == 'blockquote':
+            #     yield ' citation="{0}"'.format(self.attributes)
+            # else:
+            #     try:
+            #         yield ' ids="{0}"'.format(' '.join(self.attributes[0]))
+            #     except (IndexError, TypeError):
+            #         pass
+            #     try:
+            #         yield ' conditions="{0}"'.format(' '.join(self.attributes[1]))
+            #     except (IndexError, TypeError):
+            #         pass
+
         if self.children:
-            if self.attributes:
-                if self.name == 'codeblock':
-                    yield ' language="{0}"'.format(self.attributes)
-                elif self.name == 'blockquote':
-                    yield ' citation="{0}"'.format(self.attributes)
-                else:
-                    try:
-                        yield ' ids="{0}"'.format(' '.join(self.attributes[0]))
-                    except (IndexError, TypeError):
-                        pass
-                    try:
-                        yield ' conditions="{0}"'.format(' '.join(self.attributes[1]))
-                    except (IndexError, TypeError):
-                        pass
-
             yield ">"
-
             if self.content:
                     yield "\n<title>{0}</title>".format(self.content)
 
@@ -322,12 +335,13 @@ class Block:
             yield ">{1}</{0}>\n".format(self.name, self.content)
 
 
+
 class Comment(Block):
     def __init__(self, content='', indent=0):
         super().__init__(name='comment', content=content, indent=indent)
 
     def __str__(self):
-        return "[%s:'%s']" % ('#comment', self.content)
+        return u"[#comment:'{1:s}']".format(self.content)
 
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content)
@@ -819,16 +833,21 @@ class Para:
 
 
 def parse_block_attributes(attributes_string):
+    result = {}
     try:
         attributes_list = attributes_string.split()
     except AttributeError:
-        return None, None
-    ids = [x[1:] for x in attributes_list if x[0] == '#']
-    conditions = [x[1:] for x in attributes_list if x[0] == '?']
+        return None
     unexpected_attributes = [x for x in attributes_list if not(x[0] in '?#')]
     if unexpected_attributes:
-        raise Exception("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
-    return ids if ids else None, conditions if conditions else None
+        raise Exception("Unexpected attribute(s): {0}".format(unexpected_attributes))
+    ids = [x[1:] for x in attributes_list if x[0] == '#']
+    conditions = [x[1:] for x in attributes_list if x[0] == '?']
+    if ids:
+        result["ids"] = ids
+    if conditions:
+        result["conditions"] = conditions
+    return result
 
 
 def parse_insert(insert_string):
