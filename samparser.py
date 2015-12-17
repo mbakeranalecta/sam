@@ -34,9 +34,9 @@ class SamParser:
         self.source = None
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
-            'block-start': re.compile(r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.*)'),
+            'block-start': re.compile(r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.*)?'),
             'codeblock-start': re.compile(r'(?P<indent>\s*)(?P<flag>```.*?)\((?P<attributes>.*?)\)'),
-            'blockquote-start': re.compile(r'(?P<indent>\s*)((""")|(\'\'\')|blockquote:)(\((?P<type>[^\(]\S*?)\s*(["\'](?P<citation>.+?)["\'])?\s*(\((?P<format>\w+)\))?\))?'),
+            'blockquote-start': re.compile(r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<type>\w*)\s*(["\'](?P<citation>.+?)["\'])?\s*(\((?P<format>\w+?)\))?(?P<other>.+?)?\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
             'record-start': re.compile(r'(?P<indent>\s*)(?P<record_name>[a-zA-Z0-9-_]+)::(?P<field_names>.*)'),
@@ -122,6 +122,9 @@ class SamParser:
         if citation_format is not None:
             attributes["format"] = citation_format
 
+        other = match.group("other")
+        if other is not None:
+            attributes.update(parse_block_attributes(other))
 
         self.doc.new_block('blockquote', attributes, None, indent)
         return "SAM", context
@@ -306,20 +309,6 @@ class Block:
         if self.attributes:
             for key, value in self.attributes.items():
                 yield " {0}=\"{1}\" ".format(key, value)
-            # if self.name == 'codeblock':
-            #     yield ' language="{0}"'.format(self.attributes)
-            # elif self.name == 'blockquote':
-            #     yield ' citation="{0}"'.format(self.attributes)
-            # else:
-            #     try:
-            #         yield ' ids="{0}"'.format(' '.join(self.attributes[0]))
-            #     except (IndexError, TypeError):
-            #         pass
-            #     try:
-            #         yield ' conditions="{0}"'.format(' '.join(self.attributes[1]))
-            #     except (IndexError, TypeError):
-            #         pass
-
         if self.children:
             yield ">"
             if self.content:
@@ -502,7 +491,7 @@ class DocStructure:
         elif block_type == 'insert':
             b = BlockInsert(attributes, indent)
         else:
-            b = Block(block_type, parse_block_attributes(attributes), text, indent)
+            b = Block(block_type, attributes, text, indent)
         if self.doc is None:
             raise Exception('No root element found.')
         elif self.current_block.indent < indent:
@@ -840,13 +829,13 @@ def parse_block_attributes(attributes_string):
         return None
     unexpected_attributes = [x for x in attributes_list if not(x[0] in '?#')]
     if unexpected_attributes:
-        raise Exception("Unexpected attribute(s): {0}".format(unexpected_attributes))
+        raise Exception("Unexpected attribute(s): {0}".format(', '.join(unexpected_attributes)))
     ids = [x[1:] for x in attributes_list if x[0] == '#']
     conditions = [x[1:] for x in attributes_list if x[0] == '?']
     if ids:
-        result["ids"] = ids
+        result["ids"] = " ".join(ids)
     if conditions:
-        result["conditions"] = conditions
+        result["conditions"] = " ".join(conditions)
     return result
 
 

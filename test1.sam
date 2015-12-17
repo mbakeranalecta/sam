@@ -6,7 +6,7 @@ sam: utf-8 http://spfeopentoolkit.org/spfe-docs/topic-types/feature-topic/schema
 
 feature-topic: feature-fragments
     foo: this is the string foo
-    head:
+    head:(#foo)
         foo: bar
         baz: bat
         history:
@@ -77,7 +77,7 @@ feature-topic: feature-fragments
 
         This is another paragraph. Then there is an alternate blockquote:
 
-        '''(this "is the citation")
+        '''(this "is the citation" #foo ?bar)
             The quick brown fox jumps over the lazy dog.
 
         '''
