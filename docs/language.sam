@@ -98,12 +98,38 @@ title: Semantic Authoring Markdown (SAM)
         }
         ```
 
+    section: Insert a fragment
+
+        To insert a fragment:
+
+        ```(sam)
+        >>{my-fragment}
+
+        Any string defined within a fragment are scoped to that fragment. You can
+        override these strings when you insert the fragment. In fact, you can
+        override any in scope strings in a fragment insert. String definitions must
+        each be on a line by themselves.
+
+        >>{my-fragment
+            $foo=bar
+            $baz=bat
+          }
+
+
+        Note that the SAM syntax is designed to bear these semantics, but that the
+        SAM parser does not implement them. It simply passes them on to whatever
+        processor you are using, which is free to implement different rules for
+        string handling.
+
 	section: Shortcuts for inserts
         # string
-		>>$this.string
+		>>($ this.string)
+		>>(string this.string)
 
 		# reference
-		>>#this.ref
+		>>(# this.ref)
+		>>(ref this.ref)
+
 
     section: Blockquotes
 

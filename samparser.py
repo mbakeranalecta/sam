@@ -338,25 +338,16 @@ class Comment(Block):
 
 class BlockInsert(Block):
     # Should not really inherit from Block as cannot have children, etc
-    def __init__(self, content='', indent=0):
-        super().__init__(name='insert', content=content, indent=indent)
+    def __init__(self, attributes, indent=0):
+        super().__init__(name='insert', attributes=attributes, indent=indent)
 
     def __str__(self):
         return "[%s:'%s']" % ('#insert', self.content)
 
     def serialize_xml(self):
-        yield '<insert type="{0}"'.format(self.content[0])
-        yield ' item="{0}"'.format(self.content[1])
-        try:
-            if self.content[2]:
-                yield ' ids="{0}"'.format(' '.join(self.content[2]))
-        except IndexError:
-            pass
-        try:
-            if self.content[3]:
-                yield ' conditions="{0}"'.format(' '.join(self.content[3]))
-        except IndexError:
-            pass
+        yield '<insert '
+        for key, value in self.attributes.items():
+            yield " {0}=\"{1}\" ".format(key, value)
         yield '/>\n'
 
 
@@ -448,26 +439,19 @@ class Decoration:
 
 
 class InlineInsert:
-    def __init__(self, content):
-        self.content = content
+    def __init__(self, attributes):
+        self.attributes = attributes
 
     def __str__(self):
-        return "[#insert:'%s']" % self.content
+        return "[#insert:'%s']" % self.attributes
 
     def serialize_xml(self):
         # This duplicates block insert, but is it inherently the same
         # or only incidentally the same? Does DNRY apply?
-        yield '<insert type="{0}"'.format(self.content[0])
-        yield ' item="{0}"'.format(self.content[1])
-        try:
-            yield ' ids="{0}"'.format(' '.join(self.content[2]))
-        except IndexError:
-            pass
-        try:
-            yield ' conditions="{0}"'.format(' '.join(self.content[3]))
-        except IndexError:
-            pass
-        yield '/>'
+        yield '<insert '
+        for key, value in self.attributes.items():
+            yield " {0}=\"{1}\" ".format(key, value)
+        yield '/>\n'
 
 
 
@@ -840,18 +824,26 @@ def parse_block_attributes(attributes_string):
 
 
 def parse_insert(insert_string):
+    result={}
     attributes_list = insert_string.split()
     insert_type = attributes_list.pop(0)
-    insert_url = attributes_list.pop(0)
-    insert_id = [x[1:] for x in attributes_list if x[0] == '#']
-    insert_condition = [x[1:] for x in attributes_list if x[0] == '?']
+    if insert_type == '$':
+        insert_type = 'string'
+    if insert_type == '#':
+        insert_type = 'ref'
+    insert_item = attributes_list.pop(0)
+    insert_ids = [x[1:] for x in attributes_list if x[0] == '#']
+    insert_conditions = [x[1:] for x in attributes_list if x[0] == '?']
     unexpected_attributes = [x for x in attributes_list if not(x[0] in '?#')]
     if unexpected_attributes:
         raise Exception("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
-    return insert_type, \
-           insert_url, \
-           insert_id if insert_id else None, \
-           insert_condition if insert_condition else None
+    result['type'] = insert_type
+    result['item'] = insert_item
+    if insert_ids:
+        result['ids'] = " ".join(insert_ids)
+    if insert_conditions:
+        result['conditions'] = " ".join(insert_conditions)
+    return result
 
 def escape_for_xml(s):
     t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
