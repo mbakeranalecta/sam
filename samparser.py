@@ -853,11 +853,14 @@ def parse_insert(insert_string):
     result={}
     attributes_list = insert_string.split()
     insert_type = attributes_list.pop(0)
-    if insert_type == '$':
+    if insert_type[0] == '$':
+        insert_item = insert_type[1:]
         insert_type = 'string'
-    if insert_type == '#':
+    elif insert_type == '#':
+        insert_item = insert_type[1:]
         insert_type = 'ref'
-    insert_item = attributes_list.pop(0)
+    else:
+        insert_item = attributes_list.pop(0)
     insert_ids = [x[1:] for x in attributes_list if x[0] == '#']
     insert_conditions = [x[1:] for x in attributes_list if x[0] == '?']
     unexpected_attributes = [x for x in attributes_list if not(x[0] in '?#')]

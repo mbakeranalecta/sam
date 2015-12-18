@@ -92,7 +92,9 @@ title: Semantic Authoring Markdown (SAM)
         ```sam
         my-fragment{
 
-        Some stuff.
+        $foo=Bar bar black sheep
+
+        Some stuff. >>($foo)
 
         Some more stuff
         }
@@ -123,11 +125,11 @@ title: Semantic Authoring Markdown (SAM)
 
 	section: Shortcuts for inserts
         # string
-		>>($ this.string)
+		>>($this.string)
 		>>(string this.string)
 
 		# reference
-		>>(# this.ref)
+		>>(#this.ref)
 		>>(ref this.ref)
 
 

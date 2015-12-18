@@ -25,7 +25,7 @@ feature-topic: feature-fragments
 
         >>(image foo.gif #foo #bar ?baz ?bat)
 
-        This sentence includes a string reference >>(string name). And a shortcut version >>($ name)
+        This sentence includes a string reference >>(string name). And a shortcut version >>($name)
 
         This sentence contains a unmatched [ followed by an [annotated](word).
 
