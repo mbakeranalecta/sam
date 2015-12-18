@@ -27,6 +27,7 @@ class SamParser:
         self.stateMachine.add_state("NUM-LIST-ITEM", self._num_list_item)
         self.stateMachine.add_state("LABELED-LIST-ITEM", self._labeled_list_item)
         self.stateMachine.add_state("BLOCK-INSERT", self._block_insert)
+        self.stateMachine.add_state("STRING-DEF", self._string_def)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("NEW")
         self.current_paragraph = None
@@ -43,7 +44,8 @@ class SamParser:
             'list-item': re.compile(r'(?P<indent>\s*)(?P<marker>\*\s+)(?P<content>.*)'),
             'num-list-item': re.compile(r'(?P<indent>\s*)(?P<marker>[0-9]+\.\s+)(?P<content>.*)'),
             'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>.+?)\|\s+(?P<content>.*)'),
-            'block-insert': re.compile(r'(?P<indent>\s*)>>\((?P<attributes>.*?)\)\w*')
+            'block-insert': re.compile(r'(?P<indent>\s*)>>\((?P<attributes>.*?)\)\w*'),
+            'string-def': re.compile(r'(?P<indent>\s*)\$(?P<name>\w*?)=(?P<value>.+)')
         }
 
     def parse(self, source):
@@ -174,7 +176,14 @@ class SamParser:
     def _block_insert(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_block('insert', text='', attributes=parse_insert(match.group("attributes")), indent=indent)
+        self.doc.new_block_insert(attributes=parse_insert(match.group("attributes")), indent=indent)
+        return "SAM", context
+
+    def _string_def(self, context):
+        source, match = context
+        indent = len(match.group("indent"))
+        # FIXME: should allow annotations and decorations in string defs.
+        self.doc.new_string_def(match.group('name'), match.group('value'), indent=indent)
         return "SAM", context
 
     def _record_start(self, context):
@@ -239,6 +248,10 @@ class SamParser:
         match = self.patterns['block-insert'].match(line)
         if match is not None:
             return "BLOCK-INSERT", (source, match)
+
+        match = self.patterns['string-def'].match(line)
+        if match is not None:
+            return "STRING-DEF", (source, match)
 
         match = self.patterns['block-start'].match(line)
         if match is not None:
@@ -351,6 +364,18 @@ class BlockInsert(Block):
         yield '/>\n'
 
 
+class StringDef(Block):
+    # Should not really inherit from Block as cannot have children, etc
+    def __init__(self, string_name, value, indent=0):
+        super().__init__(name=string_name, content=value, indent=indent)
+
+    def __str__(self):
+        return "[%s:'%s']" % ('$'+self.name, self.content)
+
+    def serialize_xml(self):
+        yield '<string name="{0}">{1}</string>\n'.format(self.name, escape_for_xml(self.content))
+
+
 class Root(Block):
     def __init__(self, name='', content='', indent=-1):
         super().__init__(name, None, content, -1)
@@ -382,7 +407,6 @@ class Flow:
                 if i.text == text:
                     return i
         return None
-
 
     def serialize_xml(self):
         for x in self.flow:
@@ -446,13 +470,10 @@ class InlineInsert:
         return "[#insert:'%s']" % self.attributes
 
     def serialize_xml(self):
-        # This duplicates block insert, but is it inherently the same
-        # or only incidentally the same? Does DNRY apply?
         yield '<insert '
         for key, value in self.attributes.items():
             yield " {0}=\"{1}\" ".format(key, value)
         yield '/>\n'
-
 
 
 class DocStructure:
@@ -535,9 +556,14 @@ class DocStructure:
     def new_comment(self, comment):
         self.current_block.add_child(comment)
 
-    def new_block_insert(self, insert, indent):
-        bi = BlockInsert(insert, indent)
+    def new_block_insert(self, attributes, indent):
+        bi = BlockInsert(attributes, indent)
+        # FIXME: Why is this always a sibling?
         self.current_block.add_sibling(bi)
+
+    def new_string_def(self, string_name, value, indent):
+        s = StringDef(string_name, value, indent)
+        self.current_block.add_sibling(s)
 
     def new_record_set(self, local_element, field_names, local_indent):
         self.current_record = {'local_element': local_element, 'local_indent': local_indent}

@@ -5,7 +5,6 @@ sam: utf-8 http://spfeopentoolkit.org/spfe-docs/topic-types/feature-topic/schema
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
 feature-topic: feature-fragments
-    foo: this is the string foo
     head:(#foo)
         foo: bar
         baz: bat

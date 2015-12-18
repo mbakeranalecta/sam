@@ -133,6 +133,9 @@ rule:(#implicit) Implicit elements
         three backtick on a line by themselves, plus any attributes on the
         opening backticks.
 
+        |string| The definition of a string, which may be inserted in the
+        document, but is not intended to be published where defined.
+
 rule:(#implicit-structures) Implicit structures
     SAM also recognized implicit structures. An implicit structure occurs where
     more than one element is recognized by context. The implicit structures are:
