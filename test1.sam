@@ -31,7 +31,7 @@ feature-topic: feature-fragments
 
         This sentence includes a string reference >>(string name). And a shortcut version >>($name)
 
-        This sentence contains an unmatched [ followed by an [annotated](word).
+        This sentence contains an unmatched [ followed by an [annotated](word) phrase.
 
 
         ~~~(#foobar ?gruznatz)
@@ -47,7 +47,7 @@ feature-topic: feature-fragments
         This [sentence](grammatical-construct) contains a repeated annotation: the word
         [sentence] without any annotation metadata. It should be annotated the same as
         the previous instance. If you just want square brackets around the word
-        \[sentence] you need to preceed it with a backslash.
+        \[sentence] you need to precede it with a backslash.
 
         This sentence also references the word [sentence] and should be annotated on output.
 
@@ -94,7 +94,7 @@ feature-topic: feature-fragments
 
         This is another paragraph. Then there is an alternate blockquote:
 
-        '''(this "is the citation" #foo ?bar)
+        '''(book "Mother Goose" #foo ?bar)
             The quick brown fox jumps over the lazy dog.
 
         '''

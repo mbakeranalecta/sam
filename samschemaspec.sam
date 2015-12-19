@@ -129,34 +129,66 @@ rule:(#implicit) Implicit elements
         the opening quotes. The quoted material must be indented from the blockquote
         markers
 
-        |codeblock| The codeblock block element is indicates by opening and closing with
+        |codeblock| The codeblock block element is indicated by opening and closing with
         three backtick on a line by themselves, plus any attributes on the
         opening backticks.
 
+        |fragment| The fragment element contains a set of elements that can be
+        reused by inserting the fragment into other locations in the document, or
+        other documents. Fragments can also be use to apply conditions to a
+        set of elements that would otherwise lack a common container.
+        Recommended practice it to use fragments to contain
+        only general text elements, which helps ensure that the inserted fragment will
+        be schema compliant in the receiving document (assuming a common definition
+        of general text elements). A fragment is indicated by  three tildes (of the
+        block name "fragment".
+
         |string| The definition of a string, which may be inserted in the
         document, but is not intended to be published where defined.
+
+rule:(#ideomatic-annotation-types)
+    Certain annotation types are considered idiomatic. That is, the name
+    is considered bound by convention to a certain meaning. This does not
+    mean that you cannot use the type for other things, or use other names
+    for that function, but editor and tools are entitled to provide enhanced
+    support for the idiomatic meaning of the names.
+
+    In some cases, idiomatic types may have specialized or atypical treatment
+    of the standard attributes. For instance, the link type uses the
+    specifically attribute for the URL to link to, which is an eccentric
+    interpretation of what specifically is intended for.
+
+    |link| The link type is idiomatically used for inserting explicit hyperlinks.
+
+    A schema can rename an idiomatic type, so that the tool behavior associated
+    with the idiomatic type can be applied to the new type:
+
+    ```(samschema)
+    href=link
+    ```
+
 
 rule:(#implicit-structures) Implicit structures
     SAM also recognized implicit structures. An implicit structure occurs where
     more than one element is recognized by context. The implicit structures are:
 
-        |unordered lists| Unordered lists are indicated by starting a line with an
-        asterisk. The root element of the structure in [ul](element).
-        The container for the list item is [li](element). The container for
-        the text is [p](element).
+    |unordered lists| Unordered lists are indicated by starting a line with an
+    asterisk. The root element of the structure in [ul](element).
+    The container for the list item is [li](element). The container for
+    the text is [p](element).
 
-        |ordered lists| Ordered lists are indicated by starting a line with a number.
-        Numbers do not have to be sequential. The root element of the structure in [ol].
-        The container for the list item is [li]. The container for the text is [p].
+    |ordered lists| Ordered lists are indicated by starting a line with a number.
+    Numbers do not have to be sequential. The root element of the structure in [ol].
+    The container for the list item is [li]. The container for the text is [p].
 
-        |labeled lists| Labeled lists are indicated by surrounding the label text with
-        pipe characters at the start of a paragraph.  The root element of the structure
-        in [ll](element). Each labeled list item has the name [li] and contains the label
-        and the labeled paragraph.
+    |labeled lists| Labeled lists are indicated by surrounding the label text with
+    pipe characters at the start of a paragraph.  The root element of the structure
+    in [ll](element). Each labeled list item has the name [li] and contains the label
+    and the labeled paragraph.
 
-        |block titles| When you place text after the name of a block that has nested
-        content (as opposed to one that is merely a field with a single value), that
-        text is treated as [title](element) for the block.
+    |block titles| When you place text after the name of a block that has nested
+    content (as opposed to one that is merely a field with a single value), that
+    text is treated as [title](element) for the block.
 
 rule:(#rename-implicit) Renaming implicit structures
 

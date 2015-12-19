@@ -494,6 +494,21 @@ class DocStructure:
         self.current_block = r
 
     def add_block(self, block):
+        """
+        Adds a block to the current document structure. The location
+        to add the block is determined by comparing the indent of
+        the new block to that of the current block in the document
+        structure.
+
+        All new block methods should call this method to add a
+        block based on indent. In some cases, (such as lists)
+        document structure is not based on indent. In these cases,
+        the new block method should update the doc structure itself,
+        making sure to set current_block to the last block they add.
+
+        :param block: The Block object to be added.
+        :return: None
+        """
         if self.doc is None:
             raise Exception('No root element found.')
         elif self.current_block.indent < block.indent:
