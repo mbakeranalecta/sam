@@ -40,7 +40,7 @@ feature-topic: feature-fragments
 
             This is a sentence inside a fragment.
 
-        >>(fragment foobar)
+        >>(~foobar)
             $a=apricot
             $b=breadfruit
 
