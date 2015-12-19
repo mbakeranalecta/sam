@@ -90,15 +90,18 @@ title: Semantic Authoring Markdown (SAM)
         of a line:
 
         ```sam
-        my-fragment{
+        {#my-fragment ?bar
 
-        $foo=Bar bar black sheep
+            $foo=Bar bar black sheep
 
-        Some stuff. >>($foo)
+            Some stuff. >>($foo)
 
-        Some more stuff
+            Some more stuff.
         }
         ```
+
+        The content of the fragment must be indented, and the closing brace must
+        be at the same indentation level as the opening one.
 
     section: Insert a fragment
 
@@ -223,3 +226,14 @@ section: Lists
 
     * The next para at the same indent that starts with a list marker.
     * The end of the list.
+
+section: Reserved insert types
+
+    ref
+    string
+    image
+    video
+    audio
+    feed
+
+    These are reserved so that editors can act on them.

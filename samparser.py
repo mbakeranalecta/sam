@@ -19,6 +19,7 @@ class SamParser:
         self.stateMachine.add_state("CODEBLOCK-START", self._codeblock_start)
         self.stateMachine.add_state("CODEBLOCK", self._codeblock)
         self.stateMachine.add_state("BLOCKQUOTE-START", self._blockquote_start)
+        self.stateMachine.add_state("FRAGMENT-START", self._fragment_start)
         self.stateMachine.add_state("PARAGRAPH-START", self._paragraph_start)
         self.stateMachine.add_state("PARAGRAPH", self._paragraph)
         self.stateMachine.add_state("RECORD-START", self._record_start)
@@ -38,6 +39,7 @@ class SamParser:
             'block-start': re.compile(r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.*)?'),
             'codeblock-start': re.compile(r'(?P<indent>\s*)(?P<flag>```.*?)\((?P<attributes>.*?)\)'),
             'blockquote-start': re.compile(r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<type>\w*)\s*(["\'](?P<citation>.+?)["\'])?\s*(\((?P<format>\w+?)\))?(?P<other>.+?)?\))?'),
+            'fragment-start': re.compile(r'(?P<indent>\s*)~~~(\((?P<attributes>.*?)\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
             'record-start': re.compile(r'(?P<indent>\s*)(?P<record_name>[a-zA-Z0-9-_]+)::(?P<field_names>.*)'),
@@ -106,6 +108,7 @@ class SamParser:
             self.pre_append(line)
             return "CODEBLOCK", context
 
+
     def _blockquote_start(self, context):
         source, match = context
         indent = len(match.group('indent'))
@@ -129,6 +132,19 @@ class SamParser:
             attributes.update(parse_block_attributes(other))
 
         self.doc.new_block('blockquote', attributes, None, indent)
+        return "SAM", context
+
+    def _fragment_start(self, context):
+        source, match = context
+        indent = len(match.group('indent'))
+
+        attributes = {}
+
+        attributes_string = match.group("attributes")
+        if attributes_string is not None:
+            attributes.update(parse_block_attributes(attributes_string))
+
+        self.doc.new_block('fragment', attributes, None, indent)
         return "SAM", context
 
     def _paragraph_start(self, context):
@@ -176,7 +192,7 @@ class SamParser:
     def _block_insert(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_block_insert(attributes=parse_insert(match.group("attributes")), indent=indent)
+        self.doc.new_block("insert", attributes=parse_insert(match.group("attributes")), text=None, indent=indent)
         return "SAM", context
 
     def _string_def(self, context):
@@ -232,6 +248,10 @@ class SamParser:
         match = self.patterns['blockquote-start'].match(line)
         if match is not None:
             return "BLOCKQUOTE-START", (source, match)
+
+        match = self.patterns['fragment-start'].match(line)
+        if match is not None:
+            return "FRAGMENT-START", (source, match)
 
         match = self.patterns['list-item'].match(line)
         if match is not None:
@@ -347,21 +367,6 @@ class Comment(Block):
 
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content)
-
-
-class BlockInsert(Block):
-    # Should not really inherit from Block as cannot have children, etc
-    def __init__(self, attributes, indent=0):
-        super().__init__(name='insert', attributes=attributes, indent=indent)
-
-    def __str__(self):
-        return "[%s:'%s']" % ('#insert', self.content)
-
-    def serialize_xml(self):
-        yield '<insert '
-        for key, value in self.attributes.items():
-            yield " {0}=\"{1}\" ".format(key, value)
-        yield '/>\n'
 
 
 class StringDef(Block):
@@ -488,54 +493,48 @@ class DocStructure:
         self.doc = r
         self.current_block = r
 
-    def new_block(self, block_type, attributes, text, indent):
-        if block_type == 'codeblock':
-            b = Block(block_type, attributes, text, indent)
-        elif block_type == 'blockquote':
-            b = Block(block_type, attributes, text, indent)
-        elif block_type == 'insert':
-            b = BlockInsert(attributes, indent)
-        else:
-            b = Block(block_type, attributes, text, indent)
+    def add_block(self, block):
         if self.doc is None:
             raise Exception('No root element found.')
-        elif self.current_block.indent < indent:
+        elif self.current_block.indent < block.indent:
             if self.current_block.name == 'p':
                 raise Exception(
                     'A paragraph cannot have block children. At \"{0}\".'.format(str(self.current_block.children[0])))
-            self.current_block.add_child(b)
-        elif self.current_block.indent == indent:
-            self.current_block.add_sibling(b)
+            self.current_block.add_child(block)
+        elif self.current_block.indent == block.indent:
+            self.current_block.add_sibling(block)
         else:
-            self.current_block.add_at_indent(b, indent)
-        self.current_block = b
+            self.current_block.add_at_indent(block, block.indent)
+        self.current_block = block
         # Useful lines for debugging the build of the tree
         # print(self.doc)
         # print('-----------------------------------------------------')
 
+    def new_block(self, block_type, attributes, text, indent):
+        b = Block(block_type, attributes, text, indent)
+        self.add_block(b)
+
     def new_unordered_list_item(self, indent, content_indent):
-        uli = Block('li', None, '', indent)
+        uli = Block('li', None, '', indent+1)
         if self.current_block.parent.name == 'li':
-            self.current_block.parent.add_sibling(uli)
+            self.add_block(uli)
         else:
             ul = Block('ul', None, '', indent)
-            self.current_block.add_sibling(ul)
-            ul.add_child(uli)
-        p = Block('p',None,'',content_indent)
-        uli.add_child(p)
-        self.current_block = p
+            self.add_block(ul)
+            self.add_block(uli)
+        p = Block('p', None,'',content_indent)
+        self.add_block(p)
 
     def new_ordered_list_item(self, indent, content_indent):
-        oli = Block('li', None, '', indent)
+        oli = Block('li', None, '', indent+1)
         if self.current_block.parent.name == 'li':
-            self.current_block.parent.add_sibling(oli)
+            self.add_block(oli)
         else:
             ol = Block('ol', None, '', indent)
-            self.current_block.add_sibling(ol)
-            ol.add_child(oli)
+            self.add_block(ol)
+            self.add_block(oli)
         p = Block('p', None,'',content_indent)
-        oli.add_child(p)
-        self.current_block = p
+        self.add_block(p)
 
     def new_labeled_list_item(self, indent, label):
         lli = Block('li', None, '', indent)
@@ -544,8 +543,9 @@ class DocStructure:
             self.current_block.parent.add_sibling(lli)
         else:
             ll = Block('ll', None, '', indent)
-            self.current_block.add_sibling(ll)
+            self.add_block(ll)
             ll.add_child(lli)
+            self.current_block = lli
         p = Block('p', None,'',indent)
         lli.add_child(p)
         self.current_block = p
@@ -556,14 +556,9 @@ class DocStructure:
     def new_comment(self, comment):
         self.current_block.add_child(comment)
 
-    def new_block_insert(self, attributes, indent):
-        bi = BlockInsert(attributes, indent)
-        # FIXME: Why is this always a sibling?
-        self.current_block.add_sibling(bi)
-
     def new_string_def(self, string_name, value, indent):
         s = StringDef(string_name, value, indent)
-        self.current_block.add_sibling(s)
+        self.add_block(s)
 
     def new_record_set(self, local_element, field_names, local_indent):
         self.current_record = {'local_element': local_element, 'local_indent': local_indent}
@@ -642,7 +637,7 @@ class SamParaParser:
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\'),
-            'escaped-chars': re.compile(r'[\\\[\(\]_\*`]'),
+            'escaped-chars': re.compile(r'[\\\[\(\]\{\}_\*`]'),
             'annotation': re.compile(r'\[(?P<text>[^\[]*?[^\\])\](\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
             'italic': re.compile(r'_(?P<text>\S.*?\S)_'),
@@ -892,4 +887,6 @@ if __name__ == "__main__":
             is: a test"""
 
     samParser.parse(StringSource(test))
-    print("".join(samParser.serialize('xml')))
+    # Using a loop to avoid buffering the serialized XML.
+    for i in samParser.serialize('xml'):
+        print(i, end="")

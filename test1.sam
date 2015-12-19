@@ -20,6 +20,10 @@ feature-topic: feature-fragments
 
     body: How Fragments Work
 
+        * This list is the
+
+        * first thing in this section.
+
         [Fragments](feature) are a [content reuse](task "reusing content" (foo)) feature of the [EPPO-simple](feature)
         [plugin]( feature).
 
@@ -27,7 +31,18 @@ feature-topic: feature-fragments
 
         This sentence includes a string reference >>(string name). And a shortcut version >>($name)
 
-        This sentence contains a unmatched [ followed by an [annotated](word).
+        This sentence contains an unmatched [ followed by an [annotated](word).
+
+
+        ~~~(#foobar ?gruznatz)
+            $a=apple
+            $b=banana
+
+            This is a sentence inside a fragment.
+
+        >>(fragment foobar)
+            $a=apricot
+            $b=breadfruit
 
         This [sentence](grammatical-construct) contains a repeated annotation: the word
         [sentence] without any annotation metadata. It should be annotated the same as
