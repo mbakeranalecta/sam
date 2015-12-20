@@ -8,7 +8,7 @@ feature-topic: feature-fragments
     head:(#foo)
         foo: bar
         baz: bat
-        $name=fred
+        $name=fred [and](conjunction) wilma
         history:
             revision:: date, author, comment, status
                 2014-06-23, mbaker, New Topic, In progress
@@ -55,7 +55,7 @@ feature-topic: feature-fragments
         etc.) that _has been given_ an id so that it can be [included](bold) by reference at other
         \_points_ in the content.
 
-        ```kkk(xml)
+        ```kkk(xml "c:/foo" (1.0) #foo ?bar)
 <fragment id="test-fragment">
     <local-strings>
         <string id="test-string-1"><bold>test string one</bold></string>

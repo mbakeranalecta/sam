@@ -37,8 +37,8 @@ class SamParser:
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.*)?'),
-            'codeblock-start': re.compile(r'(?P<indent>\s*)(?P<flag>```.*?)\((?P<attributes>.*?)\)'),
-            'blockquote-start': re.compile(r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<type>\w*)\s*(["\'](?P<citation>.+?)["\'])?\s*(\((?P<format>\w+?)\))?(?P<other>.+?)?\))?'),
+            'codeblock-start': re.compile(r'(?P<indent>\s*)(?P<flag>```\S*?(?=\())(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
+            'blockquote-start': re.compile(r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<type>\w*)\s*(["\'](?P<citation>.+?)["\'])?\s*(\((?P<format>\S+?)\))?(?P<other>.+?)?\))?'),
             'fragment-start': re.compile(r'(?P<indent>\s*)~~~(\((?P<attributes>.*?)\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
@@ -92,9 +92,26 @@ class SamParser:
         indent = len(match.group("indent"))
         codeblock_flag = match.group("flag")
         self.patterns['codeblock-end'] = re.compile(r'(\s*)' + codeblock_flag + '\s*$')
-        # FIXME: Does codeblock allow other attributes? If not, test?
-        language = match.group("attributes").strip()
-        self.doc.new_block('codeblock', {"language":language}, None, indent)
+
+        attributes = {}
+
+        language = match.group("language")
+        if language is not None:
+            attributes['language']= language
+
+        source = match.group("source")
+        if source is not None:
+            attributes["source"] = source
+
+        namespace = match.group("namespace")
+        if namespace is not None:
+            attributes["namespace"] = namespace
+
+        other = match.group("other")
+        if other is not None:
+            attributes.update(parse_block_attributes(other))
+
+        self.doc.new_block('codeblock', attributes, None, indent)
         self.pre_start('')
         return "CODEBLOCK", context
 
@@ -159,7 +176,8 @@ class SamParser:
         source, match = context
         line = source.next_line
         if self.patterns['blank-line'].match(line):
-            para_parser.parse(self.current_paragraph, self.doc)
+            f = para_parser.parse(self.current_paragraph, self.doc)
+            self.doc.new_flow(f)
             return "SAM", context
         else:
             self.paragraph_append(line)
@@ -198,8 +216,7 @@ class SamParser:
     def _string_def(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        # FIXME: should allow annotations and decorations in string defs.
-        self.doc.new_string_def(match.group('name'), match.group('value'), indent=indent)
+        self.doc.new_string_def(match.group('name'), para_parser.parse(match.group('value'), self.doc), indent=indent)
         return "SAM", context
 
     def _record_start(self, context):
@@ -378,7 +395,9 @@ class StringDef(Block):
         return "[%s:'%s']" % ('$'+self.name, self.content)
 
     def serialize_xml(self):
-        yield '<string name="{0}">{1}</string>\n'.format(self.name, escape_for_xml(self.content))
+        yield '<string name="{0}">'.format(self.name)
+        yield from self.content.serialize_xml()
+        yield "</string>\n"
 
 
 class Root(Block):
@@ -668,6 +687,8 @@ class SamParaParser:
         self.current_string = ''
         self.flow = Flow()
         self.stateMachine.run(self.para)
+        return self.flow
+
 
     def _para(self, para):
         try:
@@ -675,7 +696,6 @@ class SamParaParser:
         except IndexError:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.doc.new_flow(self.flow)
             return "END", para
         if char == '\\':
             return "ESCAPE", para

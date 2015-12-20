@@ -146,7 +146,7 @@ rule:(#implicit) Implicit elements
         |string| The definition of a string, which may be inserted in the
         document, but is not intended to be published where defined.
 
-rule:(#ideomatic-annotation-types)
+rule:(#ideomatic-annotation-types) Idiomatic annotations
     Certain annotation types are considered idiomatic. That is, the name
     is considered bound by convention to a certain meaning. This does not
     mean that you cannot use the type for other things, or use other names
@@ -166,6 +166,28 @@ rule:(#ideomatic-annotation-types)
     ```(samschema)
     href=link
     ```
+
+rule:(#idiomatic-elements) Idiomatic elements
+
+    Idiomatic elements are elements with intended meanings. Those meaning are
+    not actually enforced by the SAM parser and the application is free to
+    do what it likes with them. However, users and editing applications are
+    entitled to treat the idiomatic elements as having their intended meanings.
+    In some cases, the annotations of idiomatic elements are interpreted in
+    special ways. The attributes will be assigned names that reflect their idiomatic usage,
+    rather than the standard names.
+
+    |blockquote| Annotation is recognized as a citation. Annotation type is
+    recognized as the type of publication (web, book, article, etc.). Specifically
+    the text of the citation is the format specified by the namespace attribute.
+    It specifically attribute will be named "citation", and the namespace attribute
+    will be named format.
+    It is up to the downstream processor to parse the citation into its parts.
+
+
+    |codeblock| Annotation type is recognized as a specifying the language and
+    source of the codeblock. Specifically is recognized as the source and is
+    named "source".
 
 
 rule:(#implicit-structures) Implicit structures

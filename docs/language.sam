@@ -110,9 +110,9 @@ title: Semantic Authoring Markdown (SAM)
         ```(sam)
         >>{my-fragment}
 
-        Any string defined within a fragment are scoped to that fragment. You can
+        Any strings defined within a fragment are scoped to that fragment. You can
         override these strings when you insert the fragment. In fact, you can
-        override any in scope strings in a fragment insert. String definitions must
+        override any in-scope strings in a fragment insert. String definitions must
         each be on a line by themselves.
 
         >>{my-fragment
