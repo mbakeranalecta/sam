@@ -36,9 +36,12 @@ class SamParser:
         self.source = None
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
-            'block-start': re.compile(r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.*)?'),
-            'codeblock-start': re.compile(r'(?P<indent>\s*)(?P<flag>```\S*?(?=\())(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
-            'blockquote-start': re.compile(r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<type>\w*)\s*(["\'](?P<citation>.+?)["\'])?\s*(\((?P<format>\S+?)\))?(?P<other>.+?)?\))?'),
+            'block-start': re.compile(
+                r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.*)?'),
+            'codeblock-start': re.compile(
+                r'(?P<indent>\s*)(?P<flag>```\S*?(?=\())(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
+            'blockquote-start': re.compile(
+                r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<type>\w*)\s*(["\'](?P<citation>.+?)["\'])?\s*(\((?P<format>\S+?)\))?(?P<other>.+?)?\))?'),
             'fragment-start': re.compile(r'(?P<indent>\s*)~~~(\((?P<attributes>.*?)\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'blank-line': re.compile(r'^\s*$'),
@@ -84,7 +87,7 @@ class SamParser:
         element = match.group("element").strip()
         attributes = parse_block_attributes(match.group("attributes"))
         content = match.group("content").strip()
-        self.doc.new_block(element, attributes, content, indent)
+        self.doc.new_block(element, attributes, para_parser.parse(content, self.doc), indent)
         return "SAM", context
 
     def _codeblock_start(self, context):
@@ -97,7 +100,7 @@ class SamParser:
 
         language = match.group("language")
         if language is not None:
-            attributes['language']= language
+            attributes['language'] = language
 
         source = match.group("source")
         if source is not None:
@@ -125,7 +128,6 @@ class SamParser:
             self.pre_append(line)
             return "CODEBLOCK", context
 
-
     def _blockquote_start(self, context):
         source, match = context
         indent = len(match.group('indent'))
@@ -134,7 +136,7 @@ class SamParser:
 
         citation_type = match.group("type")
         if citation_type is not None:
-            attributes['type']= citation_type
+            attributes['type'] = citation_type
 
         citation = match.group("citation")
         if citation is not None:
@@ -341,7 +343,6 @@ class Block:
             x = x.parent
         return x
 
-
     def __str__(self):
         return ''.join(self._output_block())
 
@@ -362,16 +363,24 @@ class Block:
         if self.children:
             yield ">"
             if self.content:
-                    yield "\n<title>{0}</title>".format(self.content)
+                yield "\n<title>"
+                yield from self.content.serialize_xml()
+                yield "</title>".format(self.content)
 
             if type(self.children[0]) is not Flow:
                 yield "\n"
 
             for x in self.children:
-                yield from x.serialize_xml()
+                if x is not None:
+                    yield from x.serialize_xml()
             yield "</{0}>\n".format(self.name)
         else:
-            yield ">{1}</{0}>\n".format(self.name, self.content)
+            if self.content is None:
+                yield "/>\n"
+            else:
+                yield '>'
+                yield from self.content.serialize_xml()
+                yield "</{0}>\n".format(self.name)
 
 
 
@@ -392,7 +401,7 @@ class StringDef(Block):
         super().__init__(name=string_name, content=value, indent=indent)
 
     def __str__(self):
-        return "[%s:'%s']" % ('$'+self.name, self.content)
+        return "[%s:'%s']" % ('$' + self.name, self.content)
 
     def serialize_xml(self):
         yield '<string name="{0}">'.format(self.name)
@@ -533,7 +542,8 @@ class DocStructure:
         elif self.current_block.indent < block.indent:
             if self.current_block.name == 'p':
                 raise Exception(
-                    'A paragraph cannot have block children. At \"{0}\".'.format(str(self.current_block.children[0])))
+                        'A paragraph cannot have block children. At \"{0}\".'.format(
+                            str(self.current_block.children[0])))
             self.current_block.add_child(block)
         elif self.current_block.indent == block.indent:
             self.current_block.add_sibling(block)
@@ -549,30 +559,30 @@ class DocStructure:
         self.add_block(b)
 
     def new_unordered_list_item(self, indent, content_indent):
-        uli = Block('li', None, '', indent+1)
+        uli = Block('li', None, '', indent + 1)
         if self.current_block.parent.name == 'li':
             self.add_block(uli)
         else:
             ul = Block('ul', None, '', indent)
             self.add_block(ul)
             self.add_block(uli)
-        p = Block('p', None,'',content_indent)
+        p = Block('p', None, '', content_indent)
         self.add_block(p)
 
     def new_ordered_list_item(self, indent, content_indent):
-        oli = Block('li', None, '', indent+1)
+        oli = Block('li', None, '', indent + 1)
         if self.current_block.parent.name == 'li':
             self.add_block(oli)
         else:
             ol = Block('ol', None, '', indent)
             self.add_block(ol)
             self.add_block(oli)
-        p = Block('p', None,'',content_indent)
+        p = Block('p', None, '', content_indent)
         self.add_block(p)
 
     def new_labeled_list_item(self, indent, label):
         lli = Block('li', None, '', indent)
-        lli.add_child(Block('label',None,label,indent))
+        lli.add_child(Block('label', None, para_parser.parse(label, self.doc), indent))
         if self.current_block.parent.name == 'li':
             self.current_block.parent.add_sibling(lli)
         else:
@@ -580,7 +590,7 @@ class DocStructure:
             self.add_block(ll)
             ll.add_child(lli)
             self.current_block = lli
-        p = Block('p', None,'',indent)
+        p = Block('p', None, '', indent)
         lli.add_child(p)
         self.current_block = p
 
@@ -603,7 +613,7 @@ class DocStructure:
         self.current_block.add_child(b)
         self.current_block = b
         for name, content in record:
-            b = Block(name, None, content, self.current_block.indent + 4)
+            b = Block(name, None, para_parser.parse(content, self.doc), self.current_block.indent + 4)
             self.current_block.add_child(b)
         self.current_block = self.current_block.parent
 
@@ -672,7 +682,8 @@ class SamParaParser:
         self.patterns = {
             'escape': re.compile(r'\\'),
             'escaped-chars': re.compile(r'[\\\[\(\]\{\}_\*`]'),
-            'annotation': re.compile(r'\[(?P<text>[^\[]*?[^\\])\](\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
+            'annotation': re.compile(
+                r'\[(?P<text>[^\[]*?[^\\])\](\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
             'italic': re.compile(r'_(?P<text>\S.*?\S)_'),
             'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
@@ -688,7 +699,6 @@ class SamParaParser:
         self.flow = Flow()
         self.stateMachine.run(self.para)
         return self.flow
-
 
     def _para(self, para):
         try:
@@ -807,14 +817,14 @@ class SamParaParser:
             self.flow.append(self.current_string)
             self.current_string = ''
             self.flow.append(InlineInsert(parse_insert(match.group("attributes"))))
-            para.advance(len(match.group(0))-1)
+            para.advance(len(match.group(0)) - 1)
         else:
             match = self.patterns['inline-insert-id'].match(para.rest_of_para)
             if match:
                 self.flow.append(self.current_string)
                 self.current_string = ''
                 self.flow.append(InlineInsert(('reference', match.group("attributes"))))
-                para.advance(len(match.group(0))-1)
+                para.advance(len(match.group(0)) - 1)
             else:
                 self.current_string += '>'
         return "PARA", para
@@ -825,7 +835,7 @@ class SamParaParser:
             self.flow.append(self.current_string)
             self.current_string = ''
             self.flow.append(InlineInsert('reference', match.group("id")))
-            para.advance(len(match.group(0))-1)
+            para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '>'
         return "PARA", para
@@ -867,7 +877,7 @@ def parse_block_attributes(attributes_string):
         attributes_list = attributes_string.split()
     except AttributeError:
         return None
-    unexpected_attributes = [x for x in attributes_list if not(x[0] in '?#')]
+    unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#')]
     if unexpected_attributes:
         raise Exception("Unexpected attribute(s): {0}".format(', '.join(unexpected_attributes)))
     ids = [x[1:] for x in attributes_list if x[0] == '#']
@@ -880,7 +890,7 @@ def parse_block_attributes(attributes_string):
 
 
 def parse_insert(insert_string):
-    result={}
+    result = {}
     attributes_list = insert_string.split()
     insert_type = attributes_list.pop(0)
     if insert_type[0] == '$':
@@ -896,7 +906,7 @@ def parse_insert(insert_string):
         insert_item = attributes_list.pop(0)
     insert_ids = [x[1:] for x in attributes_list if x[0] == '#']
     insert_conditions = [x[1:] for x in attributes_list if x[0] == '?']
-    unexpected_attributes = [x for x in attributes_list if not(x[0] in '?#')]
+    unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#')]
     if unexpected_attributes:
         raise Exception("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
     result['type'] = insert_type
@@ -907,9 +917,11 @@ def parse_insert(insert_string):
         result['conditions'] = " ".join(insert_conditions)
     return result
 
+
 def escape_for_xml(s):
     t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
     return s.translate(t)
+
 
 para_parser = SamParaParser()
 

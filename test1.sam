@@ -6,7 +6,7 @@ sam: utf-8 http://spfeopentoolkit.org/spfe-docs/topic-types/feature-topic/schema
 
 feature-topic: feature-fragments
     head:(#foo)
-        foo: bar
+        foo: barney [and](conjunction) betty
         baz: bat
         $name=fred [and](conjunction) wilma
         history:
@@ -34,11 +34,16 @@ feature-topic: feature-fragments
         This sentence contains an unmatched [ followed by an [annotated](word) phrase.
 
 
-        ~~~(#foobar ?gruznatz)
+        ~~~(#foo.bar ?gruz-natz)
             $a=apple
             $b=banana
 
             This is a sentence inside a fragment.
+
+            ~~~(#gruznatz)
+                $p=peach
+
+                This is a nested fragment.
 
         >>(~foobar)
             $a=apricot
@@ -140,8 +145,6 @@ feature-topic: feature-fragments
         in the fragment definition, and then at global strings. In effect, this means
         that you can define string substitutions whenever you insert a fragment into your content.
 
-        This is an incorrectly indented para.
-
         state-detection:
             sign: printer "the printer"
                 signal: chirps
@@ -167,7 +170,7 @@ feature-topic: feature-fragments
         |bold| The bold element is a decoration occurring within text and is
         indicated by surrounding the text with asterisks.
 
-        |italic| The italic decoration is indicated by surrounding the text
+        |[italic](style "|")| The italic | decoration is indicated by surrounding the text
         with underscores.
 
         |quotes| The quotes decoration is indicated by surrounding the text

@@ -1,6 +1,97 @@
-sam: utf-8 
+sam:
 
-title: Semantic Authoring Markdown (SAM)
+specification: Semantic Authoring Markdown (SAM)
+
+    introduction:
+
+        Semantic Authoring Markdown (SAM) is a simplified markup for semantic authoring. Semantic authoring,
+        in this case, means writing texts that identify some part of their semantics thought embedded
+        markup.
+
+        All markup languages, such as Markdown, have semantics of some kind, but usually they only
+        cover the semantics of document structure, delineating things like sections, paragraphs, and
+        lists. SAM is intended for markup that delineates things related to the subject matter of
+        the content, or the more specific document structures.
+
+        An example of a markup language that delineates things related to its subject matter is
+        Javadoc, which calls out parts of a Java API routine, such as parameter values and the
+        return value. However, most such languages have a fixed set of subject-specific elements
+        and are intended for only one purpose. SAM is intended to support creating subject-specific
+        markup languages for many subjects, as well as many specific document types.
+
+        XML is the language most often used for defining new tagging languages, however, XML is
+        verbose and difficult to read. The same readability goals that lead to the development
+        of Markdown as an alternative to HTML for authoring web pages led to the creation of SAM.
+
+        XML was not designed to be an authoring language, but a language for machines to talk
+        to each other. It was assumed that human authors of XML documents would use editor that
+        hid the markup. But while many such editors exist, they share a common problem that,
+        when it comes to semantic markup, hiding the tagging also hides the structure. To see
+        the structure, the author has to switch to looking at the raw XML. However, the raw
+        XML is verbose and while the structure is present, it also gets lost in the sea tags.
+
+        SAM is an attempt to provide a semantic authoring language that is easy to read and
+        write while still making the semantic structure of the document visible. It takes its
+        clues from YAML and Python (for displaying overall structure), from Markdown (for displaying
+        text structures) and from common English usage (for displaying annotations.)
+
+        SAM is not designed to be a full replacement for XML. It is far less general and it
+        combines built in semantics with externally specified semantics which limit it not
+        only to the particular purpose of semantic authoring, but to a particular approach
+        to semantic authoring, which we could call the declarative approach the markup, meaning
+        that it does not support the insertion of command to the publishing system into the
+        document markup (something common in many structured authoring languages).
+
+        It also provides for only a very limited and predefined set of attributes. This is
+        deliberate, and is based both on the desire to encourage declarative markup, and
+        the desire to keep the appearance of a raw SAM document readable. The intention is
+        that an author writing in SAM should feel no need to use a visual editor, but should
+        work directly in raw SAM (albeit with editor-supplied syntax coloring if desired).
+
+        Markup languages such as reStructured Text and ASCIIDoc provide a fuller set of
+        document markup than Markdown, but do so using a lot of punctuation characters (using
+        them in eccentric ways that would not occur in a normal document). Though not as
+        distracting to the eye as XML markup, this reliance of punctuation still reduces
+        the readability of the documents marked up in these languages. SAM makes far less
+        use of punctuation than these languages, preferring, like XML, to use words set
+        off by basic punctuation to express structure. This helps SAM meet its goals of
+        semantic extensibility (adding words is easier than adding punctuation) and of
+        making the semantic structure visible to the author.
+
+        A large part of the verbosity of XML comes from its requirement to close every
+        element tag, and the fact that it recognizes no delimiters other than element tags.
+        SAM uses markdown style text clues for things like paragraphs and lists, and
+        avoids the use of end tags in all cases but one (codeblocks containing non-SAM
+        markup). Where the structure would be ambiguous without end tags, SAM uses
+        indentation levels to determine where structures begin and end.
+
+        SAM supports the use of schemas to specify the allowed structure of a document type.
+        The parser can use the schema to determine when a structure is complete, reducing
+        the need for indenting. If you use SAM without a schema, you will need to use indenting
+        throughout to correctly represent structure.
+
+        While XML has only one unit of structure, the element, SAM has several:
+
+        |blocks| Blocks are elements that contain other elements. For instance, a section is a block.
+
+        |fields| Fields are elements that contain individual values. For instance, the title of a document
+        is usually a field.
+
+        |flows| Flows are sequences of text. Paragraphs are flows. Flows cannot contain blocks or fields.
+
+        |strings| Strings are flows that have been assigned a name so that they can be included by
+        reference in other parts of a document or in other documents.
+
+        |fragments| Fragments are sections of a documents (potentially larger than a single flow)
+        that can be included by reference in other parts of a document or in other documents. Strings
+        used in a fragment can be redefined when a fragment is reused, allowing you to vary the
+        text of the fragment when it is used in different places.
+
+        |annotations| Annotations are elements within a flow that have been annotated with semantic
+        metadata to indicate something about their subject matter.
+
+        |insertions|
+
 
     section: Annotations
 
