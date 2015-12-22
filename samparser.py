@@ -48,7 +48,7 @@ class SamParser:
             'record-start': re.compile(r'(?P<indent>\s*)(?P<record_name>[a-zA-Z0-9-_]+)::(?P<field_names>.*)'),
             'list-item': re.compile(r'(?P<indent>\s*)(?P<marker>\*\s+)(?P<content>.*)'),
             'num-list-item': re.compile(r'(?P<indent>\s*)(?P<marker>[0-9]+\.\s+)(?P<content>.*)'),
-            'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>.+?)\|\s+(?P<content>.*)'),
+            'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>.+?)(?<!\\)\|\s+(?P<content>.*)'),
             'block-insert': re.compile(r'(?P<indent>\s*)>>\((?P<attributes>.*?)\)\w*'),
             'string-def': re.compile(r'(?P<indent>\s*)\$(?P<name>\w*?)=(?P<value>.+)')
         }
