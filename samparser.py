@@ -1,6 +1,7 @@
 import sys
 from statemachine import StateMachine
 from lxml import etree
+import xml.parsers.expat
 import io
 
 try:
@@ -35,7 +36,6 @@ class SamParser:
         self.current_paragraph = None
         self.doc = DocStructure()
         self.source = None
-        self.embedded_xml_parser = etree.XMLParser()
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(
@@ -248,25 +248,30 @@ class SamParser:
     def _embedded_xml(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.embedded_xml_parser.feed(source.current_line.strip())
+        embedded_xml_parser = xml.parsers.expat.ParserCreate()
+        embedded_xml_parser.XmlDeclHandler=self._embedded_xml_declaration_check
+        embedded_xml_parser.Parse(source.current_line.strip())
         xml_lines = []
         try:
             while True:
                 line = source.next_line
                 xml_lines.append(line)
-                self.embedded_xml_parser.feed(line)
-        except etree.XMLSyntaxError as err:
-            if err.code==5: #Extra content at the end of the document
-                try:
-                    self.embedded_xml_parser.close()
-                except etree.XMLSyntaxError:
-                    pass
+                embedded_xml_parser.Parse(line)
+        except xml.parsers.expat.ExpatError as err:
+            if err.code==9: #junk after document element
                 source.return_line()
                 xml_text = ''.join(xml_lines[:-1])
                 self.doc.new_embedded_xml(xml_text, indent)
                 return "SAM", context
             else:
                 raise
+
+    def _embedded_xml_declaration_check(self, version, encoding, standalone):
+        if version != "1.0":
+            raise Exception("The version of an embedded XML fragment must be 1.0.")
+        if encoding.upper() != "UTF-8":
+            raise Exception("The encoding of an embedded XML fragment must be UTF-8.")
+
 
 
     def _sam(self, context):
