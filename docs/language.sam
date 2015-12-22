@@ -79,6 +79,8 @@ specification: Semantic Authoring Markdown (SAM)
 
         |flows| Flows are sequences of text. Paragraphs are flows. Flows cannot contain blocks or fields.
 
+        |record sets|
+
         |strings| Strings are flows that have been assigned a name so that they can be included by
         reference in other parts of a document or in other documents.
 

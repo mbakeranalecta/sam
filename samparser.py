@@ -236,6 +236,8 @@ class SamParser:
             return "SAM", context
         else:
             field_values = [x.strip() for x in line.split(',')]
+            if len(field_values) != len(self.doc.fields):
+                raise Exception("Record length does not match record set header. At:\n\n " + line)
             record = list(zip(self.doc.fields, field_values))
             self.doc.new_record(record)
             return "RECORD", context
