@@ -84,6 +84,11 @@ feature-topic: feature-fragments
                 a, b, c
                 hi, lo, med
 
+        terminal:
+            prompt: fred
+            input:
+            response:
+
         After this paragraph, there is a blockquote:
 
         """(book "Mody Dick" (MLA))

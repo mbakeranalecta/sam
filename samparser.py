@@ -37,7 +37,7 @@ class SamParser:
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(
-                r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.*)?'),
+                r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.+)?'),
             'codeblock-start': re.compile(
                 r'(?P<indent>\s*)(?P<flag>```\S*?(?=\())(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
             'blockquote-start': re.compile(
@@ -86,7 +86,7 @@ class SamParser:
         indent = len(match.group("indent"))
         element = match.group("element").strip()
         attributes = parse_block_attributes(match.group("attributes"))
-        content = match.group("content").strip()
+        content = match.group("content")
         self.doc.new_block(element, attributes, para_parser.parse(content, self.doc), indent)
         return "SAM", context
 
@@ -695,6 +695,8 @@ class SamParaParser:
         }
 
     def parse(self, para, doc):
+        if para is None:
+            return None
         self.doc = doc
         self.para = Para(para)
         self.current_string = ''
@@ -853,7 +855,7 @@ class SamParaParser:
 
 class Para:
     def __init__(self, para):
-        self.para = para
+        self.para = para.strip()
         self.currentCharNumber = -1
 
     @property
