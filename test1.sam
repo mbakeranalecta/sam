@@ -11,7 +11,7 @@ feature-topic: feature-fragments
         $name=fred [and](conjunction) wilma
         history:
             revision:: date, author, comment, status
-                2014-06-23, mbaker, New Topic, In progress
+                2014-06-23, mbaker, New\, Topic, In progress
 
         index:
             entry:: type, term

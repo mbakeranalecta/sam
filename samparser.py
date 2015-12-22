@@ -235,7 +235,7 @@ class SamParser:
         if self.patterns['blank-line'].match(line):
             return "SAM", context
         else:
-            field_values = [x.strip() for x in line.split(',')]
+            field_values = [x.strip() for x in re.split(r'(?<!\\),',line)]
             if len(field_values) != len(self.doc.fields):
                 raise Exception("Record length does not match record set header. At:\n\n " + line)
             record = list(zip(self.doc.fields, field_values))
@@ -683,7 +683,7 @@ class SamParaParser:
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\'),
-            'escaped-chars': re.compile(r'[\\\[\(\]\{\}_\*`]'),
+            'escaped-chars': re.compile(r'[\\\[\(\]\{\}_\*,`]'),
             'annotation': re.compile(
                 r'\[(?P<text>[^\[]*?[^\\])\](\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
