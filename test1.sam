@@ -85,9 +85,9 @@ feature-topic: feature-fragments
                 hi, lo, med
 
         terminal:
-            prompt: fred
-            input:
-            response:
+            prompt: $
+            input: dir
+            response: Empty directory.
 
         After this paragraph, there is a blockquote:
 
@@ -140,8 +140,20 @@ feature-topic: feature-fragments
 
         A fragment reference inserts a fragment by ID at the place it occurs in the text.
 
+        <?xml version="1.0" encoding="UTF-8"?>
+        <foo bar="bat">
+            <bang/>
+        </foo>
+
+
         Fragments are recursive. That is, [Fragments] can contain other fragments and
         fragment references.
+
+        <?xml version="1.0" encoding="UTF-8"?>
+        <foo bar="bat">
+            <boo/>
+            <hoo/>
+        </foo>
 
         Because you often want to >>(image foo.gif #foo #bar ?baz ?bat) change some part of a text when it is being
         reused, <fragments> & fragment references can both define local [strings](feature).
@@ -182,4 +194,7 @@ feature-topic: feature-fragments
         in straight quotes.
 
         |mono| The mono decoration is indicated by backticks
+
+
+
 

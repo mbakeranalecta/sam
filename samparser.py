@@ -29,11 +29,13 @@ class SamParser:
         self.stateMachine.add_state("LABELED-LIST-ITEM", self._labeled_list_item)
         self.stateMachine.add_state("BLOCK-INSERT", self._block_insert)
         self.stateMachine.add_state("STRING-DEF", self._string_def)
+        self.stateMachine.add_state("EMBEDDED-XML", self._embedded_xml)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("NEW")
         self.current_paragraph = None
         self.doc = DocStructure()
         self.source = None
+        self.embedded_xml_parser = etree.XMLParser()
         self.patterns = {
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(
@@ -50,7 +52,8 @@ class SamParser:
             'num-list-item': re.compile(r'(?P<indent>\s*)(?P<marker>[0-9]+\.\s+)(?P<content>.*)'),
             'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>.+?)(?<!\\)\|\s+(?P<content>.*)'),
             'block-insert': re.compile(r'(?P<indent>\s*)>>\((?P<attributes>.*?)\)\w*'),
-            'string-def': re.compile(r'(?P<indent>\s*)\$(?P<name>\w*?)=(?P<value>.+)')
+            'string-def': re.compile(r'(?P<indent>\s*)\$(?P<name>\w*?)=(?P<value>.+)'),
+            'embedded-xml': re.compile(r'(?P<indent>\s*)(?P<xmltag>\<\?xml.+)')
         }
 
     def parse(self, source):
@@ -168,7 +171,7 @@ class SamParser:
 
     def _paragraph_start(self, context):
         source, match = context
-        line = source.currentLine
+        line = source.current_line
         local_indent = len(line) - len(line.lstrip())
         self.doc.new_block('p', None, '', local_indent)
         self.paragraph_start(line)
@@ -242,6 +245,30 @@ class SamParser:
             self.doc.new_record(record)
             return "RECORD", context
 
+    def _embedded_xml(self, context):
+        source, match = context
+        indent = len(match.group("indent"))
+        self.embedded_xml_parser.feed(source.current_line.strip())
+        xml_lines = []
+        try:
+            while True:
+                line = source.next_line
+                xml_lines.append(line)
+                self.embedded_xml_parser.feed(line)
+        except etree.XMLSyntaxError as err:
+            if err.msg.startswith("Extra content at the end of the document"):
+                try:
+                    self.embedded_xml_parser.close()
+                except etree.XMLSyntaxError:
+                    pass
+                source.return_line()
+                xml_text = ''.join(xml_lines[:-1])
+                self.doc.new_embedded_xml(xml_text, indent)
+                return "SAM", context
+            else:
+                raise
+
+
     def _sam(self, context):
         source, match = context
         try:
@@ -293,6 +320,10 @@ class SamParser:
         match = self.patterns['string-def'].match(line)
         if match is not None:
             return "STRING-DEF", (source, match)
+
+        match = self.patterns['embedded-xml'].match(line)
+        if match is not None:
+            return "EMBEDDED-XML", (source, match)
 
         match = self.patterns['block-start'].match(line)
         if match is not None:
@@ -465,6 +496,14 @@ class Pre(Flow):
                 yield x
         yield "]]>"
 
+class EmbeddedXML(Block):
+    def __init__(self, text, indent):
+        self.text = text
+        self.indent = indent
+
+    def serialize_xml(self):
+        yield self.text
+
 
 class Annotation:
     def __init__(self, annotation_type, text, specifically='', namespace=''):
@@ -602,6 +641,10 @@ class DocStructure:
     def new_comment(self, comment):
         self.current_block.add_child(comment)
 
+    def new_embedded_xml(self, text, indent):
+        b = EmbeddedXML(text, indent)
+        self.add_block(b)
+
     def new_string_def(self, string_name, value, indent):
         s = StringDef(string_name, value, indent)
         self.add_block(s)
@@ -649,17 +692,27 @@ class StringSource:
 
         :param string_to_parse: The string to parse.
         """
-        self.currentLine = None
-        self.currentLineNumber = 0
+        self.current_line = None
+        self.pending_line = None
+        self.previous_line = None
         self.buf = io.StringIO(string_to_parse)
 
     @property
     def next_line(self):
-        self.currentLine = self.buf.readline()
-        if self.currentLine == "":
+        self.previous_line = self.current_line
+        if self.pending_line is None:
+            self.current_line = self.buf.readline()
+        else:
+            self.current_line = self.pending_line
+            self.pending_line = None
+        if self.current_line == "":
             raise EOFError("End of file")
-        self.currentLineNumber += 1
-        return self.currentLine
+        return self.current_line
+
+    def return_line(self):
+        self.pending_line = self.current_line
+        self.current_line = self.previous_line
+
 
 
 class SamParaParser:

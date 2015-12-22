@@ -65,6 +65,10 @@ specification: Semantic Authoring Markdown (SAM)
         markup). Where the structure would be ambiguous without end tags, SAM uses
         indentation levels to determine where structures begin and end.
 
+        Unlike XML, SAM is line based (as is markdown). In XML, line breaks do not tell
+        you anything about the structure of the document. In SAM, line breaks and
+        indents are the major delineators of structure.
+
         SAM supports the use of schemas to specify the allowed structure of a document type.
         The parser can use the schema to determine when a structure is complete, reducing
         the need for indenting. If you use SAM without a schema, you will need to use indenting
@@ -330,3 +334,12 @@ section: Reserved insert types
     feed
 
     These are reserved so that editors can act on them.
+
+section: Whitespace handling
+    All flows are trimmed of leading and trailing whitespace. In composing a flow
+    from multiple text lines, all spaces and returns are collapsed to a single
+    space.
+
+    In codeblocks, all whitespace is retained. However, codeblocks do not have
+    to follow the indenting of the rest of the document, so you can left-align
+    code to achieve correct indenting of the code itself.

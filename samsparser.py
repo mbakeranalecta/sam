@@ -360,17 +360,17 @@ class StringSource:
 
         :param string_to_parse: The string to parse.
         """
-        self.currentLine = None
-        self.currentLineNumber = 0
+        self.current_line = None
+        self.current_line_number = 0
         self.buf = io.StringIO(string_to_parse)
 
     @property
     def next_line(self):
-        self.currentLine = self.buf.readline()
-        if self.currentLine == "":
+        self.current_line = self.buf.readline()
+        if self.current_line == "":
             raise EOFError("End of file")
-        self.currentLineNumber += 1
-        return self.currentLine
+        self.current_line_number += 1
+        return self.current_line
 
 
 def parse_block_attributes(attributes_string):
