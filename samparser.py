@@ -256,7 +256,7 @@ class SamParser:
                 xml_lines.append(line)
                 self.embedded_xml_parser.feed(line)
         except etree.XMLSyntaxError as err:
-            if err.msg.startswith("Extra content at the end of the document"):
+            if err.code==5: #Extra content at the end of the document
                 try:
                     self.embedded_xml_parser.close()
                 except etree.XMLSyntaxError:
