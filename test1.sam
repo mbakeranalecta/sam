@@ -4,7 +4,7 @@ sam: utf-8 http://spfeopentoolkit.org/spfe-docs/topic-types/feature-topic/schema
 # for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
-feature-topic: feature-fragments
+feature-topic:(#feature-fragments) Fragments
     head:(#foo)
         foo: barney [and](conjunction) betty
         baz: bat
@@ -27,7 +27,7 @@ feature-topic: feature-fragments
         [Fragments](feature) are a [content reuse](task "reusing content" (foo)) feature of the [EPPO-simple](feature)
         [plugin]( feature).
 
-        >>(image foo.gif #foo #bar ?baz ?bat)
+        >>(image foo.gif #bar ?baz ?bat)
 
         This sentence includes a string reference >>(string name). And a shortcut version >>($name)
 
@@ -155,7 +155,7 @@ feature-topic: feature-fragments
             <hoo/>
         </foo>
 
-        Because you often want to >>(image foo.gif #foo #bar ?baz ?bat) change some part of a text when it is being
+        Because you often want to >>(image foo.gif #bar ?baz ?bat) change some part of a text when it is being
         reused, <fragments> & fragment references can both define local [strings](feature).
         Any [string references](feature) inside a fragment will be resolved by looking first
         at local-strings defined in the fragment reference, then at local strings defined

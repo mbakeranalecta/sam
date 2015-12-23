@@ -552,7 +552,7 @@ class InlineInsert:
         yield '<insert '
         for key, value in self.attributes.items():
             yield " {0}=\"{1}\" ".format(key, value)
-        yield '/>\n'
+        yield '/>'
 
 
 class DocStructure:
@@ -943,9 +943,11 @@ def parse_block_attributes(attributes_string):
     if unexpected_attributes:
         raise Exception("Unexpected attribute(s): {0}".format(', '.join(unexpected_attributes)))
     ids = [x[1:] for x in attributes_list if x[0] == '#']
+    if len(ids) > 1:
+        raise Exception("More than one ID specified: " + ", ".join(ids))
     conditions = [x[1:] for x in attributes_list if x[0] == '?']
     if ids:
-        result["ids"] = " ".join(ids)
+        result["id"] = "".join(ids)
     if conditions:
         result["conditions"] = " ".join(conditions)
     return result
@@ -969,12 +971,14 @@ def parse_insert(insert_string):
     insert_ids = [x[1:] for x in attributes_list if x[0] == '#']
     insert_conditions = [x[1:] for x in attributes_list if x[0] == '?']
     unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#')]
+    if len(insert_ids) > 1:
+        raise Exception("More than one ID specified: " + ", ".join(insert_ids))
     if unexpected_attributes:
         raise Exception("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
     result['type'] = insert_type
     result['item'] = insert_item
     if insert_ids:
-        result['ids'] = " ".join(insert_ids)
+        result['id'] = "".join(insert_ids)
     if insert_conditions:
         result['conditions'] = " ".join(insert_conditions)
     return result
