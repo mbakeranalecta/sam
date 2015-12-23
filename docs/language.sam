@@ -81,7 +81,12 @@ specification: Semantic Authoring Markdown (SAM)
         |fields| Fields are elements that contain individual values. For instance, the title of a document
         is usually a field.
 
-        |flows| Flows are sequences of text. Paragraphs are flows. Flows cannot contain blocks or fields.
+        |lines| A line is a single line of text, as in a poem, with a fixed line end.
+
+        |paragraphs| A paragraph is a continuous block of text across one or more contiguous lines.
+
+        |flows| Flows are sequences of text. Paragraphs are flows. Lines are flows. String definitions
+        are flows. Fields are flows. Flows cannot contain blocks or fields.
 
         |record sets|
 
@@ -92,7 +97,6 @@ specification: Semantic Authoring Markdown (SAM)
         embedded XML block to determine if it is well formed and to find its end. It
         then outputs the original XML from the SAM document, not the parser output.
         Therefore there will be no resolution of entities on the embedded XML.
-
 
         |strings| Strings are flows that have been assigned a name so that they can be included by
         reference in other parts of a document or in other documents.

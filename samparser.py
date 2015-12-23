@@ -30,6 +30,7 @@ class SamParser:
         self.stateMachine.add_state("LABELED-LIST-ITEM", self._labeled_list_item)
         self.stateMachine.add_state("BLOCK-INSERT", self._block_insert)
         self.stateMachine.add_state("STRING-DEF", self._string_def)
+        self.stateMachine.add_state("LINE-START", self._line_start)
         self.stateMachine.add_state("EMBEDDED-XML", self._embedded_xml)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("NEW")
@@ -46,11 +47,12 @@ class SamParser:
                 r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<type>\w*)\s*(["\'](?P<citation>.+?)["\'])?\s*(\((?P<format>\S+?)\))?(?P<other>.+?)?\))?'),
             'fragment-start': re.compile(r'(?P<indent>\s*)~~~(\((?P<attributes>.*?)\))?'),
             'paragraph-start': re.compile(r'\w*'),
+            'line-start': re.compile(r'(?P<indent>\s*)\|(\((?P<attributes>.*?)\))?\s(?P<text>.*)'),
             'blank-line': re.compile(r'^\s*$'),
             'record-start': re.compile(r'(?P<indent>\s*)(?P<record_name>[a-zA-Z0-9-_]+)::(?P<field_names>.*)'),
             'list-item': re.compile(r'(?P<indent>\s*)(?P<marker>\*\s+)(?P<content>.*)'),
             'num-list-item': re.compile(r'(?P<indent>\s*)(?P<marker>[0-9]+\.\s+)(?P<content>.*)'),
-            'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>.+?)(?<!\\)\|\s+(?P<content>.*)'),
+            'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>\S.*?)(?<!\\)\|\s+(?P<content>.*)'),
             'block-insert': re.compile(r'(?P<indent>\s*)>>\((?P<attributes>.*?)\)\w*'),
             'string-def': re.compile(r'(?P<indent>\s*)\$(?P<name>\w*?)=(?P<value>.+)'),
             'embedded-xml': re.compile(r'(?P<indent>\s*)(?P<xmltag>\<\?xml.+)')
@@ -224,6 +226,12 @@ class SamParser:
         self.doc.new_string_def(match.group('name'), para_parser.parse(match.group('value'), self.doc), indent=indent)
         return "SAM", context
 
+    def _line_start(self, context):
+        source, match = context
+        indent = len(match.group("indent"))
+        self.doc.new_block('line', parse_block_attributes(match.group("attributes")), para_parser.parse(match.group('text'), self.doc), indent=indent)
+        return "SAM", context
+
     def _record_start(self, context):
         source, match = context
         indent = len(match.group("indent"))
@@ -325,6 +333,10 @@ class SamParser:
         match = self.patterns['string-def'].match(line)
         if match is not None:
             return "STRING-DEF", (source, match)
+
+        match = self.patterns['line-start'].match(line)
+        if match is not None:
+            return "LINE-START", (source, match)
 
         match = self.patterns['embedded-xml'].match(line)
         if match is not None:
