@@ -35,7 +35,7 @@ feature-topic:(#feature-fragments) Fragments
             |(#foo) You gotta walk that lonesome valley,
             | You gotta walk it by yourself,
             |(?bar) Nobody here can walk it for you,
-            | You gotta walk it by yourself.
+            |    You gotta walk it by yourself.
 
 
         This sentence contains an unmatched [ followed by an [annotated](word) phrase.

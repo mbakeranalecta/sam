@@ -11,35 +11,39 @@ specification: Semantic Authoring Markdown (SAM)
         All markup languages, such as Markdown, have semantics of some kind, but usually they only
         cover the semantics of document structure, delineating things like sections, paragraphs, and
         lists. SAM is intended for markup that delineates things related to the subject matter of
-        the content, or the more specific document structures.
+        the content, or the more specific document structures found in subject-specific document types
+        such as recipes or API references.
 
         An example of a markup language that delineates things related to its subject matter is
         Javadoc, which calls out parts of a Java API routine, such as parameter values and the
         return value. However, most such languages have a fixed set of subject-specific elements
         and are intended for only one purpose. SAM is intended to support creating subject-specific
-        markup languages for many subjects, as well as many specific document types.
+        markup languages for many subjects and subject-specific document types.
 
         XML is the language most often used for defining new tagging languages, however, XML is
         verbose and difficult to read. The same readability goals that lead to the development
-        of Markdown as an alternative to HTML for authoring web pages led to the creation of SAM.
+        of Markdown as an alternative to HTML for authoring web pages led to the creation of SAM
+        for defining new markup languages.
 
         XML was not designed to be an authoring language, but a language for machines to talk
         to each other. It was assumed that human authors of XML documents would use editor that
         hid the markup. But while many such editors exist, they share a common problem that,
         when it comes to semantic markup, hiding the tagging also hides the structure. To see
         the structure, the author has to switch to looking at the raw XML. However, the raw
-        XML is verbose and while the structure is present, it also gets lost in the sea tags.
+        XML is verbose and while the structure is present, it tends to get lost in the sea tags.
+        Seeing the structure of what you are writing is thus difficult in XML, no matter how
+        you view it.
 
         SAM is an attempt to provide a semantic authoring language that is easy to read and
         write while still making the semantic structure of the document visible. It takes its
-        clues from YAML and Python (for displaying overall structure), from Markdown (for displaying
+        cues from YAML and Python (for displaying overall structure), from Markdown (for displaying
         text structures) and from common English usage (for displaying annotations.)
 
         SAM is not designed to be a full replacement for XML. It is far less general and it
-        combines built in semantics with externally specified semantics which limit it not
+        combines built-in semantics with externally specified semantics which limit it not
         only to the particular purpose of semantic authoring, but to a particular approach
         to semantic authoring, which we could call the declarative approach the markup, meaning
-        that it does not support the insertion of command to the publishing system into the
+        that it does not support the insertion of commands to the publishing system into the
         document markup (something common in many structured authoring languages).
 
         It also provides for only a very limited and predefined set of attributes. This is
@@ -49,21 +53,35 @@ specification: Semantic Authoring Markdown (SAM)
         work directly in raw SAM (albeit with editor-supplied syntax coloring if desired).
 
         Markup languages such as reStructured Text and ASCIIDoc provide a fuller set of
-        document markup than Markdown, but do so using a lot of punctuation characters (using
-        them in eccentric ways that would not occur in a normal document). Though not as
+        document markup than Markdown, but do so using a lot of punctuation characters
+        (using them in ways that would not occur in a normal document). Though not as
         distracting to the eye as XML markup, this reliance of punctuation still reduces
         the readability of the documents marked up in these languages. SAM makes far less
-        use of punctuation than these languages, preferring, like XML, to use words set
+        use of punctuation than these languages to use words set
         off by basic punctuation to express structure. This helps SAM meet its goals of
         semantic extensibility (adding words is easier than adding punctuation) and of
         making the semantic structure visible to the author.
 
-        A large part of the verbosity of XML comes from its requirement to close every
-        element tag, and the fact that it recognizes no delimiters other than element tags.
-        SAM uses markdown style text clues for things like paragraphs and lists, and
+        Document-oriented markup languages such as reStructuredText and Markdown tend to
+        be very flat in structure. One things follows another. There is rarely a case where
+        one thing is inside another. For example, these languages use heading levels, but
+        don't delineate sections of the document. More semantically rich languages tend
+        to be more hierarchical, with one structure inside another. For example, a document
+        might be divided into sections with title and paragraph elements inside a section.
+        This means that you need to show which structures are inside others and where the
+        containing structure ends.
+
+        XML does this by having an explicit end tag for every element. A large part of the
+        verbosity of XML comes from its requirement to close every element tag. Many
+        programming languages, which similarly have to express nested structures, use
+        some form of brackets to delineate each structure. Python is an exception to this.
+        It uses indentation to express the relationship between structures. This is a
+        far more natural way for writers to express the subordination of elements -- one
+        that is sometimes used in printed works. SAM uses this approach and
         avoids the use of end tags in all cases but one (codeblocks containing non-SAM
-        markup). Where the structure would be ambiguous without end tags, SAM uses
-        indentation levels to determine where structures begin and end.
+        markup). When a schema is used, SAM can also take clues from the schema to
+        determine where structures begin and end. This can reduce the need to indent
+        structures in the text.
 
         Unlike XML, SAM is line based (as is markdown). In XML, line breaks do not tell
         you anything about the structure of the document. In SAM, line breaks and
@@ -200,13 +218,11 @@ specification: Semantic Authoring Markdown (SAM)
         of a line:
 
         ```sam
-        {#my-fragment ?bar
+        ~~~(#my-fragment ?bar)
+            $color=black
+            Bar bar >>($color) sheep
+            Have you any wool?
 
-            $foo=Bar bar black sheep
-
-            Some stuff. >>($foo)
-
-            Some more stuff.
         }
         ```
 
@@ -225,10 +241,9 @@ specification: Semantic Authoring Markdown (SAM)
         override any in-scope strings in a fragment insert. String definitions must
         each be on a line by themselves.
 
-        >>{my-fragment
-            $foo=bar
-            $baz=bat
-          }
+        >>(~my-fragment)
+            $color=white
+          
 
 
         Note that the SAM syntax is designed to bear these semantics, but that the
@@ -287,6 +302,32 @@ specification: Semantic Authoring Markdown (SAM)
     In a blockquote, however, the material inside the quote block is still SAM
     markup and is processed as such.
 
+section: Lines
+    Lines are pieces of text with fixed line endings, such as poems. To create a set
+    of lines, precede each one with a pipe character followed by a space.
+
+    ```(sam)
+| You gotta walk that lonesome valley,
+| You gotta walk it by yourself,
+| Nobody here can walk it for you,
+| You gotta walk it by yourself.
+    ```
+
+    You can also add ids or conditions to lines. In this case, the opening parentheses
+    of the annotation must follow the leading pipe character immediately, and the closing
+    parenthesis must be followed by a space:
+
+    ```(sam)
+|(#foo) You gotta walk that lonesome valley,
+| You gotta walk it by yourself,
+|(?bar) Nobody here can walk it for you,
+| You gotta walk it by yourself.
+    ```
+
+    All spaces after a the space following the pipe are considered significant and
+    are retained on output.
+
+
 section: Lists
 
     You can create any kind of list you like by using nested blocks.
@@ -317,7 +358,8 @@ section: Lists
     7. Ray gun
     ```
 
-    Labeled lists begin with a label between pipe characters.
+    Labeled lists begin with a label between pipe characters. There must be no space between the
+    opening pipe character and the start of the label text.
 
     ```(SAM)
     |fa| A long long way to run.
@@ -345,6 +387,7 @@ section: Reserved insert types
     video
     audio
     feed
+    app
 
     These are reserved so that editors can act on them.
 

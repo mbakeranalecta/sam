@@ -229,7 +229,7 @@ class SamParser:
     def _line_start(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_block('line', parse_block_attributes(match.group("attributes")), para_parser.parse(match.group('text'), self.doc), indent=indent)
+        self.doc.new_block('line', parse_block_attributes(match.group("attributes")), para_parser.parse(match.group('text'), self.doc, strip=False), indent=indent)
         return "SAM", context
 
     def _record_start(self, context):
@@ -409,7 +409,7 @@ class Block:
 
         if self.attributes:
             for key, value in self.attributes.items():
-                yield " {0}=\"{1}\" ".format(key, value)
+                yield " {0}=\"{1}\"".format(key, value)
         if self.children:
             yield ">"
             if self.content:
@@ -561,9 +561,9 @@ class InlineInsert:
         return "[#insert:'%s']" % self.attributes
 
     def serialize_xml(self):
-        yield '<insert '
+        yield '<insert'
         for key, value in self.attributes.items():
-            yield " {0}=\"{1}\" ".format(key, value)
+            yield " {0}=\"{1}\"".format(key, value)
         yield '/>'
 
 
@@ -764,11 +764,11 @@ class SamParaParser:
             'inline-insert-id': re.compile(r'>>#(?P<id>\w*)')
         }
 
-    def parse(self, para, doc):
+    def parse(self, para, doc, strip=True):
         if para is None:
             return None
         self.doc = doc
-        self.para = Para(para)
+        self.para = Para(para, strip)
         self.current_string = ''
         self.flow = Flow()
         self.stateMachine.run(self.para)
@@ -924,8 +924,8 @@ class SamParaParser:
 
 
 class Para:
-    def __init__(self, para):
-        self.para = para.strip()
+    def __init__(self, para, strip=True):
+        self.para = para.strip() if strip else para
         self.currentCharNumber = -1
 
     @property
