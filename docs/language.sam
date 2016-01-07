@@ -129,6 +129,30 @@ specification: Semantic Authoring Markdown (SAM)
 
         |insertions|
 
+    section: Sam declaration
+
+        A SAM file starts with a sam declaration, which much start at the
+        beginning of the first line.
+
+        ```(sam)
+sam:
+        ```
+
+        The sam declaration may specify the location of a schema file. The
+        location will be processed through an XML catalog if one is specified.
+
+        ```(sam)
+sam: http://spfeopentoolkit.org/spfe-docs/topic-types/think-plan-do-topic/schemas/authoring/think-plan-do-topic.sams
+        ```
+
+        If the sam declaration does not specify a schema, it may specify a
+        namespace URI. All elements will be output in that namespace. (Namespaces
+        may not be assigned on individual elements.) If a schema is specified,
+        namespaces will be assigned in the schema.
+
+        ```(sam)
+sam: {http://spfeopentoolkit.org/ns/spfe-docs}
+        ```
 
     section: Annotations
 

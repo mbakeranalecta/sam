@@ -38,6 +38,7 @@ class SamParser:
         self.doc = DocStructure()
         self.source = None
         self.patterns = {
+            'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?'),
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(
                 r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.+)?'),
@@ -80,8 +81,9 @@ class SamParser:
 
     def _new_file(self, source):
         line = source.next_line
-        if line[:4] == 'sam:':
-            self.doc.new_root('sam', line[5:])
+        match = self.patterns['sam-declaration'].match(line)
+        if match:
+            self.doc.new_root(match)
             return "SAM", (source, None)
         else:
             raise Exception("Not a SAM file!")
@@ -357,7 +359,7 @@ class SamParser:
 
 
 class Block:
-    def __init__(self, name, attributes=None, content=None, indent=0):
+    def __init__(self, name, attributes=None, content=None, namespace=None, indent=0):
 
         # Test for a valid block name. Must be valid XML name.
         try:
@@ -368,6 +370,7 @@ class Block:
         assert isinstance(attributes, dict) or attributes is None
 
         self.name = name
+        self.namespace = namespace
         self.attributes = attributes
         self.content = content
         self.indent = indent
@@ -407,6 +410,10 @@ class Block:
     def serialize_xml(self):
         yield '<{0}'.format(self.name)
 
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+
         if self.attributes:
             for key, value in self.attributes.items():
                 yield " {0}=\"{1}\"".format(key, value)
@@ -433,7 +440,6 @@ class Block:
                 yield "</{0}>\n".format(self.name)
 
 
-
 class Comment(Block):
     def __init__(self, content='', indent=0):
         super().__init__(name='comment', content=content, indent=indent)
@@ -446,7 +452,6 @@ class Comment(Block):
 
 
 class StringDef(Block):
-    # Should not really inherit from Block as cannot have children, etc
     def __init__(self, string_name, value, indent=0):
         super().__init__(name=string_name, content=value, indent=indent)
 
@@ -460,15 +465,18 @@ class StringDef(Block):
 
 
 class Root(Block):
-    def __init__(self, name='', content='', indent=-1):
-        super().__init__(name, None, content, -1)
+    def __init__(self):
+        self.name = None
+        self.attributes = None
+        self.content = None
+        self.indent = -1
+        self.parent = None
+        self.children = []
 
     def serialize_xml(self):
         yield '<?xml version="1.0" encoding="UTF-8"?>\n'
-        yield '<sam>\n'  # should include namespace and schema
         for x in self.children:
             yield from x.serialize_xml()
-        yield '</sam>'
 
 
 class Flow:
@@ -517,6 +525,7 @@ class EmbeddedXML(Block):
     def __init__(self, text, indent):
         self.text = text
         self.indent = indent
+        self.namespace = None
 
     def serialize_xml(self):
         yield self.text
@@ -573,11 +582,17 @@ class DocStructure:
         self.fields = None
         self.current_record = None
         self.current_block = None
+        self.default_namespace =None
 
-    def new_root(self, block_type, text):
-        r = Root(block_type, text)
+    def new_root(self, match):
+        if match.group('schema') is not None:
+            pass
+        elif match.group('namespace') is not None:
+            self.default_namespace = match.group('namespace')
+        r = Root()
         self.doc = r
         self.current_block = r
+
 
     def add_block(self, block):
         """
@@ -595,6 +610,10 @@ class DocStructure:
         :param block: The Block object to be added.
         :return: None
         """
+
+        if block.namespace is None and self.default_namespace is not None:
+            block.namespace = self.default_namespace
+
         if self.doc is None:
             raise Exception('No root element found.')
         elif self.current_block.indent < block.indent:
@@ -613,42 +632,42 @@ class DocStructure:
         # print('-----------------------------------------------------')
 
     def new_block(self, block_type, attributes, text, indent):
-        b = Block(block_type, attributes, text, indent)
+        b = Block(block_type, attributes, text, None, indent)
         self.add_block(b)
 
     def new_unordered_list_item(self, indent, content_indent):
-        uli = Block('li', None, '', indent + 1)
+        uli = Block('li', None, '', None, indent + 1)
         if self.current_block.parent.name == 'li':
             self.add_block(uli)
         else:
-            ul = Block('ul', None, '', indent)
+            ul = Block('ul', None, '', None, indent)
             self.add_block(ul)
             self.add_block(uli)
-        p = Block('p', None, '', content_indent)
+        p = Block('p', None, '', None, content_indent)
         self.add_block(p)
 
     def new_ordered_list_item(self, indent, content_indent):
-        oli = Block('li', None, '', indent + 1)
+        oli = Block('li', None, '', None, indent + 1)
         if self.current_block.parent.name == 'li':
             self.add_block(oli)
         else:
-            ol = Block('ol', None, '', indent)
+            ol = Block('ol', None, '', None, indent)
             self.add_block(ol)
             self.add_block(oli)
-        p = Block('p', None, '', content_indent)
+        p = Block('p', None, '', None, content_indent)
         self.add_block(p)
 
     def new_labeled_list_item(self, indent, label):
-        lli = Block('li', None, '', indent)
-        lli.add_child(Block('label', None, para_parser.parse(label, self.doc), indent))
+        lli = Block('li', None, '', None, indent)
+        lli.add_child(Block('label', None, para_parser.parse(label, self.doc), None, indent))
         if self.current_block.parent.name == 'li':
             self.current_block.parent.add_sibling(lli)
         else:
-            ll = Block('ll', None, '', indent)
+            ll = Block('ll', None, '', None, indent)
             self.add_block(ll)
             ll.add_child(lli)
             self.current_block = lli
-        p = Block('p', None, '', indent)
+        p = Block('p', None, '', None, indent)
         lli.add_child(p)
         self.current_block = p
 
@@ -659,7 +678,7 @@ class DocStructure:
         self.current_block.add_child(comment)
 
     def new_embedded_xml(self, text, indent):
-        b = EmbeddedXML(text, indent)
+        b = EmbeddedXML(text=text, indent=indent)
         self.add_block(b)
 
     def new_string_def(self, string_name, value, indent):
@@ -671,11 +690,11 @@ class DocStructure:
         self.fields = field_names
 
     def new_record(self, record):
-        b = Block(self.current_record['local_element'], None, '', self.current_record['local_indent'])
+        b = Block(self.current_record['local_element'], None, '', None, self.current_record['local_indent'])
         self.current_block.add_child(b)
         self.current_block = b
         for name, content in record:
-            b = Block(name, None, para_parser.parse(content, self.doc), self.current_block.indent + 4)
+            b = Block(name, None, para_parser.parse(content, self.doc), None, self.current_block.indent + 4)
             self.current_block.add_child(b)
         self.current_block = self.current_block.parent
 
@@ -1005,16 +1024,18 @@ para_parser = SamParaParser()
 
 if __name__ == "__main__":
     samParser = SamParser()
-    filename = sys.argv[-1]
+    infile = sys.argv[-1]
     try:
-        with open(filename, "r") as myfile:
-            test = myfile.read()
+        with open(infile, "r") as inf:
+            test = inf.read()
     except FileNotFoundError:
         test = """sam:
         this:
             is: a test"""
 
     samParser.parse(StringSource(test))
+
+
     # Using a loop to avoid buffering the serialized XML.
     for i in samParser.serialize('xml'):
         print(i, end="")
