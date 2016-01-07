@@ -60,7 +60,7 @@ class SamParser:
         }
 
     def parse(self, source):
-        self.source = source
+        self.source = StringSource(source)
         try:
             self.stateMachine.run(self.source)
         except EOFError:
@@ -723,7 +723,7 @@ class DocStructure:
 
 
 class StringSource:
-    def __init__(self, string_to_parse):
+    def __init__(self, source):
         """
 
         :param string_to_parse: The string to parse.
@@ -731,7 +731,7 @@ class StringSource:
         self.current_line = None
         self.pending_line = None
         self.previous_line = None
-        self.buf = io.StringIO(string_to_parse)
+        self.buf = source
 
     @property
     def next_line(self):
@@ -1033,7 +1033,7 @@ if __name__ == "__main__":
         this:
             is: a test"""
 
-    samParser.parse(StringSource(test))
+    samParser.parse(io.StringIO(test))
 
 
     # Using a loop to avoid buffering the serialized XML.
