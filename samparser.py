@@ -245,7 +245,11 @@ class SamParser:
     def _record(self, context):
         source, match = context
         line = source.next_line
+        indent = len(line) - len(line.lstrip())
         if self.patterns['blank-line'].match(line):
+            return "SAM", context
+        elif indent < self.doc.current_block.indent:
+            source.return_line()
             return "SAM", context
         else:
             field_values = [x.strip() for x in re.split(r'(?<!\\),',line)]
@@ -691,12 +695,16 @@ class DocStructure:
 
     def new_record(self, record):
         b = Block(self.current_record['local_element'], None, '', None, self.current_record['local_indent'])
-        self.current_block.add_child(b)
+        if self.current_block.indent == b.indent:
+            self.current_block.add_sibling(b)
+        else:
+            self.current_block.add_child(b)
+
         self.current_block = b
         for name, content in record:
             b = Block(name, None, para_parser.parse(content, self.doc), None, self.current_block.indent + 4)
             self.current_block.add_child(b)
-        self.current_block = self.current_block.parent
+        # self.current_block = self.current_block.parent
 
     def find_last_annotation(self, text, node=None):
         if node is None:
