@@ -6,26 +6,24 @@ sam: {http://spfeopentoolkit.org/ns/spfe-docs}
 
 feature-topic:(#feature-fragments) Fragments
     head:(#foo)
-        foo: barney [and](conjunction) betty
+        foo: barney {and}(conjunction) betty
         baz: bat
-        $name=fred [and](conjunction) wilma
+        $name=fred {and}(conjunction) wilma
         history:
             revision:: date, author, comment, status
                 2014-06-23, mbaker, New\, Topic, In progress
-
         index:
             entry:: type, term
                 feature, fragment
                 feature, fragments
-
     body: How Fragments Work
 
         * This list is the
 
         * first thing in this section.
 
-        [Fragments](feature) are a [content reuse](task "reusing content" (foo)) feature of the [EPPO-simple](feature)
-        [plugin]( feature).
+        {Fragments}(feature) are a {content reuse}(task "reusing content" (foo)) feature of the {EPPO-simple}(feature)
+        {plugin}( feature).
 
         >>(image foo.gif #bar ?baz ?bat)
 
@@ -38,7 +36,7 @@ feature-topic:(#feature-fragments) Fragments
             |    You gotta walk it by yourself.
 
 
-        This sentence contains an unmatched [ followed by an [annotated](word) phrase.
+        This sentence contains an unmatched { followed by an {annotated}(word) phrase.
 
 
         ~~~(#foo.bar ?gruz-natz)
@@ -56,15 +54,15 @@ feature-topic:(#feature-fragments) Fragments
             $a=apricot
             $b=breadfruit
 
-        This [sentence](grammatical-construct) contains a repeated annotation: the word
-        [sentence] without any annotation metadata. It should be annotated the same as
-        the previous instance. If you just want square brackets around the word
-        \[sentence] you need to precede it with a backslash.
+        This {sentence}(grammatical-construct) contains a repeated annotation: the word
+        {sentence} without any annotation metadata. It should be annotated the same as
+        the previous instance. If you just want braces around the word
+        \{sentence} you need to precede it with a backslash.
 
-        This sentence also references the word [sentence] and should be annotated on output.
+        This sentence also references the word {sentence} and should be annotated on output.
 
-        A fragment is an \[arbitrary\]\\ sequence of *text structures* (paragraphs, lists,
-        etc.) that _has been given_ an id so that it can be [included](bold) by reference at other
+        A fragment is an \{arbitrary\}\\ sequence of *text structures* (paragraphs, lists,
+        etc.) that _has been given_ an id so that it can be \\{included}(bold) by reference at other
         \_points_ in the content.
 
         ```kkk(xml "c:/foo" (1.0) #foo ?bar)
@@ -101,7 +99,7 @@ feature-topic:(#feature-fragments) Fragments
         """(book "Mody Dick" (MLA))
             The quick brown fox jumps over the lazy dog.
 
-            And the [cow](beast "bovine") jumps over the moon.
+            And the {cow}(beast "bovine") jumps over the moon.
 
         blockquote:(web "http://example.com/page")
             Wafting zyphers quickly vexed jumbo.
@@ -129,7 +127,7 @@ feature-topic:(#feature-fragments) Fragments
         * batman
 
 
-        If a fragment is defined inline, it is included where it occurs. [Fragments](song) in fragment
+        If a fragment is defined inline, it is included where it occurs. {Fragments}(song) in fragment
         files are not included anywhere unless they are pulled in by a fragment reference.
 
         0. One
@@ -153,7 +151,7 @@ feature-topic:(#feature-fragments) Fragments
         </foo>
 
 
-        Fragments are recursive. That is, [Fragments] can contain other fragments and
+        Fragments are recursive. That is, {Fragments} can \{contain} other fragments and
         fragment references.
 
         <?xml version="1.0" encoding="UTF-8"?>
@@ -163,8 +161,8 @@ feature-topic:(#feature-fragments) Fragments
         </foo>
 
         Because you often want to >>(image foo.gif #bar ?baz ?bat) change some part of a text when it is being
-        reused, <fragments> & fragment references can both define local [strings](feature).
-        Any [string references](feature) inside a fragment will be resolved by looking first
+        reused, <fragments> & fragment references can both define local {strings}(feature).
+        Any {string references}(feature) inside a fragment will be resolved by looking first
         at local-strings defined in the fragment reference, then at local strings defined
         in the fragment definition, and then at global strings. In effect, this means
         that you can define string substitutions whenever you insert a fragment into your content.
@@ -194,7 +192,7 @@ feature-topic:(#feature-fragments) Fragments
         |bold| The bold element is a decoration occurring within text and is
         indicated by surrounding the text with asterisks.
 
-        |[italic](style "|")| The italic | decoration is indicated by surrounding the text
+        |{italic}(style "|")| The italic | decoration is indicated by surrounding the text
         with underscores.
 
         |quotes| The quotes decoration is indicated by surrounding the text

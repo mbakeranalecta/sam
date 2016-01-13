@@ -780,9 +780,9 @@ class SamParaParser:
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\'),
-            'escaped-chars': re.compile(r'[\\\[\(\]\{\}_\*,`]'),
+            'escaped-chars': re.compile(r'[\\\(\{\}_\*,`]'),
             'annotation': re.compile(
-                r'\[(?P<text>[^\[]*?[^\\])\](\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
+                r'\{(?P<text>[^\{]*?[^\\])\}(\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
             'italic': re.compile(r'_(?P<text>\S.*?\S)_'),
             'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
@@ -810,7 +810,7 @@ class SamParaParser:
             return "END", para
         if char == '\\':
             return "ESCAPE", para
-        elif char == '[':
+        elif char == '{':
             return "ANNOTATION-START", para
         elif char == "*":
             return "BOLD-START", para
@@ -851,9 +851,9 @@ class SamParaParser:
                     # Else raise an exception.
                     else:
                         raise Exception(
-                                "Blank annotation found: [" + text + "] " +
+                                "Blank annotation found: {" + text + "} " +
                                 "If you are trying to insert square brackets " +
-                                "into the document, use \[" + text +
+                                "into the document, use \{" + text +
                                 "]. Otherwise, make sure annotated text matches "
                                 "previous annotation exactly."
                         )

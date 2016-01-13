@@ -162,7 +162,7 @@ sam: {http://spfeopentoolkit.org/ns/spfe-docs}
         and the opening parentheses.)
 
         ```(sam)
-        In [Rio Bravo](movie), [the Duke](actor "John Wayne" (SAG)) plays
+        In {Rio Bravo}(movie), {the Duke}(actor "John Wayne" (SAG)) plays
         a union colonel.
         ```
 
@@ -246,8 +246,6 @@ sam: {http://spfeopentoolkit.org/ns/spfe-docs}
             $color=black
             Bar bar >>($color) sheep
             Have you any wool?
-
-        }
         ```
 
         The content of the fragment must be indented, and the closing brace must
@@ -258,7 +256,7 @@ sam: {http://spfeopentoolkit.org/ns/spfe-docs}
         To insert a fragment:
 
         ```(sam)
-        >>{my-fragment}
+        >>(~my-fragment)
 
         Any strings defined within a fragment are scoped to that fragment. You can
         override these strings when you insert the fragment. In fact, you can
