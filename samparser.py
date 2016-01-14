@@ -92,7 +92,7 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
         element = match.group("element").strip()
-        attributes = parse_block_attributes(match.group("attributes"))
+        attributes = self.parse_block_attributes(match.group("attributes"))
         content = match.group("content")
         self.doc.new_block(element, attributes, para_parser.parse(content, self.doc), indent)
         return "SAM", context
@@ -119,7 +119,7 @@ class SamParser:
 
         other = match.group("other")
         if other is not None:
-            attributes.update(parse_block_attributes(other))
+            attributes.update(self.parse_block_attributes(other))
 
         self.doc.new_block('codeblock', attributes, None, indent)
         self.pre_start('')
@@ -155,7 +155,7 @@ class SamParser:
 
         other = match.group("other")
         if other is not None:
-            attributes.update(parse_block_attributes(other))
+            attributes.update(self.parse_block_attributes(other))
 
         self.doc.new_block('blockquote', attributes, None, indent)
         return "SAM", context
@@ -168,7 +168,7 @@ class SamParser:
 
         attributes_string = match.group("attributes")
         if attributes_string is not None:
-            attributes.update(parse_block_attributes(attributes_string))
+            attributes.update(self.parse_block_attributes(attributes_string))
 
         self.doc.new_block('fragment', attributes, None, indent)
         return "SAM", context
@@ -231,7 +231,7 @@ class SamParser:
     def _line_start(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_block('line', parse_block_attributes(match.group("attributes")), para_parser.parse(match.group('text'), self.doc, strip=False), indent=indent)
+        self.doc.new_block('line', self.parse_block_attributes(match.group("attributes")), para_parser.parse(match.group('text'), self.doc, strip=False), indent=indent)
         return "SAM", context
 
     def _record_start(self, context):
@@ -361,6 +361,32 @@ class SamParser:
     def serialize(self, serialize_format):
         return self.doc.serialize(serialize_format)
 
+    def parse_block_attributes(self, attributes_string):
+        result = {}
+        try:
+            attributes_list = attributes_string.split()
+        except AttributeError:
+            return None
+        unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*')]
+        if unexpected_attributes:
+            raise Exception("Unexpected attribute(s): {0}".format(', '.join(unexpected_attributes)))
+        ids = [x[1:] for x in attributes_list if x[0] == '*']
+        if len(ids) > 1:
+            raise Exception("More than one ID specified: " + ", ".join(ids))
+        names = [x[1:] for x in attributes_list if x[0] == '#']
+        if len(names) > 1:
+            raise Exception("More than one name specified: " + ", ".join(names))
+        conditions = [x[1:] for x in attributes_list if x[0] == '?']
+        if ids:
+            if ids[0] in self.doc.ids:
+                raise Exception("Duplicate ID found: " + ids[0])
+            self.doc.ids.extend(ids)
+            result["id"] = "".join(ids)
+        if names:
+            result["name"] = "".join(names)
+        if conditions:
+            result["conditions"] = " ".join(conditions)
+        return result
 
 class Block:
     def __init__(self, name, attributes=None, content=None, namespace=None, indent=0):
@@ -587,6 +613,7 @@ class DocStructure:
         self.current_record = None
         self.current_block = None
         self.default_namespace =None
+        self.ids = []
 
     def new_root(self, match):
         if match.group('schema') is not None:
@@ -787,8 +814,7 @@ class SamParaParser:
             'italic': re.compile(r'_(?P<text>\S.*?\S)_'),
             'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
             'quotes': re.compile(r'"(?P<text>\S.*?\S)"'),
-            'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)'),
-            'inline-insert-id': re.compile(r'>>#(?P<id>\w*)')
+            'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)')
         }
 
     def parse(self, para, doc, strip=True):
@@ -860,12 +886,12 @@ class SamParaParser:
 
             else:
                 specifically = match.group('specifically') if match.group('specifically') is not None else None
-                namespace = match.group('namespace') if match.group('namespace') is not None else None
-                self.flow.append(Annotation(annotation_type, text, specifically, namespace))
+                namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
+                self.flow.append(Annotation(annotation_type.strip(), text, specifically, namespace))
             para.advance(len(match.group(0)) - 1)
             return "PARA", para
         else:
-            self.current_string += '['
+            self.current_string += '{'
             return "PARA", para
 
     def _bold_start(self, para):
@@ -920,14 +946,7 @@ class SamParaParser:
             self.flow.append(InlineInsert(parse_insert(match.group("attributes"))))
             para.advance(len(match.group(0)) - 1)
         else:
-            match = self.patterns['inline-insert-id'].match(para.rest_of_para)
-            if match:
-                self.flow.append(self.current_string)
-                self.current_string = ''
-                self.flow.append(InlineInsert(('reference', match.group("attributes"))))
-                para.advance(len(match.group(0)) - 1)
-            else:
-                self.current_string += '>'
+            self.current_string += '>'
         return "PARA", para
 
     def _inline_insert_id(self, para):
@@ -972,24 +991,6 @@ class Para:
         self.currentCharNumber += count
 
 
-def parse_block_attributes(attributes_string):
-    result = {}
-    try:
-        attributes_list = attributes_string.split()
-    except AttributeError:
-        return None
-    unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#')]
-    if unexpected_attributes:
-        raise Exception("Unexpected attribute(s): {0}".format(', '.join(unexpected_attributes)))
-    ids = [x[1:] for x in attributes_list if x[0] == '#']
-    if len(ids) > 1:
-        raise Exception("More than one ID specified: " + ", ".join(ids))
-    conditions = [x[1:] for x in attributes_list if x[0] == '?']
-    if ids:
-        result["id"] = "".join(ids)
-    if conditions:
-        result["conditions"] = " ".join(conditions)
-    return result
 
 
 def parse_insert(insert_string):
@@ -999,25 +1000,33 @@ def parse_insert(insert_string):
     if insert_type[0] == '$':
         insert_item = insert_type[1:]
         insert_type = 'string'
+    elif insert_type[0] == '*':
+        insert_item = insert_type[1:]
+        insert_type = 'id'
     elif insert_type[0] == '#':
         insert_item = insert_type[1:]
-        insert_type = 'ref'
+        insert_type = 'name'
     elif insert_type[0] == '~':
         insert_item = insert_type[1:]
         insert_type = 'fragment'
     else:
         insert_item = attributes_list.pop(0)
-    insert_ids = [x[1:] for x in attributes_list if x[0] == '#']
+    insert_ids = [x[1:] for x in attributes_list if x[0] == '*']
+    insert_names = [x[1:] for x in attributes_list if x[0] == '#']
     insert_conditions = [x[1:] for x in attributes_list if x[0] == '?']
-    unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#')]
+    unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*')]
     if len(insert_ids) > 1:
         raise Exception("More than one ID specified: " + ", ".join(insert_ids))
+    if len(insert_names) > 1:
+        raise Exception("More than one name specified: " + ", ".join(insert_names))
     if unexpected_attributes:
         raise Exception("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
     result['type'] = insert_type
     result['item'] = insert_item
     if insert_ids:
         result['id'] = "".join(insert_ids)
+    if insert_names:
+        result['name'] = "".join(insert_names)
     if insert_conditions:
         result['conditions'] = " ".join(insert_conditions)
     return result

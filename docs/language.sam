@@ -232,9 +232,24 @@ sam: {http://spfeopentoolkit.org/ns/spfe-docs}
         Block metadata can include:
 
         * Condition token, which start with a ?
-        * IDs, which start with #
+        * Names, which start with #
+        * IDs, which start with *
         * A string, in quotes, known as the specifically attribute. The specifically
         attribute exists to specify and clarify what is being annotated.
+
+     section: Names and IDs
+        Blocks can be assigned names and IDs. Both are used to reference the block from
+        elsewhere in the content. The difference is that ids are local to the current
+        document and must be unique within the current document. If a duplicate ID is
+        found, the parser will raise an error.
+
+        Names are merely assigned to the block by the parser. No namespace or
+        uniqueness constraints are enforced. It is up to the application to decide how
+        name are used. However, it is considered a SPFE idiom that names are scoped
+        to the type of objects they apply to. In other words, fragment names are in
+        a different namespace from string names.
+
+        This implies that string references are distinct from fragment references.
 
      section: Fragments
 

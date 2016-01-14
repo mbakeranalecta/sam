@@ -22,15 +22,37 @@ feature-topic:(#feature-fragments) Fragments
 
         * first thing in this section.
 
-        {Fragments}(feature) are a {content reuse}(task "reusing content" (foo)) feature of the {EPPO-simple}(feature)
-        {plugin}( feature).
+
+        {Fragments}(feature) are a {content reuse}(task "reusing content" (foo))
+        feature of the {EPPO-simple}(feature) {plugin}( feature).{Bains, p.6}(footnote)
+
+        [Fragments](feature) are a [content reuse](task "reusing content" (foo))
+        feature of the [EPPO-simple](feature) [plugin]( feature).
+
+        Press [Enter].
+
+        Press {Enter}(key)
+
+        Suppose you discovered that your users were using your help content far more
+        than your manuals and wanted to force your writers to break away from this
+        habit of creating book-like help systems. You would introduce>>(*bar)
+        constraint that writers were to focus on producing self sufficient
+        help topics rather than linear narratives. You could enforce
+        that constrain by edict, or through a style guide, but you would
+        get better compliance if you introduced a structured writing system
+        that enforced that constraint.
+
+        footnote:(*bar)
+            This is a footnote.
+
+
 
         >>(image foo.gif #bar ?baz ?bat)
 
         This sentence includes a string reference >>(string name). And a shortcut version >>($name)
 
         """
-            |(#foo) You gotta walk that lonesome valley,
+            |(#foo2) You gotta walk that lonesome valley,
             | You gotta walk it by yourself,
             |(?bar) Nobody here can walk it for you,
             |    You gotta walk it by yourself.
@@ -39,7 +61,7 @@ feature-topic:(#feature-fragments) Fragments
         This sentence contains an unmatched { followed by an {annotated}(word) phrase.
 
 
-        ~~~(#foo.bar ?gruz-natz)
+        ~~~(#foo3 ?gruz-natz)
             $a=apple
             $b=banana
 
@@ -65,7 +87,7 @@ feature-topic:(#feature-fragments) Fragments
         etc.) that _has been given_ an id so that it can be \\{included}(bold) by reference at other
         \_points_ in the content.
 
-        ```kkk(xml "c:/foo" (1.0) #foo ?bar)
+        ```kkk(xml "c:/foo" (1.0) #foo4 ?bar)
 <fragment id="test-fragment">
     <local-strings>
         <string id="test-string-1"><bold>test string one</bold></string>
@@ -83,7 +105,7 @@ feature-topic:(#feature-fragments) Fragments
 </fragment-ref>
         ```kkk
 
-        table:(#my-table ?foobat) An important table
+        table:(*my-table ?foobat #zombie) An important table
             row:: cell, cell, cell
                 foo, bar, baz
                 a, b, c
@@ -109,7 +131,7 @@ feature-topic:(#feature-fragments) Fragments
 
         This is another paragraph. Then there is an alternate blockquote:
 
-        '''(book "Mother Goose" #foo ?bar)
+        '''(book "Mother Goose" #foo5 ?bar)
             The quick brown fox jumps over the lazy dog.
 
         '''
@@ -163,7 +185,7 @@ feature-topic:(#feature-fragments) Fragments
         Because you often want to >>(image foo.gif #bar ?baz ?bat) change some part of a text when it is being
         reused, <fragments> & fragment references can both define local {strings}(feature).
         Any {string references}(feature) inside a fragment will be resolved by looking first
-        at local-strings defined in the fragment reference, then at local strings defined
+        at local-strings defined in the >>(*my-table) fragment reference, then at local strings defined
         in the fragment definition, and then at global strings. In effect, this means
         that you can define string substitutions whenever you insert a fragment into your content.
 
