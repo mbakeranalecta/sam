@@ -64,7 +64,7 @@ class SamParser:
         try:
             self.stateMachine.run(self.source)
         except EOFError:
-            raise Exception("Document ended before structure was complete. At:\n\n"
+            raise SAMParserError("Document ended before structure was complete. At:\n\n"
                             + self.current_paragraph)
 
     def paragraph_start(self, line):
@@ -86,7 +86,7 @@ class SamParser:
             self.doc.new_root(match)
             return "SAM", (source, None)
         else:
-            raise Exception("Not a SAM file!")
+            raise SAMParserError("Not a SAM file!")
 
     def _block(self, context):
         source, match = context
@@ -254,7 +254,7 @@ class SamParser:
         else:
             field_values = [x.strip() for x in re.split(r'(?<!\\),',line)]
             if len(field_values) != len(self.doc.fields):
-                raise Exception("Record length does not match record set header. At:\n\n " + line)
+                raise SAMParserError("Record length does not match record set header. At:\n\n " + line)
             record = list(zip(self.doc.fields, field_values))
             self.doc.new_record(record)
             return "RECORD", context
@@ -282,9 +282,9 @@ class SamParser:
 
     def _embedded_xml_declaration_check(self, version, encoding, standalone):
         if version != "1.0":
-            raise Exception("The version of an embedded XML fragment must be 1.0.")
+            raise SAMParserError("The version of an embedded XML fragment must be 1.0.")
         if encoding.upper() != "UTF-8":
-            raise Exception("The encoding of an embedded XML fragment must be UTF-8.")
+            raise SAMParserError("The encoding of an embedded XML fragment must be UTF-8.")
 
 
 
@@ -356,7 +356,7 @@ class SamParser:
         if match is not None:
             return "PARAGRAPH-START", (source, match)
 
-        raise Exception("I'm confused")
+        raise SAMParserError("I'm confused")
 
     def serialize(self, serialize_format):
         return self.doc.serialize(serialize_format)
@@ -369,17 +369,17 @@ class SamParser:
             return None
         unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*')]
         if unexpected_attributes:
-            raise Exception("Unexpected attribute(s): {0}".format(', '.join(unexpected_attributes)))
+            raise SAMParserError("Unexpected attribute(s): {0}".format(', '.join(unexpected_attributes)))
         ids = [x[1:] for x in attributes_list if x[0] == '*']
         if len(ids) > 1:
-            raise Exception("More than one ID specified: " + ", ".join(ids))
+            raise SAMParserError("More than one ID specified: " + ", ".join(ids))
         names = [x[1:] for x in attributes_list if x[0] == '#']
         if len(names) > 1:
-            raise Exception("More than one name specified: " + ", ".join(names))
+            raise SAMParserError("More than one name specified: " + ", ".join(names))
         conditions = [x[1:] for x in attributes_list if x[0] == '?']
         if ids:
             if ids[0] in self.doc.ids:
-                raise Exception("Duplicate ID found: " + ids[0])
+                raise SAMParserError("Duplicate ID found: " + ids[0])
             self.doc.ids.extend(ids)
             result["id"] = "".join(ids)
         if names:
@@ -395,7 +395,7 @@ class Block:
         try:
             x = etree.Element(name)
         except ValueError:
-            raise Exception("Invalid block name: " + name)
+            raise SAMParserError("Invalid block name: " + name)
 
         assert isinstance(attributes, dict) or attributes is None
 
@@ -646,10 +646,10 @@ class DocStructure:
             block.namespace = self.default_namespace
 
         if self.doc is None:
-            raise Exception('No root element found.')
+            raise SAMParserError('No root element found.')
         elif self.current_block.indent < block.indent:
             if self.current_block.name == 'p':
-                raise Exception(
+                raise SAMParserError(
                         'A paragraph cannot have block children. At \"{0}\".'.format(
                             str(self.current_block.children[0])))
             self.current_block.add_child(block)
@@ -754,7 +754,7 @@ class DocStructure:
         if serialize_format.upper() == 'XML':
             yield from self.doc.serialize_xml()
         else:
-            raise Exception("Unknown serialization protocol {0}".format(serialize_format))
+            raise SAMParserError("Unknown serialization protocol {0}".format(serialize_format))
 
 
 class StringSource:
@@ -876,7 +876,7 @@ class SamParaParser:
 
                     # Else raise an exception.
                     else:
-                        raise Exception(
+                        raise SAMParserError(
                                 "Blank annotation found: {" + text + "} " +
                                 "If you are trying to insert square brackets " +
                                 "into the document, use \{" + text +
@@ -990,6 +990,10 @@ class Para:
     def advance(self, count):
         self.currentCharNumber += count
 
+class SAMParserError(Exception):
+    """
+    Raised if the SAM parser encounters an error.
+    """
 
 
 
@@ -1016,11 +1020,11 @@ def parse_insert(insert_string):
     insert_conditions = [x[1:] for x in attributes_list if x[0] == '?']
     unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*')]
     if len(insert_ids) > 1:
-        raise Exception("More than one ID specified: " + ", ".join(insert_ids))
+        raise SAMParserError("More than one ID specified: " + ", ".join(insert_ids))
     if len(insert_names) > 1:
-        raise Exception("More than one name specified: " + ", ".join(insert_names))
+        raise SAMParserError("More than one name specified: " + ", ".join(insert_names))
     if unexpected_attributes:
-        raise Exception("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
+        raise SAMParserError("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
     result['type'] = insert_type
     result['item'] = insert_item
     if insert_ids:
