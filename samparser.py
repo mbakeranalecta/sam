@@ -183,7 +183,13 @@ class SamParser:
 
     def _paragraph(self, context):
         source, match = context
-        line = source.next_line
+        try:
+            line = source.next_line
+        except EOFError:
+            f = para_parser.parse(self.current_paragraph, self.doc)
+            self.doc.new_flow(f)
+            return "END", context
+
         if self.patterns['blank-line'].match(line):
             f = para_parser.parse(self.current_paragraph, self.doc)
             self.doc.new_flow(f)
@@ -244,7 +250,10 @@ class SamParser:
 
     def _record(self, context):
         source, match = context
-        line = source.next_line
+        try:
+            line = source.next_line
+        except EOFError:
+            return "END", context
         indent = len(line) - len(line.lstrip())
         if self.patterns['blank-line'].match(line):
             return "SAM", context
