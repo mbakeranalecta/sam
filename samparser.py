@@ -579,7 +579,7 @@ class Annotation:
         self.namespace = namespace
 
     def __str__(self):
-        return '[%s](%s "%s" (%s))' % (self.text, self.annotation_type, self.specifically, self.namespace)
+        return '{%s}(%s "%s" (%s))' % (self.text, self.annotation_type, self.specifically, self.namespace)
 
     def serialize_xml(self):
         yield '<annotation type="{0}"'.format(self.annotation_type)
@@ -589,6 +589,20 @@ class Annotation:
             yield ' namespace="{0}"'.format(self.namespace)
         yield '>{0}</annotation>'.format(escape_for_xml(self.text))
 
+
+class Citation:
+    def __init__(self, citation_type, citation_value):
+        self.citation_type = citation_type
+        self.citation_value = citation_value
+
+    def __str__(self):
+        return '[%s %s]' % (self.citation_type, self.citation_value)
+
+    def serialize_xml(self):
+        if self.citation_type == 'citation':
+            yield '<citation>{1}</citation>'.format(self.citation_type, self.citation_value)
+        else:
+            yield '<citation type="{0}" value="{1}"/>'.format(self.citation_type, self.citation_value)
 
 class Decoration:
     def __init__(self, decoration_type, text):
@@ -809,6 +823,7 @@ class SamParaParser:
         self.stateMachine.add_state("ESCAPE", self._escape)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.add_state("ANNOTATION-START", self._annotation_start)
+        self.stateMachine.add_state("CITATION-START", self._citation_start)
         self.stateMachine.add_state("BOLD-START", self._bold_start)
         self.stateMachine.add_state("ITALIC-START", self._italic_start)
         self.stateMachine.add_state("MONO-START", self._mono_start)
@@ -817,7 +832,7 @@ class SamParaParser:
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\'),
-            'escaped-chars': re.compile(r'[\\\(\{\}_\*,`]'),
+            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`]'),
             'annotation': re.compile(
                 r'\{(?P<text>[^\{]*?[^\\])\}(\(\s*(?P<type>\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
@@ -825,7 +840,7 @@ class SamParaParser:
             'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
             'quotes': re.compile(r'"(?P<text>\S.*?\S)"'),
             'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)'),
-            'citation': re.compile(r'\[(?P<id>\*\w)\]')
+            'citation': re.compile(r'(\[\s*\*(?P<id>\S+?)\s*\])|(\[\s*\#(?P<name>\S+?)\s*\])|(\[\s*(?P<citation>.*?)\])')
         }
 
     def parse(self, para, doc, strip=True):
@@ -849,6 +864,8 @@ class SamParaParser:
             return "ESCAPE", para
         elif char == '{':
             return "ANNOTATION-START", para
+        elif char == '[':
+            return "CITATION-START", para
         elif char == "*":
             return "BOLD-START", para
         elif char == "_":
@@ -909,6 +926,32 @@ class SamParaParser:
             return "PARA", para
         else:
             self.current_string += '{'
+            return "PARA", para
+
+    def _citation_start(self, para):
+        match = self.patterns['citation'].match(para.rest_of_para)
+        if match:
+            self.flow.append(self.current_string)
+            self.current_string = ''
+            idref = match.group('id')
+            nameref = match.group('name')
+            citation = match.group('citation')
+
+            if idref:
+                citation_type = 'idref'
+                citation_value = idref.strip()
+            elif nameref:
+                citation_type = 'nameref'
+                citation_value = nameref.strip()
+            else:
+                citation_type = 'citation'
+                citation_value = citation.strip()
+
+            self.flow.append(Citation(citation_type, citation_value))
+            para.advance(len(match.group(0)) - 1)
+            return "PARA", para
+        else:
+            self.current_string += '['
             return "PARA", para
 
     def _bold_start(self, para):

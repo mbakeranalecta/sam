@@ -28,10 +28,10 @@ feature-topic:(#feature-fragments) Fragments
 
 
         {Fragments}(feature) are a {content reuse}(task "reusing content" (foo))
-        feature of the {EPPO-simple}(feature) {plugin}( feature).>>[*bar]
+        feature of the {EPPO-simple}(feature) {plugin}( feature).[*bar]
 
         [Fragments](feature) are a [content reuse](task "reusing content" (foo))
-        feature of the [EPPO-simple](feature) [plugin]( feature).[Melville  (MLA)]
+        feature of the [EPPO-simple](feature) [plugin]( feature).[Melville, 1851]
 
         Press [Enter].
 
