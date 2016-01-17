@@ -819,12 +819,13 @@ class SamParaParser:
             'escape': re.compile(r'\\'),
             'escaped-chars': re.compile(r'[\\\(\{\}_\*,`]'),
             'annotation': re.compile(
-                r'\{(?P<text>[^\{]*?[^\\])\}(\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
+                r'\{(?P<text>[^\{]*?[^\\])\}(\(\s*(?P<type>\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
             'italic': re.compile(r'_(?P<text>\S.*?\S)_'),
             'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
             'quotes': re.compile(r'"(?P<text>\S.*?\S)"'),
-            'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)')
+            'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)'),
+            'citation': re.compile(r'\[(?P<id>\*\w)\]')
         }
 
     def parse(self, para, doc, strip=True):

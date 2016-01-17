@@ -28,10 +28,10 @@ feature-topic:(#feature-fragments) Fragments
 
 
         {Fragments}(feature) are a {content reuse}(task "reusing content" (foo))
-        feature of the {EPPO-simple}(feature) {plugin}( feature).>>(*bar)
+        feature of the {EPPO-simple}(feature) {plugin}( feature).>>[*bar]
 
         [Fragments](feature) are a [content reuse](task "reusing content" (foo))
-        feature of the [EPPO-simple](feature) [plugin]( feature).[Melville  (MLA)>
+        feature of the [EPPO-simple](feature) [plugin]( feature).[Melville  (MLA)]
 
         Press [Enter].
 
@@ -39,7 +39,7 @@ feature-topic:(#feature-fragments) Fragments
 
         Suppose you discovered that your users were using your help content far more
         than your manuals and wanted to force your writers to break away from this
-        habit of creating book-like help systems. You would introduce>>(*bar)
+        habit of creating book-like help systems. You would introduce[*bar]
         constraint that writers were to focus on producing self sufficient
         help topics rather than linear narratives. You could enforce
         that constrain by edict, or through a style guide, but you would
