@@ -22,16 +22,16 @@ feature-topic:(#feature-fragments) Fragments
 
         * first thing in this section.
 
-        This paragraph contains a line {wikipedia}(http://wikipedia.com).
+        This paragraph contains a line {Wikipedia}(http://wikipedia.com (goo)).
 
-        This paragraph contains a line {wikipedia}(link "http://wikipedia.com").
+        This paragraph contains a line {Wikipedia}(link "http://wikipedia.com").
 
 
         {Fragments}(feature) are a {content reuse}(task "reusing content" (foo))
         feature of the {EPPO-simple}(feature) {plugin}( feature).>>(*bar)
 
         [Fragments](feature) are a [content reuse](task "reusing content" (foo))
-        feature of the [EPPO-simple](feature) [plugin]( feature).
+        feature of the [EPPO-simple](feature) [plugin]( feature).[Melville  (MLA)>
 
         Press [Enter].
 

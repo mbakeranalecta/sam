@@ -208,6 +208,49 @@ sam: {http://spfeopentoolkit.org/ns/spfe-docs}
 	    4. an id, consisting of a # followed by a name (such as "#foo")
 	    5. one or more conditions, consisting of ? followed by a token
 
+    section: Citations
+
+        Citations are any reference to another resource. This includes internal references
+        to other structures within the file, such as to a graphic,procedure, or footnote, as
+        well as references to external works.
+
+        To cite a resource that has an id within the current SAM document, reference the
+        id like this:
+
+        ```(sam)
+            Moby Dick is about a big fish[*moby]. See [*whale].
+
+            fig:(*whale)
+                >>(image whale.png)
+
+            footnote:(*moby)
+                Actually, Moby Dick is a whale, not a fish.
+
+        ```
+
+        To cite a named resource within your content set, reference the name like this:
+
+        ```(sam)
+            Moby Dick[#MobyDick] is about a big fish.
+        ```
+        This assumes that there is a bibliographic entry with the named `MobyDick` somewhere
+        in your content set.
+
+        To cite an external work without referring to another resource in your content
+        set, use a standard reference syntax.
+
+        ```(sam)
+            Moby Dick[Melville, 1851] is about a big fish.
+        ```
+
+        SAM does not attempt to decode the format of this style of citation. It just delivers
+        it as a string.
+
+        However, if we decide to do patterns, than your could use a pattern to validate
+        and analyse the citation into its constituent parts in the schema.
+
+
+
     section: Conditions
 
         Conditions are indicated in annotations, blocks, and inserts using a question mark followed
@@ -237,7 +280,31 @@ sam: {http://spfeopentoolkit.org/ns/spfe-docs}
         * A string, in quotes, known as the specifically attribute. The specifically
         attribute exists to specify and clarify what is being annotated.
 
-     section: Names and IDs
+    section: Paragraphs
+
+        Syntactically, a paragraph is sequence of lines ending with a blank line, and
+        does not start with any markup that makes it look like any other structure.
+
+        Logically, a paragraph is a block that contains a flow. The content model of
+        a paragraph is thus simply a flow. The flow, in turn can contain annotations,
+        decorations, insertions, and citations.
+
+        A paragraph cannot have block children. It is a syntax error to have
+        anything indented under a paragraph. Logically, the content model of the
+        implicit element {p}(implicit-element) is a flow, so it can't have any other
+        children.
+
+        If you desperately want to create paragraphs that have block children, you
+        could create an alternative block type for them, such as `para`. This is
+        generally a bad idea, as it create unnecessary complexity. A common reason
+        for doing this it to make lists children of paragraphs. The argument for
+        this is that the list is part of the argument of the paragraph and so part
+        of the paragraph as a unit of composition. However, in almost all cases,
+        a paragraph in a markup language is not a unit of composition or meaning,
+        but a typographic unit. Unless you need to support some very specific
+        forms of linguistic analysis, you don't need paragraphs to have children.
+
+    section: Names and IDs
         Blocks can be assigned names and IDs. Both are used to reference the block from
         elsewhere in the content. The difference is that ids are local to the current
         document and must be unique within the current document. If a duplicate ID is
