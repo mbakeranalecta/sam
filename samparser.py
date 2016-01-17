@@ -3,6 +3,7 @@ from statemachine import StateMachine
 from lxml import etree
 import xml.parsers.expat
 import io
+from urllib.parse import urlparse
 
 try:
     import regex as re
@@ -868,6 +869,7 @@ class SamParaParser:
             self.current_string = ''
             annotation_type = match.group('type')
             text = match.group("text")
+
             # If there is an annotated phrase with no annotation, look back
             # to see if it has been annotated already, and if so, copy the
             # closest preceding annotation.
@@ -894,7 +896,12 @@ class SamParaParser:
                         )
 
             else:
-                specifically = match.group('specifically') if match.group('specifically') is not None else None
+                #Check for link shortcut
+                if urlparse(annotation_type,None).scheme is not None:
+                    specifically = annotation_type
+                    annotation_type='link'
+                else:
+                    specifically = match.group('specifically') if match.group('specifically') is not None else None
                 namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
                 self.flow.append(Annotation(annotation_type.strip(), text, specifically, namespace))
             para.advance(len(match.group(0)) - 1)
