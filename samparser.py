@@ -142,6 +142,10 @@ class SamParser:
 
         attributes = {}
 
+        extra=source.current_line.rstrip()[len(match.group(0)):]
+        if extra:
+            raise SAMParserError("Extra text found after blockquote start: " + extra)
+
         citation_type = match.group("type")
         if citation_type is not None:
             attributes['type'] = citation_type
@@ -817,7 +821,7 @@ class SamParaParser:
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\'),
-            'escaped-chars': re.compile(r'[\\\(\{\}_\*,`]'),
+            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`]'),
             'annotation': re.compile(
                 r'\{(?P<text>[^\{]*?[^\\])\}(\((?P<type>[^\(]\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
@@ -1069,8 +1073,11 @@ if __name__ == "__main__":
         test = """sam:
         this:
             is: a test"""
-
-    samParser.parse(io.StringIO(test))
+    try:
+        samParser.parse(io.StringIO(test))
+    except SAMParserError as err:
+        print(err, file=sys.stderr)
+        exit(1)
 
 
     # Using a loop to avoid buffering the serialized XML.
