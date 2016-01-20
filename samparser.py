@@ -46,7 +46,7 @@ class SamParser:
             'codeblock-start': re.compile(
                 r'(?P<indent>\s*)(?P<flag>```\S*?(?=\())(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
             'blockquote-start': re.compile(
-                r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<attributes>.*?(?<!\\))\))?((\[\s*\*(?P<id>\S+?)\s*\])|(\[\s*\#(?P<name>\S+?)\s*\])|(\[\s*(?P<citation>.*?)\]))?'),
+                r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<attributes>.*?(?<!\\))\))?((\[\s*\*(?P<id>\S+)(?P<extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?'),
             'fragment-start': re.compile(r'(?P<indent>\s*)~~~(\((?P<attributes>.*?)\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'line-start': re.compile(r'(?P<indent>\s*)\|(\((?P<attributes>.*?)\))?\s(?P<text>.*)'),
@@ -155,6 +155,7 @@ class SamParser:
         idref = match.group('id')
         nameref = match.group('name')
         citation = match.group('citation')
+        extra = match.group('extra')
 
         if idref:
             citation_type = 'idref'
@@ -169,7 +170,7 @@ class SamParser:
             citation_type=None
 
         if citation_type:
-            cit = (Citation(citation_type, citation_value))
+            cit = (Citation(citation_type, citation_value, extra))
             b.add_child(cit)
 
         return "SAM", context
@@ -604,18 +605,19 @@ class Annotation:
 
 
 class Citation:
-    def __init__(self, citation_type, citation_value):
+    def __init__(self, citation_type, citation_value, citation_extra):
         self.citation_type = citation_type
         self.citation_value = citation_value
+        self.citation_extra = citation_extra
 
     def __str__(self):
-        return '[%s %s]' % (self.citation_type, self.citation_value)
+        return '[%s %s]' % (self.citation_type, self.citation_value, self.citation_extra)
 
     def serialize_xml(self):
         if self.citation_type == 'citation':
             yield '<citation>{1}</citation>'.format(self.citation_type, self.citation_value)
         else:
-            yield '<citation type="{0}" value="{1}"/>'.format(self.citation_type, self.citation_value)
+            yield '<citation type="{0}" value="{1}" extra="{2}"/>'.format(self.citation_type, self.citation_value, self.citation_extra)
 
 class Decoration:
     def __init__(self, decoration_type, text):
@@ -854,7 +856,7 @@ class SamParaParser:
             'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
             'quotes': re.compile(r'"(?P<text>\S.*?\S)"'),
             'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)'),
-            'citation': re.compile(r'(\[\s*\*(?P<id>\S+?)\s*\])|(\[\s*\#(?P<name>\S+?)\s*\])|(\[\s*(?P<citation>.*?)\])')
+            'citation': re.compile(r'(\[\s*\*(?P<id>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*\#(?P<name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\])')
         }
 
     def parse(self, para, doc, strip=True):
@@ -950,6 +952,7 @@ class SamParaParser:
             idref = match.group('id')
             nameref = match.group('name')
             citation = match.group('citation')
+            extra = match.group('extra')
 
             if idref:
                 citation_type = 'idref'
@@ -961,7 +964,7 @@ class SamParaParser:
                 citation_type = 'citation'
                 citation_value = citation.strip()
 
-            self.flow.append(Citation(citation_type, citation_value))
+            self.flow.append(Citation(citation_type, citation_value, extra))
             para.advance(len(match.group(0)) - 1)
             return "PARA", para
         else:
