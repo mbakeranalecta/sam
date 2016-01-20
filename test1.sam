@@ -55,7 +55,7 @@ feature-topic:(#feature-fragments) Fragments
 
         This sentence includes a string reference >>(string name). And a shortcut version >>($name)
 
-        """
+        """[*bing]
             |(#foo2) You gotta walk that lonesome valley,
             | You gotta walk it by yourself,
             |(?bar) Nobody here can walk it for you,
@@ -122,12 +122,12 @@ feature-topic:(#feature-fragments) Fragments
 
         After this paragraph, there is a blockquote:
 
-        """(book "Mody Dick" (MLA))
+        """(*foo #bar ?baz)
             The quick brown fox jumps over the lazy dog.
 
-            And the {cow}(beast "bovine") jumps over the moon.
+            And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
 
-        blockquote:(web "http://example.com/page")
+        blockquote:[http://example.com/page]
             Wafting zyphers quickly vexed jumbo.
 
             Far and few are the lands where the jumblies live.
@@ -135,7 +135,7 @@ feature-topic:(#feature-fragments) Fragments
 
         This is another paragraph. Then there is an alternate blockquote:
 
-        '''(book "Mother Goose" #foo5 ?bar)
+        '''( #foo5 ?bar ?baz)[Mother Goose]
             The quick brown fox jumps over the lazy dog.
 
         '''

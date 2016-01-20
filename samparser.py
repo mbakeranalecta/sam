@@ -42,11 +42,11 @@ class SamParser:
             'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?'),
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(
-                r'(?P<indent>\s*)(?P<element>[a-zA-Z0-9-_]+):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.+)?'),
+                r'(?P<indent>\s*)(?P<element>\S+?):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.+)?'),
             'codeblock-start': re.compile(
                 r'(?P<indent>\s*)(?P<flag>```\S*?(?=\())(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
             'blockquote-start': re.compile(
-                r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<type>\w*)\s*(["\'](?P<citation>.+?)["\'])?\s*(\((?P<format>\S+?)\))?(?P<other>.+?)?\))?'),
+                r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<attributes>.*?(?<!\\))\))?((\[\s*\*(?P<id>\S+?)\s*\])|(\[\s*\#(?P<name>\S+?)\s*\])|(\[\s*(?P<citation>.*?)\]))?'),
             'fragment-start': re.compile(r'(?P<indent>\s*)~~~(\((?P<attributes>.*?)\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'line-start': re.compile(r'(?P<indent>\s*)\|(\((?P<attributes>.*?)\))?\s(?P<text>.*)'),
@@ -140,29 +140,38 @@ class SamParser:
         source, match = context
         indent = len(match.group('indent'))
 
-        attributes = {}
+        # TODO: Refactor this with the paraparser version
+
 
         extra=source.current_line.rstrip()[len(match.group(0)):]
         if extra:
             raise SAMParserError("Extra text found after blockquote start: " + extra)
 
-        citation_type = match.group("type")
-        if citation_type is not None:
-            attributes['type'] = citation_type
+        attributes = self.parse_block_attributes(match.group("attributes"))
 
-        citation = match.group("citation")
-        if citation is not None:
-            attributes["citation"] = citation
+        b = self.doc.new_block('blockquote', attributes, None, indent)
 
-        citation_format = match.group("format")
-        if citation_format is not None:
-            attributes["format"] = citation_format
+        #see if there is a citation
+        idref = match.group('id')
+        nameref = match.group('name')
+        citation = match.group('citation')
 
-        other = match.group("other")
-        if other is not None:
-            attributes.update(self.parse_block_attributes(other))
+        if idref:
+            citation_type = 'idref'
+            citation_value = idref.strip()
+        elif nameref:
+            citation_type = 'nameref'
+            citation_value = nameref.strip()
+        elif citation:
+            citation_type = 'citation'
+            citation_value = citation.strip()
+        else:
+            citation_type=None
 
-        self.doc.new_block('blockquote', attributes, None, indent)
+        if citation_type:
+            cit = (Citation(citation_type, citation_value))
+            b.add_child(cit)
+
         return "SAM", context
 
     def _fragment_start(self, context):
@@ -693,6 +702,7 @@ class DocStructure:
     def new_block(self, block_type, attributes, text, indent):
         b = Block(block_type, attributes, text, None, indent)
         self.add_block(b)
+        return b
 
     def new_unordered_list_item(self, indent, content_indent):
         uli = Block('li', None, '', None, indent + 1)
