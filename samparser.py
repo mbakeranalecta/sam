@@ -46,7 +46,7 @@ class SamParser:
             'codeblock-start': re.compile(
                 r'(?P<indent>\s*)(?P<flag>```[^\s\(]*)(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
             'blockquote-start': re.compile(
-                r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<attributes>.*?(?<!\\))\))?((\[\s*\*(?P<id>\S+)(?P<extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?'),
+                r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<attributes>.*?(?<!\\))\))?((\[\s*\*(?P<id>\S+)(?P<id_extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?'),
             'fragment-start': re.compile(r'(?P<indent>\s*)~~~(\((?P<attributes>.*?)\))?'),
             'paragraph-start': re.compile(r'\w*'),
             'line-start': re.compile(r'(?P<indent>\s*)\|(\((?P<attributes>.*?)\))?\s(?P<text>.*)'),
@@ -152,17 +152,27 @@ class SamParser:
         b = self.doc.new_block('blockquote', attributes, None, indent)
 
         #see if there is a citation
-        idref = match.group('id')
-        nameref = match.group('name')
-        citation = match.group('citation')
-        extra = match.group('extra')
+        try:
+            idref = match.group('id')
+        except IndexError:
+            idref=None
+        try:
+            nameref = match.group('name')
+        except IndexError:
+            nameref = None
+        try:
+            citation = match.group('citation')
+        except IndexError:
+            citation=None
 
         if idref:
             citation_type = 'idref'
             citation_value = idref.strip()
+            extra = match.group('id_extra')
         elif nameref:
             citation_type = 'nameref'
             citation_value = nameref.strip()
+            extra = match.group('name_extra')
         elif citation:
             citation_type = 'citation'
             citation_value = citation.strip()
@@ -738,7 +748,7 @@ class DocStructure:
             self.add_block(ll)
             ll.add_child(lli)
             self.current_block = lli
-        p = Block('p', None, '', None, indent)
+        p = Block('p', None, '', None, indent+4)
         lli.add_child(p)
         self.current_block = p
 
@@ -856,7 +866,7 @@ class SamParaParser:
             'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
             'quotes': re.compile(r'"(?P<text>\S.*?\S)"'),
             'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)'),
-            'citation': re.compile(r'(\[\s*\*(?P<id>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*\#(?P<name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\])')
+            'citation': re.compile(r'(\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name_name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\])')
         }
 
     def parse(self, para, doc, strip=True):
@@ -949,17 +959,27 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
+        try:
             idref = match.group('id')
+        except IndexError:
+            idref=None
+        try:
             nameref = match.group('name')
+        except IndexError:
+            nameref = None
+        try:
             citation = match.group('citation')
-            extra = match.group('extra')
+        except IndexError:
+            citation=None
 
             if idref:
                 citation_type = 'idref'
                 citation_value = idref.strip()
+                extra = match.group('id_extra')
             elif nameref:
                 citation_type = 'nameref'
                 citation_value = nameref.strip()
+                extra = match.group('name_extra')
             else:
                 citation_type = 'citation'
                 citation_value = citation.strip()
