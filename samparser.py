@@ -44,7 +44,7 @@ class SamParser:
             'block-start': re.compile(
                 r'(?P<indent>\s*)(?P<element>\S+?):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.+)?'),
             'codeblock-start': re.compile(
-                r'(?P<indent>\s*)(?P<flag>```\S*?(?=\())(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
+                r'(?P<indent>\s*)(?P<flag>```[^\s\(]*)(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
             'blockquote-start': re.compile(
                 r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<attributes>.*?(?<!\\))\))?((\[\s*\*(?P<id>\S+?)\s*\])|(\[\s*\#(?P<name>\S+?)\s*\])|(\[\s*(?P<citation>.*?)\]))?'),
             'fragment-start': re.compile(r'(?P<indent>\s*)~~~(\((?P<attributes>.*?)\))?'),
