@@ -1121,7 +1121,7 @@ if __name__ == "__main__":
     samParser = SamParser()
     infile = sys.argv[-1]
     try:
-        with open(infile, "r") as inf:
+        with open(infile, "r", encoding="utf-8-sig") as inf:
             test = inf.read()
     except FileNotFoundError:
         test = """sam:
