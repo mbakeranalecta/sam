@@ -748,7 +748,11 @@ class DocStructure:
             self.add_block(ll)
             ll.add_child(lli)
             self.current_block = lli
-        p = Block('p', None, '', None, indent+4)
+        # Assign the paragraph a fractional indent so that any following
+        # element that is not an ll we be at same indent as ll, causing
+        # ll to end. Because indent is fractional, and block child will
+        # be more indented, which is illegal and will trigger an error.
+        p = Block('p', None, '', None, indent+.5)
         lli.add_child(p)
         self.current_block = p
 

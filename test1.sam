@@ -236,6 +236,6 @@ feature-topic:(#feature-fragments) Fragments
         |mono| The mono decoration is indicated by backticks
 
         index:
-            entry:: type, term
-                feature, fragment
-                feature, fragments
+                entry:: type, term
+                    feature, fragment
+                    feature, fragments
