@@ -64,6 +64,11 @@ feature-topic:(#feature-fragments) Fragments
 
         This sentence[*bing bang boom] contains an unmatched { followed by an {annotated}(word) phrase.
 
+        |(#foo2) You gotta walk that lonesome valley,[*bing bang boom]
+        | You gotta walk it by yourself,
+        |(?bar) Nobody here can walk it for you,
+        |    You gotta walk it by yourself.
+
 
         ~~~(#foo3 ?gruz-natz)
             $a=apple
@@ -231,6 +236,6 @@ feature-topic:(#feature-fragments) Fragments
         |mono| The mono decoration is indicated by backticks
 
         index:
-            entry:: type, term
-                feature, fragment
-                feature, fragments
+                entry:: type, term
+                    feature, fragment
+                    feature, fragments
