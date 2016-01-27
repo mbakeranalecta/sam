@@ -42,7 +42,7 @@ class SamParser:
             'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?'),
             'comment': re.compile(r'\s*#.*'),
             'block-start': re.compile(
-                r'(?P<indent>\s*)(?P<element>\S+?):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.+)?'),
+                r'(?P<indent>\s*)(?P<element>[\w_\.-]+?):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.+)?'),
             'codeblock-start': re.compile(
                 r'(?P<indent>\s*)(?P<flag>```[^\s\(]*)(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
             'blockquote-start': re.compile(
@@ -923,7 +923,7 @@ class SamParaParser:
                     else:
                         raise SAMParserError(
                                 "Blank annotation found: {" + text + "} " +
-                                "If you are trying to insert square brackets " +
+                                "If you are trying to insert curly braces " +
                                 "into the document, use \{" + text +
                                 "]. Otherwise, make sure annotated text matches "
                                 "previous annotation exactly."
