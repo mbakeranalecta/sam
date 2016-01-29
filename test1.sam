@@ -21,11 +21,16 @@ feature-topic:(#feature-fragments) Fragments
         * This list is the
 
         * first thing in this section.
+        * There is no space between these list items.
 
         This paragraph contains a line {Wikipedia}(http://wikipedia.com (goo)).
 
         This paragraph contains a line {Wikipedia}(link "http://wikipedia.com").
 
+        7. Seven
+        8. Eight and
+           a half.
+        9. Nine
 
         {Fragments}(feature) are a {content reuse}(task "reusing content" (foo))
         feature of the {EPPO-simple}(feature) {plugin}( feature).[*bar]
@@ -223,16 +228,12 @@ feature-topic:(#feature-fragments) Fragments
         |p| The p element represents a paragraph. It is recognized as a block of
         lines with no leading tag. It ends with a blank line. p elements are the
         only elements that can contain decorations and annotations.
-
         |bold| The bold element is a decoration occurring within text and is
         indicated by surrounding the text with asterisks.
-
         |{italic}(style "|")| The italic | decoration is indicated by surrounding the text
         with underscores.
-
         |quotes| The quotes decoration is indicated by surrounding the text
         in straight quotes.
-
         |mono| The mono decoration is indicated by backticks
 
         index:

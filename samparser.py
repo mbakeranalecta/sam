@@ -219,6 +219,18 @@ class SamParser:
             f = para_parser.parse(self.current_paragraph, self.doc)
             self.doc.new_flow(f)
             return "SAM", context
+        elif self.doc.in_context(['p', 'li', 'ul']) and self.patterns['list-item'].match(line):
+            f = para_parser.parse(self.current_paragraph, self.doc)
+            self.doc.new_flow(f)
+            return self._list_item((source, self.patterns['list-item'].match(line)))
+        elif self.doc.in_context(['p', 'li', 'ol']) and self.patterns['num-list-item'].match(line):
+            f = para_parser.parse(self.current_paragraph, self.doc)
+            self.doc.new_flow(f)
+            return self._list_item((source, self.patterns['num-list-item'].match(line)))
+        elif self.doc.in_context(['p', 'li', 'll']) and self.patterns['labeled-list-item'].match(line):
+            f = para_parser.parse(self.current_paragraph, self.doc)
+            self.doc.new_flow(f)
+            return self._labeled_list_item((source, self.patterns['labeled-list-item'].match(line)))
         else:
             self.paragraph_append(line)
             return "PARAGRAPH", context
@@ -530,7 +542,7 @@ class StringDef(Block):
 
 class Root(Block):
     def __init__(self):
-        self.name = None
+        self.name = '/'
         self.attributes = None
         self.content = None
         self.indent = -1
@@ -663,6 +675,25 @@ class DocStructure:
         self.current_block = None
         self.default_namespace =None
         self.ids = []
+
+    @property
+    def context(self):
+        context = []
+        context_block = self.current_block
+        try:
+            while True:
+                context.append(context_block.name)
+                context_block = context_block.parent
+        finally:
+            return context
+
+    def in_context(self, context_query):
+        c = self.context
+        for i, cq in enumerate(context_query):
+            if c[i] != cq:
+                return False
+        return True
+
 
     def new_root(self, match):
         if match.group('schema') is not None:
