@@ -19,6 +19,8 @@ feature-topic:(#feature-fragments) Fragments
     body: How Fragments Work
 
         * This list is the
+            * Nested list
+            * with two entries
 
         * first thing in this section.
         * There is no space between these list items.
@@ -35,10 +37,13 @@ feature-topic:(#feature-fragments) Fragments
         {Fragments}(feature) are a {content reuse}(task "reusing content" (foo))
         feature of the {EPPO-simple}(feature) {plugin}( feature).[*bar]
 
-        [Fragments](feature) are a [content reuse](task "reusing content" (foo))
-        feature of the [EPPO-simple](feature) [plugin]( feature).[Melville, 1851]
+        \{Fragments}(feature) are a \{content reuse}(task "reusing content" (foo))
+        feature of the \{EPPO-simple}(feature) \{plugin}( feature).[*bar]
 
-        Press [Enter].
+        \[Fragments](feature) are a \[content reuse](task "reusing content" (foo))
+        feature of the \[EPPO-simple](feature) [plugin]( feature).[Melville, 1851]
+
+        Press \[Enter].
 
         Press {Enter}(key)
 

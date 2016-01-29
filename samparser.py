@@ -202,7 +202,7 @@ class SamParser:
         source, match = context
         line = source.current_line
         local_indent = len(line) - len(line.lstrip())
-        self.doc.new_block('p', None, '', local_indent)
+        self.doc.new_paragraph(None, '', local_indent)
         self.paragraph_start(line)
         return "PARAGRAPH", context
 
@@ -515,6 +515,17 @@ class Block:
                 yield from self.content.serialize_xml()
                 yield "</{0}>\n".format(self.name)
 
+class Paragraph(Block):
+    def __init__(self, attributes=None, content=None, namespace=None, indent=0):
+        super().__init__(name='p', attributes=attributes, content=content, namespace=namespace, indent=indent)
+
+    def add_child(self, b):
+        if not type(b) is Flow:
+            raise SAMParserError(
+                    'A paragraph cannot have block children. At \"{0}\".'.format(
+                        str(self)))
+        b.parent = self
+        self.children.append(b)
 
 class Comment(Block):
     def __init__(self, content='', indent=0):
@@ -728,10 +739,6 @@ class DocStructure:
         if self.doc is None:
             raise SAMParserError('No root element found.')
         elif self.current_block.indent < block.indent:
-            if self.current_block.name == 'p':
-                raise SAMParserError(
-                        'A paragraph cannot have block children. At \"{0}\".'.format(
-                            str(self.current_block.children[0])))
             self.current_block.add_child(block)
         elif self.current_block.indent == block.indent:
             self.current_block.add_sibling(block)
@@ -747,6 +754,11 @@ class DocStructure:
         self.add_block(b)
         return b
 
+    def new_paragraph(self, attributes, text, indent):
+        b = Paragraph(attributes, text, None, indent)
+        self.add_block(b)
+        return b
+
     def new_unordered_list_item(self, indent, content_indent):
         uli = Block('li', None, '', None, indent + 1)
         if self.current_block.parent.name == 'li':
@@ -755,7 +767,7 @@ class DocStructure:
             ul = Block('ul', None, '', None, indent)
             self.add_block(ul)
             self.add_block(uli)
-        p = Block('p', None, '', None, content_indent)
+        p = Paragraph( None, '', None, content_indent)
         self.add_block(p)
 
     def new_ordered_list_item(self, indent, content_indent):
@@ -766,29 +778,30 @@ class DocStructure:
             ol = Block('ol', None, '', None, indent)
             self.add_block(ol)
             self.add_block(oli)
-        p = Block('p', None, '', None, content_indent)
+        p = Paragraph(None, '', None, content_indent)
         self.add_block(p)
 
     def new_labeled_list_item(self, indent, label):
-        lli = Block('li', None, '', None, indent)
+        lli = Block('li', None, '', None, indent+.2)
         lli.add_child(Block('label', None, para_parser.parse(label, self.doc), None, indent))
-        if self.current_block.parent.name == 'li':
-            self.current_block.parent.add_sibling(lli)
+        if self.current_block.name == 'li':
+            self.current_block.add_sibling(lli)
         else:
             ll = Block('ll', None, '', None, indent)
             self.add_block(ll)
             ll.add_child(lli)
-            self.current_block = lli
+
         # Assign the paragraph a fractional indent so that any following
         # element that is not an ll we be at same indent as ll, causing
         # ll to end. Because indent is fractional, and block child will
         # be more indented, which is illegal and will trigger an error.
-        p = Block('p', None, '', None, indent+.5)
+        p = Paragraph(None, '', None, indent+.5)
         lli.add_child(p)
         self.current_block = p
 
     def new_flow(self, flow):
         self.current_block.add_child(flow)
+        self.current_block = self.current_block.parent
 
     def new_comment(self, comment):
         self.current_block.add_child(comment)
@@ -994,18 +1007,19 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-        try:
-            idref = match.group('id')
-        except IndexError:
-            idref=None
-        try:
-            nameref = match.group('name')
-        except IndexError:
-            nameref = None
-        try:
-            citation = match.group('citation')
-        except IndexError:
-            citation=None
+
+            try:
+                idref = match.group('id')
+            except IndexError:
+                idref=None
+            try:
+                nameref = match.group('name')
+            except IndexError:
+                nameref = None
+            try:
+                citation = match.group('citation')
+            except IndexError:
+                citation=None
 
             if idref:
                 citation_type = 'idref'
@@ -1018,6 +1032,7 @@ class SamParaParser:
             else:
                 citation_type = 'citation'
                 citation_value = citation.strip()
+                extra = None
 
             self.flow.append(Citation(citation_type, citation_value, extra))
             para.advance(len(match.group(0)) - 1)
