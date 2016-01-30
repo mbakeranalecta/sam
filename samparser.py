@@ -219,18 +219,24 @@ class SamParser:
             f = para_parser.parse(self.current_paragraph, self.doc)
             self.doc.new_flow(f)
             return "SAM", context
-        elif self.doc.in_context(['p', 'li', 'ul']) and self.patterns['list-item'].match(line):
+        elif self.doc.in_context(['p', 'li']):
             f = para_parser.parse(self.current_paragraph, self.doc)
             self.doc.new_flow(f)
-            return self._list_item((source, self.patterns['list-item'].match(line)))
-        elif self.doc.in_context(['p', 'li', 'ol']) and self.patterns['num-list-item'].match(line):
-            f = para_parser.parse(self.current_paragraph, self.doc)
-            self.doc.new_flow(f)
-            return self._num_list_item((source, self.patterns['num-list-item'].match(line)))
-        elif self.doc.in_context(['p', 'li', 'll']) and self.patterns['labeled-list-item'].match(line):
-            f = para_parser.parse(self.current_paragraph, self.doc)
-            self.doc.new_flow(f)
-            return self._labeled_list_item((source, self.patterns['labeled-list-item'].match(line)))
+            source.return_line()
+            return "SAM", context
+
+        # elif self.doc.in_context(['p', 'li', 'ul']) and self.patterns['list-item'].match(line):
+        #     f = para_parser.parse(self.current_paragraph, self.doc)
+        #     self.doc.new_flow(f)
+        #     return self._list_item((source, self.patterns['list-item'].match(line)))
+        # elif self.doc.in_context(['p', 'li', 'ol']) and self.patterns['num-list-item'].match(line):
+        #     f = para_parser.parse(self.current_paragraph, self.doc)
+        #     self.doc.new_flow(f)
+        #     return self._num_list_item((source, self.patterns['num-list-item'].match(line)))
+        # elif self.doc.in_context(['p', 'li', 'll']) and self.patterns['labeled-list-item'].match(line):
+        #     f = para_parser.parse(self.current_paragraph, self.doc)
+        #     self.doc.new_flow(f)
+        #     return self._labeled_list_item((source, self.patterns['labeled-list-item'].match(line)))
         else:
             self.paragraph_append(line)
             return "PARAGRAPH", context
@@ -761,7 +767,7 @@ class DocStructure:
 
     def new_unordered_list_item(self, indent, content_indent):
         uli = Block('li', None, '', None, indent + 1)
-        if self.current_block.name == 'li' and self.current_block.indent >= indent+1:
+        if self.in_context(['li', 'ul']) and self.current_block.indent >= indent+1:
             self.add_block(uli)
         else:
             ul = Block('ul', None, '', None, indent)
@@ -772,7 +778,7 @@ class DocStructure:
 
     def new_ordered_list_item(self, indent, content_indent):
         oli = Block('li', None, '', None, indent + 1)
-        if self.current_block.name == 'li' and self.current_block.indent >= indent+1:
+        if self.in_context(['li', 'ol']) and self.current_block.indent >= indent+1:
             self.add_block(oli)
         else:
             ol = Block('ol', None, '', None, indent)
