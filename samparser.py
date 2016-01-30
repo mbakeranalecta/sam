@@ -219,27 +219,15 @@ class SamParser:
             f = para_parser.parse(self.current_paragraph, self.doc)
             self.doc.new_flow(f)
             return "SAM", context
-        elif self.doc.in_context(['p', 'li']):
+
+        if self.doc.in_context(['p', 'li']):
             f = para_parser.parse(self.current_paragraph, self.doc)
             self.doc.new_flow(f)
             source.return_line()
             return "SAM", context
 
-        # elif self.doc.in_context(['p', 'li', 'ul']) and self.patterns['list-item'].match(line):
-        #     f = para_parser.parse(self.current_paragraph, self.doc)
-        #     self.doc.new_flow(f)
-        #     return self._list_item((source, self.patterns['list-item'].match(line)))
-        # elif self.doc.in_context(['p', 'li', 'ol']) and self.patterns['num-list-item'].match(line):
-        #     f = para_parser.parse(self.current_paragraph, self.doc)
-        #     self.doc.new_flow(f)
-        #     return self._num_list_item((source, self.patterns['num-list-item'].match(line)))
-        # elif self.doc.in_context(['p', 'li', 'll']) and self.patterns['labeled-list-item'].match(line):
-        #     f = para_parser.parse(self.current_paragraph, self.doc)
-        #     self.doc.new_flow(f)
-        #     return self._labeled_list_item((source, self.patterns['labeled-list-item'].match(line)))
-        else:
-            self.paragraph_append(line)
-            return "PARAGRAPH", context
+        self.paragraph_append(line)
+        return "PARAGRAPH", context
 
     def _list_item(self, context):
         source, match = context
@@ -693,10 +681,10 @@ class DocStructure:
         self.default_namespace =None
         self.ids = []
 
-    @property
-    def context(self):
+    def context(self, context_block=None):
         context = []
-        context_block = self.current_block
+        if context_block is None:
+            context_block = self.current_block
         try:
             while True:
                 context.append(context_block.name)
@@ -705,11 +693,20 @@ class DocStructure:
             return context
 
     def in_context(self, context_query):
-        c = self.context
+        c = self.context()
         for i, cq in enumerate(context_query):
             if c[i] != cq:
                 return False
         return True
+
+    def context_at_indent(self, indent):
+        c = self.current_block
+        if c.indent < indent:
+            return []
+        while True:
+            if c.indent == indent:
+                return self.context(c)
+            c = c.parent
 
 
     def new_root(self, match):
@@ -767,7 +764,7 @@ class DocStructure:
 
     def new_unordered_list_item(self, indent, content_indent):
         uli = Block('li', None, '', None, indent + 1)
-        if self.in_context(['li', 'ul']) and self.current_block.indent >= indent+1:
+        if self.context_at_indent(indent+1)[:2] == ['li', 'ul']:
             self.add_block(uli)
         else:
             ul = Block('ul', None, '', None, indent)
@@ -778,7 +775,7 @@ class DocStructure:
 
     def new_ordered_list_item(self, indent, content_indent):
         oli = Block('li', None, '', None, indent + 1)
-        if self.in_context(['li', 'ol']) and self.current_block.indent >= indent+1:
+        if self.context_at_indent(indent+1)[:2] == ['li', 'ol']:
             self.add_block(oli)
         else:
             ol = Block('ol', None, '', None, indent)
