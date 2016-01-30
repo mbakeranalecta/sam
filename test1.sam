@@ -4,244 +4,492 @@
 # for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
-feature-topic:(#feature-fragments) Fragments
-    head:(#foo)
-        foo: barney {and}(conjunction) betty
-        baz: bat
-        $name=fred {and}(conjunction) wilma
-        history:
-            revision:: date, author, comment, status
-                2014-06-23, mbaker, New\, Topic, In progress
-        index:
-            entry:: type, term
-                feature, fragment
-                feature, fragments
-    body: How Fragments Work
+tests:
 
-        * This list is the
-            * Nested list
-            * with two entries
+    test: Numbered lists
 
-        * first thing in this section.
-        * There is no space between these list items.
+        case: Numbered list with spaces
 
-        This paragraph contains a line {Wikipedia}(http://wikipedia.com (goo)).
+            0. One
 
-        This paragraph contains a line {Wikipedia}(link "http://wikipedia.com").
+            0. Two
 
-        7. Seven
-        8. Eight and
-           a half.
-        9. Nine
+            99999. Three
 
-        {Fragments}(feature) are a {content reuse}(task "reusing content" (foo))
-        feature of the {EPPO-simple}(feature) {plugin}( feature).[*bar]
+        case: Numbered list no spaces
 
-        \{Fragments}(feature) are a \{content reuse}(task "reusing content" (foo))
-        feature of the \{EPPO-simple}(feature) \{plugin}( feature).[*bar]
+            0. One
+            0. Two
+            99999. Three
 
-        \[Fragments](feature) are a \[content reuse](task "reusing content" (foo))
-        feature of the \[EPPO-simple](feature) [plugin]( feature).[Melville, 1851]
+        case: Numbered list mixed spacing
 
-        Press \[Enter].
+            0. One
 
-        Press {Enter}(key)
+            0. Two
+            99999. Three
 
-        Suppose you discovered that your users were using your help content far more
-        than your manuals and wanted to force your writers to break away from this
-        habit of creating book-like help systems. You would introduce[*bar]
-        constraint that writers were to focus on producing self sufficient
-        help topics rather than linear narratives. You could enforce
-        that constrain by edict, or through a style guide, but you would
-        get better compliance if you introduced a structured writing system
-        that enforced that constraint.
-
-        footnote:(*bar)
-            This is a footnote.
+            7. Four
 
 
 
-        >>(image foo.gif #bar ?baz ?bat)
+    test: Nested numbered lists
 
-        This sentence includes a string reference >>(string name). And a shortcut version >>($name)
+        case: Nested numbered list with spaces
 
-        """[*bing bang boom]
+            0. One
+
+            0. Two
+
+                5. Two and a quarter
+
+                6. Two and a half
+
+                9. Two and three quarters
+
+            99999. Three
+
+            7. Four
+
+
+        case: Nested numbered list with no spaces
+
+            0. One
+            0. Two
+                5. Two and a quarter
+                6. Two and a half
+                9. Two and three quarters
+            99999. Three
+            7. Four
+
+        case: Nested numbered list with mixed spacing 1
+
+            0. One
+            0. Two
+                5. Two and a quarter
+                6. Two and a half
+
+                9. Two and three quarters
+
+            99999. Three
+            7. Four
+
+        case: Nested numbered list with mixed spacing 2
+
+            0. One
+            0. Two
+                5. Two and a quarter
+                6. Two and a half
+
+                9. Two and three quarters
+            99999. Three
+
+            7. Four
+
+    test: Unordered lists
+
+        case: Unordered list with spaces
+
+            * One
+            * Two
+
+            * Three
+
+        case: Unordered list no spaces
+
+            * One
+            * Two
+            * Three
+
+        case: Unordered list mixed spacing
+
+            * One
+
+            * Two
+            * Three
+
+            * Four
+
+
+
+    test: Nested unordered lists
+
+        case: Nested list with spaces
+
+            * One
+
+            * Two
+
+                * Two and a quarter
+
+                * Two and a half
+
+                * Two and three quarters
+
+            * Three
+
+            * Four
+
+
+        case: Nested unordered list with no spaces
+
+            * One
+            * Two
+                * Two and a quarter
+                * Two and a half
+                * Two and three quarters
+            * Three
+            * Four
+
+        case: Nested unordered list with mixed spacing 1
+
+            * One
+            * Two
+                * Two and a quarter
+                * Two and a half
+
+                * Two and three quarters
+
+            * Three
+            * Four
+
+        case: Nested unordered list with mixed spacing 2
+
+            * One
+            * Two
+                * Two and a quarter
+                * Two and a half
+
+                * Two and three quarters
+            * Three
+
+            * Four
+
+    test: Nested mixed lists
+
+        case: Nested mixed lists with spaces
+
+            0. One
+
+            0. Two
+
+                * Two and a quarter
+
+                * Two and a half
+
+                * Two and three quarters
+
+            99999. Three
+
+            7. Four
+
+
+        case: Nested mixed lists with no spaces
+
+            * One
+            * Two
+                5. Two and a quarter
+                6. Two and a half
+                9. Two and three quarters
+            * Three
+            * Four
+
+        case: Nested numbered lists with mixed spacing 1
+
+            0. One
+            0. Two
+                * Two and a quarter
+                * Two and a half
+
+                * Two and three quarters
+
+            99999. Three
+            7. Four
+
+        case: Nested mixed lists with mixed spacing 2
+
+            * One
+            * Two
+                5. Two and a quarter
+                6. Two and a half
+
+                9. Two and three quarters
+            * Three
+
+            * Four
+
+    test: One list after another
+
+        case: Space between lists
+
+            * One
+            * Two
+            * Three
+
+            1. One
+            2. Two
+            3. Three
+
+
+        case: No space between lists
+
+            1. One
+            2. Two
+            3. Three
+            * One
+            * Two
+            * Three
+
+
+    test:(#feature-fragments) Fragments
+        head:(#foo)
+            foo: barney {and}(conjunction) betty
+            baz: bat
+            $name=fred {and}(conjunction) wilma
+            history:
+                revision:: date, author, comment, status
+                    2014-06-23, mbaker, New\, Topic, In progress
+            index:
+                entry:: type, term
+                    feature, fragment
+                    feature, fragments
+        body: How Fragments Work
+
+            * This list is the
+                * Nested list
+                * with two entries
+
+            * first thing in this section.
+            * There is no space between these list items.
+
+            This paragraph contains a line {Wikipedia}(http://wikipedia.com (goo)).
+
+            This paragraph contains a line {Wikipedia}(link "http://wikipedia.com").
+
+            5. Five
+                0. Five and a half
+
+                0. Five and three quarters
+
+            6. Six
+
+            7. Seven
+
+            8. Eight and
+               a half.
+
+            9. Nine
+
+            10. Ten
+
+            {Fragments}(feature) are a {content reuse}(task "reusing content" (foo))
+            feature of the {EPPO-simple}(feature) {plugin}( feature).[*bar]
+
+            \{Fragments}(feature) are a \{content reuse}(task "reusing content" (foo))
+            feature of the \{EPPO-simple}(feature) \{plugin}( feature).[*bar]
+
+            \[Fragments](feature) are a \[content reuse](task "reusing content" (foo))
+            feature of the \[EPPO-simple](feature) [plugin]( feature).[Melville, 1851]
+
+            Press \[Enter].
+
+            Press {Enter}(key)
+
+            Suppose you discovered that your users were using your help content far more
+            than your manuals and wanted to force your writers to break away from this
+            habit of creating book-like help systems. You would introduce[*bar]
+            constraint that writers were to focus on producing self sufficient
+            help topics rather than linear narratives. You could enforce
+            that constrain by edict, or through a style guide, but you would
+            get better compliance if you introduced a structured writing system
+            that enforced that constraint.
+
+            footnote:(*bar)
+                This is a footnote.
+
+
+
+            >>(image foo.gif #bar ?baz ?bat)
+
+            This sentence includes a string reference >>(string name). And a shortcut version >>($name)
+
+            """[*bing bang boom]
+                |(#foo2) You gotta walk that lonesome valley,[*bing bang boom]
+                | You gotta walk it by yourself,
+                |(?bar) Nobody here can walk it for you,
+                |    You gotta walk it by yourself.
+
+
+            This sentence[*bing bang boom] contains an unmatched { followed by an {annotated}(word) phrase.
+
             |(#foo2) You gotta walk that lonesome valley,[*bing bang boom]
             | You gotta walk it by yourself,
             |(?bar) Nobody here can walk it for you,
             |    You gotta walk it by yourself.
 
 
-        This sentence[*bing bang boom] contains an unmatched { followed by an {annotated}(word) phrase.
+            ~~~(#foo3 ?gruz-natz)
+                $a=apple
+                $b=banana
 
-        |(#foo2) You gotta walk that lonesome valley,[*bing bang boom]
-        | You gotta walk it by yourself,
-        |(?bar) Nobody here can walk it for you,
-        |    You gotta walk it by yourself.
+                This is a sentence inside a fragment.
 
+                ~~~(#gruznatz)
+                    $p=peach
 
-        ~~~(#foo3 ?gruz-natz)
-            $a=apple
-            $b=banana
+                    This is a nested fragment.
 
-            This is a sentence inside a fragment.
+            >>(~foobar)
+                $a=apricot
+                $b=breadfruit
 
-            ~~~(#gruznatz)
-                $p=peach
+            ```
+            foo
+            ```
 
-                This is a nested fragment.
+            This {sentence}(grammatical-construct) contains a repeated annotation: the word
+            {sentence} without any annotation metadata. It should be annotated the same as
+            the previous instance. If you just want braces around the word
+            \{sentence} you need to precede it with a backslash.
 
-        >>(~foobar)
-            $a=apricot
-            $b=breadfruit
+            This sentence also references the word {sentence} and should be annotated on output.
 
-        ```
-        foo
-        ```
+            A fragment is an \{arbitrary\}\\ sequence of *text structures* (paragraphs, lists,
+            etc.) that _has been given_ an id so that it can be \\{included}(bold) by reference at other
+            \_points_ in the content.
 
-        This {sentence}(grammatical-construct) contains a repeated annotation: the word
-        {sentence} without any annotation metadata. It should be annotated the same as
-        the previous instance. If you just want braces around the word
-        \{sentence} you need to precede it with a backslash.
+            ```kkk(xml "c:/foo" (1.0) #foo4 ?bar)
+    <fragment id="test-fragment">
+        <local-strings>
+            <string id="test-string-1"><bold>test string one</bold></string>
+            <string id="test-string-2"><italic>test string two</italic></string>
+        </local-strings>
+        <p>This is a piece of text in a fragment. It includes references to local
+        strings <string-ref id-ref="test-string-1"/> and <string-ref id-ref="test-string-2"/>.
+        And to a global string <string-ref id-ref="product"/></p>
+    </fragment>
+    <p>The following is a reference to the fragment defined above:</p>
+    <fragment-ref id-ref="test-fragment">
+        <local-strings>
+            <string id="test-string-1"><code>this is test string number one</code></string>
+        </local-strings>
+    </fragment-ref>
+            ```kkk
 
-        This sentence also references the word {sentence} and should be annotated on output.
+            table:(*my-table ?foobat #zombie) An important table
+                row:: cell, cell, cell
+                    foo, bar, baz
+                    a, b, c
+                    hi, lo, med
 
-        A fragment is an \{arbitrary\}\\ sequence of *text structures* (paragraphs, lists,
-        etc.) that _has been given_ an id so that it can be \\{included}(bold) by reference at other
-        \_points_ in the content.
+            terminal:
+                prompt: $
+                input: dir
+                response: Empty directory.
 
-        ```kkk(xml "c:/foo" (1.0) #foo4 ?bar)
-<fragment id="test-fragment">
-    <local-strings>
-        <string id="test-string-1"><bold>test string one</bold></string>
-        <string id="test-string-2"><italic>test string two</italic></string>
-    </local-strings>
-    <p>This is a piece of text in a fragment. It includes references to local
-    strings <string-ref id-ref="test-string-1"/> and <string-ref id-ref="test-string-2"/>.
-    And to a global string <string-ref id-ref="product"/></p>
-</fragment>
-<p>The following is a reference to the fragment defined above:</p>
-<fragment-ref id-ref="test-fragment">
-    <local-strings>
-        <string id="test-string-1"><code>this is test string number one</code></string>
-    </local-strings>
-</fragment-ref>
-        ```kkk
+            After this paragraph, there is a blockquote:
 
-        table:(*my-table ?foobat #zombie) An important table
-            row:: cell, cell, cell
-                foo, bar, baz
-                a, b, c
-                hi, lo, med
+            """(*foo #bar ?baz)
+                The quick brown fox jumps over the lazy dog.
 
-        terminal:
-            prompt: $
-            input: dir
-            response: Empty directory.
+                And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
 
-        After this paragraph, there is a blockquote:
+            blockquote:[http://example.com/page]
+                Wafting zyphers quickly vexed jumbo.
 
-        """(*foo #bar ?baz)
-            The quick brown fox jumps over the lazy dog.
-
-            And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
-
-        blockquote:[http://example.com/page]
-            Wafting zyphers quickly vexed jumbo.
-
-            Far and few are the lands where the jumblies live.
+                Far and few are the lands where the jumblies live.
 
 
-        This is another paragraph. Then there is an alternate blockquote:
+            This is another paragraph. Then there is an alternate blockquote:
 
-        '''( #foo5 ?bar ?baz)[Mother Goose]
-            The quick brown fox jumps over the lazy dog.
+            '''( #foo5 ?bar ?baz)[Mother Goose]
+                The quick brown fox jumps over the lazy dog.
 
-        '''
-            This is a blockquote without a citation.
+            '''
+                This is a blockquote without a citation.
 
-        Fragments can be defined:
+            Fragments can be defined:
 
-        * inline in a topic file
+            * inline in a topic file
 
-        * in separate fragment
-          collections
+            * in separate fragment
+              collections
 
-          foobar
+              foobar
 
-        * batman
+            * batman
 
 
-        If a fragment is defined inline, it is included where it occurs. {Fragments}(song) in fragment
-        files are not included anywhere unless they are pulled in by a fragment reference.
+            If a fragment is defined inline, it is included where it occurs. {Fragments}(song) in fragment
+            files are not included anywhere unless they are pulled in by a fragment reference.
 
-        0. One
-           Hundred
+            0. One
+               Hundred
 
-           Fifty
+               Fifty
 
-        4. Seven
+            4. Seven
 
-        80976. Two
+            80976. Two
 
-               Two and a half
+                   Two and a half
 
 
 
-        A fragment reference inserts a fragment by ID at the place it occurs in the text.
+            A fragment reference inserts a fragment by ID at the place it occurs in the text.
 
-        <?xml version="1.0" encoding="UTF-8"?>
-        <foo bar="bat">
-            <bang/>
-        </foo>
+            <?xml version="1.0" encoding="UTF-8"?>
+            <foo bar="bat">
+                <bang/>
+            </foo>
 
 
-        Fragments are recursive. That is, {Fragments} can \{contain} other fragments and
-        fragment references.
+            Fragments are recursive. That is, {Fragments} can \{contain} other fragments and
+            fragment references.
 
-        <?xml version="1.0" encoding="UTF-8"?>
-        <foo bar="bat">
-            <boo/>
-            <hoo/>
-        </foo>
+            <?xml version="1.0" encoding="UTF-8"?>
+            <foo bar="bat">
+                <boo/>
+                <hoo/>
+            </foo>
 
-        Because you often want to >>(image foo.gif #bar ?baz ?bat) change some part of a text when it is being
-        reused, <fragments> & fragment references can both define local {strings}(feature).
-        Any {string references}(feature) inside a fragment will be resolved by looking first
-        at local-strings defined in the >>(*my-table) fragment reference, then at local strings defined
-        in the fragment definition, and then at global strings. In effect, this means
-        that you can define string substitutions whenever you insert a fragment into your content.
+            Because you often want to >>(image foo.gif #bar ?baz ?bat) change some part of a text when it is being
+            reused, <fragments> & fragment references can both define local {strings}(feature).
+            Any {string references}(feature) inside a fragment will be resolved by looking first
+            at local-strings defined in the >>(*my-table) fragment reference, then at local strings defined
+            in the fragment definition, and then at global strings. In effect, this means
+            that you can define string substitutions whenever you insert a fragment into your content.
 
-        state-detection:
-            sign: printer "the printer"
-                signal: chirps
-                signal: beeps twice
-            sign: indicator "the indicator"
-                signal: red
-                signal: yellow
-                signal: green
-            state: success "retrieve print job"
-                printer: chirps
-                indicator: green
-            state: jammed "clear paper jam"
-                printer: beeps twice
-                indicator: yellow
-            state: broken "call the service desk"
-                printer: beeps twice
-                indicator: red
+            state-detection:
+                sign: printer "the printer"
+                    signal: chirps
+                    signal: beeps twice
+                sign: indicator "the indicator"
+                    signal: red
+                    signal: yellow
+                    signal: green
+                state: success "retrieve print job"
+                    printer: chirps
+                    indicator: green
+                state: jammed "clear paper jam"
+                    printer: beeps twice
+                    indicator: yellow
+                state: broken "call the service desk"
+                    printer: beeps twice
+                    indicator: red
 
-        |p| The p element represents a paragraph. It is recognized as a block of
-        lines with no leading tag. It ends with a blank line. p elements are the
-        only elements that can contain decorations and annotations.
-        |bold| The bold element is a decoration occurring within text and is
-        indicated by surrounding the text with asterisks.
-        |{italic}(style "|")| The italic | decoration is indicated by surrounding the text
-        with underscores.
-        |quotes| The quotes decoration is indicated by surrounding the text
-        in straight quotes.
-        |mono| The mono decoration is indicated by backticks
+            |p| The p element represents a paragraph. It is recognized as a block of
+            lines with no leading tag. It ends with a blank line. p elements are the
+            only elements that can contain decorations and annotations.
+            |bold| The bold element is a decoration occurring within text and is
+            indicated by surrounding the text with asterisks.
+            |{italic}(style "|")| The italic | decoration is indicated by surrounding the text
+            with underscores.
+            |quotes| The quotes decoration is indicated by surrounding the text
+            in straight quotes.
+            |mono| The mono decoration is indicated by backticks
 
-        index:
-                entry:: type, term
-                    feature, fragment
-                    feature, fragments
+            index:
+                    entry:: type, term
+                        feature, fragment
+                        feature, fragments
