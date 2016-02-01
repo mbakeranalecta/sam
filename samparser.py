@@ -588,7 +588,7 @@ class Flow:
                 yield self._escape_for_xml(x)
 
     def _escape_for_xml(self, s):
-        t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
+        t = dict(zip([ord('<'), ord('>'), ord('&'), ord('"')], ['&lt;', '&gt;', '&amp;', '&quot;']))
         return s.translate(t)
 
 
@@ -642,9 +642,12 @@ class Citation:
 
     def serialize_xml(self):
         if self.citation_type == 'citation':
-            yield '<citation>{1}</citation>'.format(self.citation_type, self.citation_value)
+            yield '<citation>{0}</citation>'.format(self.citation_value)
         else:
-            yield '<citation type="{0}" value="{1}" extra="{2}"/>'.format(self.citation_type, self.citation_value, self.citation_extra)
+            yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml(self.citation_value))
+            if self.citation_extra is not None:
+                yield 'extra="{0}"'.format(escape_for_xml(self.citation_extra))
+            yield '/>'
 
 class Decoration:
     def __init__(self, decoration_type, text):
@@ -655,7 +658,7 @@ class Decoration:
         return '[%s](%s)' % (self.text, self.decoration_type)
 
     def serialize_xml(self):
-        yield '<decoration type="{1}">{0}</decoration>'.format(self.text, self.decoration_type)
+        yield '<decoration type="{1}">{0}</decoration>'.format(escape_for_xml(self.text), self.decoration_type)
 
 
 class InlineInsert:
@@ -668,7 +671,7 @@ class InlineInsert:
     def serialize_xml(self):
         yield '<insert'
         for key, value in self.attributes.items():
-            yield " {0}=\"{1}\"".format(key, value)
+            yield " {0}=\"{1}\"".format(key, escape_for_xml(value))
         yield '/>'
 
 
@@ -911,7 +914,7 @@ class SamParaParser:
             'escape': re.compile(r'\\'),
             'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`]'),
             'annotation': re.compile(
-                r'\{(?P<text>[^\{]*?[^\\])\}(\(\s*(?P<type>\S*?\s*[^\\"\'])(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
+                r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
             'italic': re.compile(r'_(?P<text>\S.*?\S)_'),
             'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
@@ -1187,7 +1190,7 @@ def parse_insert(insert_string):
 
 
 def escape_for_xml(s):
-    t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
+    t = dict(zip([ord('<'), ord('>'), ord('&'), ord('"')], ['&lt;', '&gt;', '&amp;', '&quot;']))
     return s.translate(t)
 
 

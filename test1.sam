@@ -240,6 +240,15 @@ tests:
             * Two
             * Three
 
+    test: XML reserved characters in attributes
+
+        case: XML reserved characters in citation specifically
+
+            This is the {night mail}(train '"flying <>& scotsman"' (Auden)) crossing the border.
+
+        case: Quotes in link shortcut.
+
+            This is a {link text}(http://example.com (foo)).
 
     test:(#feature-fragments) Fragments
         head:(#foo)
