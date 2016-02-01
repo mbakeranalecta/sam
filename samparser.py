@@ -1180,7 +1180,10 @@ def parse_insert(insert_string):
     if unexpected_attributes:
         raise SAMParserError("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
     result['type'] = insert_type
+    # strip unnecessary quotes from insert item
+    insert_item = re.sub(r'^(["\'])|(["\'])$', '', insert_item)
     result['item'] = insert_item
+
     if insert_ids:
         result['id'] = "".join(insert_ids)
     if insert_names:
