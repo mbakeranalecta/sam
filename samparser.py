@@ -992,7 +992,8 @@ class SamParaParser:
                                 "]. Otherwise, make sure annotated text matches "
                                 "previous annotation exactly."
                         )
-
+            elif annotation_type.strip() == '':
+                raise SAMParserError ("Annotation type cannot be blank: " + match.group(0))
             else:
                 #Check for link shortcut
                 if urlparse(annotation_type,None).scheme is not None:
