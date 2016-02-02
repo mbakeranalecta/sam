@@ -706,10 +706,13 @@ class DocStructure:
         c = self.current_block
         if c.indent < indent:
             return []
-        while True:
-            if c.indent == indent:
-                return self.context(c)
-            c = c.parent
+        try:
+            while True:
+                if c.indent == indent:
+                    return self.context(c)
+                c = c.parent
+        except AttributeError:
+            raise SAMParserError("Indentation error found at " + str(self.current_block))
 
 
     def new_root(self, match):
