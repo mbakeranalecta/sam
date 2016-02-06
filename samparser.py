@@ -1208,18 +1208,15 @@ if __name__ == "__main__":
     infile = sys.argv[-1]
     try:
         with open(infile, "r", encoding="utf-8-sig") as inf:
-            test = inf.read()
+            try:
+                samParser.parse(inf)
+            except SAMParserError as err:
+                print(err, file=sys.stderr)
+                exit(1)
+
+            # Using a loop to avoid buffering the serialized XML.
+            for i in samParser.serialize('xml'):
+                print(i, end="")
+
     except FileNotFoundError:
-        test = """sam:
-        this:
-            is: a test"""
-    try:
-        samParser.parse(io.StringIO(test))
-    except SAMParserError as err:
-        print(err, file=sys.stderr)
-        exit(1)
-
-
-    # Using a loop to avoid buffering the serialized XML.
-    for i in samParser.serialize('xml'):
-        print(i, end="")
+        raise SAMParserError("No input file specified.")
