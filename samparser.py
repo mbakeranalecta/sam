@@ -646,7 +646,7 @@ class Citation:
         else:
             yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml(self.citation_value))
             if self.citation_extra is not None:
-                yield 'extra="{0}"'.format(escape_for_xml(self.citation_extra))
+                yield ' extra="{0}"'.format(escape_for_xml(self.citation_extra))
             yield '/>'
 
 class Decoration:
