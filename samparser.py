@@ -112,7 +112,6 @@ class SamParser:
 
         self.doc.new_block('codeblock', attributes, None, indent)
         self.current_text_block = TextBlock()
-#        self.pre_start('')
         return "CODEBLOCK", context
 
     def _codeblock(self, context):
@@ -120,6 +119,7 @@ class SamParser:
         line = source.next_line
         if self.patterns['codeblock-end'].match(line):
             self.doc.new_flow(Pre(self.current_text_block))
+            self.current_text_block = None
             return "SAM", context
         else:
             self.current_text_block.append(line)
@@ -201,16 +201,19 @@ class SamParser:
             line = source.next_line
         except EOFError:
             f = para_parser.parse(self.current_text_block.text, self.doc)
+            self.current_text_block = None
             self.doc.new_flow(f)
             return "END", context
 
         if self.patterns['blank-line'].match(line):
             f = para_parser.parse(self.current_text_block.text, self.doc)
+            self.current_text_block = None
             self.doc.new_flow(f)
             return "SAM", context
 
         if self.doc.in_context(['p', 'li']):
             f = para_parser.parse(self.current_text_block.text, self.doc)
+            self.current_text_block = None
             self.doc.new_flow(f)
             source.return_line()
             return "SAM", context
