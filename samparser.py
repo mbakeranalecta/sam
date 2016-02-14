@@ -35,7 +35,7 @@ class SamParser:
         self.stateMachine.add_state("EMBEDDED-XML", self._embedded_xml)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("NEW")
-        self.current_paragraph = None
+        self.current_text_block = None
         self.doc = DocStructure()
         self.source = None
         self.patterns = {
@@ -67,18 +67,6 @@ class SamParser:
         except EOFError:
             raise SAMParserError("Document ended before structure was complete. At:\n\n"
                             + self.current_paragraph)
-
-    def paragraph_start(self, line):
-        self.current_paragraph = line.strip()
-
-    def paragraph_append(self, line):
-        self.current_paragraph += " " + line.strip()
-
-    def pre_start(self, line):
-        self.current_paragraph = line
-
-    def pre_append(self, line):
-        self.current_paragraph += line
 
     def _new_file(self, source):
         line = source.next_line
@@ -123,17 +111,18 @@ class SamParser:
             attributes.update(self.parse_block_attributes(other))
 
         self.doc.new_block('codeblock', attributes, None, indent)
-        self.pre_start('')
+        self.current_text_block = TextBlock()
+#        self.pre_start('')
         return "CODEBLOCK", context
 
     def _codeblock(self, context):
         source, match = context
         line = source.next_line
         if self.patterns['codeblock-end'].match(line):
-            self.doc.new_flow(Pre(self.current_paragraph))
+            self.doc.new_flow(Pre(self.current_text_block))
             return "SAM", context
         else:
-            self.pre_append(line)
+            self.current_text_block.append(line)
             return "CODEBLOCK", context
 
     def _blockquote_start(self, context):
@@ -203,7 +192,7 @@ class SamParser:
         line = source.current_line
         local_indent = len(line) - len(line.lstrip())
         self.doc.new_paragraph(None, '', local_indent)
-        self.paragraph_start(line)
+        self.current_text_block = TextBlock(line)
         return "PARAGRAPH", context
 
     def _paragraph(self, context):
@@ -211,22 +200,22 @@ class SamParser:
         try:
             line = source.next_line
         except EOFError:
-            f = para_parser.parse(self.current_paragraph, self.doc)
+            f = para_parser.parse(self.current_text_block.text, self.doc)
             self.doc.new_flow(f)
             return "END", context
 
         if self.patterns['blank-line'].match(line):
-            f = para_parser.parse(self.current_paragraph, self.doc)
+            f = para_parser.parse(self.current_text_block.text, self.doc)
             self.doc.new_flow(f)
             return "SAM", context
 
         if self.doc.in_context(['p', 'li']):
-            f = para_parser.parse(self.current_paragraph, self.doc)
+            f = para_parser.parse(self.current_text_block.text, self.doc)
             self.doc.new_flow(f)
             source.return_line()
             return "SAM", context
 
-        self.paragraph_append(line)
+        self.current_text_block.append(line)
         return "PARAGRAPH", context
 
     def _list_item(self, context):
@@ -234,7 +223,7 @@ class SamParser:
         indent = len(match.group("indent"))
         content_indent = indent + len(match.group("marker"))
         self.doc.new_unordered_list_item(indent, content_indent)
-        self.paragraph_start(str(match.group("content")).strip())
+        self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
     def _num_list_item(self, context):
@@ -242,7 +231,7 @@ class SamParser:
         indent = len(match.group("indent"))
         content_indent = indent + len(match.group("marker"))
         self.doc.new_ordered_list_item(indent, content_indent)
-        self.paragraph_start(str(match.group("content")).strip())
+        self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
     def _labeled_list_item(self, context):
@@ -250,7 +239,7 @@ class SamParser:
         indent = len(match.group("indent"))
         label = match.group("label")
         self.doc.new_labeled_list_item(indent, label)
-        self.paragraph_start(str(match.group("content")).strip())
+        self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
     def _block_insert(self, context):
@@ -560,6 +549,21 @@ class Root(Block):
             yield from x.serialize_xml()
 
 
+class TextBlock:
+    def __init__(self, line=None):
+        self.lines = []
+        if line:
+            self.lines.append(line)
+
+    def append(self, line):
+        self.lines.append(line)
+
+    @property
+    def text(self):
+        return " ".join(x.strip() for x in self.lines)
+
+
+
 class Flow:
     def __init__(self, thing=None):
         self.flow = []
@@ -593,9 +597,18 @@ class Flow:
 
 
 class Pre(Flow):
+    def __init__(self, text_block):
+        raw_lines = []
+        for line in text_block.lines:
+            if not line.isspace():
+                raw_lines.append((line, len(line) - len(line.lstrip())))
+        min_indent = min(raw_lines, key = lambda t: t[1])[1]
+        self.lines = [x[min_indent:] for x in text_block.lines]
+
+
     def serialize_xml(self):
         yield "<![CDATA["
-        for x in self.flow:
+        for x in self.lines:
             try:
                 yield from x.serialize_xml()
             except AttributeError:

@@ -368,21 +368,21 @@ tests:
             \_points_ in the content.
 
             ```kkk(xml "c:/foo" (1.0) #foo4 ?bar)
-    <fragment id="test-fragment">
-        <local-strings>
-            <string id="test-string-1"><bold>test string one</bold></string>
-            <string id="test-string-2"><italic>test string two</italic></string>
-        </local-strings>
-        <p>This is a piece of text in a fragment. It includes references to local
-        strings <string-ref id-ref="test-string-1"/> and <string-ref id-ref="test-string-2"/>.
-        And to a global string <string-ref id-ref="product"/></p>
-    </fragment>
-    <p>The following is a reference to the fragment defined above:</p>
-    <fragment-ref id-ref="test-fragment">
-        <local-strings>
-            <string id="test-string-1"><code>this is test string number one</code></string>
-        </local-strings>
-    </fragment-ref>
+            <fragment id="test-fragment">
+                <local-strings>
+                    <string id="test-string-1"><bold>test string one</bold></string>
+                    <string id="test-string-2"><italic>test string two</italic></string>
+                </local-strings>
+                <p>This is a piece of text in a fragment. It includes references to local
+                strings <string-ref id-ref="test-string-1"/> and <string-ref id-ref="test-string-2"/>.
+                And to a global string <string-ref id-ref="product"/></p>
+            </fragment>
+            <p>The following is a reference to the fragment defined above:</p>
+            <fragment-ref id-ref="test-fragment">
+                <local-strings>
+                    <string id="test-string-1"><code>this is test string number one</code></string>
+                </local-strings>
+            </fragment-ref>
             ```kkk
 
             table:(*my-table ?foobat #zombie) An important table
