@@ -212,11 +212,12 @@ class SamParser:
             return "SAM", context
 
         if self.doc.in_context(['p', 'li']):
-            f = para_parser.parse(self.current_text_block.text, self.doc)
-            self.current_text_block = None
-            self.doc.new_flow(f)
-            source.return_line()
-            return "SAM", context
+            if self.patterns['list-item'].match(line) or self.patterns['num-list-item'].match(line) or self.patterns['labeled-list-item'].match(line):
+                f = para_parser.parse(self.current_text_block.text, self.doc)
+                self.current_text_block = None
+                self.doc.new_flow(f)
+                source.return_line()
+                return "SAM", context
 
         self.current_text_block.append(line)
         return "PARAGRAPH", context
