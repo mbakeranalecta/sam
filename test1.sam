@@ -5,6 +5,13 @@
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
 tests:
+    test: Paragraph continuation
+
+        case: Multiple lines joined to create one paragraph
+
+            This is a paragraph
+            that wraps across
+            multiple lines.
 
     test: Numbered lists
 
@@ -19,7 +26,8 @@ tests:
         case: Numbered list no spaces
 
             0. One
-            0. Two
+            0. Two this
+               paragraph wraps.
             99999. Three
 
         case: Numbered list mixed spacing
@@ -235,7 +243,8 @@ tests:
 
             1. One
             2. Two
-            3. Three
+            3. Three this
+               paragraph wraps.
             * One
             * Two
             * Three
