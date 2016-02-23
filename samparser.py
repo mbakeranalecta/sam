@@ -666,17 +666,6 @@ class Citation:
                 yield ' extra="{0}"'.format(escape_for_xml(self.citation_extra))
             yield '/>'
 
-class Decoration:
-    def __init__(self, decoration_type, text):
-        self.decoration_type = decoration_type
-        self.text = text
-
-    def __str__(self):
-        return '[%s](%s)' % (self.text, self.decoration_type)
-
-    def serialize_xml(self):
-        yield '<decoration type="{1}">{0}</decoration>'.format(escape_for_xml(self.text), self.decoration_type)
-
 
 class InlineInsert:
     def __init__(self, attributes):
@@ -1073,7 +1062,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('bold', self._unescape(match.group("text"))))
+            self.flow.append(Annotation('bold', self._unescape(match.group("text"))))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '*'
@@ -1084,7 +1073,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('italic', self._unescape(match.group("text"))))
+            self.flow.append(Annotation('italic', self._unescape(match.group("text"))))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '_'
@@ -1095,7 +1084,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('mono', self._unescape(match.group("text"))))
+            self.flow.append(Annotation('mono', self._unescape(match.group("text"))))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '`'
@@ -1106,7 +1095,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('quotes', self._unescape(match.group("text"))))
+            self.flow.append(Annotation('quotes', self._unescape(match.group("text"))))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '"'
