@@ -937,7 +937,7 @@ class SamParaParser:
                 r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
             'italic': re.compile(r'_(?P<text>\S.*?\S)_'),
-            'mono': re.compile(r'`(?P<text>\S.*?\S)`'),
+            'mono': re.compile(r'`(?P<text>[^`]*?)`'),
             'quotes': re.compile(r'"(?P<text>\S.*?\S)"'),
             'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)'),
             'citation': re.compile(r'(\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name_name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\])')
@@ -986,7 +986,7 @@ class SamParaParser:
             self.flow.append(self.current_string)
             self.current_string = ''
             annotation_type = match.group('type')
-            text = match.group("text")
+            text = self._unescape(match.group("text"))
 
             # If there is an annotated phrase with no annotation, look back
             # to see if it has been annotated already, and if so, copy the
@@ -1142,6 +1142,17 @@ class SamParaParser:
             self.current_string += '\\' + char
         return "PARA", para
 
+    def _unescape(self, string):
+        result = ''
+        e = enumerate(string)
+        for pos, char in e:
+            if char == '\\' and self.patterns['escaped-chars'].match(string[pos+1]):
+                result += string[pos+1]
+                next(e, None)
+            else:
+                result += char
+        return result
+
 
 class Para:
     def __init__(self, para, strip=True):
@@ -1216,6 +1227,8 @@ def parse_insert(insert_string):
 def escape_for_xml(s):
     t = dict(zip([ord('<'), ord('>'), ord('&'), ord('"')], ['&lt;', '&gt;', '&amp;', '&quot;']))
     return s.translate(t)
+
+
 
 
 para_parser = SamParaParser()

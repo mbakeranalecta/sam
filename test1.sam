@@ -5,11 +5,17 @@
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
 tests:
+    test: Escapes in annotations
+
+        case: Escapes in explicit annotations
+
+            There is a curly brace in {this \\\\\{ annotation}(bold).
+
     test: Paragraph continuation
 
         case: Multiple lines joined to create one paragraph
 
-            This is a paragraph
+            This is a {paragraph}(?foo)
             that wraps across
             multiple lines.
 
