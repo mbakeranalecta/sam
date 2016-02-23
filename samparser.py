@@ -1073,7 +1073,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('bold', match.group("text")))
+            self.flow.append(Decoration('bold', self._unescape(match.group("text"))))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '*'
@@ -1084,7 +1084,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('italic', match.group("text")))
+            self.flow.append(Decoration('italic', self._unescape(match.group("text"))))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '_'
@@ -1095,7 +1095,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('mono', match.group("text")))
+            self.flow.append(Decoration('mono', self._unescape(match.group("text"))))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '`'
@@ -1106,7 +1106,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Decoration('quotes', match.group("text")))
+            self.flow.append(Decoration('quotes', self._unescape(match.group("text"))))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '"'

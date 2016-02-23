@@ -236,12 +236,13 @@ specification: Semantic Authoring Markdown (SAM)
         Standard blockquotes may conflict with embedding in other languages such as Python docstrings. 
 
         ```(sam) 
-        '''(citation) Quoted 
+        '''(citation) 
+            Quoted 
         ```
         
-        The difference between code {`{``}(code) and quote `"""` is that code signals a different encoding. The content of the code block is not processed as sam markup until the closing {`{`\}`}(code) is seen. 
+        The difference between code {```}(code) and quote `"""` is that code signals a different encoding. The content of the code block is not processed as sam markup until the closing {```}(code) is seen. 
 
-        In the event that the end marker for the codeblock would appear in the codeblock, the writer can add arbitrary characters after {`\{``}(code) in the top and bottom markers to assure they are distinct. 
+        In the event that the end marker for the codeblock would appear in the codeblock, the writer can add arbitrary characters after {```}(code) in the top and bottom markers to assure they are distinct. 
 
         In a blockquote, however, the material inside the quote block is still SAM markup and is processed as such. 
 
