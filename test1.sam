@@ -11,6 +11,20 @@ tests:
 
             There is a curly brace in {this \\\\\{ annotation}(bold).
 
+        case: Escapes in decorations
+
+            There is a curly brace in `this \{` mono decoration.
+
+            There is a back tick in `this \`` mono decoration.
+
+            There is a back tick in "this \`" quotes decoration.
+
+            There is a quote in "this \"" quotes decoration.
+
+            There is a `*` in *this \* bold* decoration.
+
+            There is a `_` in _this \_ italic_ decoration.
+
     test: Paragraph continuation
 
         case: Multiple lines joined to create one paragraph

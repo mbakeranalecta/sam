@@ -935,10 +935,10 @@ class SamParaParser:
             'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`]'),
             'annotation': re.compile(
                 r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
-            'bold': re.compile(r'\*(?P<text>\S.+?\S)\*'),
-            'italic': re.compile(r'_(?P<text>\S.*?\S)_'),
-            'mono': re.compile(r'`(?P<text>[^`]*?)`'),
-            'quotes': re.compile(r'"(?P<text>\S.*?\S)"'),
+            'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*'),
+            'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_'),
+            'mono': re.compile(r'`(?P<text>((?<=\\)`|[^`])*)(?<!\\)`'),
+            'quotes': re.compile(r'"(?P<text>((?<=\\)"|[^"])*)(?<!\\)"'),
             'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)'),
             'citation': re.compile(r'(\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name_name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\])')
         }
