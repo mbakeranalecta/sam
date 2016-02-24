@@ -5,6 +5,26 @@
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
 tests:
+
+    test: Conditions on list items
+
+        case: Conditions on unordered list shortcut
+
+            * Fred
+            *(?foo) Barney and
+             Betty and
+             Bam Bam.
+            * Wilma
+
+        case: Conditions on ordered list shortcut
+
+            1. Fred
+            2.(?foo) Barney and
+             Betty and
+             Bam Bam.
+            3. Wilma
+
+
     test: Escapes in annotations
 
         case: Escapes in explicit annotations
@@ -73,7 +93,7 @@ tests:
 
                 6. Two and a half
 
-                9. Two and three quarters
+                9. Two and three quarters 2
 
             99999. Three
 
@@ -86,7 +106,7 @@ tests:
             0. Two
                 5. Two and a quarter
                 6. Two and a half
-                9. Two and three quarters
+                9. Two and three quarters 3
             99999. Three
             7. Four
 
@@ -97,7 +117,7 @@ tests:
                 5. Two and a quarter
                 6. Two and a half
 
-                9. Two and three quarters
+                9. Two and three quarters 4
 
             99999. Three
             7. Four
@@ -109,7 +129,7 @@ tests:
                 5. Two and a quarter
                 6. Two and a half
 
-                9. Two and three quarters
+                9. Two and three quarters 5
             99999. Three
 
             7. Four
@@ -152,7 +172,7 @@ tests:
 
                 * Two and a half
 
-                * Two and three quarters
+                * Two and three quarters 6
 
             * Three
 
@@ -165,7 +185,7 @@ tests:
             * Two
                 * Two and a quarter
                 * Two and a half
-                * Two and three quarters
+                * Two and three quarters 7
             * Three
             * Four
 
@@ -176,7 +196,7 @@ tests:
                 * Two and a quarter
                 * Two and a half
 
-                * Two and three quarters
+                * Two and three quarters 8
 
             * Three
             * Four
@@ -188,7 +208,7 @@ tests:
                 * Two and a quarter
                 * Two and a half
 
-                * Two and three quarters
+                * Two and three quarters 9
             * Three
 
             * Four
@@ -205,7 +225,7 @@ tests:
 
                 * Two and a half
 
-                * Two and three quarters
+                * Two and three quarters 10
 
             99999. Three
 
@@ -218,7 +238,7 @@ tests:
             * Two
                 5. Two and a quarter
                 6. Two and a half
-                9. Two and three quarters
+                9. Two and three quarters 11
             * Three
             * Four
 
@@ -229,7 +249,7 @@ tests:
                 * Two and a quarter
                 * Two and a half
 
-                * Two and three quarters
+                * Two and three quarters 12
 
             99999. Three
             7. Four
@@ -241,7 +261,7 @@ tests:
                 5. Two and a quarter
                 6. Two and a half
 
-                9. Two and three quarters
+                9. Two and three quarters 13
             * Three
 
             * Four

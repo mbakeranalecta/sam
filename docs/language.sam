@@ -49,6 +49,8 @@ specification: Semantic Authoring Markdown (SAM)
     |annotations| Annotations are elements within a flow that have been annotated with semantic metadata to indicate something about their subject matter. 
 
     |insertions| Insertions bring in content from an external source.
+    
+    |citations| Citations are references to other works or structures. They generate an appropriate reference to that work. This reference is a piece of generated text in the current document. It is not a link, though it may also be linked. For example, you could cite a footnote or a figure. 
 
     section: Sam declaration 
 
@@ -58,10 +60,10 @@ specification: Semantic Authoring Markdown (SAM)
         sam: 
         ``` 
 
-        The sam declaration may specify the location of a schema file. The location will be processed through an XML catalog if one is specified. 
+        The sam declaration may specify the location of a schema file. The location will be processed through an XML catalog if one is specified to the parser. 
 
         ```(sam) 
-        sam: http://spfeopentoolkit.org/spfe-docs/topic-types/think-plan-do-topic/schemas/authoring/think-plan-do-topic.sams 
+        sam: http://spfeopentoolkit.org/schemas/think-plan-do-topic.sams 
         ``` 
 
         If the sam declaration does not specify a schema, it may specify a namespace URI. All elements will be output in that namespace. (Namespaces may not be assigned on individual elements.) If a schema is specified, namespaces will be assigned in the schema. 
@@ -69,6 +71,44 @@ specification: Semantic Authoring Markdown (SAM)
         ```(sam) 
         sam: {http://spfeopentoolkit.org/ns/spfe-docs} 
         ``` 
+
+    section: Blocks 
+
+        Blocks are indicated by a token followed by a semicolon at the start of a line. 
+
+        Blocks can have metadata in parens that follow the colon with no space: 
+
+        ```(sam) 
+        section:(?ultra) The ultra feature is really cool! 
+        ``` 
+
+        Block metadata can include: 
+
+        * Condition token, which start with a ? 
+        * Names, which start with # 
+        * IDs, which start with * 
+        
+        If there is any content after the colon and the metadata, it is considered a title for the block and generates a title structure.
+
+    section: Fields
+    
+        A field is a block with no children. Fields take the same metadata as blocks, however, the text after the colon and them metadata is treated as the value of the field rather than as a title. 
+        
+        ```(sam)
+        name: Fred Flintstone
+        address: Bedrock
+        era: BC
+        ```
+    
+    section: Paragraphs 
+
+        Syntactically, a paragraph is sequence of lines ending with a blank line, and does not start with any markup that makes it look like any other structure. 
+
+        Logically, a paragraph is a block that contains a flow. The content model of a paragraph is thus simply a flow. The flow, in turn can contain annotations, insertions, and citations. 
+
+        A paragraph cannot have block children. It is a syntax error to have anything indented under a paragraph. Logically, the content model of the implicit element {p}(implicit-element) is a flow, so it can't have any other children. 
+
+        If you desperately want to create paragraphs that have block children, you could create an alternative block type for them, such as `para`. This is generally a bad idea, as it create unnecessary complexity. A common reason for doing this it to make lists children of paragraphs. The argument for this is that the list is part of the argument of the paragraph and so part of the paragraph as a unit of composition. However, in almost all cases, a paragraph in a markup language is not a unit of composition or meaning, but a typographic unit. Unless you need to support some very specific forms of linguistic analysis, you don't need paragraphs to have children. 
 
     section: Annotations 
 
@@ -145,32 +185,6 @@ specification: Semantic Authoring Markdown (SAM)
 
         SAM itself does not execute conditions, it merely encodes them for later processing. Therefore it has no idea what the tokens mean or how they will be interpreted. However, using simple tokens is recommended as a best practice. 
 
-    section: Blocks 
-
-        Blocks are indicated by a token followed by a semicolon at the start of a line. 
-
-        Blocks can have metadata in parens that follow the colon with no space: 
-
-        ``` 
-        section:(?ultra) The ultra feature is really cool! 
-        ``` 
-
-        Block metadata can include: 
-
-        * Condition token, which start with a ? 
-        * Names, which start with # 
-        * IDs, which start with * 
-        * A string, in quotes, known as the specifically attribute. The specifically attribute exists to specify and clarify what is being annotated. 
-
-    section: Paragraphs 
-
-        Syntactically, a paragraph is sequence of lines ending with a blank line, and does not start with any markup that makes it look like any other structure. 
-
-        Logically, a paragraph is a block that contains a flow. The content model of a paragraph is thus simply a flow. The flow, in turn can contain annotations, decorations, insertions, and citations. 
-
-        A paragraph cannot have block children. It is a syntax error to have anything indented under a paragraph. Logically, the content model of the implicit element {p}(implicit-element) is a flow, so it can't have any other children. 
-
-        If you desperately want to create paragraphs that have block children, you could create an alternative block type for them, such as `para`. This is generally a bad idea, as it create unnecessary complexity. A common reason for doing this it to make lists children of paragraphs. The argument for this is that the list is part of the argument of the paragraph and so part of the paragraph as a unit of composition. However, in almost all cases, a paragraph in a markup language is not a unit of composition or meaning, but a typographic unit. Unless you need to support some very specific forms of linguistic analysis, you don't need paragraphs to have children. 
 
     section: Names and IDs 
     

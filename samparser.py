@@ -52,8 +52,8 @@ class SamParser:
             'line-start': re.compile(r'(?P<indent>\s*)\|(\((?P<attributes>.*?)\))?\s(?P<text>.*)'),
             'blank-line': re.compile(r'^\s*$'),
             'record-start': re.compile(r'(?P<indent>\s*)(?P<record_name>[a-zA-Z0-9-_]+)::(?P<field_names>.*)'),
-            'list-item': re.compile(r'(?P<indent>\s*)(?P<marker>\*\s+)(?P<content>.*)'),
-            'num-list-item': re.compile(r'(?P<indent>\s*)(?P<marker>[0-9]+\.\s+)(?P<content>.*)'),
+            'list-item': re.compile(r'(?P<indent>\s*)(?P<marker>\*(\((?P<attributes>.*?)\))?\s+)(?P<content>.*)'),
+            'num-list-item': re.compile(r'(?P<indent>\s*)(?P<marker>[0-9]+\.(\((?P<attributes>.*?)\))?\s+)(?P<content>.*)'),
             'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>\S.*?)(?<!\\)\|\s+(?P<content>.*)'),
             'block-insert': re.compile(r'(?P<indent>\s*)>>\((?P<attributes>.*?)\)\w*'),
             'string-def': re.compile(r'(?P<indent>\s*)\$(?P<name>\w*?)=(?P<value>.+)'),
@@ -226,7 +226,8 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
         content_indent = indent + len(match.group("marker"))
-        self.doc.new_unordered_list_item(indent, content_indent)
+        attributes = self.parse_block_attributes(match.group("attributes"))
+        self.doc.new_unordered_list_item(attributes, indent, content_indent)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -234,7 +235,8 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
         content_indent = indent + len(match.group("marker"))
-        self.doc.new_ordered_list_item(indent, content_indent)
+        attributes = self.parse_block_attributes(match.group("attributes"))
+        self.doc.new_ordered_list_item(attributes, indent, content_indent)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -774,19 +776,19 @@ class DocStructure:
         self.add_block(b)
         return b
 
-    def new_unordered_list_item(self, indent, content_indent):
-        uli = Block('li', None, '', None, indent + 1)
+    def new_unordered_list_item(self, attributes, indent, content_indent):
+        uli = Block('li', attributes, '', None, indent + 1)
         if self.context_at_indent(indent+1)[:2] == ['li', 'ul']:
             self.add_block(uli)
         else:
             ul = Block('ul', None, '', None, indent)
             self.add_block(ul)
             self.add_block(uli)
-        p = Paragraph( None, '', None, content_indent)
+        p = Paragraph(None, '', None, content_indent)
         self.add_block(p)
 
-    def new_ordered_list_item(self, indent, content_indent):
-        oli = Block('li', None, '', None, indent + 1)
+    def new_ordered_list_item(self, attributes, indent, content_indent):
+        oli = Block('li', attributes, '', None, indent + 1)
         if self.context_at_indent(indent+1)[:2] == ['li', 'ol']:
             self.add_block(oli)
         else:
