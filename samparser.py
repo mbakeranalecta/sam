@@ -54,7 +54,7 @@ class SamParser:
             'record-start': re.compile(r'(?P<indent>\s*)(?P<record_name>[a-zA-Z0-9-_]+)::(?P<field_names>.*)'),
             'list-item': re.compile(r'(?P<indent>\s*)(?P<marker>\*(\((?P<attributes>.*?)\))?\s+)(?P<content>.*)'),
             'num-list-item': re.compile(r'(?P<indent>\s*)(?P<marker>[0-9]+\.(\((?P<attributes>.*?)\))?\s+)(?P<content>.*)'),
-            'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>\S.*?)(?<!\\)\|\s+(?P<content>.*)'),
+            'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>\S.*?)(?<!\\)\|(\((?P<attributes>.*?)\))?\s+(?P<content>.*)'),
             'block-insert': re.compile(r'(?P<indent>\s*)>>\((?P<attributes>.*?)\)\w*'),
             'string-def': re.compile(r'(?P<indent>\s*)\$(?P<name>\w*?)=(?P<value>.+)'),
             'embedded-xml': re.compile(r'(?P<indent>\s*)(?P<xmltag>\<\?xml.+)')
@@ -244,7 +244,8 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
         label = match.group("label")
-        self.doc.new_labeled_list_item(indent, label)
+        attributes = self.parse_block_attributes(match.group("attributes"))
+        self.doc.new_labeled_list_item(attributes, indent, label)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -798,8 +799,8 @@ class DocStructure:
         p = Paragraph(None, '', None, content_indent)
         self.add_block(p)
 
-    def new_labeled_list_item(self, indent, label):
-        lli = Block('li', None, '', None, indent+.2)
+    def new_labeled_list_item(self, attributes, indent, label):
+        lli = Block('li', attributes, '', None, indent+.2)
         lli.add_child(Block('label', None, para_parser.parse(label, self.doc), None, indent))
         if self.current_block.name == 'li':
             self.current_block.add_sibling(lli)

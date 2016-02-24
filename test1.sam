@@ -539,7 +539,7 @@ tests:
             |p| The p element represents a paragraph. It is recognized as a block of
             lines with no leading tag. It ends with a blank line. p elements are the
             only elements that can contain decorations and annotations.
-            |bold| The bold element is a decoration occurring within text and is
+            |bold|(*foo2 ?bar #bat) The bold element is a decoration occurring within text and is
             indicated by surrounding the text with asterisks.
             |{italic}(style "|")| The italic | decoration is indicated by surrounding the text
             with underscores.
