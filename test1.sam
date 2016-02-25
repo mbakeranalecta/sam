@@ -27,6 +27,13 @@ tests:
 
     test: Escapes in annotations
 
+        case: Quotes inside phrase:
+
+        `pubwork="book"` is an attribute on the element `citetitle`.
+
+        `pubwork=\"book\"` is an attribute on the element `citetitle`.
+
+
         case: Escapes in explicit annotations
 
             There is a curly brace in {this \\\\\{ annotation}(bold).

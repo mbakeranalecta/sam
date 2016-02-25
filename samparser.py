@@ -924,7 +924,7 @@ class SamParaParser:
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\'),
-            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`]'),
+            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`"]'),
             'annotation': re.compile(
                 r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*'),
