@@ -15,7 +15,12 @@ re_indent = r'(?P<indent>\s*)'
 re_attributes = r'(\((?P<attributes>.*?(?<!\\))\))?'
 re_content = r'(?P<content>.*)'
 re_name = r'(?P<name>[\w_\.-]+?)'
-re_ulmarker = r''
+re_ul_marker = r'(?P<marker>\*)'
+re_ol_marker = r'(?P<marker>[0-9]+\.)'
+re_ll_marker = r'\|(?P<label>\S.*?)(?<!\\)\|'
+re_spaces = r'\s+'
+re_one_space = r'\s'
+re_comment = r'#.*'
 
 
 
@@ -48,18 +53,18 @@ class SamParser:
         self.source = None
         self.patterns = {
             'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?', re.U),
-            'comment': re.compile(re_indent +r'#.*', re.U),
+            'comment': re.compile(re_indent + re_comment, re.U),
             'block-start': re.compile(re_indent + re_name + r':' + re_attributes + re_content + r'?', re.U),
             'codeblock-start': re.compile(re_indent + r'(?P<flag>```[^\s\(]*)(\((?P<language>\S*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?', re.U),
             'blockquote-start': re.compile(re_indent + r'("""|\'\'\'|blockquote:)' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?', re.U),
             'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
             'paragraph-start': re.compile(r'\w*', re.U),
-            'line-start': re.compile(re_indent + r'\|' + re_attributes + r'\s' + re_content, re.U),
+            'line-start': re.compile(re_indent + r'\|' + re_attributes + re_one_space + re_content, re.U),
             'blank-line': re.compile(r'^\s*$'),
             'record-start': re.compile(re_indent + re_name + r'::(?P<field_names>.*)', re.U),
-            'list-item': re.compile(re_indent + r'(?P<marker>\*' + re_attributes + r'\s+)' + re_content, re.U),
-            'num-list-item': re.compile(re_indent + r'(?P<marker>[0-9]+\.' + re_attributes + r'\s+)' + re_content, re.U),
-            'labeled-list-item': re.compile(re_indent + r'\|(?P<label>\S.*?)(?<!\\)\|' + re_attributes + r'\s+' + re_content, re.U),
+            'list-item': re.compile(re_indent + re_ul_marker + re_attributes + re_spaces + re_content, re.U),
+            'num-list-item': re.compile(re_indent + re_ol_marker + re_attributes + re_spaces + re_content, re.U),
+            'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
             'block-insert': re.compile(re_indent + r'>>>' + re_attributes, re.U),
             'string-def': re.compile(re_indent + r'\$' + re_name + '=' + re_content, re.U),
             'embedded-xml': re.compile(re_indent + r'(?P<xmltag>\<\?xml.+)', re.U)
