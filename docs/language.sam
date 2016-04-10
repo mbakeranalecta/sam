@@ -37,6 +37,8 @@ specification: Semantic Authoring Markdown (SAM)
     |paragraphs| A paragraph is a continuous block of text across one or more contiguous lines. 
 
     |flows| Flows are sequences of text. Paragraphs are flows. Lines are flows. String definitions are flows. Fields are flows. Flows cannot contain blocks or fields. 
+    
+    |phrases| A phrase is a string of characters in a flow. A phrase can be annotated with an annotation.
 
     |record sets| A record set is a simple database table with named columns. It allows you to capture tabular data at a logical level rather than at the presentation level of a table. 
 
@@ -46,7 +48,7 @@ specification: Semantic Authoring Markdown (SAM)
 
     |fragments| Fragments are sections of a documents (potentially larger than a single flow) that can be included by reference in other parts of a document or in other documents. Strings used in a fragment can be redefined when a fragment is reused, allowing you to vary the text of the fragment when it is used in different places. 
 
-    |annotations| Annotations are elements within a flow that have been annotated with semantic metadata to indicate something about their subject matter. 
+    |annotations| Annotations are metadata attached to a structure. Different structures take different types of annotations that hold different types of metadata. 
 
     |insertions| Insertions bring in content from an external source.
     

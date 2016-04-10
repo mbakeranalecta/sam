@@ -1,19 +1,21 @@
 ﻿sam: {http://spfeopentoolkit.org/ns/spfe-docs}
 
 # This file is part of the SPFE Open Toolkit. See the accompanying license.txt file
-# for applicable licenses.
+ # for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
-tests:
+teësts:
 
-    test: Conditions on list items
+    t7est: Conditions on list items
 
         case: Conditions on unordered list shortcut
 
             * Fred
+
             *(?foo) Barney and
-             Betty and
-             Bam Bam.
+          Betty and
+          Bam Bam.
+
             * Wilma
 
         case: Conditions on ordered list shortcut
@@ -24,6 +26,11 @@ tests:
              Bam Bam.
             3. Wilma
 
+    test: Blank annotations
+
+        case: Blank annotation
+
+            The {annotation} has no metadata. It should produce a warning, but no annotation in XML.
 
     test: Escapes in annotations
 
@@ -75,6 +82,8 @@ tests:
             0. One
             0. Two this
                paragraph wraps.
+
+             This is another para in the list.
             99999. Three
 
         case: Numbered list mixed spacing
@@ -269,6 +278,7 @@ tests:
                 6. Two and a half
 
                 9. Two and three quarters 13
+
             * Three
 
             * Four
@@ -374,9 +384,9 @@ tests:
 
 
 
-            >>(image foo.gif #bar ?baz ?bat)
+            >>>(image foo.gif #bar ?baz ?bat)
 
-            This sentence includes a string reference >>(string name). And a shortcut version >>($name)
+            This sentence includes a string reference >(string name). And a shortcut version >($name)
 
             """[*bing bang boom]
                 |(#foo2) You gotta walk that lonesome valley,[*bing bang boom]
@@ -404,7 +414,7 @@ tests:
 
                     This is a nested fragment.
 
-            >>(~foobar)
+            >>>(~foobar)
                 $a=apricot
                 $b=breadfruit
 
@@ -423,7 +433,7 @@ tests:
             etc.) that _has been given_ an id so that it can be \\{included}(bold) by reference at other
             \_points_ in the content.
 
-            ```kkk(xml "c:/foo" (1.0) #foo4 ?bar)
+            ```kkk(xml1.0 #foo4 ?bar)[c:/foo]
             <fragment id="test-fragment">
                 <local-strings>
                     <string id="test-string-1"><bold>test string one</bold></string>
@@ -518,10 +528,10 @@ tests:
                 <hoo/>
             </foo>
 
-            Because you often want to >>(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
+            Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
             reused, <fragments> & fragment references can both define local {strings}(feature).
             Any {string references}(feature) inside a fragment will be resolved by looking first
-            at local-strings defined in the >>(*my-table) fragment reference, then at local strings defined
+            at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
             in the fragment definition, and then at global strings. In effect, this means
             that you can define string substitutions whenever you insert a fragment into your content.
 

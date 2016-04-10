@@ -10,6 +10,14 @@ try:
 except ImportError:
     import re
 
+# Regex component expressions
+re_indent = r'(?P<indent>\s*)'
+re_attributes = r'(\((?P<attributes>.*?(?<!\\))\))?'
+re_content = r'(?P<content>.*)'
+re_name = r'(?P<name>[\w_\.-]+?)'
+re_ulmarker = r''
+
+
 
 class SamParser:
     def __init__(self):
@@ -39,25 +47,22 @@ class SamParser:
         self.doc = DocStructure()
         self.source = None
         self.patterns = {
-            'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?'),
-            'comment': re.compile(r'\s*#.*'),
-            'block-start': re.compile(
-                r'(?P<indent>\s*)(?P<element>[\w_\.-]+?):(\((?P<attributes>.*?(?<!\\))\))?(?P<content>.+)?'),
-            'codeblock-start': re.compile(
-                r'(?P<indent>\s*)(?P<flag>```[^\s\(]*)(\((?P<language>\w*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?'),
-            'blockquote-start': re.compile(
-                r'(?P<indent>\s*)("""|\'\'\'|blockquote:)(\((?P<attributes>.*?(?<!\\))\))?((\[\s*\*(?P<id>\S+)(?P<id_extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?'),
-            'fragment-start': re.compile(r'(?P<indent>\s*)~~~(\((?P<attributes>.*?)\))?'),
-            'paragraph-start': re.compile(r'\w*'),
-            'line-start': re.compile(r'(?P<indent>\s*)\|(\((?P<attributes>.*?)\))?\s(?P<text>.*)'),
+            'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?', re.U),
+            'comment': re.compile(re_indent +r'#.*', re.U),
+            'block-start': re.compile(re_indent + re_name + r':' + re_attributes + re_content + r'?', re.U),
+            'codeblock-start': re.compile(re_indent + r'(?P<flag>```[^\s\(]*)(\((?P<language>\S*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?', re.U),
+            'blockquote-start': re.compile(re_indent + r'("""|\'\'\'|blockquote:)' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?', re.U),
+            'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
+            'paragraph-start': re.compile(r'\w*', re.U),
+            'line-start': re.compile(re_indent + r'\|' + re_attributes + r'\s' + re_content, re.U),
             'blank-line': re.compile(r'^\s*$'),
-            'record-start': re.compile(r'(?P<indent>\s*)(?P<record_name>[a-zA-Z0-9-_]+)::(?P<field_names>.*)'),
-            'list-item': re.compile(r'(?P<indent>\s*)(?P<marker>\*(\((?P<attributes>.*?)\))?\s+)(?P<content>.*)'),
-            'num-list-item': re.compile(r'(?P<indent>\s*)(?P<marker>[0-9]+\.(\((?P<attributes>.*?)\))?\s+)(?P<content>.*)'),
-            'labeled-list-item': re.compile(r'(?P<indent>\s*)\|(?P<label>\S.*?)(?<!\\)\|(\((?P<attributes>.*?)\))?\s+(?P<content>.*)'),
-            'block-insert': re.compile(r'(?P<indent>\s*)>>\((?P<attributes>.*?)\)\w*'),
-            'string-def': re.compile(r'(?P<indent>\s*)\$(?P<name>\w*?)=(?P<value>.+)'),
-            'embedded-xml': re.compile(r'(?P<indent>\s*)(?P<xmltag>\<\?xml.+)')
+            'record-start': re.compile(re_indent + re_name + r'::(?P<field_names>.*)', re.U),
+            'list-item': re.compile(re_indent + r'(?P<marker>\*' + re_attributes + r'\s+)' + re_content, re.U),
+            'num-list-item': re.compile(re_indent + r'(?P<marker>[0-9]+\.' + re_attributes + r'\s+)' + re_content, re.U),
+            'labeled-list-item': re.compile(re_indent + r'\|(?P<label>\S.*?)(?<!\\)\|' + re_attributes + r'\s+' + re_content, re.U),
+            'block-insert': re.compile(re_indent + r'>>>' + re_attributes, re.U),
+            'string-def': re.compile(re_indent + r'\$' + re_name + '=' + re_content, re.U),
+            'embedded-xml': re.compile(re_indent + r'(?P<xmltag>\<\?xml.+)', re.U)
         }
 
     def parse(self, source):
@@ -80,10 +85,11 @@ class SamParser:
     def _block(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        element = match.group("element").strip()
+        block_name = match.group("name").strip()
         attributes = self.parse_block_attributes(match.group("attributes"))
         content = match.group("content")
-        self.doc.new_block(element, attributes, para_parser.parse(content, self.doc), indent)
+        parsed_content = None if content == '' else para_parser.parse(content, self.doc)
+        self.doc.new_block(block_name, attributes, parsed_content, indent)
         return "SAM", context
 
     def _codeblock_start(self, context):
@@ -225,18 +231,16 @@ class SamParser:
     def _list_item(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        content_indent = indent + len(match.group("marker"))
         attributes = self.parse_block_attributes(match.group("attributes"))
-        self.doc.new_unordered_list_item(attributes, indent, content_indent)
+        self.doc.new_unordered_list_item(attributes, indent)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
     def _num_list_item(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        content_indent = indent + len(match.group("marker"))
         attributes = self.parse_block_attributes(match.group("attributes"))
-        self.doc.new_ordered_list_item(attributes, indent, content_indent)
+        self.doc.new_ordered_list_item(attributes, indent)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -258,19 +262,19 @@ class SamParser:
     def _string_def(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_string_def(match.group('name'), para_parser.parse(match.group('value'), self.doc), indent=indent)
+        self.doc.new_string_def(match.group('name'), para_parser.parse(match.group('content'), self.doc), indent=indent)
         return "SAM", context
 
     def _line_start(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_block('line', self.parse_block_attributes(match.group("attributes")), para_parser.parse(match.group('text'), self.doc, strip=False), indent=indent)
+        self.doc.new_block('line', self.parse_block_attributes(match.group("attributes")), para_parser.parse(match.group('content'), self.doc, strip=False), indent=indent)
         return "SAM", context
 
     def _record_start(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        record_name = match.group("record_name").strip()
+        record_name = match.group("name").strip()
         field_names = [x.strip() for x in match.group("field_names").split(',')]
         self.doc.new_record_set(record_name, field_names, indent)
         return "RECORD", context
@@ -525,7 +529,7 @@ class Comment(Block):
         return u"[#comment:'{1:s}']".format(self.content)
 
     def serialize_xml(self):
-        yield '<!-- {0} -->\n'.format(self.content)
+        yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
 
 
 class StringDef(Block):
@@ -777,26 +781,26 @@ class DocStructure:
         self.add_block(b)
         return b
 
-    def new_unordered_list_item(self, attributes, indent, content_indent):
-        uli = Block('li', attributes, '', None, indent + 1)
-        if self.context_at_indent(indent+1)[:2] == ['li', 'ul']:
+    def new_unordered_list_item(self, attributes, indent):
+        uli = Block('li', attributes, '', None, indent + .1)
+        if self.context_at_indent(indent+.1)[:2] == ['li', 'ul']:
             self.add_block(uli)
         else:
             ul = Block('ul', None, '', None, indent)
             self.add_block(ul)
             self.add_block(uli)
-        p = Paragraph(None, '', None, content_indent)
+        p = Paragraph(None, '', None, indent+.2)
         self.add_block(p)
 
-    def new_ordered_list_item(self, attributes, indent, content_indent):
-        oli = Block('li', attributes, '', None, indent + 1)
-        if self.context_at_indent(indent+1)[:2] == ['li', 'ol']:
+    def new_ordered_list_item(self, attributes, indent):
+        oli = Block('li', attributes, '', None, indent + .1)
+        if self.context_at_indent(indent+.1)[:2] == ['li', 'ol']:
             self.add_block(oli)
         else:
             ol = Block('ol', None, '', None, indent)
             self.add_block(ol)
             self.add_block(oli)
-        p = Paragraph(None, '', None, content_indent)
+        p = Paragraph(None, '', None, indent+.2)
         self.add_block(p)
 
     def new_labeled_list_item(self, attributes, indent, label):
@@ -923,16 +927,16 @@ class SamParaParser:
         self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
         self.stateMachine.set_start("PARA")
         self.patterns = {
-            'escape': re.compile(r'\\'),
-            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`"]'),
+            'escape': re.compile(r'\\', re.U),
+            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`"]', re.U),
             'annotation': re.compile(
-                r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?'),
-            'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*'),
-            'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_'),
-            'mono': re.compile(r'`(?P<text>((?<=\\)`|[^`])*)(?<!\\)`'),
-            'quotes': re.compile(r'"(?P<text>((?<=\\)"|[^"])*)(?<!\\)"'),
-            'inline-insert': re.compile(r'>>\((?P<attributes>.*?)\)'),
-            'citation': re.compile(r'(\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name_name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\])')
+                r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?', re.U),
+            'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
+            'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
+            'mono': re.compile(r'`(?P<text>((?<=\\)`|[^`])*)(?<!\\)`', re.U),
+            'quotes': re.compile(r'"(?P<text>((?<=\\)"|[^"])*)(?<!\\)"', re.U),
+            'inline-insert': re.compile(r'>\((?P<attributes>.*?)\)', re.U),
+            'citation': re.compile(r'(\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name_name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\])', re.U)
         }
 
     def parse(self, para, doc, strip=True):
@@ -995,17 +999,20 @@ class SamParaParser:
                     if previous is not None:
                         self.flow.append(previous)
 
-                    # Else raise an exception.
+                    # Else output a warning.
                     else:
-                        raise SAMParserError(
-                                "Blank annotation found: {" + text + "} " +
+                        self.current_string += text
+                        SAM_parser_warning(
+                                "Blank annotation found: {" +
+                                text + "} " +
                                 "If you are trying to insert curly braces " +
                                 "into the document, use \{" + text +
                                 "]. Otherwise, make sure annotated text matches "
                                 "previous annotation exactly."
                         )
+            # FIXME: Outdated restriction.
             elif annotation_type.strip() == '':
-                raise SAMParserError ("Annotation type cannot be blank: " + match.group(0))
+                raise SAMParserError ("SAM parser error: Annotation type cannot be blank: " + match.group(0))
             else:
                 #Check for link shortcut
                 if urlparse(annotation_type,None).scheme is not None:
@@ -1197,11 +1204,11 @@ def parse_insert(insert_string):
     insert_conditions = [x[1:] for x in attributes_list if x[0] == '?']
     unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*')]
     if len(insert_ids) > 1:
-        raise SAMParserError("More than one ID specified: " + ", ".join(insert_ids))
+        raise SAMParserError("SAM parser error: More than one ID specified: " + ", ".join(insert_ids))
     if len(insert_names) > 1:
-        raise SAMParserError("More than one name specified: " + ", ".join(insert_names))
+        raise SAMParserError("SAM parser error: More than one name specified: " + ", ".join(insert_names))
     if unexpected_attributes:
-        raise SAMParserError("Unexpected insert attribute(s): {0}".format(unexpected_attributes))
+        raise SAMParserError("SAM parser error: Unexpected insert attribute(s): {0}".format(unexpected_attributes))
     result['type'] = insert_type
     # strip unnecessary quotes from insert item
     insert_item = re.sub(r'^(["\'])|(["\'])$', '', insert_item)
@@ -1220,7 +1227,8 @@ def escape_for_xml(s):
     t = dict(zip([ord('<'), ord('>'), ord('&'), ord('"')], ['&lt;', '&gt;', '&amp;', '&quot;']))
     return s.translate(t)
 
-
+def SAM_parser_warning(warning):
+    print("Sam parser warning: " + warning, file=sys.stderr)
 
 
 para_parser = SamParaParser()
