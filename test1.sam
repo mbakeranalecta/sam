@@ -80,9 +80,9 @@ tests:(~en)
 
         case: Escapes in decorations
 
-            There is a curly brace in `this \{` mono decoration.
+            There is a curly brace in `this \{` code decoration.
 
-            There is a back tick in `this \`` mono decoration.
+            There is a back tick in `th\\is ``` code decoration.
 
             There is a back tick in "this \`" quotes decoration.
 
@@ -338,6 +338,16 @@ tests:(~en)
             * One
             * Two
             * Three
+
+    test: Literal lists
+
+        case: Literal numbered list using \\ to escape .
+
+            2\. This is just a paragraph
+
+        case: Literal unordered list using \* to escape *
+
+            \* This is just a paragraph
 
     test: XML reserved characters in attributes
 
@@ -595,7 +605,7 @@ tests:(~en)
             with underscores.
             |quotes| The quotes decoration is indicated by surrounding the text
             in straight quotes.
-            |mono| The mono decoration is indicated by backticks
+            |code| The code decoration is indicated by backticks
 
             index:
                     entry:: type, term

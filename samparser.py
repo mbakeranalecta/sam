@@ -938,19 +938,19 @@ class SamParaParser:
         self.stateMachine.add_state("CITATION-START", self._citation_start)
         self.stateMachine.add_state("BOLD-START", self._bold_start)
         self.stateMachine.add_state("ITALIC-START", self._italic_start)
-        self.stateMachine.add_state("MONO-START", self._mono_start)
+        self.stateMachine.add_state("CODE-START", self._code_start)
         self.stateMachine.add_state("QUOTES-START", self._quotes_start)
         self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
         self.stateMachine.add_state("CHARACTER-ENTITY", self._character_entity)
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\', re.U),
-            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`"&]', re.U),
+            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,\.\*`"&]', re.U),
             'annotation': re.compile(
                 r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(~(?P<language>[\w-]+))?\))?', re.U),
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
-            'mono': re.compile(r'`(?P<text>((?<=\\)`|[^`])*)(?<!\\)`', re.U),
+            'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
             'quotes': re.compile(r'"(?P<text>((?<=\\)"|[^"])*)(?<!\\)"', re.U),
             'inline-insert': re.compile(r'>\((?P<attributes>.*?)\)', re.U),
             'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
@@ -985,7 +985,7 @@ class SamParaParser:
         elif char == "_":
             return "ITALIC-START", para
         elif char == "`":
-            return "MONO-START", para
+            return "CODE-START", para
         elif char == '"':
             return "QUOTES-START", para
         elif char == ">":
@@ -1107,12 +1107,12 @@ class SamParaParser:
             self.current_string += '_'
         return "PARA", para
 
-    def _mono_start(self, para):
-        match = self.patterns['mono'].match(para.rest_of_para)
+    def _code_start(self, para):
+        match = self.patterns['code'].match(para.rest_of_para)
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Annotation('mono', self._unescape(match.group("text"))))
+            self.flow.append(Annotation('code', (match.group("text")).replace("``", "`")))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '`'
@@ -1182,20 +1182,21 @@ class SamParaParser:
         result = ''
         e = enumerate(string)
         for pos, char in e:
-            if char == '\\' and self.patterns['escaped-chars'].match(string[pos+1]):
-                result += string[pos+1]
-                next(e, None)
-            elif char == '&':
-                match = self.patterns['character-entity'].match(string[pos:])
-                if match:
-                    result += self.patterns['character-entity'].sub(self._replace_charref, match.group(0))
-                    for i in range(0, len(match.group(0))):
-                        next(e, None)
+            try:
+                if char == '\\' and self.patterns['escaped-chars'].match(string[pos+1]):
+                    result += string[pos+1]
+                    next(e, None)
+                elif char == '&':
+                    match = self.patterns['character-entity'].match(string[pos:])
+                    if match:
+                        result += self.patterns['character-entity'].sub(self._replace_charref, match.group(0))
+                        for i in range(0, len(match.group(0))):
+                            next(e, None)
+                    else:
+                        result += char
                 else:
                     result += char
-
-
-            else:
+            except IndexError:
                 result += char
         return result
 
