@@ -4,9 +4,34 @@
  # for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
-teësts:
+# Need test for unicode characters and numbers in names.
 
-    t7est: Conditions on list items
+
+tests:
+
+    test: Character entities
+
+        case: HTML named entities
+
+            The doggy in the window costs &pound;5.00.
+
+        case: Numeric entities
+
+            The doggy in the window costs &#163;5.00.
+
+        case: Hexadecimal entity
+
+            The doggy in the window costs &#xA3;5.00.
+
+        case: In code annotation shortcut:
+
+            The doggy in the window costs `&#xA3;`5.00.
+
+        case: In bold annotation shortcut:
+
+            The doggy in the window costs *&#xA3;*5.00.
+
+    test: Conditions on list items
 
         case: Conditions on unordered list shortcut
 

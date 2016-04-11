@@ -2,7 +2,8 @@ import sys
 from statemachine import StateMachine
 from lxml import etree
 import xml.parsers.expat
-import io
+import html
+
 from urllib.parse import urlparse
 
 try:
@@ -930,6 +931,7 @@ class SamParaParser:
         self.stateMachine.add_state("MONO-START", self._mono_start)
         self.stateMachine.add_state("QUOTES-START", self._quotes_start)
         self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
+        self.stateMachine.add_state("CHARACTER-ENTITY", self._character_entity)
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\', re.U),
@@ -941,6 +943,7 @@ class SamParaParser:
             'mono': re.compile(r'`(?P<text>((?<=\\)`|[^`])*)(?<!\\)`', re.U),
             'quotes': re.compile(r'"(?P<text>((?<=\\)"|[^"])*)(?<!\\)"', re.U),
             'inline-insert': re.compile(r'>\((?P<attributes>.*?)\)', re.U),
+            'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
             'citation': re.compile(r'(\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name_name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\])', re.U)
         }
 
@@ -977,6 +980,8 @@ class SamParaParser:
             return "QUOTES-START", para
         elif char == ">":
             return "INLINE-INSERT", para
+        elif char == "&":
+            return "CHARACTER-ENTITY", para
         else:
             self.current_string += char
             return "PARA", para
@@ -1137,6 +1142,25 @@ class SamParaParser:
         else:
             self.current_string += '>'
         return "PARA", para
+
+    def _character_entity(self, para):
+        match = self.patterns['character-entity'].match(para.rest_of_para)
+        if match:
+            self.current_string += self.patterns['character-entity'].sub(self._replace_charref, match.group(0))
+            para.advance(len(match.group(0)) - 1)
+        else:
+            self.current_string += '&'
+        return "PARA", para
+
+    def _replace_charref(self, match):
+        character = html.unescape(match.group(0))
+        if character == match.group(0):  # Escape not recognized
+            raise SAMParserError("Unrecognized character entity found: " + character)
+        return character
+
+
+
+
 
     def _escape(self, para):
         char = para.next_char
