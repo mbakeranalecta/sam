@@ -935,7 +935,7 @@ class SamParaParser:
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\', re.U),
-            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`"]', re.U),
+            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`"&]', re.U),
             'annotation': re.compile(
                 r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?', re.U),
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
@@ -1153,14 +1153,14 @@ class SamParaParser:
         return "PARA", para
 
     def _replace_charref(self, match):
-        character = html.unescape(match.group(0))
-        if character == match.group(0):  # Escape not recognized
-            raise SAMParserError("Unrecognized character entity found: " + character)
+        try:
+            charref = match.group(0)
+        except AttributeError:
+           charref = match
+        character = html.unescape(charref)
+        if character == charref:  # Escape not recognized
+            raise SAMParserError("Unrecognized character entity found: " + charref)
         return character
-
-
-
-
 
     def _escape(self, para):
         char = para.next_char
@@ -1177,6 +1177,16 @@ class SamParaParser:
             if char == '\\' and self.patterns['escaped-chars'].match(string[pos+1]):
                 result += string[pos+1]
                 next(e, None)
+            elif char == '&':
+                match = self.patterns['character-entity'].match(string[pos:])
+                if match:
+                    result += self.patterns['character-entity'].sub(self._replace_charref, match.group(0))
+                    for i in range(0, len(match.group(0))):
+                        next(e, None)
+                else:
+                    result += char
+
+
             else:
                 result += char
         return result

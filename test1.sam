@@ -31,6 +31,14 @@ tests:
 
             The doggy in the window costs *&#xA3;*5.00.
 
+        case: In bold annotation shortcut escaped:
+
+            The doggy in the window costs *\&#xA3;*5.00.
+
+            The cat & the dog.
+
+            The cat \& the dog.
+
     test: Conditions on list items
 
         case: Conditions on unordered list shortcut
