@@ -7,7 +7,7 @@
 # Need test for unicode characters and numbers in names.
 
 
-tests:
+tests:(~en)
 
     test: Character entities
 
@@ -46,8 +46,8 @@ tests:
             * Fred
 
             *(?foo) Barney and
-          Betty and
-          Bam Bam.
+              Betty and
+              Bam Bam.
 
             * Wilma
 
@@ -349,7 +349,7 @@ tests:
 
             This is a {link text}(thing 'somthing "specific"' (foo)).
 
-    test:(#feature-fragments) Fragments
+    test:(#feature-fragments ) Fragments
         head:(#foo)
             foo: barney {and}(conjunction) betty
             baz: bat
@@ -401,9 +401,9 @@ tests:
 
             Press \[Enter].
 
-            Press {Enter}(key)
+            Press {Enter}(key ~fr-CA)
 
-            Suppose you discovered that your users were using your help content far more
+            Suppose you {discovered}(~sp) that your users were using your help content far more
             than your manuals and wanted to force your writers to break away from this
             habit of creating book-like help systems. You would introduce[*bar]
             constraint that writers were to focus on producing self sufficient

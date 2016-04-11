@@ -413,7 +413,7 @@ class SamParser:
             attributes_list = attributes_string.split()
         except AttributeError:
             return None
-        unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*')]
+        unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*~')]
         if unexpected_attributes:
             raise SAMParserError("Unexpected attribute(s): {0}".format(', '.join(unexpected_attributes)))
         ids = [x[1:] for x in attributes_list if x[0] == '*']
@@ -422,6 +422,9 @@ class SamParser:
         names = [x[1:] for x in attributes_list if x[0] == '#']
         if len(names) > 1:
             raise SAMParserError("More than one name specified: " + ", ".join(names))
+        language = [x[1:] for x in attributes_list if x[0] == '~']
+        if len(language) > 1:
+            raise SAMParserError("More than one language specified: " + ", ".join(language))
         conditions = [x[1:] for x in attributes_list if x[0] == '?']
         if ids:
             if ids[0] in self.doc.ids:
@@ -430,6 +433,8 @@ class SamParser:
             result["id"] = "".join(ids)
         if names:
             result["name"] = "".join(names)
+        if language:
+            result["xml:lang"] = "".join(language)
         if conditions:
             result["conditions"] = " ".join(conditions)
         return result
@@ -643,21 +648,26 @@ class EmbeddedXML(Block):
 
 
 class Annotation:
-    def __init__(self, annotation_type, text, specifically='', namespace=''):
+    def __init__(self, annotation_type, text, specifically='', namespace='', language=''):
         self.annotation_type = annotation_type
         self.text = text
         self.specifically = specifically
         self.namespace = namespace
+        self.language = language
 
     def __str__(self):
         return '{%s}(%s "%s" (%s))' % (self.text, self.annotation_type, self.specifically, self.namespace)
 
     def serialize_xml(self):
-        yield '<annotation type="{0}"'.format(self.annotation_type)
+        yield '<annotation'
+        if self.annotation_type:
+            yield ' type="{0}"'.format(self.annotation_type)
         if self.specifically:
             yield ' specifically="{0}"'.format(escape_for_xml(self.specifically))
         if self.namespace:
             yield ' namespace="{0}"'.format(self.namespace)
+        if self.language:
+            yield ' xml:lang="{0}"'.format(self.language)
         yield '>{0}</annotation>'.format(escape_for_xml(self.text))
 
 
@@ -937,7 +947,7 @@ class SamParaParser:
             'escape': re.compile(r'\\', re.U),
             'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,`"&]', re.U),
             'annotation': re.compile(
-                r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))?', re.U),
+                r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(~(?P<language>[\w-]+))?\))?', re.U),
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
             'mono': re.compile(r'`(?P<text>((?<=\\)`|[^`])*)(?<!\\)`', re.U),
@@ -992,12 +1002,13 @@ class SamParaParser:
             self.flow.append(self.current_string)
             self.current_string = ''
             annotation_type = match.group('type')
+            language = match.group('language')
             text = self._unescape(match.group("text"))
 
             # If there is an annotated phrase with no annotation, look back
             # to see if it has been annotated already, and if so, copy the
             # closest preceding annotation.
-            if annotation_type is None:
+            if annotation_type is None and not language:
                 # First look back in the current flow
                 # (which is not part of the doc structure yet).
                 previous = self.flow.find_last_annotation(text)
@@ -1020,9 +1031,6 @@ class SamParaParser:
                                 "]. Otherwise, make sure annotated text matches "
                                 "previous annotation exactly."
                         )
-            # FIXME: Outdated restriction.
-            elif annotation_type.strip() == '':
-                raise SAMParserError ("SAM parser error: Annotation type cannot be blank: " + match.group(0))
             else:
                 #Check for link shortcut
                 if urlparse(annotation_type,None).scheme is not None:
@@ -1030,8 +1038,8 @@ class SamParaParser:
                     annotation_type='link'
                 else:
                     specifically = match.group('specifically') if match.group('specifically') is not None else None
-                namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
-                self.flow.append(Annotation(annotation_type.strip(), text, specifically, namespace))
+                    namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
+                    self.flow.append(Annotation(annotation_type, text, specifically, namespace, language))
             para.advance(len(match.group(0)) - 1)
             return "PARA", para
         else:
@@ -1217,7 +1225,6 @@ class SAMParserError(Exception):
     """
     Raised if the SAM parser encounters an error.
     """
-
 
 
 def parse_insert(insert_string):
