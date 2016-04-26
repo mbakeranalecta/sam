@@ -9,6 +9,25 @@
 
 tests:(~en)
 
+    test: Prior annotation lookup.
+
+        case: Same para
+
+            This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotation}.
+
+        case: Earlier para
+
+            This {annotation} occurs previously.
+
+        case: Failure
+
+            This {should be reported}.
+
+        case: With intervening paragraph
+
+            This {annotation} occurs previously.
+
+
     test: Character entities
 
         case: HTML named entities
@@ -34,6 +53,8 @@ tests:(~en)
         case: In bold annotation shortcut escaped:
 
             The doggy in the window costs *\&#xA3;*5.00.
+
+        case: Ampersand in a sentence, escaped with \ and not escaped. Both should output in XML as `&amp;`
 
             The cat & the dog.
 
@@ -67,26 +88,31 @@ tests:(~en)
 
     test: Escapes in annotations
 
-        case: Quotes inside phrase:
-
-        `pubwork="book"` is an attribute on the element `citetitle`.
-
-        `pubwork=\"book\"` is an attribute on the element `citetitle`.
-
-
         case: Escapes in explicit annotations
 
             There is a curly brace in {this \\\\\{ annotation}(bold).
 
+        case: Escapes in code annotations
+
+            Normal escape sequences are not recognized in a code annotation. All
+            characters are treated as literal up to the closing backtick. A literal
+            backtick in a code annotation must therefore be escaped as a double
+            backtick.
+
+            There is a backtick and two backslashes in `th\\is `` code` decoration.
+
+            There is a backslash and a curly brace in `this \{ code` decoration.
+
+            `pubwork="book"` is an attribute on the element `citetitle`.
+
+
         case: Escapes in decorations
 
-            There is a curly brace in `this \{` code decoration.
+            Escape sequences are recognized inside decorations.
 
-            There is a back tick in `th\\is ``` code decoration.
+            There is a back tick in "this \` quotes" decoration.
 
-            There is a back tick in "this \`" quotes decoration.
-
-            There is a quote in "this \"" quotes decoration.
+            There is a quote in "this \" quotes" decoration.
 
             There is a `*` in *this \* bold* decoration.
 

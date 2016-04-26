@@ -1038,8 +1038,8 @@ class SamParaParser:
                     annotation_type='link'
                 else:
                     specifically = match.group('specifically') if match.group('specifically') is not None else None
-                    namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
-                    self.flow.append(Annotation(annotation_type, text, specifically, namespace, language))
+                namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
+                self.flow.append(Annotation(annotation_type, text, specifically, namespace, language))
             para.advance(len(match.group(0)) - 1)
             return "PARA", para
         else:
