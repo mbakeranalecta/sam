@@ -138,7 +138,7 @@ specification: Semantic Authoring Markdown (SAM)
 
     section: Inserts 
 
-        Insertions are indicated by >> followed by parentheses containing the type and identity of the thing to be inserted. SAM knows nothing about the types of things you might insert. It simply passes on the type to the processing application. 
+        Insertions are indicated by >>> followed by parentheses containing the type and identity of the thing to be inserted. SAM knows nothing about the types of things you might insert. It simply passes on the type to the processing application.
 
         The parameters of an insertion are different from those of an annotation. They are: 
 

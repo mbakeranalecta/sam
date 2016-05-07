@@ -9,6 +9,22 @@
 
 tests:(~en)
 
+    test: Blank lines in codeblocks
+
+        ```(sam)
+        warnings:
+            warning:(#warn_danger_domestic)
+                title: Danger
+
+                Be very very careful. This could kill you.
+
+            warning:(#warn_danger_foreign)
+                title: Look out!
+
+                Pay close attention. You could really hurt yourself.
+        ```
+
+
     test: Prior annotation lookup.
 
         case: Same para

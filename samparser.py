@@ -76,8 +76,7 @@ class SamParser:
         try:
             self.stateMachine.run(self.source)
         except EOFError:
-            raise SAMParserError("Document ended before structure was complete. At:\n\n"
-                            + self.current_paragraph)
+            raise SAMParserError("Document ended before structure was complete.")
 
     def _new_file(self, source):
         line = source.next_line
@@ -625,7 +624,7 @@ class Pre(Flow):
             if not line.isspace():
                 raw_lines.append((line, len(line) - len(line.lstrip())))
         min_indent = min(raw_lines, key = lambda t: t[1])[1]
-        self.lines = [x[min_indent:] for x in text_block.lines]
+        self.lines = [x[min_indent:] if len(x) > min_indent else x for x in text_block.lines]
 
 
     def serialize_xml(self):
