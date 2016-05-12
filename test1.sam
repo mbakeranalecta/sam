@@ -7,7 +7,17 @@
 # Need test for unicode characters and numbers in names.
 
 
-tests:(~en)
+tests:(!en)
+
+    test: Smart quotes
+
+        "For once, 'sir' adding, 'you're making a
+        scene.'" and "For once, 'sir' adding,
+        'you're making a scene.'" In the winter
+        of '65. "Yes," he said, "I met her. She's
+        very 'friendly.'" '"I don’t know what you
+        mean by 'glory,'" Alice said.' "'I don’t
+        know what you mean by "glory,"' Alice said."
 
     test: Blank lines in codeblocks
 

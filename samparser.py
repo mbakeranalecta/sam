@@ -11,7 +11,7 @@ try:
 except ImportError:
     import re
 
-# Regex component expressions
+# Block regex component expressions
 re_indent = r'(?P<indent>\s*)'
 re_attributes = r'(\((?P<attributes>.*?(?<!\\))\))?'
 re_content = r'(?P<content>.*)'
@@ -23,6 +23,12 @@ re_spaces = r'\s+'
 re_one_space = r'\s'
 re_comment = r'#.*'
 
+# Flow regex component expressions
+re_single_quote_close = '(?<=[\w\.\,\"])\'((?=[\.\s"])|$)'
+re_single_quote_open = ''
+re_double_quote_close = '(?<=[\w\.\,\'])"((?=[\.\s\'])|$)'
+re_double_quote_open = ''
+re_apostrophe = "(?<=\w)'(?=\w)"
 
 
 class SamParser:
@@ -412,7 +418,7 @@ class SamParser:
             attributes_list = attributes_string.split()
         except AttributeError:
             return None
-        unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*~')]
+        unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*!')]
         if unexpected_attributes:
             raise SAMParserError("Unexpected attribute(s): {0}".format(', '.join(unexpected_attributes)))
         ids = [x[1:] for x in attributes_list if x[0] == '*']
@@ -421,7 +427,7 @@ class SamParser:
         names = [x[1:] for x in attributes_list if x[0] == '#']
         if len(names) > 1:
             raise SAMParserError("More than one name specified: " + ", ".join(names))
-        language = [x[1:] for x in attributes_list if x[0] == '~']
+        language = [x[1:] for x in attributes_list if x[0] == '!']
         if len(language) > 1:
             raise SAMParserError("More than one language specified: " + ", ".join(language))
         conditions = [x[1:] for x in attributes_list if x[0] == '?']
@@ -946,7 +952,7 @@ class SamParaParser:
             'escape': re.compile(r'\\', re.U),
             'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,\.\*`"&]', re.U),
             'annotation': re.compile(
-                r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(~(?P<language>[\w-]+))?\))?', re.U),
+                r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(!(?P<language>[\w-]+))?\))?', re.U),
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
             'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
