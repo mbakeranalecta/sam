@@ -23,12 +23,6 @@ re_spaces = r'\s+'
 re_one_space = r'\s'
 re_comment = r'#.*'
 
-# Flow regex component expressions
-re_single_quote_close = '(?<=[\w\.\,\"])\'((?=[\.\s"])|$)'
-re_single_quote_open = ''
-re_double_quote_close = '(?<=[\w\.\,\'])"((?=[\.\s\'])|$)'
-re_double_quote_open = ''
-re_apostrophe = "(?<=\w)'(?=\w)"
 
 
 class SamParser:
@@ -926,6 +920,13 @@ class StringSource:
         self.current_line = self.previous_line
 
 
+# Flow regex component expressions
+re_single_quote_close = '(?<=[\w\.\,\"])\'((?=[\.\s"}])|$)'
+re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"])'
+re_double_quote_close = '(?<=[\w\.\,\'])"((?=[\.\s\'}])|$)'
+re_double_quote_open = '(^|(?<=[\s\'{]))"(?=[\w\'])'
+re_apostrophe = "(?<=\w)'(?=\w)"
+
 
 class SamParaParser:
     def __init__(self):
@@ -944,19 +945,24 @@ class SamParaParser:
         self.stateMachine.add_state("BOLD-START", self._bold_start)
         self.stateMachine.add_state("ITALIC-START", self._italic_start)
         self.stateMachine.add_state("CODE-START", self._code_start)
-        self.stateMachine.add_state("QUOTES-START", self._quotes_start)
+        self.stateMachine.add_state("DOUBLE_QUOTE", self._double_quote)
+        self.stateMachine.add_state("SINGLE_QUOTE", self._single_quote)
         self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
         self.stateMachine.add_state("CHARACTER-ENTITY", self._character_entity)
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\', re.U),
-            'escaped-chars': re.compile(r'[\\\(\{\}\[\]_\*,\.\*`"&]', re.U),
+            'escaped-chars': re.compile('[\\\(\{\}\[\]_\*,\.\*`"&' + "']", re.U),
             'annotation': re.compile(
                 r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(!(?P<language>[\w-]+))?\))?', re.U),
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
             'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
-            'quotes': re.compile(r'"(?P<text>((?<=\\)"|[^"])*)(?<!\\)"', re.U),
+            'apostrophe': re.compile(re_apostrophe, re.U),
+            'single_quote_close': re.compile(re_single_quote_close, re.U),
+            'single_quote_open': re.compile(re_single_quote_open, re.U),
+            'double_quote_close': re.compile(re_double_quote_close, re.U),
+            'double_quote_open': re.compile(re_double_quote_open, re.U),
             'inline-insert': re.compile(r'>\((?P<attributes>.*?)\)', re.U),
             'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
             'citation': re.compile(r'(\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name_name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\])', re.U)
@@ -992,7 +998,9 @@ class SamParaParser:
         elif char == "`":
             return "CODE-START", para
         elif char == '"':
-            return "QUOTES-START", para
+            return "DOUBLE_QUOTE", para
+        elif char == "'":
+            return "SINGLE_QUOTE", para
         elif char == ">":
             return "INLINE-INSERT", para
         elif char == "&":
@@ -1123,13 +1131,22 @@ class SamParaParser:
             self.current_string += '`'
         return "PARA", para
 
-    def _quotes_start(self, para):
-        match = self.patterns['quotes'].match(para.rest_of_para)
-        if match:
-            self.flow.append(self.current_string)
-            self.current_string = ''
-            self.flow.append(Annotation('quotes', self._unescape(match.group("text"))))
-            para.advance(len(match.group(0)) - 1)
+    def _double_quote(self, para):
+        if self.patterns['double_quote_close'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+            self.current_string += '”'
+        elif self.patterns['double_quote_open'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+            self.current_string += '“'
+        else:
+            self.current_string += '"'
+        return "PARA", para
+
+    def _single_quote(self, para):
+        if self.patterns['single_quote_close'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+            self.current_string += '’'
+        elif self.patterns['single_quote_open'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+            self.current_string += '‘'
+        elif self.patterns['apostrophe'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+            self.current_string += '’'
         else:
             self.current_string += '"'
         return "PARA", para
