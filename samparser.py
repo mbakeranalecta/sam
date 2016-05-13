@@ -921,10 +921,10 @@ class StringSource:
 
 
 # Flow regex component expressions
-re_single_quote_close = '(?<=[\w\.\,\"])\'((?=[\.\s"}])|$)'
-re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"])'
-re_double_quote_close = '(?<=[\w\.\,\'])"((?=[\.\s\'}])|$)'
-re_double_quote_open = '(^|(?<=[\s\'{]))"(?=[\w\'])'
+re_single_quote_close = '(?<=[\w\.\,\"\)])\'((?=[\.\s"}])|$)'
+re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{])'
+re_double_quote_close = '(?<=[\w\.\,\'\)])"((?=[\.\s\'}])|$)'
+re_double_quote_open = '(^|(?<=[\s\'{]))"(?=[\w\'{])'
 re_apostrophe = "(?<=\w)'(?=\w)"
 
 
@@ -1138,6 +1138,8 @@ class SamParaParser:
             self.current_string += '“'
         else:
             self.current_string += '"'
+            SAM_parser_warning('Detected straight double quote that was not recognized by smart quote rules in: "'+ para.para + '" at position ' + str(para.currentCharNumber))
+
         return "PARA", para
 
     def _single_quote(self, para):
@@ -1149,6 +1151,7 @@ class SamParaParser:
             self.current_string += '’'
         else:
             self.current_string += '"'
+            SAM_parser_warning('Detected straight single quote that was not recognized by smart quote rules in: "'+ para.para + '" at position ' + str(para.currentCharNumber))
         return "PARA", para
 
     def _inline_insert(self, para):
