@@ -40,6 +40,8 @@ class SamParser:
         self.stateMachine.add_state("PARAGRAPH", self._paragraph)
         self.stateMachine.add_state("RECORD-START", self._record_start)
         self.stateMachine.add_state("RECORD", self._record)
+        self.stateMachine.add_state("GRID-START", self._grid_start)
+        self.stateMachine.add_state("GRID", self._grid)
         self.stateMachine.add_state("LIST-ITEM", self._list_item)
         self.stateMachine.add_state("NUM-LIST-ITEM", self._num_list_item)
         self.stateMachine.add_state("LABELED-LIST-ITEM", self._labeled_list_item)
@@ -57,6 +59,7 @@ class SamParser:
             'comment': re.compile(re_indent + re_comment, re.U),
             'block-start': re.compile(re_indent + re_name + r':' + re_attributes + re_content + r'?', re.U),
             'codeblock-start': re.compile(re_indent + r'(?P<flag>```[^\s\(]*)(\((?P<language>\S*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?', re.U),
+            'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(re_indent + r'("""|\'\'\'|blockquote:)' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?', re.U),
             'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
             'paragraph-start': re.compile(r'\w*', re.U),
@@ -292,8 +295,9 @@ class SamParser:
             return "END", context
         indent = len(line) - len(line.lstrip())
         if self.patterns['blank-line'].match(line):
-            return "SAM", context
-        elif indent < self.doc.current_block.indent:
+            # Does blank like have to end record? Doesn't indent take care of this?
+            return "RECORD", context
+        if indent < self.doc.current_block.indent:
             source.return_line()
             return "SAM", context
         else:
@@ -303,6 +307,44 @@ class SamParser:
             record = list(zip(self.doc.fields, field_values))
             self.doc.new_record(record)
             return "RECORD", context
+
+    def _grid_start(self, context):
+        source, match = context
+        indent = len(match.group('indent'))
+
+        attributes = {}
+
+        attributes_string = match.group("attributes")
+        if attributes_string is not None:
+            attributes.update(self.parse_block_attributes(attributes_string))
+
+        self.doc.new_block('grid', attributes, None, indent)
+        return "GRID", context
+
+    def _grid(self, context):
+        source, match = context
+        try:
+            line = source.next_line
+        except EOFError:
+            return "END", context
+        indent = len(line) - len(line.lstrip())
+        if self.patterns['blank-line'].match(line):
+            return "GRID", context
+        elif indent < self.doc.current_block.indent:
+            source.return_line()
+            return "SAM", context
+        else:
+            cell_values = [x.strip() for x in re.split(r'(?<!\\)\|', line)]
+            if self.doc.current_block.name == 'row':
+                if len(self.doc.current_block.children) != len(cell_values):
+                    raise SAMParserError('Uneven number of cells in grid row at: "' + line +'"')
+            self.doc.new_block('row', None, None, indent)
+            for content in cell_values:
+                self.doc.new_block('cell', None, None, indent+1)
+                self.doc.new_flow(para_parser.parse(content, self.doc))
+            # Test for consistency with previous rows?
+
+            return "GRID", context
 
     def _embedded_xml(self, context):
         source, match = context
@@ -364,6 +406,10 @@ class SamParser:
         match = self.patterns['fragment-start'].match(line)
         if match is not None:
             return "FRAGMENT-START", (source, match)
+
+        match = self.patterns['grid-start'].match(line)
+        if match is not None:
+            return "GRID-START", (source, match)
 
         match = self.patterns['list-item'].match(line)
         if match is not None:

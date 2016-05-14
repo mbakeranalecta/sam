@@ -9,6 +9,32 @@
 
 tests:(!en)
 
+    test: Grids
+
+        case: Grid with heads
+
+            +++
+                *Type*  | *Term*    | *Notes*
+
+                feature | fragment  | bing
+
+                feature | fragments | bang
+
+
+        case: Grid with bold row
+
+            +++
+                *Type*  | *Term*    | *Notes*
+                feature | fragment  | bing
+                *feature* | *fragments* | *bang*
+
+        case: Grid with side heads
+
+            +++
+                *Type*  | Term    | Notes
+                *feature* | fragment  | bing
+                *feature* | fragments | bang
+
     test: Smart quotes
 
         case: Smart quotes
@@ -566,7 +592,9 @@ tests:(!en)
                 row:: cell, cell, cell
                     foo, bar, baz
                     a, b, c
+
                     hi, lo, med
+
 
             terminal:
                 prompt: $
