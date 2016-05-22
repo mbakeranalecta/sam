@@ -281,6 +281,7 @@ specification: Semantic Authoring Markdown (SAM)
         |(?bar) Nobody here can walk it for you, 
         | You gotta walk it by yourself. 
         ``` 
+        The entire line must be on one line in the source.
 
         All spaces after a the space following the pipe are considered significant and are retained on output. 
 
@@ -312,9 +313,14 @@ specification: Semantic Authoring Markdown (SAM)
         0. Robot 
         12. Spaceship 
         7. Ray gun 
-        ``` 
+        ```
 
-        Labeled lists begin with a label between pipe characters. There must be no space between the opening pipe character and the start of the label text. 
+        The numbers are not retained, nor is their style. The processing application
+        will decide the style and numbering of lists.
+
+        Labeled lists begin with a label between pipe characters. There must be no space
+        between the opening pipe character and the start of the label text. (Otherwise
+        it will be parsed as a line, not a labeled list.
 
         ```(SAM) 
         |fa| A long long way to run. 
@@ -331,7 +337,50 @@ specification: Semantic Authoring Markdown (SAM)
         List items continue until: 
 
         * The next para at the same indent that starts with a list marker. 
-        * The end of the list. 
+        * The end of the list.
+
+    section: Grids
+
+        Grids are an very simple table-like construct. They are not full tables
+        which are complex {document domain} beasts with potentially elaborate
+        syntax. There are many ways to do {tables} or semantically represent
+        data that may be displayed in tables in SAM. Grids are meant for the
+        simplest cases that have no document domain or subject domain semantics.
+        They are just a tick tack toe board.
+
+        A grid is created by starting a line with three `+` signs. These may be followed
+        by management domain annotations.
+
+        Each row of the grid is on a separate line. Cells are separated by pipes.
+        There is no pipe before the first cell or after the last. All rows must have
+        the same number of cells.
+
+        There is no concept of a header, no row or column spanning. A grid consists
+        of rows and cells. Each cell contains a single flow. Each row must be on
+        one line of the source files. Cell contents are trimmed of leading and trailing
+        whitespace. This allows you to align the pipes if you wish (though this is
+        not required).
+
+        ```(SAM)
+        +++
+            *Type*  | *Term*    | *Notes*
+
+            feature | fragment  | bing
+
+            feature | fragments | bang
+        ```
+
+        Management domain attributes are permitted on the grid, but not the rows.
+
+        ```(SAM)
+        +++(*foo #bar ?baz)
+            *Type*  | *Term*    | *Notes*
+
+            feature | fragment  | bing
+
+            feature | fragments | bang
+        ```
+
 
     section: Reserved insert types 
 

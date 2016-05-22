@@ -183,7 +183,7 @@ class SamParser:
             citation_type=None
 
         if citation_type:
-            cit = (Citation(citation_type, citation_value, extra))
+            cit = (Citation(None, citation_type, citation_value, extra))
             b.add_child(cit)
 
         return "SAM", context
@@ -717,21 +717,23 @@ class Annotation:
 
 
 class Citation:
-    def __init__(self, citation_type, citation_value, citation_extra):
+    def __init__(self, citation_text, citation_type, citation_value, citation_extra):
+        self.citation_text = citation_text
         self.citation_type = citation_type
         self.citation_value = citation_value
         self.citation_extra = citation_extra
 
     def __str__(self):
-        return '[%s %s]' % (self.citation_type, self.citation_value, self.citation_extra)
+        return u'{{{0:s}}}[{1:s} {2:s} {3:s}]'.format(self.citation_text, self.citation_type, self.citation_value,
+                                                      self.citation_extra)
 
     def serialize_xml(self):
-        if self.citation_type == 'citation':
-            yield '<citation>{0}</citation>'.format(self.citation_value)
+        yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml(self.citation_value))
+        if self.citation_extra is not None:
+            yield ' extra="{0}"'.format(escape_for_xml(self.citation_extra))
+        if self.citation_text is not None:
+            yield '>{0}</citation>'.format(escape_for_xml(self.citation_text))
         else:
-            yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml(self.citation_value))
-            if self.citation_extra is not None:
-                yield ' extra="{0}"'.format(escape_for_xml(self.citation_extra))
             yield '/>'
 
 
@@ -986,6 +988,7 @@ class SamParaParser:
         self.stateMachine.add_state("PARA", self._para)
         self.stateMachine.add_state("ESCAPE", self._escape)
         self.stateMachine.add_state("END", None, end_state=1)
+        self.stateMachine.add_state("SPAN-START", self._span_start)
         self.stateMachine.add_state("ANNOTATION-START", self._annotation_start)
         self.stateMachine.add_state("CITATION-START", self._citation_start)
         self.stateMachine.add_state("BOLD-START", self._bold_start)
@@ -1011,7 +1014,7 @@ class SamParaParser:
             'double_quote_open': re.compile(re_double_quote_open, re.U),
             'inline-insert': re.compile(r'>\((?P<attributes>.*?)\)', re.U),
             'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
-            'citation': re.compile(r'(\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name_name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\])', re.U)
+            'citation': re.compile(r'((?<!\\)\{(?P<text>.*?)(?<!\\)\})?((\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name_name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))', re.U)
         }
 
     def parse(self, para, doc, strip=True):
@@ -1034,7 +1037,7 @@ class SamParaParser:
         if char == '\\':
             return "ESCAPE", para
         elif char == '{':
-            return "ANNOTATION-START", para
+            return "SPAN-START", para
         elif char == '[':
             return "CITATION-START", para
         elif char == "*":
@@ -1054,6 +1057,13 @@ class SamParaParser:
         else:
             self.current_string += char
             return "PARA", para
+
+    def _span_start(self, para):
+        if self.patterns['citation'].match(para.rest_of_para):
+            return  "CITATION-START", para
+        else:
+            return "ANNOTATION-START", para
+
 
     def _annotation_start(self, para):
         match = self.patterns['annotation'].match(para.rest_of_para)
@@ -1112,6 +1122,11 @@ class SamParaParser:
             self.current_string = ''
 
             try:
+                citation_text = match.group('text')
+            except IndexError:
+                citation_text = None
+
+            try:
                 idref = match.group('id')
             except IndexError:
                 idref=None
@@ -1137,7 +1152,7 @@ class SamParaParser:
                 citation_value = citation.strip()
                 extra = None
 
-            self.flow.append(Citation(citation_type, citation_value, extra))
+            self.flow.append(Citation(citation_text, citation_type, citation_value, extra))
             para.advance(len(match.group(0)) - 1)
             return "PARA", para
         else:

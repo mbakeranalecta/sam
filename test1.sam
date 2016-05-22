@@ -9,29 +9,43 @@
 
 tests:(!en)
 
+    test: Citations
+
+        case: Spanning citation
+
+        You can {Call me Ishmael}[Melville, 1851x].
+
     test: Grids
 
         case: Grid with heads
 
             +++
                 *Type*  | *Term*    | *Notes*
-
                 feature | fragment  | bing
-
                 feature | fragments | bang
+
+        case: Grid with management domain attributes
+
+        +++(*foom #bar ?baz)
+            *Type*  | *Term*    | *Notes*
+
+            feature | fragment  | bing
+
+            feature | fragments | bang
+
 
 
         case: Grid with bold row
 
             +++
-                *Type*  | *Term*    | *Notes*
-                feature | fragment  | bing
+                *Type*    | *Term*      | *Notes*
+                feature   | fragment    | bing
                 *feature* | *fragments* | *bang*
 
         case: Grid with side heads
 
             +++
-                *Type*  | Term    | Notes
+                *Type*    | Term      | Notes
                 *feature* | fragment  | bing
                 *feature* | fragments | bang
 
@@ -505,9 +519,9 @@ tests:(!en)
 
             Press \[Enter].
 
-            Press {Enter}(key ~fr-CA)
+            Press {Enter}(key !fr-CA)
 
-            Suppose you {discovered}(~sp) that your users were using your help content far more
+            Suppose you {discovered}(!sp) that your users were using your help content far more
             than your manuals and wanted to force your writers to break away from this
             habit of creating book-like help systems. You would introduce[*bar]
             constraint that writers were to focus on producing self sufficient
