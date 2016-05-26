@@ -38,7 +38,7 @@ specification: Semantic Authoring Markdown (SAM)
 
     |flows| Flows are sequences of text. Paragraphs are flows. Lines are flows. String definitions are flows. Fields are flows. Flows cannot contain blocks or fields. 
     
-    |phrases| A phrase is a string of characters in a flow. A phrase can be annotated with an annotation.
+    |phrase| A phrase is a string of characters in a flow. A phrase can be annotated with an annotation or a citation.
 
     |record sets| A record set is a simple database table with named columns. It allows you to capture tabular data at a logical level rather than at the presentation level of a table. 
 
@@ -130,7 +130,7 @@ specification: Semantic Authoring Markdown (SAM)
 
     section: Repeated annotations 
 
-    If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use square brackets around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase. 
+    If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use square brackets around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase.
 
     ```(sam) 
     [foo](bar "baz") gruznatz [foo] 
@@ -148,7 +148,15 @@ specification: Semantic Authoring Markdown (SAM)
 
     section: Citations 
 
-        Citations are any reference to another resource. This includes internal references to other structures within the file, such as to a graphic,procedure, or footnote, as well as references to external works. 
+        Citations are any reference to another resource. This includes internal references to other structures within the file, such as to a graphic,procedure, or footnote, as well as references to external works.
+
+        Citations can be applied to:
+
+        * a point in a flow
+
+        * a phrase
+
+        * a blockquote
 
         To cite a resource that has an id within the current SAM document, reference the id like this: 
 
@@ -168,6 +176,15 @@ specification: Semantic Authoring Markdown (SAM)
         ```(sam) 
         Moby Dick[#MobyDick] is about a big fish. 
         ```
+
+        Or like this:
+
+        ```(sam)
+        {Moby Dick}[#MobyDick] is about a big fish.
+        ```
+
+        The advantage of applying the citation to a phrase is that it allows
+        you to turn the citation into a link in online content.
 
         This assumes that there is a bibliographic entry with the named `MobyDick` somewhere in your content set. 
 
