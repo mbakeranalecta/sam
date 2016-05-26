@@ -11,7 +11,7 @@ tests:(!en)
 
     test: Citations
 
-        case: Spanning citation
+        case: Citation on phrase
 
         You can {Call me Ishmael}[Melville, 1851x].
 
@@ -207,6 +207,10 @@ tests:(!en)
             This is a {paragraph}(?foo)
             that wraps across
             multiple lines.
+
+    test: Nested annotations and decorations
+
+        This sentence {contains}(foo) an annotation nested in a decoration.
 
     test: Numbered lists
 
