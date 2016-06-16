@@ -11,6 +11,7 @@ try:
 except ImportError:
     import re
 
+
 # Block regex component expressions
 re_indent = r'(?P<indent>\s*)'
 re_attributes = r'(\((?P<attributes>.*?(?<!\\))\))?'
@@ -1379,7 +1380,8 @@ if __name__ == "__main__":
 
             # Using a loop to avoid buffering the serialized XML.
             for i in samParser.serialize('xml'):
-                print(i, end="")
+                sys.stdout.buffer.write(i.encode('utf-8'))
+                #print(i, end="")
 
     except FileNotFoundError:
         raise SAMParserError("No input file specified.")

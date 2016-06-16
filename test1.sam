@@ -6,8 +6,15 @@
 
 # Need test for unicode characters and numbers in names.
 
-
 tests:(!en)
+
+    test: Parens in link shortcuts
+
+        Rio Bravo refers to the movie (and not to {the city in Texas or the nature reserve in Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
+
+        Rio Bravo refers to the movie (and not to {the city in Texas or the nature reserve in Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
+
+        Rio Bravo refers to the movie (and not to {the city in Texas or the nature reserve in Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 
     test: Citations
 
