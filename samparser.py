@@ -510,7 +510,7 @@ class Block:
 
     def add_sibling(self, b):
         b.parent = self.parent
-        self.parent.children.append(b)
+        self.parent.add_child(b)
 
     def add_at_indent(self, b, indent):
         x = self.ancestor_at_indent(indent)
@@ -616,6 +616,16 @@ class Root(Block):
         for x in self.children:
             yield from x.serialize_xml()
 
+    def add_child(self, b):
+        # This is a hack to catch the creation of a second root-level block.
+        # It is not good because people can add to the children list without
+        # calling this function. Not sure what the options are. Could detect
+        # the error at the XML output stage, I suppose, but would rather
+        # catch it earlier and give feedback.
+        if any(type(x) is Block for x in self.children):
+            raise SAMParserError("A SAM document can only have one root.")
+        b.parent = self
+        self.children.append(b)
 
 class TextBlock:
     def __init__(self, line=None):
