@@ -306,7 +306,7 @@ class SamParser:
             if len(field_values) != len(self.doc.fields):
                 raise SAMParserError("Record length does not match record set header. At:\n\n " + line)
             record = list(zip(self.doc.fields, field_values))
-            self.doc.new_record(record)
+            self.doc.new_record(record, indent)
             return "RECORD", context
 
     def _grid_start(self, context):
@@ -910,12 +910,14 @@ class DocStructure:
         s = StringDef(string_name, value, indent)
         self.add_block(s)
 
-    def new_record_set(self, local_element, field_names, local_indent):
-        self.current_record = {'local_element': local_element, 'local_indent': local_indent}
+    def new_record_set(self, name, field_names, indent):
+        b=Block(name,None,None,None,indent)
+        self.add_block(b)
+        self.current_record = {'local_element': name, 'local_indent': indent}
         self.fields = field_names
 
-    def new_record(self, record):
-        b = Block(self.current_record['local_element'], None, '', None, self.current_record['local_indent'])
+    def new_record(self, record, indent):
+        b = Block('row', None, '', None, indent)
         if self.current_block.indent == b.indent:
             self.current_block.add_sibling(b)
         else:
@@ -925,7 +927,7 @@ class DocStructure:
         for name, content in record:
             b = Block(name, None, para_parser.parse(content, self.doc), None, self.current_block.indent + 4)
             self.current_block.add_child(b)
-        # self.current_block = self.current_block.parent
+
 
     def find_last_annotation(self, text, node=None):
         if node is None:

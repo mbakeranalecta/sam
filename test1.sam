@@ -490,13 +490,11 @@ tests:(!en)
             foo: barney {and}(conjunction) betty
             baz: bat
             $name=fred {and}(conjunction) wilma
-            history:
-                revision:: date, author, comment, status
-                    2014-06-23, mbaker, New\, Topic, In progress
-            index:
-                entry:: type, term
-                    feature, fragment
-                    feature, fragments
+            history:: date, author, comment, status
+                2014-06-23, mbaker, New\, Topic, In progress
+            index:: type, term
+                feature, fragment
+                feature, fragments
         body: How Fragments Work
 
             * This list is the
