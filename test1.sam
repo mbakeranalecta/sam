@@ -68,6 +68,13 @@ tests:(!en)
             mean by 'glory,'" Alice said.' "'I don’t
             know what you mean by "glory,"' Alice said."
 
+            for "the Duke", perhaps
+
+
+        case: Following an annotation
+
+            interpretations of the `xref`'s instruction
+
         case: Smart quotes with annotations
 
             "For once, '{sir}(salutation)' adding, 'you're making a
