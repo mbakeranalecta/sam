@@ -1034,7 +1034,7 @@ class SamParaParser:
             'double_quote_open': re.compile(re_double_quote_open, re.U),
             'inline-insert': re.compile(r'>\((?P<attributes>.*?)\)', re.U),
             'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
-            'citation': re.compile(r'((?<!\\)\{(?P<text>.*?)(?<!\\)\})?((\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name_name>\S+)(\s+(?P<extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))', re.U)
+            'citation': re.compile(r'((?<!\\)\{(?P<text>.*?)(?<!\\)\})?((\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))', re.U)
         }
 
     def parse(self, para, doc, strip=True):
