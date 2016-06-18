@@ -132,7 +132,12 @@ class SamParser:
     def _codeblock(self, context):
         source, match = context
         line = source.next_line
-        if self.patterns['codeblock-end'].match(line):
+        indent = len(line) - len(line.lstrip())
+        if self.patterns['blank-line'].match(line):
+            self.current_text_block.append(line)
+            return "CODEBLOCK", context
+        if indent <= self.doc.current_block.indent:
+            source.return_line()
             self.doc.new_flow(Pre(self.current_text_block))
             self.current_text_block = None
             return "SAM", context
@@ -296,7 +301,6 @@ class SamParser:
             return "END", context
         indent = len(line) - len(line.lstrip())
         if self.patterns['blank-line'].match(line):
-            # Does blank like have to end record? Doesn't indent take care of this?
             return "RECORD", context
         if indent < self.doc.current_block.indent:
             source.return_line()
@@ -680,7 +684,10 @@ class Pre(Flow):
         for line in text_block.lines:
             if not line.isspace():
                 raw_lines.append((line, len(line) - len(line.lstrip())))
-        min_indent = min(raw_lines, key = lambda t: t[1])[1]
+        try:
+            min_indent = min(raw_lines, key = lambda t: t[1])[1]
+        except ValueError:
+            min_indent = 0
         self.lines = [x[min_indent:] if len(x) > min_indent else x for x in text_block.lines]
 
 

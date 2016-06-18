@@ -92,17 +92,17 @@ tests:(!en)
     test: Blank lines in codeblocks
 
         ```(sam)
-        warnings:
-            warning:(#warn_danger_domestic)
-                title: Danger
+            warnings:
+                warning:(#warn_danger_domestic)
+                    title: Danger
 
-                Be very very careful. This could kill you.
+                    Be very very careful. This could kill you.
 
-            warning:(#warn_danger_foreign)
-                title: Look out!
+                warning:(#warn_danger_foreign)
+                    title: Look out!
 
-                Pay close attention. You could really hurt yourself.
-        ```
+                    Pay close attention. You could really hurt yourself.
+
 
 
     test: Prior annotation lookup.
@@ -586,8 +586,9 @@ tests:(!en)
                 $b=breadfruit
 
             ```
-            foo
-            ```
+                foo
+
+                bar
 
             This {sentence}(grammatical-construct) contains a repeated annotation: the word
             {sentence} without any annotation metadata. It should be annotated the same as
@@ -600,23 +601,23 @@ tests:(!en)
             etc.) that _has been given_ an id so that it can be \\{included}(bold) by reference at other
             \_points_ in the content.
 
-            ```kkk(xml1.0 #foo4 ?bar)[c:/foo]
-            <fragment id="test-fragment">
-                <local-strings>
-                    <string id="test-string-1"><bold>test string one</bold></string>
-                    <string id="test-string-2"><italic>test string two</italic></string>
-                </local-strings>
-                <p>This is a piece of text in a fragment. It includes references to local
-                strings <string-ref id-ref="test-string-1"/> and <string-ref id-ref="test-string-2"/>.
-                And to a global string <string-ref id-ref="product"/></p>
-            </fragment>
-            <p>The following is a reference to the fragment defined above:</p>
-            <fragment-ref id-ref="test-fragment">
-                <local-strings>
-                    <string id="test-string-1"><code>this is test string number one</code></string>
-                </local-strings>
-            </fragment-ref>
-            ```kkk
+            ```(xml1.0 #foo4 ?bar)[c:/foo]
+                <fragment id="test-fragment">
+                    <local-strings>
+                        <string id="test-string-1"><bold>test string one</bold></string>
+                        <string id="test-string-2"><italic>test string two</italic></string>
+                    </local-strings>
+                    <p>This is a piece of text in a fragment. It includes references to local
+                    strings <string-ref id-ref="test-string-1"/> and <string-ref id-ref="test-string-2"/>.
+                    And to a global string <string-ref id-ref="product"/></p>
+                </fragment>
+                <p>The following is a reference to the fragment defined above:</p>
+                <fragment-ref id-ref="test-fragment">
+                    <local-strings>
+                        <string id="test-string-1"><code>this is test string number one</code></string>
+                    </local-strings>
+                </fragment-ref>
+
 
             table:(*my-table ?foobat #zombie) An important table
                 row:: cell, cell, cell
