@@ -130,7 +130,13 @@ class SamParser:
 
     def _codeblock(self, context):
         source, match = context
-        line = source.next_line
+        try:
+            line = source.next_line
+        except EOFError:
+            self.doc.new_flow(Pre(self.current_text_block))
+            self.current_text_block = None
+            return "END", context
+
         indent = len(line) - len(line.lstrip())
         if self.patterns['blank-line'].match(line):
             self.current_text_block.append(line)

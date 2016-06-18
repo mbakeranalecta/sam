@@ -248,6 +248,22 @@ specification: Semantic Authoring Markdown (SAM)
 
             # reference >(#this.ref) >(ref this.ref)
 
+    section: Codeblocks
+
+        Codeblocks begin with three back ticks followed by an optional {annotation} and or {citation}.
+
+        ```(sam)
+            ```(sam)
+                This is a codeblock example.
+
+                This is more text in the codeblock.
+
+        The text of the codeblock is not processed as SAM markup. It is recorded as is with
+        no interpretation or escape processing.
+
+        Code must be indented under the codeblock marker. The codeblock ends at the first line that is less indented than the codeblock, or at the end of the file.
+
+
     section: Blockquotes 
 
         Three quotation marks in a row are a shortcut for the {implicit structure} "blockquote".
@@ -264,7 +280,10 @@ specification: Semantic Authoring Markdown (SAM)
                 Quoted
 
 
-    section: Alternate blockquotes 
+    section: Alternate blockquotes
+
+        # Do we still need to treat explicit "blockquote:" differently now we have separated
+        # annotation and citation. Don't think so.
 
         Standard blockquotes may conflict with embedding in other languages such as Python docstrings. 
 
@@ -298,7 +317,7 @@ specification: Semantic Authoring Markdown (SAM)
 
         The entire line must be on one line in the source.
 
-        All spaces after a the space following the pipe are considered significant and are retained on output. 
+        All spaces after the first space following the pipe are considered significant and are retained on output.
 
     section: Lists 
 
@@ -364,14 +383,14 @@ specification: Semantic Authoring Markdown (SAM)
         They are just a tick tack toe board.
 
         A grid is created by starting a line with three `+` signs. These may be followed
-        by management domain annotations.
+        by {block annotations}.
 
         Each row of the grid is on a separate line. Cells are separated by pipes.
         There is no pipe before the first cell or after the last. All rows must have
         the same number of cells.
 
         There is no concept of a header, no row or column spanning. A grid consists
-        of rows and cells. Each cell contains a single flow. Each row must be on
+        of rows and cells. Each cell contains a single {flow}. Each row must be on
         one line of the source files. Cell contents are trimmed of leading and trailing
         whitespace. This allows you to align the pipes if you wish (though this is
         not required).
@@ -385,7 +404,7 @@ specification: Semantic Authoring Markdown (SAM)
                 feature | fragments | bang
 
 
-        Management domain attributes are permitted on the grid, but not the rows.
+        Block attributes are permitted on the grid, but not the rows.
 
         ```(SAM)
             +++(*foo #bar ?baz)
@@ -399,15 +418,26 @@ specification: Semantic Authoring Markdown (SAM)
 
     section: Reserved insert types 
 
-        ref string image video audio feed app 
+        You can use any name you like for the insert type, however the following types
+        are reserved so that editors can act on them to provide enhanced views of the
+        document while editing:
 
-        These are reserved so that editors can act on them. 
+        *ref
+        *string
+        *image
+        *video
+        *audio
+        *feed
+        *app
+        *sam
 
-        section: Whitespace handling All flows are trimmed of leading and trailing whitespace. In composing a flow from multiple text lines, all spaces and returns are collapsed to a single space. 
+    section: Whitespace handling
 
-        In codeblocks, all whitespace is retained. However, codeblocks do not have to follow the indenting of the rest of the document, so you can left-align code to achieve correct indenting of the code itself. 
+        All flows are trimmed of leading and trailing whitespace. In composing a flow from multiple text lines, all spaces and returns are collapsed to a single space.
     
     section: Embedded XML
     
         The embedded XML must begin with an XML declaration on a line by itself (typically `<?xml version="1.0" encoding="UTF-8"?>`). The XML fragment that follows must be well formed and must end on a line by itself. The SAM parser parses the embedded XML block to determine if it is well formed and to find its end. It then outputs the original XML from the SAM document, not the parser output. Therefore there will be no resolution of entities on the embedded XML. 
 
+         ```
+            test
