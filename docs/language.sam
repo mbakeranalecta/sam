@@ -263,6 +263,15 @@ specification: Semantic Authoring Markdown (SAM)
 
         Code must be indented under the codeblock marker. The codeblock ends at the first line that is less indented than the codeblock, or at the end of the file.
 
+        section: codeblock annotations
+            Codeblock annotations are different from block annotations. The take the form:
+
+            ```
+                (language "source" (namespace) #name *id ?condition)
+
+            # Source is not needed is we can do citations.
+            # Also not sure what use namespace is in this context.
+
 
     section: Blockquotes 
 
