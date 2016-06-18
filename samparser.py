@@ -59,7 +59,7 @@ class SamParser:
             'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?', re.U),
             'comment': re.compile(re_indent + re_comment, re.U),
             'block-start': re.compile(re_indent + re_name + r':' + re_attributes + re_content + r'?', re.U),
-            'codeblock-start': re.compile(re_indent + r'(?P<flag>```[^\s\(]*)(\((?P<language>\S*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?', re.U),
+            'codeblock-start': re.compile(re_indent + r'(?P<flag>```)(\((?P<language>\S*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?', re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(re_indent + r'("""|\'\'\'|blockquote:)' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?', re.U),
             'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
@@ -105,7 +105,6 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
         codeblock_flag = match.group("flag")
-        self.patterns['codeblock-end'] = re.compile(r'(\s*)' + codeblock_flag + '\s*$')
 
         attributes = {}
 
