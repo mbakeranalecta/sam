@@ -8,6 +8,14 @@
 
 tests:(!en)
 
+    test: Recordsets
+
+        case: Recordset with only one field name
+
+            filmography:: film
+                Rio Bravo
+                The Shootish
+
     test: Parens in link shortcuts
 
         Rio Bravo refers to the movie (and not to {the city in Texas or the nature reserve in Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
