@@ -104,7 +104,6 @@ class SamParser:
     def _codeblock_start(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        codeblock_flag = match.group("flag")
 
         attributes = {}
 
@@ -143,7 +142,7 @@ class SamParser:
             return "CODEBLOCK", context
         if indent <= self.doc.current_block.indent:
             source.return_line()
-            self.doc.new_flow(Pre(self.current_text_block))
+            self.doc.new_flow(Pre(self.current_text_block.strip()))
             self.current_text_block = None
             return "SAM", context
         else:
@@ -644,6 +643,30 @@ class TextBlock:
 
     def append(self, line):
         self.lines.append(line)
+
+    def strip(self):
+        """
+        Removes blank lines from the beginning and end of the text block
+        :return: Stripped text block
+        """
+        first_non_blank_line = 0
+        for i in self.lines:
+            if i.strip() == '':
+                first_non_blank_line += 1
+            else:
+                break
+
+        last_non_blank_line = len(self.lines)
+        for i in reversed(self.lines):
+            if i.strip() == '':
+                last_non_blank_line -= 1
+            else:
+                break
+
+        self.lines = self.lines[first_non_blank_line:last_non_blank_line]
+        return self
+
+
 
     @property
     def text(self):
