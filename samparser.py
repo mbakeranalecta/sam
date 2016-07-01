@@ -1430,7 +1430,7 @@ if __name__ == "__main__":
     transformed = None
 
     if args.intermediate and not args.xslt:
-        SAMParserError("Do not specify an intermediate file name if XSLT file is not specified.")
+        SAMParserError("Do not specify an intermediate file name if an XSLT file is not specified.")
 
     try:
         with open(args.infile, "r", encoding="utf-8-sig") as inf:
@@ -1448,11 +1448,7 @@ if __name__ == "__main__":
             if args.xslt:
                 try:
                     with open(args.xslt, "r") as xsltf:
-                        try:
-                            transform = etree.XSLT(etree.parse(xsltf))
-                        except SAMParserError as err:
-                            print(err, file=sys.stderr)
-                            exit(1)
+                        transform = etree.XSLT(etree.parse(xsltf))
                 except FileNotFoundError as e:
                     raise SAMParserError(e.strerror + ' ' + e.filename)
 
