@@ -27,4 +27,16 @@
     <xsl:template match="test/title">
         <h2><xsl:apply-templates/></h2>
     </xsl:template>
+
+    <xsl:template match="codeblock">
+        <pre><xsl:apply-templates/></pre>
+    </xsl:template>
+
+    <xsl:template match="annotation[@type='bold']">
+        <b><xsl:apply-templates/></b>
+    </xsl:template>
+
+    <xsl:template match="annotation[@type='code']">
+        <tt><xsl:apply-templates/></tt>
+    </xsl:template>
 </xsl:stylesheet>

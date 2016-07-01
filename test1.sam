@@ -214,11 +214,14 @@ tests:(!en)
 
             Escape sequences are recognized inside decorations.
 
-            There is a back tick in "this \` quotes" decoration.
-
-            There is a quote in "this \" quotes" decoration.
+            ```(sam)
+                There is a `*` in *this \* bold* decoration.
 
             There is a `*` in *this \* bold* decoration.
+
+            ```(XML)
+               <p>There is a <annotation type="code">*</annotation> in <annotation type="bold">this * bold</annotation> decoration.</p>
+
 
             There is a `_` in _this \_ italic_ decoration.
 
@@ -738,8 +741,6 @@ tests:(!en)
             indicated by surrounding the text with asterisks.
             |{italic}(style "|")| The italic | decoration is indicated by surrounding the text
             with underscores.
-            |quotes| The quotes decoration is indicated by surrounding the text
-            in straight quotes.
             |code| The code decoration is indicated by backticks
 
             index:
