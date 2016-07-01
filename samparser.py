@@ -1411,7 +1411,7 @@ def escape_for_xml(s):
     return s.translate(t)
 
 def SAM_parser_warning(warning):
-    print("Sam parser warning: " + warning, file=sys.stderr)
+    print("SAM parser warning: " + warning, file=sys.stderr)
 
 
 para_parser = SamParaParser()
