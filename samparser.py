@@ -1363,6 +1363,7 @@ class SAMParserError(Exception):
     """
 
 
+
 def parse_insert(insert_string):
     result = {}
     attributes_list = insert_string.split()
@@ -1423,9 +1424,13 @@ if __name__ == "__main__":
 
     argparser.add_argument("infile", help="the SAM file to be parsed")
     argparser.add_argument("-outfile", "-o", help="the name of the output file")
-    argparser.add_argument("-xslt", "-x", help="name of xslt file for postprocessing output" )
+    argparser.add_argument("-xslt", "-x", help="name of xslt file for postprocessing output")
+    argparser.add_argument("-intermediate", "-i", help="name of file to dump intermediate XML to when using transform")
     args = argparser.parse_args()
     transformed = None
+
+    if args.intermediate and not args.xslt:
+        SAMParserError("Do not specify an intermediate file name if XSLT file is not specified.")
 
     try:
         with open(args.infile, "r", encoding="utf-8-sig") as inf:
@@ -1436,16 +1441,21 @@ if __name__ == "__main__":
                 exit(1)
 
             if args.infile == args.outfile:
-                raise SAMParserError("Input and output files cannot have the same name.")
+                SAMParserError('Input and output files cannot have the same name.')
+
             # Using a loop to avoid buffering the serialized XML.
 
             if args.xslt:
-                with open(args.xslt, "r") as xsltf:
-                    try:
-                        transform = etree.XSLT(etree.parse(xsltf))
-                    except SAMParserError as err:
-                        print(err, file=sys.stderr)
-                        exit(1)
+                try:
+                    with open(args.xslt, "r") as xsltf:
+                        try:
+                            transform = etree.XSLT(etree.parse(xsltf))
+                        except SAMParserError as err:
+                            print(err, file=sys.stderr)
+                            exit(1)
+                except FileNotFoundError as e:
+                    raise SAMParserError(e.strerror + ' ' + e.filename)
+
                 xout = "".join(samParser.serialize('xml')).encode('utf-8')
                 transformed = transform(etree.XML(xout))
 
@@ -1454,17 +1464,38 @@ if __name__ == "__main__":
                     with open(args.outfile, "wb") as outf:
                         transformed_text = etree.tostring(transformed, method='xml', encoding="UTF-8")
                         outf.write(transformed_text)
+
+                    if transform.error_log:
+                        SAM_parser_warning("Messages from the XSLT transformation:")
+                    for entry in transform.error_log:
+                        print('message from line %s, col %s: %s' % (
+                            entry.line, entry.column, entry.message))
+                        print('domain: %s (%d)' % (entry.domain_name, entry.domain))
+                        print('type: %s (%d)' % (entry.type_name, entry.type))
+                        print('level: %s (%d)' % (entry.level_name, entry.level))
+                        print('filename: %s' % entry.filename)
                 else:
                     with open(args.outfile, "w") as outf:
                         for i in samParser.serialize('xml'):
                             outf.write(i)
             else:
                 if transformed:
-                    sys.stdout.buffer.write(transformed.encode('utf-8'))
+                    sys.stdout.buffer.write(transformed)
                 else:
                     for i in samParser.serialize('xml'):
                         sys.stdout.buffer.write(i.encode('utf-8'))
 
+            if args.intermediate:
+                with open(args.intermediate, "w") as intf:
+                    for i in samParser.serialize('xml'):
+                        intf.write(i)
+
+
 
     except FileNotFoundError:
         raise SAMParserError("No input file specified.")
+
+    except SAMParserError as e:
+        sys.stderr.write('ERROR: ' + str(e))
+        sys.exit(1)
+

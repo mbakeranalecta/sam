@@ -7,9 +7,17 @@
 
     <xsl:template match="tests">
         <html>
-        <h1>Tests!</h1>
-        <xsl:apply-templates/>
+            <head>
+                <meta charset="UTF-8"/>
+            </head>
+            <body>
+                <xsl:apply-templates/>
+            </body>
         </html>
+    </xsl:template>
+
+    <xsl:template match="tests/title">
+        <h2><xsl:apply-templates/></h2>
     </xsl:template>
 
     <xsl:template match="test">
