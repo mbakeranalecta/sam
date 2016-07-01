@@ -3,6 +3,7 @@ from statemachine import StateMachine
 from lxml import etree
 import xml.parsers.expat
 import html
+import argparse
 
 from urllib.parse import urlparse
 
@@ -1416,19 +1417,34 @@ para_parser = SamParaParser()
 
 if __name__ == "__main__":
     samParser = SamParser()
-    infile = sys.argv[-1]
+
+
+    argparser = argparse.ArgumentParser()
+
+    argparser.add_argument("infile", help="the file to be parsed")
+    argparser.add_argument("--outfile", "-o", help="increase output verbosity")
+    args = argparser.parse_args()
+
     try:
-        with open(infile, "r", encoding="utf-8-sig") as inf:
+        with open(args.infile, "r", encoding="utf-8-sig") as inf:
             try:
                 samParser.parse(inf)
             except SAMParserError as err:
                 print(err, file=sys.stderr)
                 exit(1)
 
+            if args.infile == args.outfile:
+                raise SAMParserError("Input and output files cannot have the same name.")
             # Using a loop to avoid buffering the serialized XML.
-            for i in samParser.serialize('xml'):
-                sys.stdout.buffer.write(i.encode('utf-8'))
-                #print(i, end="")
+
+            if args.outfile:
+                with open(args.outfile, "w", encoding="utf-8") as outf:
+                    for i in samParser.serialize('xml'):
+                        outf.write(i)
+            else:
+                for i in samParser.serialize('xml'):
+                    sys.stdout.buffer.write(i.encode('utf-8'))
+
 
     except FileNotFoundError:
         raise SAMParserError("No input file specified.")
