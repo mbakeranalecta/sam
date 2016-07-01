@@ -1421,9 +1421,11 @@ if __name__ == "__main__":
 
     argparser = argparse.ArgumentParser()
 
-    argparser.add_argument("infile", help="the file to be parsed")
-    argparser.add_argument("--outfile", "-o", help="increase output verbosity")
+    argparser.add_argument("infile", help="the SAM file to be parsed")
+    argparser.add_argument("-outfile", "-o", help="the name of the output file")
+    argparser.add_argument("-xslt", "-x", help="name of xslt file for postprocessing output" )
     args = argparser.parse_args()
+    transformed = None
 
     try:
         with open(args.infile, "r", encoding="utf-8-sig") as inf:
@@ -1437,13 +1439,31 @@ if __name__ == "__main__":
                 raise SAMParserError("Input and output files cannot have the same name.")
             # Using a loop to avoid buffering the serialized XML.
 
+            if args.xslt:
+                with open(args.xslt, "r") as xsltf:
+                    try:
+                        transform = etree.XSLT(etree.parse(xsltf))
+                    except SAMParserError as err:
+                        print(err, file=sys.stderr)
+                        exit(1)
+                xout = "".join(samParser.serialize('xml')).encode('utf-8')
+                transformed = transform(etree.XML(xout))
+
             if args.outfile:
-                with open(args.outfile, "w", encoding="utf-8") as outf:
-                    for i in samParser.serialize('xml'):
-                        outf.write(i)
+                if transformed:
+                    with open(args.outfile, "wb") as outf:
+                        transformed_text = etree.tostring(transformed, method='xml', encoding="UTF-8")
+                        outf.write(transformed_text)
+                else:
+                    with open(args.outfile, "w") as outf:
+                        for i in samParser.serialize('xml'):
+                            outf.write(i)
             else:
-                for i in samParser.serialize('xml'):
-                    sys.stdout.buffer.write(i.encode('utf-8'))
+                if transformed:
+                    sys.stdout.buffer.write(transformed.encode('utf-8'))
+                else:
+                    for i in samParser.serialize('xml'):
+                        sys.stdout.buffer.write(i.encode('utf-8'))
 
 
     except FileNotFoundError:
