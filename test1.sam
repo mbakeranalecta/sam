@@ -10,19 +10,85 @@ tests:(!en)
 
     test: Recordsets
 
+        case: Recordset
+
+            description:
+                Test that recordsets are recognized correctly. Includes a
+                test that character escapes are recognized in records and
+                commas can be escaped.
+
+            source:
+                ```(sam)
+                    history:: date, author, comment, status
+                        2014-06-23, mbaker, New\, Topic, In progress
+                        2016-07-01, mbaker, Revision, In progress
+
+            markup:
+                history:: date, author, comment, status
+                    2014-06-23, mbaker, New\, Topic, In progress
+                    2016-07-01, mbaker, Revision, In progress
+
+            result:
+                ```(xml)
+                    <history>
+                    <row>
+                    <date>2014-06-23</date>
+                    <author>mbaker</author>
+                    <comment>New, Topic</comment>
+                    <status>In progress</status>
+                    </row>
+                    <row>
+                    <date>2016-07-01</date>
+                    <author>mbaker</author>
+                    <comment>Revision</comment>
+                    <status>In progress</status>
+                    </row>
+                    </history>
+
         case: Recordset with only one field name
 
-            filmography:: film
-                Rio Bravo
-                The Shootish
+            description:
+                Test that a recordset works correctly with only one field.
+
+            source:
+                ```(sam)
+                    filmography:: film
+                        Rio Bravo
+                        The Shootish
+
+            markup:
+                filmography:: film
+                    Rio Bravo
+                    The Shootish
+
+            result:
+                ```(xml)
+                    <filmography>
+                    <row>
+                    <film>Rio Bravo</film>
+                    </row>
+                    <row>
+                    <film>The Shootish</film>
+                    </row>
+                    </filmography>
+
 
     test: Parens in link shortcuts
 
-        Rio Bravo refers to the movie (and not to {the city in Texas or the nature reserve in Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
+        Rio Bravo refers to the movie
+        (and not to {the city in Texas or
+        the nature reserve in
+        Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
 
-        Rio Bravo refers to the movie (and not to {the city in Texas or the nature reserve in Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
+        Rio Bravo refers to the movie
+        (and not to {the city in Texas or
+        the nature reserve in
+        Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
 
-        Rio Bravo refers to the movie (and not to {the city in Texas or the nature reserve in Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
+        Rio Bravo refers to the movie
+        (and not to {the city in Texas or
+        the nature reserve in
+        Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 
     test: Citations
 
@@ -503,6 +569,7 @@ tests:(!en)
             $name=fred {and}(conjunction) wilma
             history:: date, author, comment, status
                 2014-06-23, mbaker, New\, Topic, In progress
+                2016-07-01, mbaker, Revision, In progress
             index:: type, term
                 feature, fragment
                 feature, fragments

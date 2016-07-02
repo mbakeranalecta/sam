@@ -7,6 +7,18 @@
     </xsl:copy>
   </xsl:template>
 
+  <xsl:template match="*" mode="reproduce-markup">
+    <xsl:text>&lt;</xsl:text>
+    <xsl:value-of select="name()"/>
+    <xsl:text>&gt;</xsl:text>
+      <xsl:apply-templates mode="reproduce-markup"/>
+    <xsl:text>&lt;/</xsl:text>
+    <xsl:value-of select="name()"/>
+    <xsl:text>&gt;</xsl:text>
+
+  </xsl:template>
+
+
     <xsl:template match="tests">
         <html>
             <head>
@@ -27,7 +39,7 @@
     </xsl:template>
 
     <xsl:template match="test/title">
-        <h2><xsl:apply-templates/></h2>
+        <h2>Test: <xsl:apply-templates/></h2>
     </xsl:template>
 
     <xsl:template match="case">
@@ -35,8 +47,26 @@
     </xsl:template>
 
     <xsl:template match="case/title">
-        <h3><xsl:apply-templates/></h3>
+        <h3>Case: <xsl:apply-templates/></h3>
     </xsl:template>
+
+    <xsl:template match="case/source">
+        <h4>Source</h4>
+        <xsl:apply-templates/>
+    </xsl:template>
+
+    <xsl:template match="case/markup">
+        <h4>Generated result</h4>
+        <pre>
+        <xsl:apply-templates mode="reproduce-markup"/>
+        </pre>
+    </xsl:template>
+
+    <xsl:template match="case/result">
+        <h4>Intended result</h4>
+        <xsl:apply-templates/>
+    </xsl:template>
+
 
     <xsl:template match="codeblock">
         <pre><xsl:apply-templates/></pre>
@@ -48,6 +78,10 @@
 
     <xsl:template match="annotation[@type='code']">
         <tt><xsl:apply-templates/></tt>
+    </xsl:template>
+
+    <xsl:template match="annotation[@type='link']">
+        <a href="{@specifically}"><xsl:apply-templates/></a>
     </xsl:template>
 
     <xsl:template match="grid">
