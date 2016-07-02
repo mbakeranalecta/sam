@@ -741,7 +741,7 @@ class EmbeddedXML(Block):
 
 class Annotation:
     def __init__(self, annotation_type, text, specifically='', namespace='', language=''):
-        self.annotation_type = annotation_type
+        self.annotation_type = annotation_type.strip()
         self.text = text
         self.specifically = specifically
         self.namespace = namespace
