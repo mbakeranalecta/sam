@@ -94,7 +94,16 @@ tests:(!en) SAM Parser Tests
 
         case: Citation on phrase
 
-        You can {Call me Ishmael}[Melville, 1851x].
+            source:
+                ```(SAM)
+                    You can {call me Ishmael}[Melville, 1851].
+
+            markup:
+                You can {call me Ishmael}[Melville, 1851].
+
+            result:
+                ```(XML)
+                    <p>You can <citation type="citation" value="Melville, 1851">call me Ishmael</citation>.</p>
 
     test: Grids
 
@@ -107,12 +116,12 @@ tests:(!en) SAM Parser Tests
 
         case: Grid with management domain attributes
 
-        +++(*foom #bar ?baz)
-            *Type*  | *Term*    | *Notes*
+            +++(*foom #bar ?baz)
+                *Type*  | *Term*    | *Notes*
 
-            feature | fragment  | bing
+                feature | fragment  | bing
 
-            feature | fragments | bang
+                feature | fragments | bang
 
 
 

@@ -1428,7 +1428,7 @@ if __name__ == "__main__":
     argparser.add_argument("infile", help="the SAM file to be parsed")
     argparser.add_argument("-outfile", "-o", help="the name of the output file")
     argparser.add_argument("-xslt", "-x", help="name of xslt file for postprocessing output")
-    argparser.add_argument("-intermediate", "-i", help="name of file to dump intermediate XML to when using transform")
+    argparser.add_argument("-intermediate", "-i", help="name of file to dump intermediate XML to when using -xslt")
     argparser.add_argument("-smartquotes", "-s", help="turn on smart quotes processing",
                     action="store_true")
     args = argparser.parse_args()
@@ -1482,9 +1482,9 @@ if __name__ == "__main__":
                         print('level: %s (%d)' % (entry.level_name, entry.level))
 
                 else:
-                    with open(args.outfile, "w") as outf:
+                    with open(args.outfile, "wb") as outf:
                         for i in samParser.serialize('xml'):
-                            outf.write(i)
+                            outf.write(i.encode('utf-8'))
             else:
                 if transformed:
                     sys.stdout.buffer.write(transformed)

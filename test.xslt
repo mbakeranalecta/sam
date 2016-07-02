@@ -30,6 +30,7 @@
                 <meta charset="UTF-8"/>
             </head>
             <body>
+                <a name="top"/>
                 <xsl:apply-templates/>
             </body>
         </html>
@@ -51,6 +52,7 @@
     <xsl:template match="test">
         <a name="{generate-id()}"/>
         <xsl:apply-templates/>
+        <a href="#top">^top</a>
     </xsl:template>
 
     <xsl:template match="test/title">
@@ -75,6 +77,9 @@
         <pre>
         <xsl:apply-templates mode="reproduce-markup"/>
         </pre>
+
+        <h4>Formatted result (not necessarily supported for all tests)</h4>
+        <xsl:apply-templates/>
     </xsl:template>
 
     <xsl:template match="case/result">
@@ -98,6 +103,22 @@
     <xsl:template match="annotation[@type='link']">
         <a href="{@specifically}"><xsl:apply-templates/></a>
     </xsl:template>
+
+    <xsl:template match="annotation">
+        <span style="color: dark-green">
+            <xsl:apply-templates/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="citation">
+        <xsl:apply-templates/>
+        <span style="color: red">
+            <xsl:text>[</xsl:text>
+            <xsl:value-of select="@value"/>
+            <xsl:text>]</xsl:text>
+        </span>
+    </xsl:template>
+
 
     <xsl:template match="grid">
         <table border="1">
