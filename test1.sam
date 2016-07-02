@@ -6,7 +6,7 @@
 
 # Need test for unicode characters and numbers in names.
 
-tests:(!en)
+tests:(!en) SAM Parser Tests
 
     test: Recordsets
 

@@ -32,14 +32,24 @@
 
     <xsl:template match="tests/title">
         <h2><xsl:apply-templates/></h2>
+        <ul>
+            <xsl:for-each select="../test">
+                <li>
+                    <a href="#{generate-id()}">
+                        <xsl:value-of select="title"/>
+                    </a>
+                </li>
+            </xsl:for-each>
+        </ul>
     </xsl:template>
 
     <xsl:template match="test">
+        <a name="{generate-id()}"/>
         <xsl:apply-templates/>
     </xsl:template>
 
     <xsl:template match="test/title">
-        <h2>Test: <xsl:apply-templates/></h2>
+        <h2 id="{generate-id(..)}">Test: <xsl:apply-templates/></h2>
     </xsl:template>
 
     <xsl:template match="case">
