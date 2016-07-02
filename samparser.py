@@ -98,7 +98,7 @@ class SamParser:
         indent = len(match.group("indent"))
         block_name = match.group("name").strip()
         attributes = self.parse_block_attributes(match.group("attributes"))
-        content = match.group("content")
+        content = match.group("content").strip()
         parsed_content = None if content == '' else para_parser.parse(content, self.doc)
         self.doc.new_block(block_name, attributes, parsed_content, indent)
         return "SAM", context
@@ -1493,9 +1493,9 @@ if __name__ == "__main__":
                         sys.stdout.buffer.write(i.encode('utf-8'))
 
             if args.intermediate:
-                with open(args.intermediate, "w") as intf:
+                with open(args.intermediate, "wb") as intf:
                     for i in samParser.serialize('xml'):
-                        intf.write(i)
+                        intf.write(i.encode('utf-8'))
 
 
 
