@@ -1151,7 +1151,7 @@ class SamParaParser:
                         )
             else:
                 #Check for link shortcut
-                if urlparse(annotation_type,None).scheme is not None:
+                if urlparse(annotation_type, None).scheme is not None:
                     specifically = annotation_type
                     annotation_type='link'
                 else:
