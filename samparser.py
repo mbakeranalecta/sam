@@ -56,6 +56,7 @@ class SamParser:
         self.current_text_block = None
         self.doc = DocStructure()
         self.source = None
+        self.smart_quotes = False
         self.patterns = {
             'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?', re.U),
             'comment': re.compile(re_indent + re_comment, re.U),
@@ -1032,6 +1033,7 @@ class SamParaParser:
         self.para = None
         self.current_string = None
         self.flow = None
+        self.smart_quotes = False
 
         self.stateMachine = StateMachine()
         self.stateMachine.add_state("PARA", self._para)
@@ -1242,26 +1244,31 @@ class SamParaParser:
         return "PARA", para
 
     def _double_quote(self, para):
-        if self.patterns['double_quote_close'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
-            self.current_string += '”'
-        elif self.patterns['double_quote_open'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
-            self.current_string += '“'
+        if self.smart_quotes:
+            if self.patterns['double_quote_close'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+                self.current_string += '”'
+            elif self.patterns['double_quote_open'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+                self.current_string += '“'
+            else:
+                self.current_string += '"'
+                SAM_parser_warning('Detected straight double quote that was not recognized by smart quote rules in: "'+ para.para + '" at position ' + str(para.currentCharNumber))
         else:
             self.current_string += '"'
-            SAM_parser_warning('Detected straight double quote that was not recognized by smart quote rules in: "'+ para.para + '" at position ' + str(para.currentCharNumber))
-
         return "PARA", para
 
     def _single_quote(self, para):
-        if self.patterns['single_quote_close'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
-            self.current_string += '’'
-        elif self.patterns['single_quote_open'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
-            self.current_string += '‘'
-        elif self.patterns['apostrophe'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
-            self.current_string += '’'
+        if self.smart_quotes:
+            if self.patterns['single_quote_close'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+                self.current_string += '’'
+            elif self.patterns['single_quote_open'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+                self.current_string += '‘'
+            elif self.patterns['apostrophe'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+                self.current_string += '’'
+            else:
+                self.current_string += "'"
+                SAM_parser_warning('Detected straight single quote that was not recognized by smart quote rules in: "'+ para.para + '" at position ' + str(para.currentCharNumber))
         else:
-            self.current_string += '"'
-            SAM_parser_warning('Detected straight single quote that was not recognized by smart quote rules in: "'+ para.para + '" at position ' + str(para.currentCharNumber))
+            self.current_string += "'"
         return "PARA", para
 
     def _inline_insert(self, para):
@@ -1417,8 +1424,6 @@ def SAM_parser_warning(warning):
 para_parser = SamParaParser()
 
 if __name__ == "__main__":
-    samParser = SamParser()
-
 
     argparser = argparse.ArgumentParser()
 
@@ -1426,8 +1431,16 @@ if __name__ == "__main__":
     argparser.add_argument("-outfile", "-o", help="the name of the output file")
     argparser.add_argument("-xslt", "-x", help="name of xslt file for postprocessing output")
     argparser.add_argument("-intermediate", "-i", help="name of file to dump intermediate XML to when using transform")
+    argparser.add_argument("-smartquotes", "-s", help="turn on smart quotes processing",
+                    action="store_true")
     args = argparser.parse_args()
     transformed = None
+
+    samParser = SamParser()
+
+    if args.smartquotes:
+        para_parser.smart_quotes = True
+
 
     if args.intermediate and not args.xslt:
         SAMParserError("Do not specify an intermediate file name if an XSLT file is not specified.")
