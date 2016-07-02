@@ -1144,12 +1144,10 @@ class SamParaParser:
                     else:
                         self.current_string += text
                         SAM_parser_warning(
-                                "Blank annotation found: {" +
+                                "Unannotated phrase found: {" +
                                 text + "} " +
                                 "If you are trying to insert curly braces " +
-                                "into the document, use \{" + text +
-                                "]. Otherwise, make sure annotated text matches "
-                                "previous annotation exactly."
+                                "into the document, use \{" + text + "}."
                         )
             else:
                 #Check for link shortcut
