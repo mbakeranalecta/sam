@@ -7,6 +7,8 @@
     </xsl:copy>
   </xsl:template>
 
+
+
   <xsl:template match="*" mode="reproduce-markup">
     <xsl:text>&lt;</xsl:text>
     <xsl:value-of select="name()"/>
