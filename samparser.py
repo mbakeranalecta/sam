@@ -1469,7 +1469,7 @@ if __name__ == "__main__":
                         print('domain: %s (%d)' % (entry.domain_name, entry.domain))
                         print('type: %s (%d)' % (entry.type_name, entry.type))
                         print('level: %s (%d)' % (entry.level_name, entry.level))
-                        print('filename: %s' % entry.filename)
+
                 else:
                     with open(args.outfile, "w") as outf:
                         for i in samParser.serialize('xml'):

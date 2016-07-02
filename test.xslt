@@ -10,14 +10,19 @@
   <xsl:template match="*" mode="reproduce-markup">
     <xsl:text>&lt;</xsl:text>
     <xsl:value-of select="name()"/>
+      <xsl:for-each select="@*">
+          <xsl:text> </xsl:text>
+          <xsl:value-of select="name()"/>
+          <xsl:text>="</xsl:text>
+          <xsl:value-of select="."/>
+          <xsl:text>"</xsl:text>
+      </xsl:for-each>
     <xsl:text>&gt;</xsl:text>
       <xsl:apply-templates mode="reproduce-markup"/>
     <xsl:text>&lt;/</xsl:text>
     <xsl:value-of select="name()"/>
     <xsl:text>&gt;</xsl:text>
-
   </xsl:template>
-
 
     <xsl:template match="tests">
         <html>
