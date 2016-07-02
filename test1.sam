@@ -299,10 +299,6 @@ tests:(!en) SAM Parser Tests
             that wraps across
             multiple lines.
 
-    test: Nested annotations and decorations
-
-        This sentence {contains}(foo) an annotation nested in a decoration.
-
     test: Numbered lists
 
         case: Numbered list with spaces
