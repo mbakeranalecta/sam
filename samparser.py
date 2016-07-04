@@ -1441,7 +1441,10 @@ if __name__ == "__main__":
 
 
     if args.intermediate and not args.xslt:
-        SAMParserError("Do not specify an intermediate file name if an XSLT file is not specified.")
+        raise SAMParserError("Do not specify an intermediate file name if an XSLT file is not specified.")
+
+    if args.infile == args.outfile:
+        raise SAMParserError('Input and output files cannot have the same name.')
 
     try:
         with open(args.infile, "r", encoding="utf-8-sig") as inf:
@@ -1450,9 +1453,6 @@ if __name__ == "__main__":
             except SAMParserError as err:
                 print(err, file=sys.stderr)
                 exit(1)
-
-            if args.infile == args.outfile:
-                SAMParserError('Input and output files cannot have the same name.')
 
             # Using a loop to avoid buffering the serialized XML.
 
