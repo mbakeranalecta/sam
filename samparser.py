@@ -1429,7 +1429,7 @@ if __name__ == "__main__":
     argparser.add_argument("-outfile", "-o", help="the name of the output file")
     argparser.add_argument("-xslt", "-x", help="name of xslt file for postprocessing output")
     argparser.add_argument("-intermediate", "-i", help="name of file to dump intermediate XML to when using -xslt")
-    argparser.add_argument("-smartquotes", "-s", help="turn on smart quotes processing",
+    argparser.add_argument("-smartquotes", "-q", help="turn on smart quotes processing",
                     action="store_true")
     args = argparser.parse_args()
     transformed = None
