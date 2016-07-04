@@ -35,7 +35,7 @@ SAM Parser is invoked as follows:
     
 The meaning of each parameter is as follows:
     
- * infile: The path of the SAM file to be parsed.
+ * <infile>: The path of the SAM file to be parsed.
  
  * -outfile: (optional) The name and path of the output file to be created. If `-xslt` is 
    specified, this will be the output of the XSLT stylesheet. Otherwise, it will 

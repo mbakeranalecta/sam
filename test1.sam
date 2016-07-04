@@ -8,6 +8,60 @@
 
 tests:(!en) SAM Parser Tests
 
+    test: Annotations and Citations
+
+        case: Annotation followed by citation
+
+            description:
+                Observed in the wild: When an annotated phrase was followed by a
+                phrase with a citation, the end of the annoations was not found
+                and the two structures were recognized as one long citation.
+
+            source:
+                ```(sam)
+                    When using the map approach, it is important to
+                    think about how your content will {single
+                    source}(concept "single sourcing") to paper-like
+                    media and hypertext-media. Some people will output
+                    the same map to to both media. In hyper-text media
+                    that usually results in the map being turned into
+                    a table of contents, often displayed in a separate
+                    pane as in a help system. This may be fine if you
+                    are creating a help system, but it is not how Web
+                    content is usually displayed. Another approach to
+                    single sourcing content that uses the assemble from
+                    pieces approach is to create completely separate maps
+                    -- or even to use completely different assembly
+                    techniques that don't involve maps at all -- to produce
+                    paper-like and hypertext outputs. This can help you
+                    to work around some of the design limitations that
+                    we talked about in the {single sourcing
+                    chapter}[#single_source].
+
+            markup:
+                When using the map approach, it is important to
+                think about how your content will {single
+                source}(concept "single sourcing") to paper-like
+                media and hypertext-media. Some people will output
+                the same map to to both media. In hyper-text media
+                that usually results in the map being turned into
+                a table of contents, often displayed in a separate
+                pane as in a help system. This may be fine if you
+                are creating a help system, but it is not how Web
+                content is usually displayed. Another approach to
+                single sourcing content that uses the assemble from
+                pieces approach is to create completely separate maps
+                -- or even to use completely different assembly
+                techniques that don't involve maps at all -- to produce
+                paper-like and hypertext outputs. This can help you
+                to work around some of the design limitations that
+                we talked about in the {single sourcing
+                chapter}[#single_source].
+
+            result:
+                ```(xml)
+                    <p>When using the map approach, it is important to think about how your content will <annotation type="concept" specifically="single sourcing">single source</annotation> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don't involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <citation type="nameref" value="single_source">single sourcing chapter</citation>.</p>
+
     test: Recordsets
 
         case: Recordset
