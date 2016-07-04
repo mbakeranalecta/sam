@@ -30,23 +30,25 @@ the easiest way to get one with the required libraries installed is to install
 
 SAM Parser is invoked as follows:
 
-    samparser <input-file> [-outfile <output-file>] [-xslt <xslt-file> [-intermediate <intermediate-file>]]
+    samparser <infile> [-outfile <output-file>] [-xslt <xslt-file> [-intermediate <intermediate-file>]] -smartquotes
     
     
 The meaning of each parameter is as follows:
     
- * input-file: The path of the SAM file to be parsed.
+ * infile: The path of the SAM file to be parsed.
  
- * output-file: (optional) The name and path of the output file to be created. If `-xslt` is 
+ * -outfile: (optional) The name and path of the output file to be created. If `-xslt` is 
    specified, this will be the output of the XSLT stylesheet. Otherwise, it will 
    be the default XML representation of the SAM document. (short form: `-o`)
  
- * xslt-file: (optional) The name of an XSLT 1.0 stylesheet to be used to post process the 
+ * -xslt: (optional) The name of an XSLT 1.0 stylesheet to be used to post process the 
    normal SAM XML output. (short form: `-x`)
    
- * intermediate-file: (optional, requires that `-xslt` be specified) The name and path of 
+ * -intermediate: (optional, requires that `-xslt` be specified) The name and path of 
    a file to which the default XML representation of the SAM file will be written if
-   `xslt-file` is specified. This may be useful for debugging purposes. (short form '-i')
+   `xslt-file` is specified. This may be useful for debugging purposes. (short form `-i`)
+   
+ * -smartquotes: Turns on smart quotes processing. (short form `-q`)
    
 ### Running SAM Parser on Windows
 
