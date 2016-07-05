@@ -686,7 +686,7 @@ class Flow (list):
             if type(self[-1]) is Span:
                 self[-1].children.append(thing)
             else:
-                raise SAMParserError("Tried to add annotation where there is no span to annotate. This should not be possible.")
+                super(Flow, self).append(thing)
         elif type(thing) is Citation:
             if type(self[-1]) is Span:
                 self[-1].children.append(thing)
@@ -1110,7 +1110,7 @@ class SamParaParser:
                 specifically = match.group('specifically') if match.group('specifically') is not None else None
             namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
             self.flow.append(Annotation(annotation_type, specifically, namespace, language))
-            para.advance(len(match.group(0)) - 1)
+            para.advance(len(match.group(0)))
             if self.patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
             elif self.patterns['citation'].match(para.rest_of_para):
@@ -1154,11 +1154,11 @@ class SamParaParser:
                 extra = None
 
             self.flow.append(Citation(citation_type, citation_value, extra))
-            para.advance(len(match.group(0)) - 1)
+            para.advance(len(match.group(0)))
             if self.patterns['annotation'].match(para.rest_of_para):
-                return "ANNOTATION_START", para
+                return "ANNOTATION-START", para
             elif self.patterns['citation'].match(para.rest_of_para):
-                return "CITATION_START", para
+                return "CITATION-START", para
             else:
                 return "PARA", para
         else:

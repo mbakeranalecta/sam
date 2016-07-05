@@ -665,13 +665,13 @@ tests:(!en) SAM Parser Tests
 
             10. Ten
 
-            {Fragments}(feature) are a {content reuse}(task "reusing content" (foo))
+            {Fragments}(feature) are a {content reuse}(task "1reusing content" (foo))
             feature of the {EPPO-simple}(feature) {plugin}( feature).[*bar]
 
-            \{Fragments}(feature) are a \{content reuse}(task "reusing content" (foo))
+            \{Fragments}(feature) are a \{content reuse}(task "2reusing content" (foo))
             feature of the \{EPPO-simple}(feature) \{plugin}( feature).[*bar]
 
-            \[Fragments](feature) are a \[content reuse](task "reusing content" (foo))
+            \[Fragments](feature) are a \[content reuse](task "3reusing content" (foo))
             feature of the \[EPPO-simple](feature) [plugin]( feature).[Someone, 1852]
 
             Press \[Enter].
