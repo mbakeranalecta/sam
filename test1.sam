@@ -10,6 +10,10 @@ tests:(!en) SAM Parser Tests
 
     test: Annotations and Citations
 
+        case: Multiple annotations
+
+            This is {very}(bold)(italic) important.
+
         case: Annotation followed by citation
 
             description:
@@ -668,7 +672,7 @@ tests:(!en) SAM Parser Tests
             feature of the \{EPPO-simple}(feature) \{plugin}( feature).[*bar]
 
             \[Fragments](feature) are a \[content reuse](task "reusing content" (foo))
-            feature of the \[EPPO-simple](feature) [plugin]( feature).[Melville, 1851]
+            feature of the \[EPPO-simple](feature) [plugin]( feature).[Someone, 1852]
 
             Press \[Enter].
 

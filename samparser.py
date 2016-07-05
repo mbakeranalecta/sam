@@ -195,7 +195,7 @@ class SamParser:
             citation_type=None
 
         if citation_type:
-            cit = (Citation(None, citation_type, citation_value, extra))
+            cit = (Citation(citation_type, citation_value, extra))
             b.add_child(cit)
 
         return "SAM", context
@@ -675,37 +675,39 @@ class TextBlock:
         return " ".join(x.strip() for x in self.lines)
 
 
-
-class Flow:
-    def __init__(self, thing=None):
-        self.flow = []
-        if thing:
-            self.append(thing)
+class Flow (list):
 
     def __str__(self):
-        return "[{0}]".format(''.join([str(x) for x in self.flow]))
+        return "[{0}]".format(''.join([str(x) for x in self]))
 
     def append(self, thing):
-        if not thing == '':
-            self.flow.append(thing)
+        print(thing)
+        if type(thing) is Annotation:
+            if type(self[-1]) is Span:
+                self[-1].children.append(thing)
+            else:
+                raise SAMParserError("Tried to add annotation where there is no span to annotate. This should not be possible.")
+        elif type(thing) is Citation:
+            if type(self[-1]) is Span:
+                self[-1].children.append(thing)
+            else:
+                super(Flow, self).append(thing)
+        elif not thing == '':
+            super(Flow, self).append(thing)
 
     def find_last_annotation(self, text):
-        for i in reversed(self.flow):
+        for i in reversed(self):
             if type(i) is Annotation:
                 if i.text == text:
                     return i
         return None
 
     def serialize_xml(self):
-        for x in self.flow:
+        for x in self:
             try:
                 yield from x.serialize_xml()
             except AttributeError:
-                yield self._escape_for_xml(x)
-
-    def _escape_for_xml(self, s):
-        t = dict(zip([ord('<'), ord('>'), ord('&'), ord('"')], ['&lt;', '&gt;', '&amp;', '&quot;']))
-        return s.translate(t)
+                yield escape_for_xml(x)
 
 
 class Pre(Flow):
@@ -740,64 +742,6 @@ class EmbeddedXML(Block):
         yield self.text
 
 
-class Annotation:
-    def __init__(self, annotation_type, text, specifically='', namespace='', language=''):
-        self.annotation_type = annotation_type.strip()
-        self.text = text
-        self.specifically = specifically
-        self.namespace = namespace
-        self.language = language
-
-    def __str__(self):
-        return '{%s}(%s "%s" (%s))' % (self.text, self.annotation_type, self.specifically, self.namespace)
-
-    def serialize_xml(self):
-        yield '<annotation'
-        if self.annotation_type:
-            yield ' type="{0}"'.format(self.annotation_type)
-        if self.specifically:
-            yield ' specifically="{0}"'.format(escape_for_xml(self.specifically))
-        if self.namespace:
-            yield ' namespace="{0}"'.format(self.namespace)
-        if self.language:
-            yield ' xml:lang="{0}"'.format(self.language)
-        yield '>{0}</annotation>'.format(escape_for_xml(self.text))
-
-
-class Citation:
-    def __init__(self, citation_text, citation_type, citation_value, citation_extra):
-        self.citation_text = citation_text
-        self.citation_type = citation_type
-        self.citation_value = citation_value
-        self.citation_extra = citation_extra
-
-    def __str__(self):
-        return u'{{{0:s}}}[{1:s} {2:s} {3:s}]'.format(self.citation_text, self.citation_type, self.citation_value,
-                                                      self.citation_extra)
-
-    def serialize_xml(self):
-        yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml(self.citation_value))
-        if self.citation_extra is not None:
-            yield ' extra="{0}"'.format(escape_for_xml(self.citation_extra))
-        if self.citation_text is not None:
-            yield '>{0}</citation>'.format(escape_for_xml(self.citation_text))
-        else:
-            yield '/>'
-
-
-class InlineInsert:
-    def __init__(self, attributes):
-        self.attributes = attributes
-
-    def __str__(self):
-        return "[#insert:'%s']" % self.attributes
-
-    def serialize_xml(self):
-        yield '<insert'
-        for key, value in self.attributes.items():
-            yield " {0}=\"{1}\"".format(key, escape_for_xml(value))
-        yield '/>'
-
 
 class DocStructure:
     def __init__(self):
@@ -805,7 +749,7 @@ class DocStructure:
         self.fields = None
         self.current_record = None
         self.current_block = None
-        self.default_namespace =None
+        self.default_namespace = None
         self.ids = []
 
     def context(self, context_block=None):
@@ -1053,8 +997,9 @@ class SamParaParser:
         self.patterns = {
             'escape': re.compile(r'\\', re.U),
             'escaped-chars': re.compile('[\\\(\{\}\[\]_\*,\.\*`"&' + "']", re.U),
+            'span': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
             'annotation': re.compile(
-                r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(!(?P<language>[\w-]+))?\))?', re.U),
+                r'(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(!(?P<language>[\w-]+))?\))', re.U),
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
             'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
@@ -1065,7 +1010,7 @@ class SamParaParser:
             'double_quote_open': re.compile(re_double_quote_open, re.U),
             'inline-insert': re.compile(r'>\((?P<attributes>.*?)\)', re.U),
             'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
-            'citation': re.compile(r'((?<!\\)\{(?P<text>.*?)(?<!\\)\})?((\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))', re.U)
+            'citation': re.compile(r'((\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))', re.U)
         }
 
     def parse(self, para, doc, strip=True):
@@ -1110,25 +1055,22 @@ class SamParaParser:
             return "PARA", para
 
     def _span_start(self, para):
-        if self.patterns['citation'].match(para.rest_of_para):
-            return  "CITATION-START", para
-        else:
-            return "ANNOTATION-START", para
-
-
-    def _annotation_start(self, para):
-        match = self.patterns['annotation'].match(para.rest_of_para)
+        match = self.patterns['span'].match(para.rest_of_para)
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            annotation_type = match.group('type')
-            language = match.group('language')
             text = self._unescape(match.group("text"))
+            self.flow.append(Span(text))
+            para.advance(len(match.group(0)) )
 
-            # If there is an annotated phrase with no annotation, look back
-            # to see if it has been annotated already, and if so, copy the
-            # closest preceding annotation.
-            if annotation_type is None and not language:
+            if self.patterns['annotation'].match(para.rest_of_para):
+                return "ANNOTATION-START", para
+            elif self.patterns['citation'].match(para.rest_of_para):
+                return "CITATION-START", para
+            else:
+                # If there is an annotated phrase with no annotation, look back
+                # to see if it has been annotated already, and if so, copy the
+                # closest preceding annotation.
                 # First look back in the current flow
                 # (which is not part of the doc structure yet).
                 previous = self.flow.find_last_annotation(text)
@@ -1149,17 +1091,32 @@ class SamParaParser:
                                 "If you are trying to insert curly braces " +
                                 "into the document, use \{" + text + "}."
                         )
-            else:
-                #Check for link shortcut
-                if urlparse(annotation_type, None).scheme is not None:
-                    specifically = annotation_type
-                    annotation_type='link'
-                else:
-                    specifically = match.group('specifically') if match.group('specifically') is not None else None
-                namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
-                self.flow.append(Annotation(annotation_type, text, specifically, namespace, language))
-            para.advance(len(match.group(0)) - 1)
+                return "PARA", para
+        else:
+            self.current_string += '{'
             return "PARA", para
+
+    def _annotation_start(self, para):
+        match = self.patterns['annotation'].match(para.rest_of_para)
+        if match:
+            annotation_type = match.group('type')
+            language = match.group('language')
+
+            #Check for link shortcut
+            if urlparse(annotation_type, None).scheme is not None:
+                specifically = annotation_type
+                annotation_type = 'link'
+            else:
+                specifically = match.group('specifically') if match.group('specifically') is not None else None
+            namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
+            self.flow.append(Annotation(annotation_type, specifically, namespace, language))
+            para.advance(len(match.group(0)) - 1)
+            if self.patterns['annotation'].match(para.rest_of_para):
+                return "ANNOTATION-START", para
+            elif self.patterns['citation'].match(para.rest_of_para):
+                return "CITATION-START", para
+            else:
+                return "PARA", para
         else:
             self.current_string += '{'
             return "PARA", para
@@ -1169,11 +1126,6 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-
-            try:
-                citation_text = match.group('text')
-            except IndexError:
-                citation_text = None
 
             try:
                 idref = match.group('id')
@@ -1201,9 +1153,14 @@ class SamParaParser:
                 citation_value = citation.strip()
                 extra = None
 
-            self.flow.append(Citation(citation_text, citation_type, citation_value, extra))
+            self.flow.append(Citation(citation_type, citation_value, extra))
             para.advance(len(match.group(0)) - 1)
-            return "PARA", para
+            if self.patterns['annotation'].match(para.rest_of_para):
+                return "ANNOTATION_START", para
+            elif self.patterns['citation'].match(para.rest_of_para):
+                return "CITATION_START", para
+            else:
+                return "PARA", para
         else:
             self.current_string += '['
             return "PARA", para
@@ -1213,7 +1170,8 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Annotation('bold', self._unescape(match.group("text"))))
+            self.flow.append(Span(self._unescape(match.group("text"))))
+            self.flow.append(Annotation('bold'))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '*'
@@ -1224,7 +1182,8 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Annotation('italic', self._unescape(match.group("text"))))
+            self.flow.append(Span(self._unescape(match.group("text"))))
+            self.flow.append(Annotation('italic'))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '_'
@@ -1235,7 +1194,8 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Annotation('code', (match.group("text")).replace("``", "`")))
+            self.flow.append(Span((match.group("text")).replace("``", "`")))
+            self.flow.append(Annotation('code'))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '`'
@@ -1340,6 +1300,20 @@ class SamParaParser:
                 result += char
         return result
 
+class Span:
+    def __init__(self, text):
+        self.text = text
+        self.children = []
+
+    def __str__(self):
+        return u'{{{0:s}}}'.format(self.text)
+
+    def serialize_xml(self):
+        yield '<span><text>{0}</text>'.format(self.text)
+        for x in self.children:
+            yield from x.serialize_xml()
+        yield '</span>'
+
 
 class Para:
     def __init__(self, para, strip=True):
@@ -1361,6 +1335,62 @@ class Para:
 
     def advance(self, count):
         self.currentCharNumber += count
+
+
+class Annotation:
+    def __init__(self, annotation_type, specifically='', namespace='', language=''):
+        self.annotation_type = annotation_type.strip()
+        self.specifically = specifically
+        self.namespace = namespace
+        self.language = language
+
+    def __str__(self):
+        return '(%s "%s" (%s))' % (self.annotation_type, self.specifically, self.namespace)
+
+    def serialize_xml(self):
+        yield '<annotation'
+        if self.annotation_type:
+            yield ' type="{0}"'.format(self.annotation_type)
+        if self.specifically:
+            yield ' specifically="{0}"'.format(escape_for_xml(self.specifically))
+        if self.namespace:
+            yield ' namespace="{0}"'.format(self.namespace)
+        if self.language:
+            yield ' xml:lang="{0}"'.format(self.language)
+        yield '/>'
+
+
+class Citation:
+    def __init__(self, citation_type, citation_value, citation_extra):
+        self.citation_type = citation_type
+        self.citation_value = citation_value
+        self.citation_extra = citation_extra
+
+    def __str__(self):
+        cit_extra = self.citation_extra if self.citation_extra else ''
+        return u'[{0:s} {1:s} {2:s}]'.format(self.citation_type, self.citation_value,
+                                                      cit_extra)
+
+    def serialize_xml(self):
+        yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml(self.citation_value))
+        if self.citation_extra is not None:
+            yield ' extra="{0}"'.format(escape_for_xml(self.citation_extra))
+        yield '/>'
+
+
+class InlineInsert:
+    def __init__(self, attributes):
+        self.attributes = attributes
+
+    def __str__(self):
+        return "[#insert:'%s']" % self.attributes
+
+    def serialize_xml(self):
+        yield '<insert'
+        for key, value in self.attributes.items():
+            yield " {0}=\"{1}\"".format(key, escape_for_xml(value))
+        yield '/>'
+
 
 class SAMParserError(Exception):
     """
