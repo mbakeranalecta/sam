@@ -699,9 +699,19 @@ class Flow(list):
 
     def find_last_annotation(self, text):
         for i in reversed(self):
-            if type(i) is Annotation:
-                if i.text == text:
-                    return i
+
+            if type(i) is Span:
+                c = i.child
+                while c:
+                    if type(c) is Annotation:
+                        if i.text == text:
+                            return c
+                    c=c.child
+
+
+            # if type(i) is Annotation:
+            #     if i.text == text:
+            #         return i
         return None
 
     def serialize_xml(self):
