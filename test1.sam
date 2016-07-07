@@ -16,6 +16,24 @@ tests:(!en) SAM Parser Tests
             This is {very}(bold)(italic) important.
             This is {very}(bold)(italic)(green) important.
 
+        case: Consecutive Annotations
+
+            description:
+                Two separate annotations with no space between them.
+
+            source:
+                ```(sam)
+                    {The Duke}(actor "John Wayne")(if "1969"){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
+
+            markup:
+                {The Duke}(actor "John Wayne")(if "1969'){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
+
+            result:
+                ```(xml)
+                    <p><span><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></span><span><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></span> plays Rooster Cogburn.</p>
+
+
+
         case: Annotation followed by citation
 
             description:
@@ -135,10 +153,27 @@ tests:(!en) SAM Parser Tests
 
     test: Parens in link shortcuts
 
-        Rio Bravo refers to the movie
-        (and not to {the city in Texas or
-        the nature reserve in
-        Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
+        case: Parens not escaped
+
+            Description: The parens are not escapes, causing misreading of markup.
+
+            source:
+                ```(sam)
+                    Rio Bravo refers to the movie
+                    (and not to {the city in Texas or
+                    the nature reserve in
+                    Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
+
+            markup:
+                Rio Bravo refers to the movie
+                (and not to {the city in Texas or
+                the nature reserve in
+                Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
+
+            result:
+                ```(xml)
+                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_" namespace="disambiguation">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
+
 
         Rio Bravo refers to the movie
         (and not to {the city in Texas or

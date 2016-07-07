@@ -124,15 +124,25 @@
         <a href="{@specifically}"><xsl:apply-templates/></a>
     </xsl:template>
 
-    <xsl:template match="annotation">
+    <xsl:template match="annotation[@type='if']">
+        [<xsl:apply-templates/>]?
+    </xsl:template>
+
+    <xsl:template match="span">
         <span style="color: green">
+            <xsl:apply-templates/>
+        </span>
+    </xsl:template>
+
+    <xsl:template match="annotation">
+        <span style="color: red">
             <xsl:apply-templates/>
         </span>
     </xsl:template>
 
     <xsl:template match="citation">
         <xsl:apply-templates/>
-        <span style="color: red">
+        <span style="color: brown">
             <xsl:text>[</xsl:text>
             <xsl:value-of select="@value"/>
             <xsl:text>]</xsl:text>
