@@ -99,6 +99,10 @@
         <b><xsl:apply-templates/></b>
     </xsl:template>
 
+    <xsl:template match="annotation[@type='italic']">
+        <i><xsl:apply-templates/></i>
+    </xsl:template>
+
     <xsl:template match="annotation[@type='code']">
         <tt><xsl:apply-templates/></tt>
     </xsl:template>
@@ -108,7 +112,7 @@
     </xsl:template>
 
     <xsl:template match="annotation">
-        <span style="color: dark-green">
+        <span style="color: green">
             <xsl:apply-templates/>
         </span>
     </xsl:template>

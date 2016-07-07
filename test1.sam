@@ -12,13 +12,15 @@ tests:(!en) SAM Parser Tests
 
         case: Multiple annotations
 
-            This is {very}(bold)(italic) important.
+            This is {very}(bold)123456 important.
+            This is {very}(bold)(italic)123456 important.
+            This is {very}(bold)(italic)(green)123456 important.
 
         case: Annotation followed by citation
 
             description:
                 Observed in the wild: When an annotated phrase was followed by a
-                phrase with a citation, the end of the annoations was not found
+                phrase with a citation, the end of the annotation was not found
                 and the two structures were recognized as one long citation.
 
             source:

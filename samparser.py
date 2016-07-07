@@ -12,7 +12,6 @@ try:
 except ImportError:
     import re
 
-
 # Block regex component expressions
 re_indent = r'(?P<indent>\s*)'
 re_attributes = r'(\((?P<attributes>.*?(?<!\\))\))?'
@@ -24,7 +23,6 @@ re_ll_marker = r'\|(?P<label>\S.*?)(?<!\\)\|'
 re_spaces = r'\s+'
 re_one_space = r'\s'
 re_comment = r'#.*'
-
 
 
 class SamParser:
@@ -61,9 +59,13 @@ class SamParser:
             'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?', re.U),
             'comment': re.compile(re_indent + re_comment, re.U),
             'block-start': re.compile(re_indent + re_name + r':' + re_attributes + re_content + r'?', re.U),
-            'codeblock-start': re.compile(re_indent + r'(?P<flag>```)(\((?P<language>\S*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?', re.U),
+            'codeblock-start': re.compile(
+                re_indent + r'(?P<flag>```)(\((?P<language>\S*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?',
+                re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
-            'blockquote-start': re.compile(re_indent + r'("""|\'\'\'|blockquote:)' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?', re.U),
+            'blockquote-start': re.compile(
+                re_indent + r'("""|\'\'\'|blockquote:)' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?',
+                re.U),
             'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
             'paragraph-start': re.compile(r'\w*', re.U),
             'line-start': re.compile(re_indent + r'\|' + re_attributes + re_one_space + re_content, re.U),
@@ -158,7 +160,7 @@ class SamParser:
         # TODO: Refactor this with the paraparser version
 
 
-        extra=source.current_line.rstrip()[len(match.group(0)):]
+        extra = source.current_line.rstrip()[len(match.group(0)):]
         if extra:
             raise SAMParserError("Extra text found after blockquote start: " + extra)
 
@@ -166,11 +168,11 @@ class SamParser:
 
         b = self.doc.new_block('blockquote', attributes, None, indent)
 
-        #see if there is a citation
+        # see if there is a citation
         try:
             idref = match.group('id')
         except IndexError:
-            idref=None
+            idref = None
         try:
             nameref = match.group('name')
         except IndexError:
@@ -178,7 +180,7 @@ class SamParser:
         try:
             citation = match.group('citation')
         except IndexError:
-            citation=None
+            citation = None
 
         if idref:
             citation_type = 'idref'
@@ -192,7 +194,7 @@ class SamParser:
             citation_type = 'citation'
             citation_value = citation.strip()
         else:
-            citation_type=None
+            citation_type = None
 
         if citation_type:
             cit = (Citation(citation_type, citation_value, extra))
@@ -238,7 +240,8 @@ class SamParser:
             return "SAM", context
 
         if self.doc.in_context(['p', 'li']):
-            if self.patterns['list-item'].match(line) or self.patterns['num-list-item'].match(line) or self.patterns['labeled-list-item'].match(line):
+            if self.patterns['list-item'].match(line) or self.patterns['num-list-item'].match(line) or self.patterns[
+                'labeled-list-item'].match(line):
                 f = para_parser.parse(self.current_text_block.text, self.doc)
                 self.current_text_block = None
                 self.doc.new_flow(f)
@@ -288,7 +291,8 @@ class SamParser:
     def _line_start(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_block('line', self.parse_block_attributes(match.group("attributes")), para_parser.parse(match.group('content'), self.doc, strip=False), indent=indent)
+        self.doc.new_block('line', self.parse_block_attributes(match.group("attributes")),
+                           para_parser.parse(match.group('content'), self.doc, strip=False), indent=indent)
         return "SAM", context
 
     def _record_start(self, context):
@@ -312,7 +316,7 @@ class SamParser:
             source.return_line()
             return "SAM", context
         else:
-            field_values = [x.strip() for x in re.split(r'(?<!\\),',line)]
+            field_values = [x.strip() for x in re.split(r'(?<!\\),', line)]
             if len(field_values) != len(self.doc.fields):
                 raise SAMParserError("Record length does not match record set header. At:\n\n " + line)
             record = list(zip(self.doc.fields, field_values))
@@ -348,10 +352,10 @@ class SamParser:
             cell_values = [x.strip() for x in re.split(r'(?<!\\)\|', line)]
             if self.doc.current_block.name == 'row':
                 if len(self.doc.current_block.children) != len(cell_values):
-                    raise SAMParserError('Uneven number of cells in grid row at: "' + line +'"')
+                    raise SAMParserError('Uneven number of cells in grid row at: "' + line + '"')
             self.doc.new_block('row', None, None, indent)
             for content in cell_values:
-                self.doc.new_block('cell', None, None, indent+1)
+                self.doc.new_block('cell', None, None, indent + 1)
                 self.doc.new_flow(para_parser.parse(content, self.doc))
             # Test for consistency with previous rows?
 
@@ -361,7 +365,7 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
         embedded_xml_parser = xml.parsers.expat.ParserCreate()
-        embedded_xml_parser.XmlDeclHandler=self._embedded_xml_declaration_check
+        embedded_xml_parser.XmlDeclHandler = self._embedded_xml_declaration_check
         embedded_xml_parser.Parse(source.current_line.strip())
         xml_lines = []
         try:
@@ -370,7 +374,7 @@ class SamParser:
                 xml_lines.append(line)
                 embedded_xml_parser.Parse(line)
         except xml.parsers.expat.ExpatError as err:
-            if err.code==9: #junk after document element
+            if err.code == 9:  # junk after document element
                 source.return_line()
                 xml_text = ''.join(xml_lines[:-1])
                 self.doc.new_embedded_xml(xml_text, indent)
@@ -383,8 +387,6 @@ class SamParser:
             raise SAMParserError("The version of an embedded XML fragment must be 1.0.")
         if encoding.upper() != "UTF-8":
             raise SAMParserError("The encoding of an embedded XML fragment must be UTF-8.")
-
-
 
     def _sam(self, context):
         source, match = context
@@ -461,7 +463,7 @@ class SamParser:
         raise SAMParserError("I'm confused")
 
     def serialize(self, serialize_format):
-        return self.doc.serialize(serialize_format)
+        yield from self.doc.serialize(serialize_format)
 
     def parse_block_attributes(self, attributes_string):
         result = {}
@@ -494,6 +496,7 @@ class SamParser:
         if conditions:
             result["conditions"] = " ".join(conditions)
         return result
+
 
 class Block:
     def __init__(self, name, attributes=None, content=None, namespace=None, indent=0):
@@ -576,6 +579,7 @@ class Block:
                 yield from self.content.serialize_xml()
                 yield "</{0}>\n".format(self.name)
 
+
 class Paragraph(Block):
     def __init__(self, attributes=None, content=None, namespace=None, indent=0):
         super().__init__(name='p', attributes=attributes, content=content, namespace=namespace, indent=indent)
@@ -583,10 +587,11 @@ class Paragraph(Block):
     def add_child(self, b):
         if not type(b) is Flow:
             raise SAMParserError(
-                    'A paragraph cannot have block children. At \"{0}\".'.format(
-                        str(self)))
+                'A paragraph cannot have block children. At \"{0}\".'.format(
+                    str(self)))
         b.parent = self
         self.children.append(b)
+
 
 class Comment(Block):
     def __init__(self, content='', indent=0):
@@ -637,6 +642,7 @@ class Root(Block):
         b.parent = self
         self.children.append(b)
 
+
 class TextBlock:
     def __init__(self, line=None):
         self.lines = []
@@ -668,28 +674,24 @@ class TextBlock:
         self.lines = self.lines[first_non_blank_line:last_non_blank_line]
         return self
 
-
-
     @property
     def text(self):
         return " ".join(x.strip() for x in self.lines)
 
 
-class Flow (list):
-
+class Flow(list):
     def __str__(self):
         return "[{0}]".format(''.join([str(x) for x in self]))
 
     def append(self, thing):
-        print(thing)
         if type(thing) is Annotation:
             if type(self[-1]) is Span:
-                self[-1].children.append(thing)
+                self[-1].append(thing)
             else:
                 super(Flow, self).append(thing)
         elif type(thing) is Citation:
             if type(self[-1]) is Span:
-                self[-1].children.append(thing)
+                self[-1].append(thing)
             else:
                 super(Flow, self).append(thing)
         elif not thing == '':
@@ -717,11 +719,10 @@ class Pre(Flow):
             if not line.isspace():
                 raw_lines.append((line, len(line) - len(line.lstrip())))
         try:
-            min_indent = min(raw_lines, key = lambda t: t[1])[1]
+            min_indent = min(raw_lines, key=lambda t: t[1])[1]
         except ValueError:
             min_indent = 0
         self.lines = [x[min_indent:] if len(x) > min_indent else x for x in text_block.lines]
-
 
     def serialize_xml(self):
         yield "<![CDATA["
@@ -732,6 +733,7 @@ class Pre(Flow):
                 yield x
         yield "]]>"
 
+
 class EmbeddedXML(Block):
     def __init__(self, text, indent):
         self.text = text
@@ -740,7 +742,6 @@ class EmbeddedXML(Block):
 
     def serialize_xml(self):
         yield self.text
-
 
 
 class DocStructure:
@@ -782,7 +783,6 @@ class DocStructure:
         except AttributeError:
             raise SAMParserError("Indentation error found at " + str(self.current_block))
 
-
     def new_root(self, match):
         if match.group('schema') is not None:
             pass
@@ -791,7 +791,6 @@ class DocStructure:
         r = Root()
         self.doc = r
         self.current_block = r
-
 
     def add_block(self, block):
         """
@@ -838,28 +837,28 @@ class DocStructure:
 
     def new_unordered_list_item(self, attributes, indent):
         uli = Block('li', attributes, '', None, indent + .1)
-        if self.context_at_indent(indent+.1)[:2] == ['li', 'ul']:
+        if self.context_at_indent(indent + .1)[:2] == ['li', 'ul']:
             self.add_block(uli)
         else:
             ul = Block('ul', None, '', None, indent)
             self.add_block(ul)
             self.add_block(uli)
-        p = Paragraph(None, '', None, indent+.2)
+        p = Paragraph(None, '', None, indent + .2)
         self.add_block(p)
 
     def new_ordered_list_item(self, attributes, indent):
         oli = Block('li', attributes, '', None, indent + .1)
-        if self.context_at_indent(indent+.1)[:2] == ['li', 'ol']:
+        if self.context_at_indent(indent + .1)[:2] == ['li', 'ol']:
             self.add_block(oli)
         else:
             ol = Block('ol', None, '', None, indent)
             self.add_block(ol)
             self.add_block(oli)
-        p = Paragraph(None, '', None, indent+.2)
+        p = Paragraph(None, '', None, indent + .2)
         self.add_block(p)
 
     def new_labeled_list_item(self, attributes, indent, label):
-        lli = Block('li', attributes, '', None, indent+.2)
+        lli = Block('li', attributes, '', None, indent + .2)
         lli.add_child(Block('label', None, para_parser.parse(label, self.doc), None, indent))
         if self.current_block.name == 'li':
             self.current_block.add_sibling(lli)
@@ -872,7 +871,7 @@ class DocStructure:
         # element that is not an ll we be at same indent as ll, causing
         # ll to end. Because indent is fractional, and block child will
         # be more indented, which is illegal and will trigger an error.
-        p = Paragraph(None, '', None, indent+.5)
+        p = Paragraph(None, '', None, indent + .5)
         lli.add_child(p)
         self.current_block = p
 
@@ -892,7 +891,7 @@ class DocStructure:
         self.add_block(s)
 
     def new_record_set(self, name, field_names, indent):
-        b=Block(name,None,None,None,indent)
+        b = Block(name, None, None, None, indent)
         self.add_block(b)
         self.current_record = {'local_element': name, 'local_indent': indent}
         self.fields = field_names
@@ -908,7 +907,6 @@ class DocStructure:
         for name, content in record:
             b = Block(name, None, para_parser.parse(content, self.doc), None, self.current_block.indent + 4)
             self.current_block.add_child(b)
-
 
     def find_last_annotation(self, text, node=None):
         if node is None:
@@ -999,7 +997,8 @@ class SamParaParser:
             'escaped-chars': re.compile('[\\\(\{\}\[\]_\*,\.\*`"&' + "']", re.U),
             'span': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
             'annotation': re.compile(
-                r'(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(!(?P<language>[\w-]+))?\))', re.U),
+                r'(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(!(?P<language>[\w-]+))?\))',
+                re.U),
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
             'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
@@ -1010,7 +1009,9 @@ class SamParaParser:
             'double_quote_open': re.compile(re_double_quote_open, re.U),
             'inline-insert': re.compile(r'>\((?P<attributes>.*?)\)', re.U),
             'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
-            'citation': re.compile(r'((\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))', re.U)
+            'citation': re.compile(
+                r'((\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
+                re.U)
         }
 
     def parse(self, para, doc, strip=True):
@@ -1061,7 +1062,7 @@ class SamParaParser:
             self.current_string = ''
             text = self._unescape(match.group("text"))
             self.flow.append(Span(text))
-            para.advance(len(match.group(0)) )
+            para.advance(len(match.group(0)))
 
             if self.patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
@@ -1086,11 +1087,12 @@ class SamParaParser:
                     else:
                         self.current_string += text
                         SAM_parser_warning(
-                                "Unannotated phrase found: {" +
-                                text + "} " +
-                                "If you are trying to insert curly braces " +
-                                "into the document, use \{" + text + "}."
+                            "Unannotated phrase found: {" +
+                            text + "} " +
+                            "If you are trying to insert curly braces " +
+                            "into the document, use \{" + text + "}."
                         )
+                para.retreat(1)
                 return "PARA", para
         else:
             self.current_string += '{'
@@ -1102,7 +1104,7 @@ class SamParaParser:
             annotation_type = match.group('type')
             language = match.group('language')
 
-            #Check for link shortcut
+            # Check for link shortcut
             if urlparse(annotation_type, None).scheme is not None:
                 specifically = annotation_type
                 annotation_type = 'link'
@@ -1116,6 +1118,7 @@ class SamParaParser:
             elif self.patterns['citation'].match(para.rest_of_para):
                 return "CITATION-START", para
             else:
+                para.retreat(1)
                 return "PARA", para
         else:
             self.current_string += '{'
@@ -1130,7 +1133,7 @@ class SamParaParser:
             try:
                 idref = match.group('id')
             except IndexError:
-                idref=None
+                idref = None
             try:
                 nameref = match.group('name')
             except IndexError:
@@ -1138,7 +1141,7 @@ class SamParaParser:
             try:
                 citation = match.group('citation')
             except IndexError:
-                citation=None
+                citation = None
 
             if idref:
                 citation_type = 'idref'
@@ -1160,6 +1163,7 @@ class SamParaParser:
             elif self.patterns['citation'].match(para.rest_of_para):
                 return "CITATION-START", para
             else:
+                para.retreat(1)
                 return "PARA", para
         else:
             self.current_string += '['
@@ -1203,28 +1207,36 @@ class SamParaParser:
 
     def _double_quote(self, para):
         if self.smart_quotes:
-            if self.patterns['double_quote_close'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+            if self.patterns['double_quote_close'].search(para.para, para.currentCharNumber,
+                                                          para.currentCharNumber + 2):
                 self.current_string += '”'
-            elif self.patterns['double_quote_open'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+            elif self.patterns['double_quote_open'].search(para.para, para.currentCharNumber,
+                                                           para.currentCharNumber + 2):
                 self.current_string += '“'
             else:
                 self.current_string += '"'
-                SAM_parser_warning('Detected straight double quote that was not recognized by smart quote rules in: "'+ para.para + '" at position ' + str(para.currentCharNumber))
+                SAM_parser_warning(
+                    'Detected straight double quote that was not recognized by smart quote rules in: "' + para.para + '" at position ' + str(
+                        para.currentCharNumber))
         else:
             self.current_string += '"'
         return "PARA", para
 
     def _single_quote(self, para):
         if self.smart_quotes:
-            if self.patterns['single_quote_close'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+            if self.patterns['single_quote_close'].search(para.para, para.currentCharNumber,
+                                                          para.currentCharNumber + 2):
                 self.current_string += '’'
-            elif self.patterns['single_quote_open'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+            elif self.patterns['single_quote_open'].search(para.para, para.currentCharNumber,
+                                                           para.currentCharNumber + 2):
                 self.current_string += '‘'
-            elif self.patterns['apostrophe'].search(para.para, para.currentCharNumber, para.currentCharNumber+2):
+            elif self.patterns['apostrophe'].search(para.para, para.currentCharNumber, para.currentCharNumber + 2):
                 self.current_string += '’'
             else:
                 self.current_string += "'"
-                SAM_parser_warning('Detected straight single quote that was not recognized by smart quote rules in: "'+ para.para + '" at position ' + str(para.currentCharNumber))
+                SAM_parser_warning(
+                    'Detected straight single quote that was not recognized by smart quote rules in: "' + para.para + '" at position ' + str(
+                        para.currentCharNumber))
         else:
             self.current_string += "'"
         return "PARA", para
@@ -1264,7 +1276,7 @@ class SamParaParser:
         try:
             charref = match.group(0)
         except AttributeError:
-           charref = match
+            charref = match
         character = html.unescape(charref)
         if character == charref:  # Escape not recognized
             raise SAMParserError("Unrecognized character entity found: " + charref)
@@ -1283,8 +1295,8 @@ class SamParaParser:
         e = enumerate(string)
         for pos, char in e:
             try:
-                if char == '\\' and self.patterns['escaped-chars'].match(string[pos+1]):
-                    result += string[pos+1]
+                if char == '\\' and self.patterns['escaped-chars'].match(string[pos + 1]):
+                    result += string[pos + 1]
                     next(e, None)
                 elif char == '&':
                     match = self.patterns['character-entity'].match(string[pos:])
@@ -1300,19 +1312,26 @@ class SamParaParser:
                 result += char
         return result
 
+
 class Span:
     def __init__(self, text):
         self.text = text
-        self.children = []
+        self.child = None
 
     def __str__(self):
         return u'{{{0:s}}}'.format(self.text)
 
     def serialize_xml(self):
-        yield '<span><text>{0}</text>'.format(self.text)
-        for x in self.children:
-            yield from x.serialize_xml()
+        yield '<span>'
+        if self.child:
+            yield from self.child.serialize_xml(escape_for_xml(self.text))
         yield '</span>'
+
+    def append(self, thing):
+        if not self.child:
+            self.child = thing
+        else:
+            self.child.append(thing)
 
 
 class Para:
@@ -1336,6 +1355,9 @@ class Para:
     def advance(self, count):
         self.currentCharNumber += count
 
+    def retreat(self, count):
+        self.currentCharNumber -= count
+
 
 class Annotation:
     def __init__(self, annotation_type, specifically='', namespace='', language=''):
@@ -1343,11 +1365,12 @@ class Annotation:
         self.specifically = specifically
         self.namespace = namespace
         self.language = language
+        self.child = None
 
     def __str__(self):
         return '(%s "%s" (%s))' % (self.annotation_type, self.specifically, self.namespace)
 
-    def serialize_xml(self):
+    def serialize_xml(self, payload=None):
         yield '<annotation'
         if self.annotation_type:
             yield ' type="{0}"'.format(self.annotation_type)
@@ -1357,7 +1380,22 @@ class Annotation:
             yield ' namespace="{0}"'.format(self.namespace)
         if self.language:
             yield ' xml:lang="{0}"'.format(self.language)
-        yield '/>'
+        if self.child:
+            yield '>'
+            yield from self.child.serialize_xml(payload)
+            yield '</annotation>'
+        elif payload:
+            yield '>'
+            yield payload
+            yield '</annotation>'
+        else:
+            yield '/>'
+
+    def append(self, thing):
+        if not self.child:
+            self.child = thing
+        else:
+            self.child.append(thing)
 
 
 class Citation:
@@ -1365,17 +1403,33 @@ class Citation:
         self.citation_type = citation_type
         self.citation_value = citation_value
         self.citation_extra = citation_extra
+        self.child = None
 
     def __str__(self):
         cit_extra = self.citation_extra if self.citation_extra else ''
         return u'[{0:s} {1:s} {2:s}]'.format(self.citation_type, self.citation_value,
-                                                      cit_extra)
+                                             cit_extra)
 
-    def serialize_xml(self):
+    def serialize_xml(self, payload=None):
         yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml(self.citation_value))
         if self.citation_extra is not None:
             yield ' extra="{0}"'.format(escape_for_xml(self.citation_extra))
-        yield '/>'
+        if self.child:
+            yield '>'
+            yield from self.child.serialize_xml(payload)
+            yield '</citation>'
+        elif payload:
+            yield '>'
+            yield payload
+            yield '</citation>'
+        else:
+            yield '/>'
+
+    def append(self, thing):
+        if not self.child:
+            self.child = thing
+        else:
+            self.child.append(thing)
 
 
 class InlineInsert:
@@ -1396,7 +1450,6 @@ class SAMParserError(Exception):
     """
     Raised if the SAM parser encounters an error.
     """
-
 
 
 def parse_insert(insert_string):
@@ -1445,6 +1498,7 @@ def escape_for_xml(s):
     t = dict(zip([ord('<'), ord('>'), ord('&'), ord('"')], ['&lt;', '&gt;', '&amp;', '&quot;']))
     return s.translate(t)
 
+
 def SAM_parser_warning(warning):
     print("SAM parser warning: " + warning, file=sys.stderr)
 
@@ -1460,7 +1514,7 @@ if __name__ == "__main__":
     argparser.add_argument("-xslt", "-x", help="name of xslt file for postprocessing output")
     argparser.add_argument("-intermediate", "-i", help="name of file to dump intermediate XML to when using -xslt")
     argparser.add_argument("-smartquotes", "-q", help="turn on smart quotes processing",
-                    action="store_true")
+                           action="store_true")
     args = argparser.parse_args()
     transformed = None
 
@@ -1468,7 +1522,6 @@ if __name__ == "__main__":
 
     if args.smartquotes:
         para_parser.smart_quotes = True
-
 
     if args.intermediate and not args.xslt:
         raise SAMParserError("Do not specify an intermediate file name if an XSLT file is not specified.")
@@ -1535,4 +1588,3 @@ if __name__ == "__main__":
     except SAMParserError as e:
         sys.stderr.write('ERROR: ' + str(e))
         sys.exit(1)
-
