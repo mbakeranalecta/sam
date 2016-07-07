@@ -1525,6 +1525,7 @@ if __name__ == "__main__":
     argparser.add_argument("-intermediate", "-i", help="name of file to dump intermediate XML to when using -xslt")
     argparser.add_argument("-smartquotes", "-q", help="turn on smart quotes processing",
                            action="store_true")
+    argparser.add_argument("-xsd", help="Specify an XSD schema to validate generated XML")
     args = argparser.parse_args()
     transformed = None
 
@@ -1547,7 +1548,21 @@ if __name__ == "__main__":
                 print(err, file=sys.stderr)
                 exit(1)
 
-            # Using a loop to avoid buffering the serialized XML.
+            if args.xsd:
+                try:
+                    xmlschema = etree.XMLSchema(file=args.xsd)
+                except etree.XMLSchemaParseError as e:
+                    print(e)
+                    exit(1)
+
+                xml_doc = etree.fromstring("".join(samParser.serialize('xml')).encode('utf-8'))
+
+                try:
+                    xmlschema.assertValid(xml_doc)
+                except etree.DocumentInvalid as e:
+                    print(e)
+                    exit(1)
+
 
             if args.xslt:
                 try:
