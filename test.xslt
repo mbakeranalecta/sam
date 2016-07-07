@@ -76,13 +76,15 @@
     </xsl:template>
 
     <xsl:template match="case/markup">
-        <h4>Generated result</h4>
+        <h4>Formatted result (not necessarily supported for all tests)</h4>
+        <xsl:apply-templates/>
+
+        <h4>Raw result</h4>
         <pre>
         <xsl:apply-templates mode="reproduce-markup"/>
         </pre>
 
-        <h4>Formatted result (not necessarily supported for all tests)</h4>
-        <xsl:apply-templates/>
+
     </xsl:template>
 
     <xsl:template match="case/result">
