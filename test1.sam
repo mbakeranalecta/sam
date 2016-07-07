@@ -66,7 +66,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>When using the map approach, it is important to think about how your content will <span><annotation type="concept" specifically="single sourcing">single source</annotation></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don't involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span><citation type="nameref" value="single_source">single sourcing chapter</citation></span>.</p>
+                    <p>When using the map approach, it is important to think about how your content will <span><annotation type="concept" specifically="single sourcing">single source</annotation></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span><citation type="nameref" value="single_source">single sourcing chapter</citation></span>.</p>
 
     test: Recordsets
 
@@ -163,7 +163,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(XML)
-                    <p>You can <citation type="citation" value="Melville, 1851">call me Ishmael</citation>.</p>
+                    <p>You can <span><citation type="citation" value="Melville, 1851">call me Ishmael</citation></span>.</p>
 
     test: Grids
 
@@ -705,7 +705,7 @@ tests:(!en) SAM Parser Tests
                 |    You gotta walk it by yourself.
 
 
-            This sentence[*bing bang boom] contains an unmatched { followed by an {annotated}(word) phrase.
+            This sentence[*bing bang boom] contains an unmatched \{ followed by an {annotated}(word) phrase.
 
             |(#foo2) You gotta walk that lonesome valley,[*bing bang boom]
             | You gotta walk it by yourself,

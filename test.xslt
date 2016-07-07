@@ -76,20 +76,31 @@
     </xsl:template>
 
     <xsl:template match="case/markup">
-        <h4>Formatted result (not necessarily supported for all tests)</h4>
+        <h4>Formatted output (not necessarily supported for all tests)</h4>
         <xsl:apply-templates/>
-
-        <h4>Raw result</h4>
-        <pre>
-        <xsl:apply-templates mode="reproduce-markup"/>
-        </pre>
-
-
     </xsl:template>
 
     <xsl:template match="case/result">
-        <h4>Intended result</h4>
-        <xsl:apply-templates/>
+        <xsl:variable name="actual">
+            <xsl:apply-templates select="../markup/*" mode="reproduce-markup"/>
+        </xsl:variable>
+        <xsl:variable name="intended" select="string(codeblock/text())"/>
+
+        <h4>Intended output</h4>
+        <pre><xsl:value-of select="normalize-space($intended)"/></pre>
+        <h4>Actual output</h4>
+        <pre><xsl:value-of select="normalize-space($actual)"/></pre>
+
+
+        <h4>Test result</h4>
+        <xsl:choose>
+            <xsl:when test="normalize-space($actual) = normalize-space($intended)">
+                <p style="color: green; font-weight: bold">PASS</p>
+            </xsl:when>
+            <xsl:otherwise>
+                <p style="color: red; font-weight: bold">**** FAIL ****</p>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
 
