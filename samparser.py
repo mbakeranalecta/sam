@@ -1548,6 +1548,8 @@ if __name__ == "__main__":
                 print(err, file=sys.stderr)
                 exit(1)
 
+            xml_doc = etree.fromstring("".join(samParser.serialize('xml')).encode('utf-8'))
+
             if args.xsd:
                 try:
                     xmlschema = etree.XMLSchema(file=args.xsd)
@@ -1555,7 +1557,6 @@ if __name__ == "__main__":
                     print(e)
                     exit(1)
 
-                xml_doc = etree.fromstring("".join(samParser.serialize('xml')).encode('utf-8'))
 
                 try:
                     xmlschema.assertValid(xml_doc)
@@ -1571,8 +1572,7 @@ if __name__ == "__main__":
                 except FileNotFoundError as e:
                     raise SAMParserError(e.strerror + ' ' + e.filename)
 
-                xout = "".join(samParser.serialize('xml')).encode('utf-8')
-                transformed = transform(etree.XML(xout))
+                transformed = transform(xml_doc)
 
             if args.outfile:
                 if transformed:
