@@ -10,11 +10,36 @@ tests:(!en) SAM Parser Tests
 
     test: Annotations and Citations
 
+        description:
+
+            A phrase can have one or more annotations or citations attached to it.
+            On output, the text of the phrase is wrapped in the annotations and
+            citations in the order they were specified in source.
+
         case: Multiple annotations
 
-            This is {very}(bold) important.
-            This is {very}(bold)(italic) important.
-            This is {very}(bold)(italic)(green) important.
+            description:
+                Spans with more than one attribute in a chain.
+
+            source:
+                ```(sam)
+                    This is {very}(bold) important.
+
+                    This is {very}(bold)(italic) important.
+
+                    This is {very}(bold)(italic)(green) important.
+
+            markup:
+                This is {very}(bold) important.
+
+                This is {very}(bold)(italic) important.
+
+                This is {very}(bold)(italic)(green) important.
+
+            result:
+                ```(xml)
+                    <p>This is <span><annotation type="bold">very</annotation></span> important.</p><p>This is <span><annotation type="bold"><annotation type="italic">very</annotation></annotation></span> important.</p><p>This is <span><annotation type="bold"><annotation type="italic"><annotation type="green">very</annotation></annotation></annotation></span> important.</p>
+
 
         case: Consecutive Annotations
 
@@ -86,7 +111,12 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>When using the map approach, it is important to think about how your content will <span><annotation type="concept" specifically="single sourcing">single source</annotation></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span><citation type="nameref" value="single_source">single sourcing chapter</citation></span>.</p>
 
-    test: Recordsets
+    test: Record sets
+
+        description:
+            Record sets are a structure similar to a database table. They
+            record data in rows with identical column names. Column names
+            are specified in the records set header.
 
         case: Recordset
 
@@ -153,9 +183,28 @@ tests:(!en) SAM Parser Tests
 
     test: Parens in link shortcuts
 
+        description:
+
+            You can specify a link as a `link` annotation.
+
+            ```
+                foo {bar}(link "http://example.com/bar") baz
+
+            The link annotation shortcut lets you shorten this to:
+
+            ```
+                foo {bar}(http://example.com/bar) baz
+
+            However, use of the shortcut means you need to escape
+            any parens that occur in the URL.
+
+
         case: Parens not escaped
 
-            Description: The parens are not escapes, causing misreading of markup.
+            description:
+                The parens are not escaped, causing misreading of markup. This example
+                should be interpreted incorrectly.
+
 
             source:
                 ```(sam)
@@ -175,19 +224,64 @@ tests:(!en) SAM Parser Tests
                     <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_" namespace="disambiguation">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
 
 
-        Rio Bravo refers to the movie
-        (and not to {the city in Texas or
-        the nature reserve in
-        Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
+        case: Parens escaped with backslashes
 
-        Rio Bravo refers to the movie
-        (and not to {the city in Texas or
-        the nature reserve in
-        Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
+            description:
+                The parens in the URL are escaped with blackslashes. This example
+                should be interpreted correctly.
+
+            source:
+                ```(sam)
+                    Rio Bravo refers to the movie
+                    (and not to {the city in Texas or
+                    the nature reserve in
+                    Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
+
+            markup:
+                Rio Bravo refers to the movie
+                (and not to {the city in Texas or
+                the nature reserve in
+                Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
+
+            result:
+                ```(xml)
+                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
+
+        case: Using explicit link annotation instead of shortcut
+
+            description:
+                The link is specified using a specific link annotation so the
+                URL is not in parens itself. This example should be interpreted
+                correctly.
+
+            source:
+                ```(sam)
+                    Rio Bravo refers to the movie
+                    (and not to {the city in Texas or
+                    the nature reserve in
+                    Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
+
+            markup:
+                Rio Bravo refers to the movie
+                (and not to {the city in Texas or
+                the nature reserve in
+                Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
+
+            result:
+                ```(xml)
+                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
+
 
     test: Citations
 
+        description:
+            A citation is a reference to a source of information. You
+            can cite with a phrase or by reference to an ID or a name.
+
         case: Citation on phrase
+
+            description:
+                A citation on a phrase
 
             source:
                 ```(SAM)
@@ -202,12 +296,51 @@ tests:(!en) SAM Parser Tests
 
     test: Grids
 
+        description:
+
+            Grids are a simple form or table. They have no table heads or row or
+            column spanning. More complex tables can be modeled using explicit
+            blocks. Labeled lists can be modeled using the labeled list structure.
+            Database-like tables can be modeled using record sets.
+
         case: Grid with heads
 
-            +++
-                *Type*  | *Term*    | *Notes*
-                feature | fragment  | bing
-                feature | fragments | bang
+            description:
+
+                Table heads are simulated using bold in the top row of the grid.
+
+            source:
+                ```(sam)
+                    +++
+                        *Type*  | *Term*    | *Notes*
+                        feature | fragment  | bing
+                        feature | fragments | bang
+
+            markup:
+                +++
+                    *Type*  | *Term*    | *Notes*
+                    feature | fragment  | bing
+                    feature | fragments | bang
+
+            result:
+                ```(xml)
+                    <grid>
+                    <row>
+                    <cell><span><annotation type="bold">Type</annotation></span></cell>
+                    <cell><span><annotation type="bold">Term</annotation></span></cell>
+                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragment</cell>
+                    <cell>bing</cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragments</cell>
+                    <cell>bang</cell>
+                    </row>
+                    </grid>
 
         case: Grid with management domain attributes
 

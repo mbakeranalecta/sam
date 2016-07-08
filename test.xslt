@@ -2,6 +2,8 @@
 
     <xsl:output method="html"/>
 
+    <xsl:preserve-space elements="codeblock"/>
+
   <xsl:template match="@*|node()">
     <xsl:copy>
       <xsl:apply-templates select="@*|node()"/>
@@ -86,9 +88,9 @@
         </xsl:variable>
         <xsl:variable name="intended" select="string(codeblock/text())"/>
 
-        <h4>Intended output</h4>
+        <h4>Intended output (space normalized)</h4>
         <pre><xsl:value-of select="normalize-space($intended)"/></pre>
-        <h4>Actual output</h4>
+        <h4>Actual output  (space normalized)</h4>
         <pre><xsl:value-of select="normalize-space($actual)"/></pre>
 
 

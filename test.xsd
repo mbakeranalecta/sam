@@ -10,7 +10,18 @@
                     <xs:complexType>
                         <xs:sequence>
                             <xs:element name="title"/>
-                            <xs:element maxOccurs="unbounded" name="case"/>
+                            <xs:element name="description"/>
+                            <xs:element maxOccurs="unbounded" name="case">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="title"/>
+                                        <xs:element name="description"/>
+                                        <xs:element name="source"/>
+                                        <xs:element name="markup"/>
+                                        <xs:element name="result"/>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
                         </xs:sequence>
                     </xs:complexType>
                 </xs:element>
