@@ -38,7 +38,9 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>This is <span><annotation type="bold">very</annotation></span> important.</p><p>This is <span><annotation type="bold"><annotation type="italic">very</annotation></annotation></span> important.</p><p>This is <span><annotation type="bold"><annotation type="italic"><annotation type="green">very</annotation></annotation></annotation></span> important.</p>
+                    <p>This is <span><annotation type="bold">very</annotation></span> important.</p>
+                    <p>This is <span><annotation type="bold"><annotation type="italic">very</annotation></annotation></span> important.</p>
+                    <p>This is <span><annotation type="bold"><annotation type="italic"><annotation type="green">very</annotation></annotation></annotation></span> important.</p>
 
 
         case: Consecutive Annotations
@@ -344,57 +346,229 @@ tests:(!en) SAM Parser Tests
 
         case: Grid with management domain attributes
 
-            +++(*foom #bar ?baz)
-                *Type*  | *Term*    | *Notes*
+            description:
+                The same grid only with management domain attributes attached
+                to the grid header.
 
-                feature | fragment  | bing
+                Note that SAM Parser sorts block attributes alphabetically for
+                output, which makes it possible to test them with a simple string
+                comparison (such as that performed by test.xslt). However, this
+                is behavior of this parser, not a SAM language requirement.
 
-                feature | fragments | bang
+            source:
+                ```(sam)
+                    +++(*foom #bar ?baz)
+                        *Type*  | *Term*    | *Notes*
 
+                        feature | fragment  | bing
+
+                        feature | fragments | bang
+
+            markup:
+                +++(*foom #bar ?baz)
+                    *Type*  | *Term*    | *Notes*
+
+                    feature | fragment  | bing
+
+                    feature | fragments | bang
+
+            result:
+                ```(xml)
+                    <grid conditions="baz" id="foom" name="bar">
+                    <row>
+                    <cell><span><annotation type="bold">Type</annotation></span></cell>
+                    <cell><span><annotation type="bold">Term</annotation></span></cell>
+                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragment</cell>
+                    <cell>bing</cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragments</cell>
+                    <cell>bang</cell>
+                    </row>
+                    </grid>
 
 
         case: Grid with bold row
 
-            +++
-                *Type*    | *Term*      | *Notes*
-                feature   | fragment    | bing
-                *feature* | *fragments* | *bang*
+            description:
+
+                Make an lower row bold.
+
+            source:
+                ```(sam)
+                    +++
+                        *Type*    | *Term*      | *Notes*
+                        feature   | fragment    | bing
+                        *feature* | *fragments* | *bang*
+            markup:
+                +++
+                    *Type*    | *Term*      | *Notes*
+                    feature   | fragment    | bing
+                    *feature* | *fragments* | *bang*
+
+            result:
+                ```(xml)
+                    <grid>
+                    <row>
+                    <cell><span><annotation type="bold">Type</annotation></span></cell>
+                    <cell><span><annotation type="bold">Term</annotation></span></cell>
+                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragment</cell>
+                    <cell>bing</cell>
+                    </row>
+                    <row>
+                    <cell><span><annotation type="bold">feature</annotation></span></cell>
+                    <cell><span><annotation type="bold">fragments</annotation></span></cell>
+                    <cell><span><annotation type="bold">bang</annotation></span></cell>
+                    </row>
+                    </grid>
+
 
         case: Grid with side heads
 
-            +++
-                *Type*    | Term      | Notes
-                *feature* | fragment  | bing
-                *feature* | fragments | bang
+            description:
+
+                Grid with row headings rather than column headings.
+
+            source:
+                ```(sam)
+                    +++
+                        *Type*    | Term      | Notes
+                        *feature* | fragment  | bing
+                        *feature* | fragments | bang
+            markup:
+                +++
+                    *Type*    | Term      | Notes
+                    *feature* | fragment  | bing
+                    *feature* | fragments | bang
+
+            result:
+                ```(xml)
+                    <grid>
+                    <row>
+                    <cell><span><annotation type="bold">Type</annotation></span></cell>
+                    <cell>Term</cell>
+                    <cell>Notes</cell>
+                    </row>
+                    <row>
+                    <cell><span><annotation type="bold">feature</annotation></span></cell>
+                    <cell>fragment</cell>
+                    <cell>bing</cell>
+                    </row>
+                    <row>
+                    <cell><span><annotation type="bold">feature</annotation></span></cell>
+                    <cell>fragments</cell>
+                    <cell>bang</cell>
+                    </row>
+                    </grid>
 
     test: Smart quotes
 
+        description:
+            Smart quotes is an optional feature of the parser, not a
+            feature of the SAM language. It turns straight quotes into
+            curly quotes. It raises a warning when it can't figure out
+            how to handle a case. The algorithm could be improved in
+            the future to handle more cases correctly.
+
+            The canonical way to handle quotes in SAM is to use real
+            curly quotes to begin with. All SAM documents are UTF-8.
+
+            Note: These test will fail if smart quotes is not selected
+            using the `-q` option of the parser command line or by
+            setting the `smart_quotes` attribute of the SamParser
+            object to `True`.
+
         case: Smart quotes
 
-            "For once, 'sir' adding, 'you're making a
-            scene.'" and "For once, 'sir' adding,
-            'you're making a scene.'" In the winter
-            of ’65. "Yes," he said, "I met her. She's
-            very 'friendly.'" '"I don’t know what you
-            mean by 'glory,'" Alice said.' "'I don’t
-            know what you mean by "glory,"' Alice said."
+            description:
 
-            for "the Duke", perhaps
+                Paragraphs illustrating most of the cases where smart quotes should
+                be recognized in ordinary English.
 
+            source:
+                ```(sam)
+                    "For once, 'sir' adding, 'you're making a
+                    scene.'" and "For once, 'sir' adding,
+                    'you're making a scene.'" In the winter
+                    of ’65. "Yes," he said, "I met her. She's
+                    very 'friendly.'" '"I don’t know what you
+                    mean by 'glory,'" Alice said.' "'I don’t
+                    know what you mean by "glory,"' Alice said."
+
+                    For "the Duke", perhaps?
+
+            markup:
+                "For once, 'sir' adding, 'you're making a
+                scene.'" and "For once, 'sir' adding,
+                'you're making a scene.'" In the winter
+                of ’65. "Yes," he said, "I met her. She's
+                very 'friendly.'" '"I don’t know what you
+                mean by 'glory,'" Alice said.' "'I don’t
+                know what you mean by "glory,"' Alice said."
+
+                For "the Duke", perhaps?
+
+            result:
+                ```(xml)
+                    <p>“For once, ‘sir’ adding, ‘you’re making a scene.’” and “For once, ‘sir’ adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
+                    <p>For “the Duke”, perhaps?</p>
 
         case: Following an annotation
 
-            interpretations of the `xref`'s instruction
+            description:
+                Smart quotes also need to be recognized when they follow
+                SAM markup.
+
+            source:
+                ```(sam)
+
+                    interpretations of the `xref`'s instruction
+
+            markup:
+                interpretations of the `xref`'s instruction
+
+            result:
+                ```(xml)
+                    <p>interpretations of the <span><annotation type="code">xref</annotation></span>’s instruction</p>
 
         case: Smart quotes with annotations
 
-            "For once, '{sir}(salutation)' adding, 'you're making a
-            scene.'" and "For once, {'sir'}(salutation) adding,
-            'you're making a scene.'" In the winter
-            of ’65. "Yes," he said, "I met her. She's
-            very 'friendly.'" '"I don’t know what you
-            mean by 'glory,'" Alice said.' "'I don’t
-            know what you mean by "glory,"' Alice said."
+            description:
+
+                Smart quotes surrounding annotated phrases.
+
+            source:
+                ```(sam)
+                    "For once, '{sir}(salutation)' adding, 'you're making a
+                    scene.'" and "For once, {'sir'}(salutation) adding,
+                    'you're making a scene.'" In the winter
+                    of ’65. "Yes," he said, "I met her. She's
+                    very 'friendly.'" '"I don’t know what you
+                    mean by 'glory,'" Alice said.' "'I don’t
+                    know what you mean by "glory,"' Alice said."
+
+            markup:
+                "For once, '{sir}(salutation)' adding, 'you're making a
+                scene.'" and "For once, {'sir'}(salutation) adding,
+                'you're making a scene.'" In the winter
+                of ’65. "Yes," he said, "I met her. She's
+                very 'friendly.'" '"I don’t know what you
+                mean by 'glory,'" Alice said.' "'I don’t
+                know what you mean by "glory,"' Alice said."
+
+            result:
+                ```(xml)
+                    <p>“For once, ‘<span><annotation type="salutation">sir</annotation></span>’ adding, ‘you’re making a scene.’” and “For once, <span><annotation type="salutation">‘sir’</annotation></span> adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
+
 
         case: Escaped dumb quotes
 
