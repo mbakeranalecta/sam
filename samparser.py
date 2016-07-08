@@ -1004,7 +1004,7 @@ class SamParaParser:
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\', re.U),
-            'escaped-chars': re.compile('[\\\(\{\}\[\]_\*,\.\*`"&' + "']", re.U),
+            'escaped-chars': re.compile('[\\\(\)\{\}\[\]_\*,\.\*`"&' + "']", re.U),
             'span': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
             'annotation': re.compile(
                 r'(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(!(?P<language>[\w-]+))?\))',
@@ -1121,7 +1121,7 @@ class SamParaParser:
             else:
                 specifically = match.group('specifically') if match.group('specifically') is not None else None
             namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
-            self.flow.append(Annotation(annotation_type, specifically, namespace, language))
+            self.flow.append(Annotation(annotation_type, self._unescape(specifically), namespace, language))
             para.advance(len(match.group(0)))
             if self.patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
@@ -1302,25 +1302,28 @@ class SamParaParser:
 
     def _unescape(self, string):
         result = ''
-        e = enumerate(string)
-        for pos, char in e:
-            try:
-                if char == '\\' and self.patterns['escaped-chars'].match(string[pos + 1]):
-                    result += string[pos + 1]
-                    next(e, None)
-                elif char == '&':
-                    match = self.patterns['character-entity'].match(string[pos:])
-                    if match:
-                        result += self.patterns['character-entity'].sub(self._replace_charref, match.group(0))
-                        for i in range(0, len(match.group(0))):
-                            next(e, None)
+        try:
+            e = enumerate(string)
+            for pos, char in e:
+                try:
+                    if char == '\\' and self.patterns['escaped-chars'].match(string[pos + 1]):
+                        result += string[pos + 1]
+                        next(e, None)
+                    elif char == '&':
+                        match = self.patterns['character-entity'].match(string[pos:])
+                        if match:
+                            result += self.patterns['character-entity'].sub(self._replace_charref, match.group(0))
+                            for i in range(0, len(match.group(0))):
+                                next(e, None)
+                        else:
+                            result += char
                     else:
                         result += char
-                else:
+                except IndexError:
                     result += char
-            except IndexError:
-                result += char
-        return result
+            return result
+        except TypeError:
+            return string
 
 
 class Span:
@@ -1506,7 +1509,10 @@ def parse_insert(insert_string):
 
 def escape_for_xml(s):
     t = dict(zip([ord('<'), ord('>'), ord('&'), ord('"')], ['&lt;', '&gt;', '&amp;', '&quot;']))
-    return s.translate(t)
+    try:
+        return s.translate(t)
+    except AttributeError:
+        return s
 
 
 def SAM_parser_warning(warning):
@@ -1548,22 +1554,8 @@ if __name__ == "__main__":
                 print(err, file=sys.stderr)
                 exit(1)
 
-            xml_doc = etree.fromstring("".join(samParser.serialize('xml')).encode('utf-8'))
-
-            if args.xsd:
-                try:
-                    xmlschema = etree.XMLSchema(file=args.xsd)
-                except etree.XMLSchemaParseError as e:
-                    print(e)
-                    exit(1)
-
-
-                try:
-                    xmlschema.assertValid(xml_doc)
-                except etree.DocumentInvalid as e:
-                    print(e)
-                    exit(1)
-
+            xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
+            xml_doc = etree.fromstring(xml_string)
 
             if args.xslt:
                 try:
@@ -1591,8 +1583,7 @@ if __name__ == "__main__":
 
                 else:
                     with open(args.outfile, "wb") as outf:
-                        for i in samParser.serialize('xml'):
-                            outf.write(i.encode('utf-8'))
+                        outf.write(xml_string)
             else:
                 if transformed:
                     sys.stdout.buffer.write(transformed)
@@ -1602,8 +1593,20 @@ if __name__ == "__main__":
 
             if args.intermediate:
                 with open(args.intermediate, "wb") as intf:
-                    for i in samParser.serialize('xml'):
-                        intf.write(i.encode('utf-8'))
+                    intf.write(xml_string)
+
+            if args.xsd:
+                try:
+                    xmlschema = etree.XMLSchema(file=args.xsd)
+                except etree.XMLSchemaParseError as e:
+                    print(e)
+                    exit(1)
+
+                try:
+                    xmlschema.assertValid(xml_doc)
+                except etree.DocumentInvalid as e:
+                    sys.stderr.write('STRUCTURE ERROR: ' + str(e))
+                    exit(1)
 
 
 
