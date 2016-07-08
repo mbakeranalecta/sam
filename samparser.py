@@ -555,7 +555,7 @@ class Block:
                 yield ' xmlns="{0}"'.format(self.namespace)
 
         if self.attributes:
-            for key, value in self.attributes.items():
+            for key, value in sorted(self.attributes.items()):
                 yield " {0}=\"{1}\"".format(key, value)
         if self.children:
             yield ">"
