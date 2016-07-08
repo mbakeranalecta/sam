@@ -2,7 +2,7 @@
 
     <xsl:output method="html"/>
 
-    <xsl:preserve-space elements="codeblock"/>
+    <xsl:preserve-space elements="codeblock markup"/>
 
   <xsl:template match="@*|node()">
     <xsl:copy>
@@ -84,7 +84,9 @@
 
     <xsl:template match="case/result">
         <xsl:variable name="actual">
-            <xsl:apply-templates select="../markup/*" mode="reproduce-markup"/>
+            <xsl:for-each select="../markup">
+                <xsl:apply-templates  mode="reproduce-markup"/>
+            </xsl:for-each>
         </xsl:variable>
         <xsl:variable name="intended" select="string(codeblock/text())"/>
 
