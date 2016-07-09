@@ -1308,7 +1308,7 @@ class SamParaParser:
                         match = self.patterns['character-entity'].match(string[pos:])
                         if match:
                             result += self.patterns['character-entity'].sub(self._replace_charref, match.group(0))
-                            for i in range(0, len(match.group(0))):
+                            for i in range(1, len(match.group(0))):
                                 next(e, None)
                         else:
                             result += char

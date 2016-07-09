@@ -722,32 +722,99 @@ tests:(!en) SAM Parser Tests
                     <p>This <span>should be reported</span>.</p>
 
 
-
-
-
-
-
     test: Character entities
+
+        description:
+
+            All SAM documents are UTF-8 unicode documents. Therefore you should
+            be able to enter any character directly. However, typing extended
+            characters is not easy, so SAM supports character entities for
+            entering characters that are not easy to type.
 
         case: HTML named entities
 
-            The doggy in the window costs &pound;5.00.
+            description:
+
+                All of the HTML named character entities are supported.
+
+            source:
+                ```(sam)
+                    The doggy in the window costs &pound;5.00.
+
+            markup:
+                The doggy in the window costs &pound;5.00.
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs £5.00.</p>
+
+
+
 
         case: Numeric entities
 
-            The doggy in the window costs &#163;5.00.
+            description:
+
+                XML-style decimal numeric character entities are supported.
+
+            source:
+                ```(sam)
+                    The doggy in the window costs &#163;5.00.
+
+            markup:
+                The doggy in the window costs &#163;5.00.
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs £5.00.</p>
+
 
         case: Hexadecimal entity
 
-            The doggy in the window costs &#xA3;5.00.
+            description:
+
+                XML-style hexadecimal numeric character entities are supported.
+
+            source:
+                ```(sam)
+                    The doggy in the window costs &#xA3;5.00.
+
+            markup:
+                The doggy in the window costs &#xA3;5.00.
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs £5.00.</p>
+
+            case: Character entities inside phrases and decorations
+
+                description:
+                    Make sure entities are recognized in phrases and
+                    decorations.
+
+                source:
+                    ```(sam)
+                        The doggy in the window costs *&#xA3;*5.00.
+
+                        The doggy in the window costs {&#xA3;5.00}(money).
+
+                markup:
+                    The doggy in the window costs *&#xA3;*5.00.
+
+                    The doggy in the window costs {&#xA3;5.00}(money).
+
+                result:
+                    ```(xml)
+                        <p>The doggy in the window costs <span><annotation type="bold">£</annotation></span>5.00.</p>
+                        <p>The doggy in the window costs <span><annotation type="money">£5.00</annotation></span>.</p>
+
+
 
         case: In code annotation shortcut:
 
             The doggy in the window costs `&#xA3;`5.00.
 
-        case: In bold annotation shortcut:
 
-            The doggy in the window costs *&#xA3;*5.00.
 
         case: In bold annotation shortcut escaped:
 
