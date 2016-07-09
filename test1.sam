@@ -569,44 +569,162 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>“For once, ‘<span><annotation type="salutation">sir</annotation></span>’ adding, ‘you’re making a scene.’” and “For once, <span><annotation type="salutation">‘sir’</annotation></span> adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
 
+        case: Adjacent to parentheses
+
+            Quotes inside parentheses.
+
+            source:
+                ```(sam)
+                    A vector graphic program creates graphics as a collection of  objects ("vector" meaning the mathematical representation of a shape or line).
+
+                    The shape of the characters (technically, "glyphs") that make up the font are stored separately in font files.
+
+            markup:
+                A vector graphic program creates graphics as a collection of  objects ("vector" meaning the mathematical representation of a shape or line).
+
+                The shape of the characters (technically, "glyphs") that make up the font are stored separately in font files.
+
+            result:
+                ```(xml)
+                    <p>A vector graphic program creates graphics as a collection of  objects (“vector” meaning the mathematical representation of a shape or line).</p>
+                    <p>The shape of the characters (technically, “glyphs”) that make up the font are stored separately in font files.</p>
+
 
         case: Escaped dumb quotes
 
-            This para uses \"dumb\" quotes. Don\'t get them mixed up.
+            If you want to enter straight quotes and have them stay straight when
+            smart quotes are applied, you have to escape them with `\` or use the
+            `&quot;` character entity.
+
+            source:
+                ```(sam)
+                    This para uses \"dumb\" quotes. Don\'t get them &quot;mixed up&quot;.
+
+            markup:
+                This para uses \"dumb\" quotes. Don\'t get them &quot;mixed up&quot;.
+
+            result:
+                ```(xml)
+                    <p>This para uses "dumb" quotes. Don't get them "mixed up".</p>
+
 
     test: Blank lines in codeblocks
 
-        ```(sam)
-            warnings:
-                warning:(#warn_danger_domestic)
-                    title: Danger
+        description:
 
-                    Be very very careful. This could kill you.
+            Blank lines are thrown away in SAM, but must be retained in codeblocks.
 
-                warning:(#warn_danger_foreign)
-                    title: Look out!
+        case: Blank lines in codeblock
 
-                    Pay close attention. You could really hurt yourself.
+            description:
+                Blank lines in a code block. The display of the result will be
+                confusing here because the result is whitespace normalized for
+                ease of comparison with the generated XML.
 
+            source:
+                ```(sam)
+                    ```(sam)
+                        warnings:
+                            warning:(#warn_danger_domestic)
+                                title: Danger
 
+                                Be very very careful. This could kill you.
 
-    test: Prior annotation lookup.
+                            warning:(#warn_danger_foreign)
+                                title: Look out!
+
+                                Pay close attention. You could really hurt yourself.
+            markup:
+                ```(sam)
+                    warnings:
+                        warning:(#warn_danger_domestic)
+                            title: Danger
+
+                            Be very very careful. This could kill you.
+
+                        warning:(#warn_danger_foreign)
+                            title: Look out!
+
+                            Pay close attention. You could really hurt yourself.
+            result:
+                ```(xml)
+                    <codeblock language="sam">
+                    warnings:
+                        warning:(#warn_danger_domestic)
+                            title: Danger
+
+                            Be very very careful. This could kill you.
+
+                        warning:(#warn_danger_foreign)
+                            title: Look out!
+
+                            Pay close attention. You could really hurt yourself.
+                    </codeblock>
+
+    test: Prior annotation lookup
+
+        description:
+            If a phrase has no annotation or citation attached to it, the parser will
+            attempt to find a suitable annotation by searching back up the document for
+            the most recent case of the same phrase. If it finds one, it will copy
+            the annotations and citations from that phrase to the current one. This
+            prevents writers from having to write the same annotation out over and
+            over again. If not prior phrase is found, a warning is issued.
 
         case: Same para
 
-            This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotation}.
+            description:
+
+                There is a previous instance of the phrase in the same paragraph.
+
+            source:
+                ```(sam)
+                    This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotation}.
+
+            markup:
+                This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotation}.
+
+            result:
+                ```(xml)
+                    <p>This <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span> is repeated <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span>.</p>
 
         case: Earlier para
 
-            This {annotation} occurs previously.
+            description:
+                The marching annotation is in an earlier paragraph in the document. (In this
+                case, in the preceding test case).
+
+            source:
+                ```(sam)
+                    This {annotation} occurs previously.
+
+            markup:
+                This {annotation} occurs previously.
+
+            result:
+                ```(xml)
+                    <p>This <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span> occurs previously.</p>
+
 
         case: Failure
 
-            This {should be reported}.
+            There is no previous phrase. This should generate a warning when the test is run.
 
-        case: With intervening paragraph
+            source:
+                ```(sam)
+                    This {should be reported}.
 
-            This {annotation} occurs previously.
+            markup:
+                This {should be reported}.
+
+            result:
+                ```(xml)
+                    <p>This <span>should be reported</span>.</p>
+
+
+
+
+
 
 
     test: Character entities
@@ -704,11 +822,32 @@ tests:(!en) SAM Parser Tests
 
     test: Paragraph continuation
 
+        descrption:
+
+            A paragraph is any block of text at the same indent level and
+            ending with a blank line.
+
         case: Multiple lines joined to create one paragraph
 
-            This is a {paragraph}(?foo)
-            that wraps across
-            multiple lines.
+            description:
+                A paragraph over multiple lines with an inline annotation.
+
+            source:
+                ```(sam)
+                    This is a {paragraph}(foo)
+                    that wraps across
+                    multiple lines.
+
+            markup:
+                This is a {paragraph}(foo)
+                that wraps across
+                multiple lines.
+
+            result:
+                ```(xml)
+                    <p>This is a <span><annotation type="foo">paragraph</annotation></span> that wraps across multiple lines.</p>
+
+
 
     test: Numbered lists
 

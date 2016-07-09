@@ -2,55 +2,72 @@ sam:
 
 specification: Semantic Authoring Markdown (SAM) 
 
-    Semantic Authoring Markdown (SAM) is a simplified markup for semantic authoring. Semantic authoring, in this case, means writing texts that identify some part of their semantics thought embedded markup. 
+    Semantic Authoring Markdown (SAM) is a simplified markup for semantic authoring. Semantic authoring means writing texts that identify some part of their semantics thought embedded markup. Semantic authoring also places constraints on the author, making sure they create the content that is required. Semantic authoring allows for sophisticated validation and manipulation of content, supporting increased quality and improving the efficiency of the publishing process.
     
-    Current lightweight markup languages have fixed semantics with little or no extensibility. Where extensibility exists, it generally requires coding extensions to the parser. 
+    section: Why SAM?
     
-    XML allows extension through schemas. But the price it pays for this is an abstract data model and a verbose syntax. Writing and editing in XML is cumbersome, even with a dedicated XML editor (and dedicated XML editors can be expensive). And while XML is intended for doing structured writing, in practice it tends to hide the structure of the content either behind a WYSIWYG editing interface or verbose markup.
+        Why is SAM needed? What are the limits of current semantic authoring solutions? The core of a semantic authoring solution is a markup language. There are, broadly, two kinds of markup languages: general and lightweight. Lightweight markup languages are easier to use, but less capable. XML is the only general languages in common use today (thought SGML is also still in use). There are many lightweight markup languages. The best known is Markdown.
+        
+        The key issue for real semantic authoring is extensibility: the ability to specify your own semantics. (To create new tag that are specific to what you are writing about.)
     
-    SAM attempts to bridge these two worlds, providing a lightweight syntax that is easy to read, writes, and edit, and which makes the structured of the content clear and explicit. But also provides a lightweight abstract syntax of blocks and annotations that supports extension, either through ad hoc markup or through a schema. 
-    
-    Unlike most lightweight markup languages, SAM is not designed to output directly to final format, but to output an intermediate XML format which can then be processes to produce final output. 
-    
-    Syntactically, SAM takes its cues from YAML and Python (for displaying overall structure), from Markdown (for displaying text structures) and from common English usage (for displaying annotations.) In contrast to some of the richer lightweight markup languages, it tries to minimize the use of exotic forms of punctuation to delineate structures. 
-    
-    The intention is that an author writing in SAM should feel no need to use a visual editor, but should work directly in raw SAM (albeit with editor-supplied syntax coloring if desired). A SAM document should be a very natural read. 
+        Current lightweight markup languages have fixed semantics with little or no extensibility. Where extensibility exists, it generally requires coding extensions to the parser. 
+        
+        XML supports extensibility through schemas. But the price it pays for this is an abstract data model and a verbose syntax. Writing and editing in XML is cumbersome, even with a dedicated XML editor (and dedicated XML editors can be expensive). And while XML is intended for doing structured writing, in practice it tends to hide the structure of the content either behind a WYSIWYG editing interface or verbose markup.
+        
+        SAM attempts to bridge these two worlds, providing a lightweight syntax that is easy to read, write, and edit, and which makes the structure of the content clear and explicit. SAM is also designed to be extensible and to support the specification of new tags through a schema. (Currently the SAM Parser uses an XML schema language to validate the output XML, but a true SAM schema language is planned.)
+        
+        Most lightweight markup languages provide a fixed set of document structures with little or no extensibility. XML provides no document structures by default and makes you specify everything in a schema. SAM defines a limited set of core text structures such as paragraph and lists and then leaves it to you to specify the semantic structures that contain the text. 
+        
+    section: Creating output from SAM
+        
+        Unlike most lightweight markup languages, SAM does not output directly to a final format, such as HTML. Rather, it outputs an intermediate XML format that captures the specific semantics of the SAM document. This can then be processed with standard XML tools to produce whatever kind of final output is required. For instance, you might use XSLT to transform the SAM output into HTML.
 
-    SAM is not designed to be a full replacement for XML. It is far less general, because of its use of specific syntax for common text structures such as lists and paragraphs, and it has very limited support for attributes. Basically, each structure has a fixed set of attributes available. There is no extensibility for attributes. This is essential to maintain the readability of SAM sources, but it limits certain styles of markup design.
-    
-    In particular, it is designed to support a declarative approach to semantic authoring meaning that it is designed to express declarations about the structure of the document and the meaning of the text, rather than to embed management and processing information into the source, a practice common in many structured authoring languages. 
+        Another approach to producing final output is to create an intermediate file in a format for which a publishing tool chain already exists. For instance, you might transform the XML produced by SAM into DocBook and then use existing DocBook tools for final publishing.    
+        
+        To make simple transformations easier, the SAM Parser allows you to specify an XSLT 1.0 stylesheet to transform the XML output in a single step. With an appropriate stylesheet in place, you can use SAM to generate output directly, just as you would with Markdown or another lightweight language.
+        
+    section: SAM Syntax
+        
+        Syntactically, SAM takes its cues from YAML and Python (for displaying overall structure), from Markdown (for displaying text structures) and from common English usage (for displaying annotations.) In contrast to some of the richer lightweight markup languages, it tries to minimize the use of exotic forms of punctuation to delineate structures. 
+        
+        The intention is that an author writing in SAM should feel no need to use a visual editor, but should work directly in raw SAM (albeit with editor-supplied syntax coloring if desired). A SAM document should be a very natural read. 
 
-    Document-oriented markup languages such as reStructuredText and Markdown tend to be very flat in structure. One things follows another. There is rarely a case where one thing is inside another. For example, these languages use heading levels, but don't delineate sections of the document. More semantically rich languages tend to be more hierarchical, with one structure inside another. For example, a document might be divided into sections with title and paragraph elements inside a section. This means that you need to show which structures are inside others and where the containing structure ends. 
+        SAM is not designed to be a full replacement for XML. It is far less general, because of its use of predefined syntax for common text structures such as lists and paragraphs, and it has very limited support for attributes. Basically, each structure has a fixed set of attributes available. There is no extensibility for attributes. This is essential to maintain the readability of SAM sources, but it limits certain styles of markup design.
+        
+        In particular, SAM is designed to support a declarative approach to semantic authoring meaning that it is designed to express declarations about the structure of the document and the meaning of the text, rather than to embed management and processing information into the source, a practice common in many structured authoring languages. 
 
-    XML does this by having an explicit end tag for every element. A large part of the verbosity of XML comes from its requirement to close every element tag. Many programming languages, which similarly have to express nested structures, use some form of brackets to delineate each structure. Python is an exception to this. It uses indentation to express the relationship between structures. This is a far more natural way for writers to express the subordination of elements -- one that is sometimes used in printed works. SAM uses this approach and avoids the use of end tags entirely.
+        Document-oriented markup languages such as reStructuredText and Markdown tend to be very flat in structure. One things follows another. There is rarely a case where one thing is inside another. For example, these languages use heading levels, but don't delineate sections of the document. More semantically rich languages tend to be more hierarchical, with one structure inside another. For example, a document might be divided into sections with title and paragraph elements inside a section. This means that you need to show which structures are inside others and where the containing structure ends. 
 
-    While XML has only one unit of structure, the element, SAM has several:
+        XML does this by having an explicit end tag for every element. A large part of the verbosity of XML comes from its requirement to close every element tag. Many programming languages, which similarly have to express nested structures, use some form of brackets to delineate each structure. Python is an exception to this. It uses indentation to express the relationship between structures. This is a far more natural way for writers to express the subordination of elements -- one that is sometimes also used in published works. SAM uses this approach and avoids the use of end tags entirely.
 
-    |blocks| Blocks are elements that contain other elements. For instance, a section is a block. 
+        A SAM document contains the following structures:
 
-    |fields| Fields are elements that contain individual values. For instance, the date a document was written is usually a field. 
+        |blocks| Blocks are elements that contain other elements. For instance, a section is a block. 
 
-    |lines| A line is a single line of text, as in a poem, with a fixed line end. 
+        |fields| Fields are elements that contain individual values. For instance, the date a document was written is usually a field. 
 
-    |paragraphs| A paragraph is a continuous block of text across one or more contiguous lines. 
+        |lines| A line is a single line of text, as in a poem, with a fixed line end. 
 
-    |flows| Flows are sequences of text. Paragraphs are flows. Lines are flows. String definitions are flows. Fields are flows. Flows cannot contain blocks or fields. Titles are flows.
-    
-    |phrase| A phrase is a string of characters in a flow. A phrase can be annotated with an annotation or a citation.
+        |paragraphs| A paragraph is a continuous block of text across one or more contiguous lines. 
 
-    |record sets| A record set is a simple database table with named columns. It allows you to capture tabular data at a logical level rather than at the presentation level of a table. 
+        |phrases| A phrase is a string of characters in a paragraph or field. You use a phrase when you want to attach and annotation or a citation to a string of text.
 
-    |embedded XML| You can embed XML in a SAM document. 
+        |record sets| A record set is a simple database table with named columns. It allows you to capture tabular data at a semantic level rather than at the presentation level of a table. 
+        
+        |grids| A grid is a simple table-like layout structure. 
 
-    |strings| Strings are flows that have been assigned a name so that they can be included by reference in other parts of a document or in other documents. 
+        |strings| Strings are named pieces of text that can be included by reference in other parts of a document or in other documents. 
 
-    |fragments| Fragments are sections of a documents (potentially larger than a single flow) that can be included by reference in other parts of a document or in other documents. Strings used in a fragment can be redefined when a fragment is reused, allowing you to vary the text of the fragment when it is used in different places. 
+        |fragments| Fragments are sections of a documents (potentially larger than a single paragraph) that can be included by reference in other parts of a document or in other documents. Strings used in a fragment can be redefined when a fragment is reused, allowing you to vary the text of the fragment when it is used in different places. 
 
-    |annotations| Annotations are metadata attached to a structure. Different structures take different types of annotations that hold different types of metadata. 
+        |annotations| Annotations are metadata attached to a structure. Different structures take different types of annotations that hold different types of metadata. 
 
-    |insertions| Insertions bring in content from an external source.
-    
-    |citations| Citations are references to other works or structures. They generate an appropriate reference to that work. This reference is a piece of generated text in the current document. It is not a link, though it may also be linked. For example, you could cite a footnote or a figure. 
+        |insertions| Insertions bring in content from an external source.
+        
+        |citations| Citations are references to other works or structures. They generate an appropriate reference to that work. This reference is a piece of generated text in the current document. It is not a link, though it may also be linked. For example, you could cite a footnote or a figure. 
+        
+        |embedded XML| You can embed XML in a SAM document. 
+
 
     section: Sam declaration 
 
@@ -84,11 +101,20 @@ specification: Semantic Authoring Markdown (SAM)
 
         Block annotations can include:
 
-        * {Condition tokens}, which start with a ?
-        * {Names}, which start with #
-        * {IDs}, which start with *
+        * {Condition tokens}[#conditions], which start with a `?`
+        * {Names}[#names], which start with `#`
+        * {IDs}[#ids], which start with `*`
+        * {Language tags}[#lang], which start with `!`
         
-        If there is any content after the colon and the metadata, it is considered a title for the block and generates a {title} structure.
+        If there is any content after the colon and the metadata, it is considered a title for the block and generates a title structure.
+        
+        Thus the SAM markup above would create the following XML output:
+        
+        ```(xml)
+            <section conditions="ultra">
+                <title>The ultra feature is really cool!</title>
+                ...
+            </section>
 
     section: Fields
     
@@ -98,21 +124,41 @@ specification: Semantic Authoring Markdown (SAM)
             name: Fred Flintstone
             address: Bedrock
             era: BC
+            
+        This would produce the following:
+        
+        ```(xml)
+            <name>Fred Flintstone</name>
+            <address>Bedrock</address>
+            <era>BC</era>
 
     
     section: Paragraphs 
 
-        Syntactically, a paragraph is sequence of lines ending with a blank line, and does not start with any markup that makes it look like any other structure. 
+        A paragraph is sequence of lines ending with a blank line.
 
-        Logically, a paragraph is a block that contains a flow. The content model of a paragraph is thus simply a flow. The flow, in turn can contain annotations, insertions, and citations. 
+        ```(sam)
+            Now is the time
+            for all good men
+            to come to the aid
+            of the party.
+            
+            It was the best of 
+            times, it was the 
+            worst of times.
+            
+        This produces the following XML:
+        
+        ```(xml)
+            <p>Now is the time for all good men to come to the aid of the party.</p>
+            
+            <p>It was the best of times, it was the worst of times.</p>
 
-        A paragraph cannot have block children. It is a syntax error to have anything indented under a paragraph. Logically, the content model of the implicit element {p}(implicit-element) is a flow, so it can't have any other children. 
-
-        If you desperately want to create paragraphs that have block children, you could create an alternative block type for them, such as `para`. This is generally a bad idea, as it creates unnecessary complexity. A common reason for doing this it to make lists children of paragraphs. The argument for this is that the list is part of the argument of the paragraph and so part of the paragraph as a unit of composition. However, in almost all cases, a paragraph in a markup language is not a unit of composition or meaning, but a typographic unit. Unless you need to support some very specific forms of linguistic analysis, you don't need paragraphs to have children.
+        A paragraph cannot have block children. It is a syntax error to have anything indented under a paragraph.  
 
     section:(#annotations) Annotations
 
-        Annotations clarify what a piece of text is about. The annotated text is placed in square brackets, and the annotation follows immediately in parentheses. (There must be no space between the closing square bracket and the opening parentheses.) 
+        Annotations clarify what a piece of text is about.  
 
         ```(sam) 
             In {Rio Bravo}(movie), {the Duke}(actor "John Wayne" (SAG)) plays a union colonel.
@@ -128,10 +174,10 @@ specification: Semantic Authoring Markdown (SAM)
 
     section: Repeated annotations 
 
-    If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use square brackets around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase.
+        If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use square brackets around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase.
 
-    ```(sam) 
-        [foo](bar "baz") gruznatz [foo]
+        ```(sam) 
+            {foo}(bar "baz") gruznatz {foo}
 
 
     section: Inserts 
@@ -194,7 +240,6 @@ specification: Semantic Authoring Markdown (SAM)
 
         SAM does not attempt to decode the format of this style of citation. It just delivers it as a string. 
 
-        However, if we decide to do patterns, then your could use a pattern to validate and analyze the citation into its constituent parts in the schema.
 
     section: Conditions 
 

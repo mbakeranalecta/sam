@@ -735,13 +735,9 @@ class Pre(Flow):
         self.lines = [x[min_indent:] if len(x) > min_indent else x for x in text_block.lines]
 
     def serialize_xml(self):
-        yield "<![CDATA["
         for x in self.lines:
-            try:
-                yield from x.serialize_xml()
-            except AttributeError:
-                yield x
-        yield "]]>"
+            yield escape_for_xml(x)
+
 
 
 class EmbeddedXML(Block):
@@ -1095,7 +1091,6 @@ class SamParaParser:
 
                     # Else output a warning.
                     else:
-                        self.current_string += text
                         SAM_parser_warning(
                             "Unannotated phrase found: {" +
                             text + "} " +
@@ -1338,6 +1333,8 @@ class Span:
         yield '<span>'
         if self.child:
             yield from self.child.serialize_xml(escape_for_xml(self.text))
+        else:
+            yield escape_for_xml(self.text)
         yield '</span>'
 
     def append(self, thing):
