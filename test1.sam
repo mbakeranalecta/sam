@@ -786,33 +786,45 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>The doggy in the window costs £5.00.</p>
 
-            case: Character entities inside phrases and decorations
+        case: Character entities inside phrases and decorations
 
-                description:
-                    Make sure entities are recognized in phrases and
-                    decorations.
+            description:
+                Make sure entities are recognized in phrases and
+                decorations.
 
-                source:
-                    ```(sam)
-                        The doggy in the window costs *&#xA3;*5.00.
-
-                        The doggy in the window costs {&#xA3;5.00}(money).
-
-                markup:
+            source:
+                ```(sam)
                     The doggy in the window costs *&#xA3;*5.00.
 
                     The doggy in the window costs {&#xA3;5.00}(money).
 
-                result:
-                    ```(xml)
-                        <p>The doggy in the window costs <span><annotation type="bold">£</annotation></span>5.00.</p>
-                        <p>The doggy in the window costs <span><annotation type="money">£5.00</annotation></span>.</p>
+            markup:
+                The doggy in the window costs *&#xA3;*5.00.
 
+                The doggy in the window costs {&#xA3;5.00}(money).
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs <span><annotation type="bold">£</annotation></span>5.00.</p>
+                    <p>The doggy in the window costs <span><annotation type="money">£5.00</annotation></span>.</p>
 
 
         case: In code annotation shortcut:
 
-            The doggy in the window costs `&#xA3;`5.00.
+            description:
+
+                In a code decoration, character entities are not expanded.
+
+            source:
+                ```(sam)
+                    The doggy in the window costs `&#xA3;`5.00.
+
+            markup:
+                The doggy in the window costs `&#xA3;`5.00.
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs <span><annotation type="code">&amp;#xA3;</annotation></span>5.00.</p>
 
 
 
