@@ -1385,7 +1385,7 @@ class Annotation:
         if self.annotation_type:
             yield ' type="{0}"'.format(self.annotation_type)
         if self.specifically:
-            yield ' specifically="{0}"'.format(escape_for_xml(self.specifically))
+            yield ' specifically="{0}"'.format(escape_for_xml_attribute(self.specifically))
         if self.namespace:
             yield ' namespace="{0}"'.format(self.namespace)
         if self.language:
@@ -1421,9 +1421,9 @@ class Citation:
                                              cit_extra)
 
     def serialize_xml(self, payload=None):
-        yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml(self.citation_value))
+        yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml_attribute(self.citation_value))
         if self.citation_extra is not None:
-            yield ' extra="{0}"'.format(escape_for_xml(self.citation_extra))
+            yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
         if self.child:
             yield '>'
             yield from self.child.serialize_xml(payload)
@@ -1452,7 +1452,7 @@ class InlineInsert:
     def serialize_xml(self):
         yield '<insert'
         for key, value in self.attributes.items():
-            yield " {0}=\"{1}\"".format(key, escape_for_xml(value))
+            yield " {0}=\"{1}\"".format(key, escape_for_xml_attribute(value))
         yield '/>'
 
 
@@ -1505,6 +1505,13 @@ def parse_insert(insert_string):
 
 
 def escape_for_xml(s):
+    t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
+    try:
+        return s.translate(t)
+    except AttributeError:
+        return s
+
+def escape_for_xml_attribute(s):
     t = dict(zip([ord('<'), ord('>'), ord('&'), ord('"')], ['&lt;', '&gt;', '&amp;', '&quot;']))
     try:
         return s.translate(t)

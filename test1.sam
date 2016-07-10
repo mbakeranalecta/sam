@@ -828,60 +828,178 @@ tests:(!en) SAM Parser Tests
 
 
 
-        case: In bold annotation shortcut escaped:
+        case: In bold decoration escaped:
 
-            The doggy in the window costs *\&#xA3;*5.00.
+            description:
+                Escaped version inside a bold decoration.
 
-        case: Ampersand in a sentence, escaped with \ and not escaped. Both should output in XML as `&amp;`
+            source:
+                ```(sam)
+                    The doggy in the window costs *\&#xA3;*5.00.
 
-            The cat & the dog.
+            markup:
+                The doggy in the window costs *\&#xA3;*5.00.
 
-            The cat \& the dog.
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs <span><annotation type="bold">&amp;#xA3;</annotation></span>5.00.</p>
+
+
+        case: Ampersand in a sentence, escaped with \ and not escaped.
+
+            description:
+
+                Unlike XML, SAM does not require that an ampersand be escaped if it is not part of a character entity. You
+                can escape it if you want to using a backslash. Both should output in XML as `&amp;`
+
+            source:
+                ```(sam)
+                    The cat & the dog.
+
+                    The cat \& the dog.
+
+            markup:
+                The cat & the dog.
+
+                The cat \& the dog.
+
+            result:
+                ```(xml)
+                    <p>The cat &amp; the dog.</p>
+                    <p>The cat &amp; the dog.</p>
+
 
     test: Conditions on list items
 
+        description:
+
+            You can add conditions and other block metadata to list items.
+
         case: Conditions on unordered list shortcut
 
-            * Fred
+            description:
 
-            *(?foo) Barney and
-              Betty and
-              Bam Bam.
+                A condition on an unordered list item.
 
-            * Wilma
+            source:
+                ```(sam)
+                    * Fred
+
+                    *(?foo) Barney and
+                      Betty and
+                      Bam Bam.
+
+                    * Wilma
+
+            markup:
+
+                * Fred
+
+                *(?foo) Barney and
+                  Betty and
+                  Bam Bam.
+
+                * Wilma
+
+            result:
+                ```(xml)
+                    <ul>
+                    <li>
+                    <p>Fred</p>
+                    </li>
+                    <li conditions="foo">
+                    <p>Barney and Betty and Bam Bam.</p>
+                    </li>
+                    <li>
+                    <p>Wilma</p>
+                    </li>
+                    </ul>
 
         case: Conditions on ordered list shortcut
+            description:
+                Condition on an ordered list item.
 
-            1. Fred
-            2.(?foo) Barney and
-             Betty and
-             Bam Bam.
-            3. Wilma
+            source:
+                ```(sam)
+                    1. Fred
+                    2.(?foo) Barney and
+                     Betty and
+                     Bam Bam.
+                    3. Wilma
 
-    test: Blank annotations
+            markup:
+                1. Fred
+                2.(?foo) Barney and
+                 Betty and
+                 Bam Bam.
+                3. Wilma
 
-        case: Blank annotation
+            result:
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>Fred</p>
+                    </li>
+                    <li conditions="foo">
+                    <p>Barney and Betty and Bam Bam.</p>
+                    </li>
+                    <li>
+                    <p>Wilma</p>
+                    </li>
+                    </ol>
 
-            The {annotation} has no metadata. It should produce a warning, but no annotation in XML.
 
-    test: Escapes in annotations
+
+    test: Escapes in phrases and decorations
+
+        description:
+            Character escaping should be recognized inside phrases and decorations.
 
         case: Escapes in explicit annotations
 
-            There is a curly brace in {this \\\\\{ annotation}(bold).
+            description:
+                Escaping curly braces and backslashes inside a phrase.
 
-        case: Escapes in code annotations
+            source:
+                ```(sam)
+                    There is a curly brace and two backslashes in {this \\\\\{ phrase}(bold).
 
-            Normal escape sequences are not recognized in a code annotation. All
-            characters are treated as literal up to the closing backtick. A literal
-            backtick in a code annotation must therefore be escaped as a double
-            backtick.
+            markup:
+                There is a curly brace and two backslashes in {this \\\\\{ phrase}(bold).
 
-            There is a backtick and two backslashes in `th\\is `` code` decoration.
+            result:
+                ```(xml)
+                    <p>There is a curly brace and two backslashes in <span><annotation type="bold">this \\{ phrase</annotation></span>.</p>
 
-            There is a backslash and a curly brace in `this \{ code` decoration.
+        case: Escapes in code decorations
 
-            `pubwork="book"` is an attribute on the element `citetitle`.
+            description:
+                Code decorations have different escaping rules. All characters are literal
+                except that the backtick character can be escaped with a double back tick.
+                Character entities are not translated in a code decoration. Smart quote
+                transformations are not applied.
+
+            source:
+                ```(sam)
+                    There is a backtick and two backslashes in `th\\is `` code` decoration.
+
+                    There is a backslash and a curly brace in `this \{ code` decoration.
+
+                    `pubwork="book"` is an attribute on the element `citetitle`.
+
+            markup:
+                There is a backtick and two backslashes in `th\\is `` code` decoration.
+
+                There is a backslash and a curly brace in `this \{ code` decoration.
+
+                `pubwork="book"` is an attribute on the element `citetitle`.
+
+            result:
+                ```(xml)
+                    <p>There is a backtick and two backslashes in <span><annotation type="code">th\\is ` code</annotation></span> decoration.</p>
+                    <p>There is a backslash and a curly brace in <span><annotation type="code">this \{ code</annotation></span> decoration.</p>
+                    <p><span><annotation type="code">pubwork="book"</annotation></span> is an attribute on the element <span><annotation type="code">citetitle</annotation></span>.</p>
+
 
 
         case: Escapes in decorations
