@@ -23,11 +23,18 @@
 
           <xsl:text>"</xsl:text>
       </xsl:for-each>
-    <xsl:text>&gt;</xsl:text>
-      <xsl:apply-templates mode="reproduce-markup"/>
-    <xsl:text>&lt;/</xsl:text>
-    <xsl:value-of select="name()"/>
-    <xsl:text>&gt;</xsl:text>
+      <xsl:choose>
+          <xsl:when test="not(*) and not(normalize-space())">
+              <xsl:text>/&gt;</xsl:text>
+          </xsl:when>
+          <xsl:otherwise>
+              <xsl:text>&gt;</xsl:text>
+              <xsl:apply-templates mode="reproduce-markup"/>
+              <xsl:text>&lt;/</xsl:text>
+              <xsl:value-of select="name()"/>
+              <xsl:text>&gt;</xsl:text>
+          </xsl:otherwise>
+      </xsl:choose>
   </xsl:template>
 
     <xsl:template match="*/text()" mode="reproduce-markup">

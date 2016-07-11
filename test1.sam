@@ -2043,9 +2043,39 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p><span><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp; Possum&quot;" namespace="Eliott">Skimbleshanks</annotation></span>.</p>
 
-        case: Quotes in link shortcut.
+    test: XML fragment
 
-            This is a {link text}(thing 'somthing "specific"' (foo)).
+        description:
+            You can insert a fragment of XML. It must be well formed and must start with an XML header. It must be UTF-8.
+            It will be copied to output verbatim, minus the XML header.
+
+            case:
+                Inserted XML.
+
+                source:
+                    ```(sam)
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <foo bar="bat">
+                            <boo/>
+                            <hoo/>
+                        </foo>
+
+                markup:
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <foo bar="bat">
+                        <boo/>
+                        <hoo/>
+                    </foo>
+
+                result:
+                    ```(xml)
+                        <foo bar="bat">
+                            <boo/>
+                            <hoo/>
+                        </foo>
+
+
+
 
     test:(#feature-fragments ) Fragments
         head:(#foo)
@@ -2060,38 +2090,13 @@ tests:(!en) SAM Parser Tests
                 feature, fragments
         body: How Fragments Work
 
-            * This list is the
-                * Nested list
-                * with two entries
 
-            * first thing in this section.
-            * There is no space between these list items.
 
-            This paragraph contains a link {Wikipedia}(http://wikipedia.com (goo)).
-
-            This paragraph contains a link {Wikipedia}(link "http://wikipedia.com").
-
-            {Fragments}(feature) are a {content reuse}(task "1reusing content" (foo))
-            feature of the {EPPO-simple}(feature) {plugin}( feature).[*bar]
-
-            \{Fragments}(feature) are a \{content reuse}(task "2reusing content" (foo))
-            feature of the \{EPPO-simple}(feature) \{plugin}( feature).[*bar]
-
-            \[Fragments](feature) are a \[content reuse](task "3reusing content" (foo))
-            feature of the \[EPPO-simple](feature) [plugin]( feature).[Someone, 1852]
 
             Press \[Enter].
 
             Press {Enter}(key !fr-CA)
 
-            Suppose you {discovered}(!sp) that your users were using your help content far more
-            than your manuals and wanted to force your writers to break away from this
-            habit of creating book-like help systems. You would introduce[*bar]
-            constraint that writers were to focus on producing self sufficient
-            help topics rather than linear narratives. You could enforce
-            that constrain by edict, or through a style guide, but you would
-            get better compliance if you introduced a structured writing system
-            that enforced that constraint.
 
             footnote:(*bar)
                 This is a footnote.
@@ -2100,7 +2105,11 @@ tests:(!en) SAM Parser Tests
 
             >>>(image foo.gif #bar ?baz ?bat)
 
+
+
             This sentence includes a string reference >(string name). And a shortcut version >($name)
+
+
 
             """[*bing bang boom]
                 |(#foo2) You gotta walk that lonesome valley,[*bing bang boom]
@@ -2110,6 +2119,7 @@ tests:(!en) SAM Parser Tests
 
 
             This sentence[*bing bang boom] contains an unmatched \{ followed by an {annotated}(word) phrase.
+
 
             |(#foo2) You gotta walk that lonesome valley,[*bing bang boom]
             | You gotta walk it by yourself,
@@ -2200,47 +2210,18 @@ tests:(!en) SAM Parser Tests
             '''
                 This is a blockquote without a citation.
 
-            Fragments can be defined:
 
-            * inline in a topic file
-
-            * in separate fragment
-              collections
-
-              foobar
-
-            * batman
 
 
             If a fragment is defined inline, it is included where it occurs. {Fragments}(song) in fragment
             files are not included anywhere unless they are pulled in by a fragment reference.
 
-            0. One
-               Hundred
-
-               Fifty
-
-            4. Seven
-
-            80976. Two
-
-                   Two and a half
-
 
 
             A fragment reference inserts a fragment by ID at the place it occurs in the text.
 
-            <?xml version="1.0" encoding="UTF-8"?>
-            <foo bar="bat">
-                <bang/>
-            </foo>
 
 
-            <?xml version="1.0" encoding="UTF-8"?>
-            <foo bar="bat">
-                <boo/>
-                <hoo/>
-            </foo>
 
             Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
             reused, <fragments> & fragment references can both define local {strings}(feature).
