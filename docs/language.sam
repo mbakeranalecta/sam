@@ -484,10 +484,55 @@ specification: Semantic Authoring Markdown (SAM)
         *feed
         *app
         *sam
+        *file
 
     section: Whitespace handling
 
         All flows are trimmed of leading and trailing whitespace. In composing a flow from multiple text lines, all spaces and returns are collapsed to a single space.
+
+    section: Decorations
+
+        A decoration is a shortcut for creating an annotated phrase. For example,
+
+        ```(sam)
+            This text is in *important* type.
+
+        is a shortcut for
+
+        ```(sam)
+            This text is {important}(bold).
+
+        Annotation chaining is not supported for decorations.
+
+        ```(sam)
+            This text is *important*(italic).
+
+        is not the same as
+
+        ```(sam)
+            This text is {important}(bold)(italic).
+
+        Decorations cannot be nested, so
+
+         ```(sam)
+            This text is *_important_*.
+
+        is not a shortcut for
+
+        ```(sam)
+            This text is {important}(bold)(italic)
+
+        but would be interpreted as
+
+        ```(sam)
+            This text is {_important_}(bold).
+
+        Decorations are not recognized inside of phrases, but are read as plain text.
+
+
+
+
+
     
     section: Embedded XML
     

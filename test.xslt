@@ -1,4 +1,4 @@
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:my="my:my">
 
     <xsl:output method="html" omit-xml-declaration="no"/>
 
@@ -19,7 +19,8 @@
           <xsl:text> </xsl:text>
           <xsl:value-of select="name()"/>
           <xsl:text>="</xsl:text>
-          <xsl:value-of select="."/>
+          <xsl:call-template name="multiReplace"/>
+
           <xsl:text>"</xsl:text>
       </xsl:for-each>
     <xsl:text>&gt;</xsl:text>
@@ -209,4 +210,66 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
+
+  <my:reps>
+  <rep>
+    <old>&amp;</old>
+    <new>&amp;amp;</new>
+  </rep>
+  <rep>
+    <old>&quot;</old>
+    <new>&amp;quot;</new>
+  </rep>
+  <rep>
+    <old>&lt;</old>
+    <new>&amp;lt;</new>
+  </rep>
+  <rep>
+    <old>&gt;</old>
+    <new>&amp;gt;</new>
+  </rep>
+ </my:reps>
+
+ <xsl:variable name="vReps" select="document('')/*/my:reps/*"/>
+
+ <xsl:template name="multiReplace">
+  <xsl:param name="pText" select="."/>
+  <xsl:param name="pRep" select="$vReps[1]"/>
+
+  <xsl:choose>
+    <xsl:when test="not($pRep)"><xsl:value-of select="$pText"/></xsl:when>
+      <xsl:otherwise>
+        <xsl:variable name="vReplaced">
+            <xsl:call-template name="replace">
+              <xsl:with-param name="pText" select="$pText"/>
+              <xsl:with-param name="pOld" select="$pRep/old"/>
+              <xsl:with-param name="pNew" select="$pRep/new"/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:call-template name="multiReplace">
+         <xsl:with-param name="pText" select="$vReplaced"/>
+         <xsl:with-param name="pRep" select="$pRep/following-sibling::*[1]"/>
+        </xsl:call-template>
+      </xsl:otherwise>
+  </xsl:choose>
+ </xsl:template>
+
+ <xsl:template name="replace">
+   <xsl:param name="pText"/>
+   <xsl:param name="pOld"/>
+   <xsl:param name="pNew"/>
+
+   <xsl:if test="$pText">
+     <xsl:value-of select="substring-before(concat($pText,$pOld), $pOld)"/>
+       <xsl:if test="contains($pText, $pOld)">
+         <xsl:value-of select="$pNew"/>
+             <xsl:call-template name="replace">
+               <xsl:with-param name="pText" select="substring-after($pText, $pOld)"/>
+               <xsl:with-param name="pOld" select="$pOld"/>
+               <xsl:with-param name="pNew" select="$pNew"/>
+             </xsl:call-template>
+       </xsl:if>
+   </xsl:if>
+ </xsl:template>
 </xsl:stylesheet>

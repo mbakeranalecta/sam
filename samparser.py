@@ -1580,10 +1580,10 @@ if __name__ == "__main__":
                         SAM_parser_warning("Messages from the XSLT transformation:")
                     for entry in transform.error_log:
                         print('message from line %s, col %s: %s' % (
-                            entry.line, entry.column, entry.message))
-                        print('domain: %s (%d)' % (entry.domain_name, entry.domain))
-                        print('type: %s (%d)' % (entry.type_name, entry.type))
-                        print('level: %s (%d)' % (entry.level_name, entry.level))
+                            entry.line, entry.column, entry.message), file=sys.stderr)
+                        print('domain: %s (%d)' % (entry.domain_name, entry.domain), file=sys.stderr)
+                        print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
+                        print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
 
                 else:
                     with open(args.outfile, "wb") as outf:
@@ -1596,20 +1596,20 @@ if __name__ == "__main__":
                         sys.stdout.buffer.write(i.encode('utf-8'))
 
             if args.intermediate:
-                with open(args.intermediate, "wb") as intf:
-                    intf.write(xml_string)
+                with open(args.intermediate, "wb") as intermediate:
+                    intermediate.write(xml_string)
 
             if args.xsd:
                 try:
                     xmlschema = etree.XMLSchema(file=args.xsd)
                 except etree.XMLSchemaParseError as e:
-                    print(e)
+                    print(e, file=sys.stderr)
                     exit(1)
 
                 try:
                     xmlschema.assertValid(xml_doc)
                 except etree.DocumentInvalid as e:
-                    sys.stderr.write('STRUCTURE ERROR: ' + str(e))
+                    print('STRUCTURE ERROR: ' + str(e), file=sys.stderr)
                     exit(1)
 
 

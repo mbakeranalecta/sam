@@ -29,12 +29,15 @@ tests:(!en) SAM Parser Tests
 
                     This is {very}(bold)(italic)(green) important.
 
+                    This `foo`(bar) baz.
+
             markup:
                 This is {very}(bold) important.
 
                 This is {very}(bold)(italic) important.
 
                 This is {very}(bold)(italic)(green) important.
+
 
             result:
                 ```(xml)
@@ -570,8 +573,8 @@ tests:(!en) SAM Parser Tests
                     <p>“For once, ‘<span><annotation type="salutation">sir</annotation></span>’ adding, ‘you’re making a scene.’” and “For once, <span><annotation type="salutation">‘sir’</annotation></span> adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
 
         case: Adjacent to parentheses
-
-            Quotes inside parentheses.
+            description:
+                Quotes inside parentheses.
 
             source:
                 ```(sam)
@@ -591,10 +594,10 @@ tests:(!en) SAM Parser Tests
 
 
         case: Escaped dumb quotes
-
-            If you want to enter straight quotes and have them stay straight when
-            smart quotes are applied, you have to escape them with `\` or use the
-            `&quot;` character entity.
+            description:
+                If you want to enter straight quotes and have them stay straight when
+                smart quotes are applied, you have to escape them with `\` or use the
+                `&quot;` character entity.
 
             source:
                 ```(sam)
@@ -707,8 +710,8 @@ tests:(!en) SAM Parser Tests
 
 
         case: Failure
-
-            There is no previous phrase. This should generate a warning when the test is run.
+            description:
+                There is no previous phrase. This should generate a warning when the test is run.
 
             source:
                 ```(sam)
@@ -1004,22 +1007,31 @@ tests:(!en) SAM Parser Tests
 
         case: Escapes in decorations
 
-            Escape sequences are recognized inside decorations.
+            description:
 
-            ```(sam)
+                Escape sequences are recognized inside decorations.
+
+            source:
+                ```(sam)
+                    There is a `*` in *this \* bold* decoration.
+
+                    There is a `_` in _this \_ italic_ decoration.
+
+            markup:
                 There is a `*` in *this \* bold* decoration.
 
-            There is a `*` in *this \* bold* decoration.
+                There is a `_` in _this \_ italic_ decoration.
 
-            ```(XML)
-               <p>There is a <annotation type="code">*</annotation> in <annotation type="bold">this * bold</annotation> decoration.</p>
+            result:
+                ```(xml)
+                    <p>There is a <span><annotation type="code">*</annotation></span> in <span><annotation type="bold">this * bold</annotation></span> decoration.</p>
 
 
-            There is a `_` in _this \_ italic_ decoration.
+
 
     test: Paragraph continuation
 
-        descrption:
+        description:
 
             A paragraph is any block of text at the same indent level and
             ending with a blank line.
@@ -1048,258 +1060,988 @@ tests:(!en) SAM Parser Tests
 
     test: Numbered lists
 
+        description:
+            Numbered lists are created by starting a line with a number followed by a period.
+            Exact numbers are not retained.
+
         case: Numbered list with spaces
 
-            0. One
+            description:
+                Numbered lists can have blank lines between the items.
 
-            0. Two
 
-            99999. Three
+            source:
+                ```(sam)
+
+                    0. One
+
+                    0. Two
+
+                    99999. Three
+
+            markup:
+
+                0. One
+
+                0. Two
+
+                99999. Three
+
+            result:
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    </ol>
+
 
         case: Numbered list no spaces
 
-            0. One
-            0. Two this
-               paragraph wraps.
+            description:
+                List are also recognized without space between items. List items can wrap
+                to another line if more indented than the number. Additional paragraphs can be
+                included if more indented than the number.
 
-             This is another para in the list.
-            99999. Three
+            source:
+                ```(sam)
+
+                    0. One
+                    0. Two this
+                       paragraph wraps.
+
+                     This is another para in the list item.
+                    99999. Three
+
+            markup:
+                0. One
+                0. Two this
+                   paragraph wraps.
+
+                 This is another para in the list item.
+                99999. Three
+
+            result:
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two this paragraph wraps.</p>
+                    <p>This is another para in the list item.</p>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    </ol>
 
         case: Numbered list mixed spacing
 
-            0. One
+            description:
+                Numbered list with inconsistent spacing.
 
-            0. Two
-            99999. Three
+            source:
+                ```(sam)
+                    0. One
 
-            7. Four
+                    0. Two
+                    99999. Three
+
+                    7. Four
+
+            markup:
+                0. One
+
+                0. Two
+                99999. Three
+
+                7. Four
+
+            result:
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ol>
 
 
 
     test: Nested numbered lists
 
+        description:
+            Lists can be nested in other lists by indening them further.
+
         case: Nested numbered list with spaces
 
-            0. One
+            description:
+                Numbered lists at different indents, with spaces between lines.
 
-            0. Two
+            source:
+                ```(sam)
+                    0. One
 
-                5. Two and a quarter
+                    0. Two
 
-                6. Two and a half
+                        5. Two and a quarter
 
-                9. Two and three quarters 2
+                        6. Two and a half
 
-            99999. Three
+                        9. Two and three quarters
 
-            7. Four
+                    99999. Three
+
+                    7. Four
+
+            markup:
+                0. One
+
+                0. Two
+
+                    5. Two and a quarter
+
+                    6. Two and a half
+
+                    9. Two and three quarters
+
+                99999. Three
+
+                7. Four
+
+            result:
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    <ol>
+                    <li>
+                    <p>Two and a quarter</p>
+                    </li>
+                    <li>
+                    <p>Two and a half</p>
+                    </li>
+                    <li>
+                    <p>Two and three quarters</p>
+                    </li>
+                    </ol>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ol>
+
 
 
         case: Nested numbered list with no spaces
 
-            0. One
-            0. Two
-                5. Two and a quarter
-                6. Two and a half
-                9. Two and three quarters 3
-            99999. Three
-            7. Four
+            description:
+                Numbered lists at different indents, with no spaces between lines.
 
-        case: Nested numbered list with mixed spacing 1
+            source:
+                ```(sam)
+                    0. One
+                    0. Two
+                        5. Two and a quarter
+                        6. Two and a half
+                        9. Two and three quarters
+                    99999. Three
+                    7. Four
 
-            0. One
-            0. Two
-                5. Two and a quarter
-                6. Two and a half
+            markup:
+                0. One
+                0. Two
+                    5. Two and a quarter
+                    6. Two and a half
+                    9. Two and three quarters
+                99999. Three
+                7. Four
 
-                9. Two and three quarters 4
+            result:
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    <ol>
+                    <li>
+                    <p>Two and a quarter</p>
+                    </li>
+                    <li>
+                    <p>Two and a half</p>
+                    </li>
+                    <li>
+                    <p>Two and three quarters</p>
+                    </li>
+                    </ol>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ol>
 
-            99999. Three
-            7. Four
+        case: Nested numbered list with mixed spacing
 
-        case: Nested numbered list with mixed spacing 2
+            description:
+                Numbered lists at different indents, with some spaces between lines.
 
-            0. One
-            0. Two
-                5. Two and a quarter
-                6. Two and a half
+            source:
+                ```(sam)
+                    0. One
+                    0. Two
+                        5. Two and a quarter
 
-                9. Two and three quarters 5
-            99999. Three
+                        6. Two and a half
+                        9. Two and three quarters
 
-            7. Four
+                    99999. Three
+
+                    7. Four
+
+            markup:
+                0. One
+                0. Two
+                    5. Two and a quarter
+
+                    6. Two and a half
+                    9. Two and three quarters
+
+                99999. Three
+
+                7. Four
+
+            result:
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    <ol>
+                    <li>
+                    <p>Two and a quarter</p>
+                    </li>
+                    <li>
+                    <p>Two and a half</p>
+                    </li>
+                    <li>
+                    <p>Two and three quarters</p>
+                    </li>
+                    </ol>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ol>
 
     test: Unordered lists
 
+        description:
+            Unordered lists are indicated by starting a line with `*`.
+
         case: Unordered list with spaces
 
-            * One
-            * Two
+            description:
+                A list with spaces between the lines.
 
-            * Three
+            source:
+                ```(sam)
+
+                    * One
+
+                    * Two
+
+                    * Three
+
+            markup:
+
+                * One
+
+                * Two
+
+                * Three
+
+            result:
+                ```(xml)
+                    <ul>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    </ul>
 
         case: Unordered list no spaces
 
-            * One
-            * Two
-            * Three
+            description:
+                A list with no spaces between the lines.
+
+            source:
+                ```(sam)
+
+                    * One
+                    * Two
+                    * Three
+
+            markup:
+
+                * One
+                * Two
+                * Three
+
+            result:
+                ```(xml)
+                    <ul>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    </ul>
 
         case: Unordered list mixed spacing
 
-            * One
+            description:
+                A list with mixed spacing between the lines.
 
-            * Two
-            * Three
+            source:
+                ```(sam)
 
-            * Four
+                    * One
+                    * Two
 
+                    * Three
+                    * Four
+
+            markup:
+
+                * One
+                * Two
+
+                * Three
+                * Four
+
+            result:
+                ```(xml)
+                    <ul>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ul>
 
 
     test: Nested unordered lists
 
+        description:
+
+            Lists can be nested using indents.
+
         case: Nested list with spaces
 
-            * One
+            description:
+                Nested lists separated by spaces.
 
-            * Two
+            source:
+                ```(sam)
 
-                * Two and a quarter
 
-                * Two and a half
+                    * One
 
-                * Two and three quarters 6
+                    * Two
 
-            * Three
+                        * Two and a quarter
 
-            * Four
+                        * Two and a half
+
+                        * Two and three quarters
+
+                    * Three
+
+                    * Four
+
+            markup:
+                * One
+
+                * Two
+
+                    * Two and a quarter
+
+                    * Two and a half
+
+                    * Two and three quarters
+
+                * Three
+
+                * Four
+
+            result:
+                ```(xml)
+                    <ul>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    <ul>
+                    <li>
+                    <p>Two and a quarter</p>
+                    </li>
+                    <li>
+                    <p>Two and a half</p>
+                    </li>
+                    <li>
+                    <p>Two and three quarters</p>
+                    </li>
+                    </ul>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ul>
+
 
 
         case: Nested unordered list with no spaces
+            description:
+                Nested lists not separated by spaces.
 
-            * One
-            * Two
-                * Two and a quarter
-                * Two and a half
-                * Two and three quarters 7
-            * Three
-            * Four
+            source:
+                ```(sam)
 
-        case: Nested unordered list with mixed spacing 1
 
-            * One
-            * Two
-                * Two and a quarter
-                * Two and a half
+                    * One
+                    * Two
+                        * Two and a quarter
+                        * Two and a half
+                        * Two and three quarters
+                    * Three
+                    * Four
 
-                * Two and three quarters 8
+            markup:
+                * One
+                * Two
+                    * Two and a quarter
+                    * Two and a half
+                    * Two and three quarters
+                * Three
+                * Four
 
-            * Three
-            * Four
+            result:
+                ```(xml)
+                    <ul>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    <ul>
+                    <li>
+                    <p>Two and a quarter</p>
+                    </li>
+                    <li>
+                    <p>Two and a half</p>
+                    </li>
+                    <li>
+                    <p>Two and three quarters</p>
+                    </li>
+                    </ul>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ul>
 
-        case: Nested unordered list with mixed spacing 2
+        case: Nested unordered list with mixed spacing
 
-            * One
-            * Two
-                * Two and a quarter
-                * Two and a half
+            description:
+                Nested lists separated by some spaces.
 
-                * Two and three quarters 9
-            * Three
+            source:
+                ```(sam)
 
-            * Four
+
+                    * One
+                    * Two
+                        * Two and a quarter
+
+                        * Two and a half
+                        * Two and three quarters
+
+                    * Three
+                    * Four
+
+            markup:
+                * One
+                * Two
+                    * Two and a quarter
+
+                    * Two and a half
+                    * Two and three quarters
+
+                * Three
+                * Four
+
+            result:
+                ```(xml)
+                    <ul>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    <ul>
+                    <li>
+                    <p>Two and a quarter</p>
+                    </li>
+                    <li>
+                    <p>Two and a half</p>
+                    </li>
+                    <li>
+                    <p>Two and three quarters</p>
+                    </li>
+                    </ul>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ul>
+
 
     test: Nested mixed lists
 
+        description:
+
+            You can nest ordered and unordered lists inside each other.
+
         case: Nested mixed lists with spaces
 
-            0. One
+            description:
 
-            0. Two
+                Unordered inside ordered list, spaces between lines.
 
-                * Two and a quarter
+            source:
+                ```(sam)
+                    0. One
 
-                * Two and a half
+                    0. Two
 
-                * Two and three quarters 10
+                        * Two and a quarter
 
-            99999. Three
+                        * Two and a half
 
-            7. Four
+                        * Two and three quarters
+
+                    99999. Three
+
+                    7. Four
+
+            markup:
+                0. One
+
+                0. Two
+
+                    * Two and a quarter
+
+                    * Two and a half
+
+                    * Two and three quarters
+
+                99999. Three
+
+                7. Four
+
+            result:
+
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    <ul>
+                    <li>
+                    <p>Two and a quarter</p>
+                    </li>
+                    <li>
+                    <p>Two and a half</p>
+                    </li>
+                    <li>
+                    <p>Two and three quarters</p>
+                    </li>
+                    </ul>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ol>
 
 
         case: Nested mixed lists with no spaces
 
-            * One
-            * Two
-                5. Two and a quarter
-                6. Two and a half
-                9. Two and three quarters 11
-            * Three
-            * Four
+            description:
 
-        case: Nested numbered lists with mixed spacing 1
+                Unordered inside ordered list, no spaces between lines.
 
-            0. One
-            0. Two
-                * Two and a quarter
-                * Two and a half
+            source:
+                ```(sam)
+                    0. One
+                    0. Two
+                        * Two and a quarter
+                        * Two and a half
+                        * Two and three quarters
+                    99999. Three
+                    7. Four
 
-                * Two and three quarters 12
+            markup:
+                0. One
+                0. Two
+                    * Two and a quarter
+                    * Two and a half
+                    * Two and three quarters
+                99999. Three
+                7. Four
 
-            99999. Three
-            7. Four
+            result:
 
-        case: Nested mixed lists with mixed spacing 2
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    <ul>
+                    <li>
+                    <p>Two and a quarter</p>
+                    </li>
+                    <li>
+                    <p>Two and a half</p>
+                    </li>
+                    <li>
+                    <p>Two and three quarters</p>
+                    </li>
+                    </ul>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ol>
 
-            * One
-            * Two
-                5. Two and a quarter
-                6. Two and a half
+        case: Nested numbered lists with mixed spacing
 
-                9. Two and three quarters 13
+            description:
 
-            * Three
+                Unordered inside ordered list, some spaces between lines.
 
-            * Four
+            source:
+                ```(sam)
+                    0. One
+
+                    0. Two
+                        * Two and a quarter
+
+                        * Two and a half
+                        * Two and three quarters
+                    99999. Three
+
+                    7. Four
+
+            markup:
+                0. One
+
+                0. Two
+                    * Two and a quarter
+
+                    * Two and a half
+                    * Two and three quarters
+                99999. Three
+
+                7. Four
+
+            result:
+
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    <ul>
+                    <li>
+                    <p>Two and a quarter</p>
+                    </li>
+                    <li>
+                    <p>Two and a half</p>
+                    </li>
+                    <li>
+                    <p>Two and three quarters</p>
+                    </li>
+                    </ul>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    <li>
+                    <p>Four</p>
+                    </li>
+                    </ol>
 
     test: One list after another
 
+        description:
+            An ordered list can follow an unordered list directly and vice versa.
+
         case: Space between lists
+            description:
+                An unordered list followed by an ordered list with a space between them.
 
-            * One
-            * Two
-            * Three
+            source:
+                ```(sam)
+                    * One
+                    * Two
+                    * Three
 
-            1. One
-            2. Two
-            3. Three
+                    1. One
+                    2. Two
+                    3. Three
+
+            markup:
+                * One
+                * Two
+                * Three
+
+                1. One
+                2. Two
+                3. Three
+
+            result:
+                ```(xml)
+
+                    <ul>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    </ul>
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    </ol>
 
 
         case: No space between lists
 
-            1. One
-            2. Two
-            3. Three this
-               paragraph wraps.
-            * One
-            * Two
-            * Three
+            description:
+                An unordered list followed by an ordered list with no space between them.
+
+            source:
+                ```(sam)
+                    * One
+                    * Two
+                    * Three
+                    1. One
+                    2. Two
+                    3. Three
+
+            markup:
+                * One
+                * Two
+                * Three
+                1. One
+                2. Two
+                3. Three
+
+            result:
+                ```(xml)
+
+                    <ul>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    </ul>
+                    <ol>
+                    <li>
+                    <p>One</p>
+                    </li>
+                    <li>
+                    <p>Two</p>
+                    </li>
+                    <li>
+                    <p>Three</p>
+                    </li>
+                    </ol>
 
     test: Literal lists
 
+        description:
+            Ordered lists have the number stripped away and are renumbered on output.
+            Unordered list have their `*` stripped away and replaced with the style of
+            bullet specified on output processing. If you want to preserve actual
+            numbers and bullets in your lists, you need to escape them so that the
+            lines are not recognized as lists items.
+
         case: Literal numbered list using \\ to escape .
 
-            2\. This is just a paragraph
+            description:
+                To have a list number recognized as a literal, escape the period
+                following the number (not the number itself). Because these are
+                now paragraphs, not lists, you must put spaces between items or
+                they will be run together into one paragraph.
+
+            source:
+                ```(sam)
+
+                    2\. This is just a paragraph
+
+                    4\. This is just a paragraph
+
+                    9\. This is just a paragraph
+
+            markup:
+                2\. This is just a paragraph
+
+                4\. This is just a paragraph
+
+                9\. This is just a paragraph
+
+            result:
+                ```(xml)
+                    <p>2. This is just a paragraph</p>
+                    <p>4. This is just a paragraph</p>
+                    <p>9. This is just a paragraph</p>
+
 
         case: Literal unordered list using \* to escape *
 
-            \* This is just a paragraph
+            description:
+                To have a list number recognized as a literal, escape the `*`. Because these are
+                now paragraphs, not lists, you must put spaces between items or
+                they will be run together into one paragraph.
+
+            source:
+                ```(sam)
+                    \* This is just a paragraph
+
+                    \* This is just a paragraph
+
+                    \* This is just a paragraph
+
+            markup:
+                \* This is just a paragraph
+
+                \* This is just a paragraph
+
+                \* This is just a paragraph
+
+            result:
+                ```(xml)
+                    <p>* This is just a paragraph</p>
+                    <p>* This is just a paragraph</p>
+                    <p>* This is just a paragraph</p>
+
 
     test: XML reserved characters in attributes
+        description:
+            XML reserved characters should be translated to character entities
+            when producing XML output.
 
-        case: XML reserved characters in citation specifically
+        case: XML reserved characters in citation specifically attribute
 
-            {Skimbleshanks}(animal '"Old  <>& Possum"' (Eliott)).
+            description:
+                XML reserved characters occurring within the text of a "specifically" attribute.
+
+            source:
+                ```(sam)
+                    {Skimbleshanks}(animal '"Old  <>& Possum"' (Eliott)).
+
+            markup:
+                {Skimbleshanks}(animal '"Old  <>& Possum"' (Eliott)).
+
+            result:
+                ```(xml)
+                    <p><span><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp; Possum&quot;" namespace="Eliott">Skimbleshanks</annotation></span>.</p>
 
         case: Quotes in link shortcut.
 
@@ -1325,25 +2067,9 @@ tests:(!en) SAM Parser Tests
             * first thing in this section.
             * There is no space between these list items.
 
-            This paragraph contains a line {Wikipedia}(http://wikipedia.com (goo)).
+            This paragraph contains a link {Wikipedia}(http://wikipedia.com (goo)).
 
-            This paragraph contains a line {Wikipedia}(link "http://wikipedia.com").
-
-            5. Five
-                0. Five and a half
-
-                0. Five and three quarters
-
-            6. Six
-
-            7. Seven
-
-            8. Eight and
-               a half.
-
-            9. Nine
-
-            10. Ten
+            This paragraph contains a link {Wikipedia}(link "http://wikipedia.com").
 
             {Fragments}(feature) are a {content reuse}(task "1reusing content" (foo))
             feature of the {EPPO-simple}(feature) {plugin}( feature).[*bar]
@@ -1510,9 +2236,6 @@ tests:(!en) SAM Parser Tests
             </foo>
 
 
-            Fragments are recursive. That is, {Fragments} can \{contain} other fragments and
-            fragment references.
-
             <?xml version="1.0" encoding="UTF-8"?>
             <foo bar="bat">
                 <boo/>
@@ -1543,17 +2266,3 @@ tests:(!en) SAM Parser Tests
                 state: broken "call the service desk"
                     printer: beeps twice
                     indicator: red
-
-            |p| The p element represents a paragraph. It is recognized as a block of
-            lines with no leading tag. It ends with a blank line. p elements are the
-            only elements that can contain decorations and annotations.
-            |bold|(*foo2 ?bar #bat) The bold element is a decoration occurring within text and is
-            indicated by surrounding the text with asterisks.
-            |{italic}(style "|")| The italic | decoration is indicated by surrounding the text
-            with underscores.
-            |code| The code decoration is indicated by backticks
-
-            index:
-                    entry:: type, term
-                        feature, fragment
-                        feature, fragments
