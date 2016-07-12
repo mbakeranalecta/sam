@@ -75,7 +75,7 @@ class SamParser:
             'num-list-item': re.compile(re_indent + re_ol_marker + re_attributes + re_spaces + re_content, re.U),
             'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
             'block-insert': re.compile(re_indent + r'>>>' + re_attributes, re.U),
-            'string-def': re.compile(re_indent + r'\$' + re_name + '=' + re_content, re.U),
+            'string-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U),
             'embedded-xml': re.compile(re_indent + r'(?P<xmltag>\<\?xml.+)', re.U)
         }
 

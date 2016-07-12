@@ -2427,7 +2427,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <string id="foo">bar bar black sheep</string>
+                    <string name="foo">bar bar black sheep</string>
 
         case: String references
             description:
