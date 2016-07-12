@@ -2562,7 +2562,7 @@ tests:(!en) SAM Parser Tests
             The canonical way to handle quotes in SAM is to use real
             curly quotes to begin with. All SAM documents are UTF-8.
 
-            Note: These test will fail if smart quotes is not selected
+            Note: These tests will fail if smart quotes is not selected
             using the `-q` option of the parser command line or by
             setting the `smart_quotes` attribute of the SamParser
             object to `True`.

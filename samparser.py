@@ -967,12 +967,17 @@ class StringSource:
 
 
 # Flow regex component expressions
-re_single_quote_close = '(?<=[\w\.\,\"\)])\'((?=[\.\s"}])|$)'
+re_single_quote_close = '(?<=[\w\.\,\"\)}])\'((?=[\.\s"}])|$)'
 re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{])'
-re_double_quote_close = '(?<=[\w\.\,\'\)])"((?=[\.\s\'},!:;])|$)'
-re_double_quote_open = '(^|(?<=[\s\'{]))"(?=[\w\'{])'
+re_double_quote_close = '(?<=[\w\.\,\'\)\}])"((?=[\.\s\'\)},!:;])|$)'
+re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{])'
 re_apostrophe = "(?<=[\w`\*_])'(?=\w)"
 
+smart_quote_subs = {re_double_quote_close:'”',
+                    re_double_quote_open: '“',
+                    re_single_quote_close:'’',
+                    re_single_quote_open: '‘',
+                    re_apostrophe: '’'}
 
 class SamParaParser:
     def __init__(self):
@@ -1067,6 +1072,9 @@ class SamParaParser:
             self.flow.append(self.current_string)
             self.current_string = ''
             text = self._unescape(match.group("text"))
+            if self.smart_quotes:
+                text=multi_replace(text, smart_quote_subs)
+            # FIXME: Scan text for smart quotes
             self.flow.append(Span(text))
             para.advance(len(match.group(0)))
 
@@ -1517,6 +1525,13 @@ def escape_for_xml_attribute(s):
         return s.translate(t)
     except AttributeError:
         return s
+
+
+def multi_replace(string, subs):
+    for pattern, sub in subs.items():
+        r = re.compile(pattern)
+        string= r.sub(sub, string)
+    return string
 
 
 def SAM_parser_warning(warning):
