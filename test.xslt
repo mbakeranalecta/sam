@@ -1,6 +1,6 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:my="my:my">
 
-    <xsl:output method="html" omit-xml-declaration="no"/>
+    <xsl:output method="html" omit-xml-declaration="no" />
 
     <xsl:preserve-space elements="codeblock markup"/>
 
@@ -66,13 +66,21 @@
                     <a href="#{generate-id()}">
                         <xsl:value-of select="title"/>
                     </a>
+                    <ul>
+                         <xsl:for-each select="case">
+                             <li>
+                                 <a href="#{generate-id()}">
+                                     <xsl:value-of select="title"/>
+                                 </a>
+                             </li>
+                         </xsl:for-each>
+                    </ul>
                 </li>
             </xsl:for-each>
         </ul>
     </xsl:template>
 
     <xsl:template match="test">
-        <a name="{generate-id()}"/>
         <xsl:apply-templates/>
         <a href="#top">^top</a>
     </xsl:template>
@@ -86,7 +94,7 @@
     </xsl:template>
 
     <xsl:template match="case/title">
-        <h3>Case: <xsl:apply-templates/></h3>
+        <h3 id="{generate-id(..)}">Case: <xsl:apply-templates/></h3>
     </xsl:template>
 
     <xsl:template match="case/source">
@@ -279,4 +287,8 @@
        </xsl:if>
    </xsl:if>
  </xsl:template>
+    
+    <xsl:template match="description">
+        <xsl:apply-templates/>
+    </xsl:template>
 </xsl:stylesheet>

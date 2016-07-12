@@ -116,6 +116,11 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>When using the map approach, it is important to think about how your content will <span><annotation type="concept" specifically="single sourcing">single source</annotation></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span><citation type="nameref" value="single_source">single sourcing chapter</citation></span>.</p>
 
+        case: annotation with language metadata
+
+            Press {Enter}(key !fr-CA)
+
+
     test: Record sets
 
         description:
@@ -298,6 +303,10 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(XML)
                     <p>You can <span><citation type="citation" value="Melville, 1851">call me Ishmael</citation></span>.</p>
+
+        case: Literal square brackets
+
+                    Press \[Enter].
 
     test: Grids
 
@@ -2049,84 +2058,178 @@ tests:(!en) SAM Parser Tests
             You can insert a fragment of XML. It must be well formed and must start with an XML header. It must be UTF-8.
             It will be copied to output verbatim, minus the XML header.
 
-            case:
-                Inserted XML.
-
-                source:
-                    ```(sam)
-                        <?xml version="1.0" encoding="UTF-8"?>
-                        <foo bar="bat">
-                            <boo/>
-                            <hoo/>
-                        </foo>
-
-                markup:
+        case: XML fragment
+            source:
+                ```(sam)
                     <?xml version="1.0" encoding="UTF-8"?>
                     <foo bar="bat">
                         <boo/>
                         <hoo/>
                     </foo>
 
-                result:
-                    ```(xml)
-                        <foo bar="bat">
-                            <boo/>
-                            <hoo/>
-                        </foo>
+            markup:
+                <?xml version="1.0" encoding="UTF-8"?>
+                <foo bar="bat">
+                    <boo/>
+                    <hoo/>
+                </foo>
+
+            result:
+                ```(xml)
+                    <foo bar="bat">
+                        <boo/>
+                        <hoo/>
+                    </foo>
+
+    test: Nested fields
+        description:
+            You can create a structure of nested fields.
+
+        case: Nested fields
+            description:
+                Nested fields. Anything with a child, of course, is a block, not a field.
+
+            source:
+                ```(sam)
+                    address:
+                        name: Fred Flintstone
+                        address: Bedrock
+                        era: Stone Age
+
+            markup:
+                address:
+                    name: Fred Flintstone
+                    address: Bedrock
+                    era: Stone Age
+
+            result:
+                ```(xml)
+                    <address>
+                    <name>Fred Flintstone</name>
+                    <address>Bedrock</address>
+                    <era>Stone Age</era>
+                    </address>
+
+    test: Paragraphs
+
+        case: Paragraph
+            description:
 
 
 
+    test: Lines
 
-    test:(#feature-fragments ) Fragments
-        head:(#foo)
-            foo: barney {and}(conjunction) betty
-            baz: bat
-            $name=fred {and}(conjunction) wilma
-            history:: date, author, comment, status
-                2014-06-23, mbaker, New\, Topic, In progress
-                2016-07-01, mbaker, Revision, In progress
-            index:: type, term
-                feature, fragment
-                feature, fragments
-        body: How Fragments Work
+        description:
+            Lines allows you to create text with specific line breaks. Lines are created by
+            beginning each line on a new line and starting with a `|` character. There must
+            be one space after the `|`, which is discarded. All other spaces after `|` are
+            retained. (Retained spaces are not tested for in text.xslt because the test
+            normalize space.)
 
+        case: Lines
 
+            description:
+                Lines with various annotations:
 
-
-            Press \[Enter].
-
-            Press {Enter}(key !fr-CA)
-
-
-            footnote:(*bar)
-                This is a footnote.
-
-
-
-            >>>(image foo.gif #bar ?baz ?bat)
-
-
-
-            This sentence includes a string reference >(string name). And a shortcut version >($name)
-
-
-
-            """[*bing bang boom]
-                |(#foo2) You gotta walk that lonesome valley,[*bing bang boom]
+            source:
+                ```(sam)
+                    |(#foo2) You gotta walk that lonesome valley,[*bing page 22]
+                    | You gotta walk it by yourself,
+                    |(?bar) Nobody here can walk it for you,
+                    |    You gotta walk it by yourself.
+            markup:
+                |(#foo2) You gotta walk that lonesome valley,[*bing page 22]
                 | You gotta walk it by yourself,
                 |(?bar) Nobody here can walk it for you,
                 |    You gotta walk it by yourself.
 
+            result:
+                ```(xml)
+                    <line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+                    <line>You gotta walk it by yourself,</line>
+                    <line conditions="bar">Nobody here can walk it for you,</line>
+                    <line>   You gotta walk it by yourself.</line>
 
-            This sentence[*bing bang boom] contains an unmatched \{ followed by an {annotated}(word) phrase.
+        case: Lines inside a blockquote
+
+            description:
+                Lines should work inside a block quote.
+
+            source:
+                ```(sam)
+                    """[*bing page 22]
+                        |(#foo2) You gotta walk that lonesome valley,[*bing page 22]
+                        | You gotta walk it by yourself,
+                        |(?bar) Nobody here can walk it for you,
+                        |    You gotta walk it by yourself.
+
+            markup:
+                """[*bing page 22]
+                    |(#foo2) You gotta walk that lonesome valley,[*bing page 22]
+                    | You gotta walk it by yourself,
+                    |(?bar) Nobody here can walk it for you,
+                    |    You gotta walk it by yourself.
+
+            result:
+                ```(xml)
+                    <blockquote>
+                    <citation type="idref" value="bing" extra=" page 22"/><line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+                    <line>You gotta walk it by yourself,</line>
+                    <line conditions="bar">Nobody here can walk it for you,</line>
+                    <line>   You gotta walk it by yourself.</line>
+                    </blockquote>
+
+    test: Blocks
+
+        description:
+            Blocks are the basic building block of a SAM file. This whole document is a
+            test case for blocks.
 
 
-            |(#foo2) You gotta walk that lonesome valley,[*bing bang boom]
-            | You gotta walk it by yourself,
-            |(?bar) Nobody here can walk it for you,
-            |    You gotta walk it by yourself.
+        case: Language metadata
+
+            description:
+                A block with language metadata.
+
+            source:
 
 
+
+        case: Complex block structure
+
+            head:(#foo)
+                foo: barney {and}(conjunction) betty
+                baz: bat
+                $name=fred {and}(conjunction) wilma
+                history:: date, author, comment, status
+                    2014-06-23, mbaker, New\, Topic, In progress
+                    2016-07-01, mbaker, Revision, In progress
+                index:: type, term
+                    feature, fragment
+                    feature, fragments
+            body: How Fragments Work
+                Stuff on how fragments work.
+
+
+
+    test: Block inserts
+        case: Image insert
+
+            >>>(image foo.gif #bar ?baz ?bat)
+
+    test: Strings
+
+        case: String definition
+            $foo = bar bar black sheep
+
+        case: String references
+
+            This sentence includes a string reference >(string name). And a shortcut version >($name)
+
+
+    test: Fragments
+
+        case: Fragment
             ~~~(#foo3 ?gruz-natz)
                 $a=apple
                 $b=banana
@@ -2142,108 +2245,131 @@ tests:(!en) SAM Parser Tests
                 $a=apricot
                 $b=breadfruit
 
-            ```
-                foo
 
-                bar
+    test: Blockquotes
+        description:
+            Blockquotes are introduced by three quotations marke (single or double). The content of
+            a blockquote is normal SAM markup.
 
-            This {sentence}(grammatical-construct) contains a repeated annotation: the word
-            {sentence} without any annotation metadata. It should be annotated the same as
-            the previous instance. If you just want braces around the word
-            \{sentence} you need to precede it with a backslash.
-
-            This sentence also references the word {sentence} and should be annotated on output.
-
-            A fragment is an \{arbitrary\}\\ sequence of *text structures* (paragraphs, lists,
-            etc.) that _has been given_ an id so that it can be \\{included}(bold) by reference at other
-            \_points_ in the content.
-
-            ```(xml1.0 #foo4 ?bar)[c:/foo]
-                <fragment id="test-fragment">
-                    <local-strings>
-                        <string id="test-string-1"><bold>test string one</bold></string>
-                        <string id="test-string-2"><italic>test string two</italic></string>
-                    </local-strings>
-                    <p>This is a piece of text in a fragment. It includes references to local
-                    strings <string-ref id-ref="test-string-1"/> and <string-ref id-ref="test-string-2"/>.
-                    And to a global string <string-ref id-ref="product"/></p>
-                </fragment>
-                <p>The following is a reference to the fragment defined above:</p>
-                <fragment-ref id-ref="test-fragment">
-                    <local-strings>
-                        <string id="test-string-1"><code>this is test string number one</code></string>
-                    </local-strings>
-                </fragment-ref>
+        case: Blockquote
+            description:
+                A blockquote with management domain metadata.
 
 
-            table:(*my-table ?foobat #zombie) An important table
-                row:: cell, cell, cell
-                    foo, bar, baz
-                    a, b, c
+            source:
+                ```(sam)
+                    After this paragraph, there is a blockquote:
 
-                    hi, lo, med
+                    """(*foo #bar ?baz)
+                        The quick brown fox jumps over the lazy dog.
+
+                        And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
+
+            markup:
+                After this paragraph, there is a blockquote:
+
+                """(*foo #bar ?baz)
+                    The quick brown fox jumps over the lazy dog.
+
+                    And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
+
+            result:
+                ```(xml)
+                    <p>After this paragraph, there is a blockquote:</p>
+                    <blockquote conditions="baz" id="foo" name="bar">
+                    <p>The quick brown fox jumps over the lazy dog.</p>
+                    <p>And the <span><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></span> jumps over the moon.</p>
+                    </blockquote>
+
+        case: Explicit blockquote
+            description:
+                Blockquote with an explicit `blockquote` block tag.
+
+            source:
+                ```(sam)
+                    blockquote:[http://example.com/page]
+                        Wafting zyphers quickly vexed jumbo.
+
+                        Far and few are the lands where the jumblies live.
+
+            markup:
+                blockquote:[http://example.com/page]
+                    Wafting zyphers quickly vexed jumbo.
+
+                    Far and few are the lands where the jumblies live.
+
+            result:
+                ```(xml)
+                    <blockquote>
+                    <citation type="citation" value="http://example.com/page" extra=""/><p>Wafting zyphers quickly vexed jumbo.</p>
+                    <p>Far and few are the lands where the jumblies live.</p>
+                    </blockquote>
+
+        case: Alternate block quote
+            description:
+                Blockquote with single quotes.
+
+            source:
+                ```(sam)
+                    This is another paragraph. Then there is an alternate blockquote:
+
+                    '''( #foo5 ?bar ?baz)[Mother Goose]
+                        The quick brown fox jumps over the lazy dog.
+
+                    '''
+                        This is a blockquote without a citation.
+
+            markup:
+                This is another paragraph. Then there is an alternate blockquote:
+
+                '''( #foo5 ?bar ?baz)[Mother Goose]
+                    The quick brown fox jumps over the lazy dog.
+
+                '''
+                    This is a blockquote without a citation.
 
 
-            terminal:
-                prompt: $
-                input: dir
-                response: Empty directory.
-
-            After this paragraph, there is a blockquote:
-
-            """(*foo #bar ?baz)
-                The quick brown fox jumps over the lazy dog.
-
-                And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
-
-            blockquote:[http://example.com/page]
-                Wafting zyphers quickly vexed jumbo.
-
-                Far and few are the lands where the jumblies live.
-
-
-            This is another paragraph. Then there is an alternate blockquote:
-
-            '''( #foo5 ?bar ?baz)[Mother Goose]
-                The quick brown fox jumps over the lazy dog.
-
-            '''
-                This is a blockquote without a citation.
+            result:
+                ```(xml)
+                    <p>This is another paragraph. Then there is an alternate blockquote:</p>
+                    <blockquote conditions="bar baz" name="foo5">
+                    <citation type="citation" value="Mother Goose" extra=""/><p>The quick brown fox jumps over the lazy dog.</p>
+                    </blockquote>
+                    <blockquote>
+                    <p>This is a blockquote without a citation.</p>
+                    </blockquote>
 
 
 
 
-            If a fragment is defined inline, it is included where it occurs. {Fragments}(song) in fragment
-            files are not included anywhere unless they are pulled in by a fragment reference.
 
+    test: Inline inserts
 
+        description:
+            Inline inserts are an instructions to insert something into the middle of a paragraph.
 
-            A fragment reference inserts a fragment by ID at the place it occurs in the text.
+        case: Inline inserts
+            description:
+                Inline inserts.
 
+            source:
+                ```(sam)
+                    Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
+                    reused, <fragments> & fragment references can both define local {strings}(feature).
+                    Any {string references}(feature) inside a fragment will be resolved by looking first
+                    at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
+                    in the fragment definition, and then at global strings. In effect, this means
+                    that you can define string substitutions whenever you insert a fragment into your content.
 
+            markup:
 
+                Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
+                reused, <fragments> & fragment references can both define local {strings}(feature).
+                Any {string references}(feature) inside a fragment will be resolved by looking first
+                at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
+                in the fragment definition, and then at global strings. In effect, this means
+                that you can define string substitutions whenever you insert a fragment into your content.
 
-            Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
-            reused, <fragments> & fragment references can both define local {strings}(feature).
-            Any {string references}(feature) inside a fragment will be resolved by looking first
-            at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
-            in the fragment definition, and then at global strings. In effect, this means
-            that you can define string substitutions whenever you insert a fragment into your content.
-
-            state-detection:
-                sign: printer "the printer"
-                    signal: chirps
-                    signal: beeps twice
-                sign: indicator "the indicator"
-                    signal: red
-                    signal: yellow
-                    signal: green
-                state: success "retrieve print job"
-                    printer: chirps
-                    indicator: green
-                state: jammed "clear paper jam"
-                    printer: beeps twice
-                    indicator: yellow
-                state: broken "call the service desk"
-                    printer: beeps twice
-                    indicator: red
+            result:
+                ```(xml)
+                    <p>Because you often want to <insert item="foo.gif" name="bar" conditions="baz bat" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <span><annotation type="feature">strings</annotation></span>. Any <span><annotation type="feature">string references</annotation></span> inside a fragment will be resolved by looking first at local-strings defined in the <insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
