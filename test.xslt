@@ -19,7 +19,9 @@
           <xsl:text> </xsl:text>
           <xsl:value-of select="name()"/>
           <xsl:text>="</xsl:text>
-          <xsl:call-template name="multiReplace"/>
+          <xsl:call-template name="multiReplace">
+              <xsl:with-param name="pRep" select="$attribute-reps"/>
+          </xsl:call-template>
 
           <xsl:text>"</xsl:text>
       </xsl:for-each>
@@ -38,10 +40,8 @@
   </xsl:template>
 
     <xsl:template match="*/text()" mode="reproduce-markup">
-        <xsl:call-template name="string-replace-all">
-            <xsl:with-param name="text" select="." />
-            <xsl:with-param name="replace" select="'&amp;'" />
-            <xsl:with-param name="by" select="'&amp;amp;'" />
+        <xsl:call-template name="multiReplace">
+            <xsl:with-param name="pRep" select="$element-reps"/> 
         </xsl:call-template>
 
     </xsl:template>
@@ -53,31 +53,34 @@
             </head>
             <body>
                 <a name="top"/>
-                <xsl:apply-templates/>
+                <xsl:apply-templates select="title"/>
+                <xsl:apply-templates select="description"/>
+                <h2>Contents</h2>
+                <ul>
+                    <xsl:for-each select="test">
+                        <li>
+                            <a href="#{generate-id()}">
+                                <xsl:value-of select="title"/>
+                            </a>
+                            <ul>
+                                 <xsl:for-each select="case">
+                                     <li>
+                                         <a href="#{generate-id()}">
+                                             <xsl:value-of select="title"/>
+                                         </a>
+                                     </li>
+                                 </xsl:for-each>
+                            </ul>
+                        </li>
+                    </xsl:for-each>
+                </ul>
+                <xsl:apply-templates select="test"/>
             </body>
         </html>
     </xsl:template>
 
     <xsl:template match="tests/title">
-        <h2><xsl:apply-templates/></h2>
-        <ul>
-            <xsl:for-each select="../test">
-                <li>
-                    <a href="#{generate-id()}">
-                        <xsl:value-of select="title"/>
-                    </a>
-                    <ul>
-                         <xsl:for-each select="case">
-                             <li>
-                                 <a href="#{generate-id()}">
-                                     <xsl:value-of select="title"/>
-                                 </a>
-                             </li>
-                         </xsl:for-each>
-                    </ul>
-                </li>
-            </xsl:for-each>
-        </ul>
+        <h1><xsl:apply-templates/></h1>
     </xsl:template>
 
     <xsl:template match="test">
@@ -248,7 +251,7 @@
         </xsl:choose>
     </xsl:template>
 
-  <my:reps>
+  <my:attribute-reps>
   <rep>
     <old>&amp;</old>
     <new>&amp;amp;</new>
@@ -265,13 +268,30 @@
     <old>&gt;</old>
     <new>&amp;gt;</new>
   </rep>
- </my:reps>
+ </my:attribute-reps>
+    
+<my:element-reps>
+    <rep>
+        <old>&amp;</old>
+        <new>&amp;amp;</new>
+    </rep>
+    <rep>
+        <old>&lt;</old>
+        <new>&amp;lt;</new>
+    </rep>
+    <rep>
+        <old>&gt;</old>
+        <new>&amp;gt;</new>
+    </rep>
+    
+</my:element-reps>
 
- <xsl:variable name="vReps" select="document('')/*/my:reps/*"/>
-
+    <xsl:variable name="element-reps" select="document('')/*/my:element-reps/*"/>
+    <xsl:variable name="attribute-reps" select="document('')/*/my:attribute-reps/*"/>
+    
  <xsl:template name="multiReplace">
   <xsl:param name="pText" select="."/>
-  <xsl:param name="pRep" select="$vReps[1]"/>
+  <xsl:param name="pRep"/>
 
   <xsl:choose>
     <xsl:when test="not($pRep)"><xsl:value-of select="$pText"/></xsl:when>

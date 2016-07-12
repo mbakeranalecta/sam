@@ -8,6 +8,25 @@
 
 tests:(!en) SAM Parser Tests
 
+    description:
+
+        This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string
+        version of the markup under the `markup:` heading and comparing it to the
+        text of the expected result as shown under the `result:` heading in the
+        test file. This is not a perfect test. Two issues are known:
+
+        * Test are done on whitespace normalized versions of the XML markup
+          strings. As such, they do not validly test situations where whitespace
+          should be retained, such as in codeblocks and at the beginning of
+          lines.
+
+        * The SAM parser does not currently guarantee the order in which
+          XML attributes are generated. (From an XML point of view, it does
+          not need to.) However the expected result markup in the test document
+          lists them in a fixed order. If the expected and actual markup
+          differ in the order of attributes, the test will fail even though
+          the two pieces of markup are semantically identical.
+
     test: Blocks
 
         description:
@@ -2229,7 +2248,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <p>There is a <span><annotation type="code">*</annotation></span> in <span><annotation type="bold">this * bold</annotation></span> decoration.</p>
-
+                    <p>There is a <span><annotation type="code">_</annotation></span> in <span><annotation type="italic">this _ italic</annotation></span> decoration.</p>
 
         case: XML reserved characters in citation specifically attribute
 
@@ -2423,7 +2442,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                   <p>This sentence includes a string reference <insert type="string" id="name"/>. And a shortcut version <insert type="string" id="name"/>.</p>
+                   <p>This sentence includes a string reference <insert type="string" item="name"/>. And a shortcut version <insert type="string" item="name"/>.</p>
 
     test: Fragments
         description:
