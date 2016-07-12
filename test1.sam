@@ -116,9 +116,20 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>When using the map approach, it is important to think about how your content will <span><annotation type="concept" specifically="single sourcing">single source</annotation></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span><citation type="nameref" value="single_source">single sourcing chapter</citation></span>.</p>
 
-        case: annotation with language metadata
+        case: Annotation with language metadata
+            description:
+                You can add language metadata to a phrase.
 
-            Press {Enter}(key !fr-CA)
+            source:
+                ```(sam)
+                    Press {Enter}(key !fr-CA)
+            markup:
+                Press {Enter}(key !fr-CA)
+
+            result:
+                ```(xml)
+                    <p>Press <span><annotation type="key" xml:lang="fr-CA">Enter</annotation></span></p>
+
 
 
     test: Record sets
@@ -305,8 +316,20 @@ tests:(!en) SAM Parser Tests
                     <p>You can <span><citation type="citation" value="Melville, 1851">call me Ishmael</citation></span>.</p>
 
         case: Literal square brackets
+            description:
+                If you want to enter literal square brackets, rather than create a citation,
+                escape the opening square bracket with a backslash.
 
+            source:
+                ```(xml)
                     Press \[Enter].
+
+            markup:
+                Press \[Enter].
+
+            result:
+                ```(xml)
+                    <p>Press [Enter].</p>
 
     test: Grids
 
@@ -2059,6 +2082,10 @@ tests:(!en) SAM Parser Tests
             It will be copied to output verbatim, minus the XML header.
 
         case: XML fragment
+
+            description:
+                A chunk of XML.
+
             source:
                 ```(sam)
                     <?xml version="1.0" encoding="UTF-8"?>
@@ -2112,8 +2139,27 @@ tests:(!en) SAM Parser Tests
 
     test: Paragraphs
 
+        description:
+            A paragraph is a block of text over consecutive lines.
+
         case: Paragraph
             description:
+                A simple multi-line paragraph ending with a blank space.
+
+            source:
+                ```(sam)
+                    Wafting zephyrs
+                    quickly vexed
+                    Jumbo.
+
+            markup:
+                Wafting zephyrs
+                quickly vexed
+                Jumbo.
+
+            result:
+                ```(xml)
+                    <p>Wafting zephyrs quickly vexed Jumbo.</p>
 
 
 
@@ -2192,60 +2238,222 @@ tests:(!en) SAM Parser Tests
                 A block with language metadata.
 
             source:
+                ```(sam)
+                    section:(!sp)
+                        Feliz Navidad
+
+            markup:
+                section:(!sp)
+                    Feliz Navidad
+
+            result:
+                ```(xml)
+                    <section xml:lang="sp">
+                        <p>Feliz Navidad</p>
+                    </section>
 
 
 
         case: Complex block structure
 
-            head:(#foo)
-                foo: barney {and}(conjunction) betty
-                baz: bat
-                $name=fred {and}(conjunction) wilma
-                history:: date, author, comment, status
-                    2014-06-23, mbaker, New\, Topic, In progress
-                    2016-07-01, mbaker, Revision, In progress
-                index:: type, term
-                    feature, fragment
-                    feature, fragments
-            body: How Fragments Work
-                Stuff on how fragments work.
+            description:
+                A complex block with various structures inside.
 
+            source:
+                ```(sam)
+                    document:
+                        head:(#foo)
+                            foo: barney {and}(conjunction) betty
+                            baz: bat
+                            $name=fred {and}(conjunction) wilma
+                            history:: date, author, comment, status
+                                2014-06-23, mbaker, New\, Topic, In progress
+                                2016-07-01, mbaker, Revision, In progress
+                            index:: type, term
+                                feature, fragment
+                                feature, fragments
+                        body: How Fragments Work
+                            Stuff on how fragments work.
+
+            markup:
+                document:
+                    head:(#foo)
+                        foo: barney {and}(conjunction) betty
+                        baz: bat
+                        $name=fred {and}(conjunction) wilma
+                        history:: date, author, comment, status
+                            2014-06-23, mbaker, New\, Topic, In progress
+                            2016-07-01, mbaker, Revision, In progress
+                        index:: type, term
+                            feature, fragment
+                            feature, fragments
+                    body: How Fragments Work
+                        Stuff on how fragments work.
+
+            result:
+                ```(xml)
+                    <document>
+                    <head name="foo">
+                    <foo>barney <span><annotation type="conjunction">and</annotation></span> betty</foo>
+                    <baz>bat</baz>
+                    <string name="name">fred <span><annotation type="conjunction">and</annotation></span> wilma</string>
+                    <history>
+                    <row>
+                    <date>2014-06-23</date>
+                    <author>mbaker</author>
+                    <comment>New, Topic</comment>
+                    <status>In progress</status>
+                    </row>
+                    <row>
+                    <date>2016-07-01</date>
+                    <author>mbaker</author>
+                    <comment>Revision</comment>
+                    <status>In progress</status>
+                    </row>
+                    </history>
+                    <index>
+                    <row>
+                    <type>feature</type>
+                    <term>fragment</term>
+                    </row>
+                    <row>
+                    <type>feature</type>
+                    <term>fragments</term>
+                    </row>
+                    </index>
+                    </head>
+                    <body>
+                    <title>How Fragments Work</title>
+                    <p>Stuff on how fragments work.</p>
+                    </body>
+                    </document>
 
 
     test: Block inserts
-        case: Image insert
 
-            >>>(image foo.gif #bar ?baz ?bat)
+        description:
+
+            An insert creates an instruction to insert something into the document.
+
+        case: Image insert
+            description:
+                Insert an image.
+
+            source:
+                ```(sam)
+                    >>>(image foo.gif)
+
+            markup:
+                >>>(image foo.gif)
+
+            result:
+                ```(xml)
+                    <insert type="image" item="foo.gif"/>
 
     test: Strings
 
+        description:
+            A string is a variable that can contain text, including annotations and citations.
+
         case: String definition
-            $foo = bar bar black sheep
+            description:
+                A string definition.
+
+            source:
+                ```(sam)
+                    $foo = bar bar black sheep
+
+            markup:
+                $foo = bar bar black sheep
+
+            result:
+                ```(xml)
+                    <string id="foo">bar bar black sheep</string>
 
         case: String references
+            description:
+                Inserting the value of a string.
 
-            This sentence includes a string reference >(string name). And a shortcut version >($name)
+            source:
+                ```(sam)
+                    This sentence includes a string reference >(string name). And a shortcut version >($name).
 
+            markup:
+                This sentence includes a string reference >(string name). And a shortcut version >($name).
+
+            result:
+                ```(xml)
+                   <p>This sentence includes a string reference <insert type="string" id="name"/>. And a shortcut version <insert type="string" id="name"/>.</p>
 
     test: Fragments
+        description:
+            Fragments are sequences of paragraphs that can have management metadata applied to them
+            and that can be inserted in other places.
 
         case: Fragment
-            ~~~(#foo3 ?gruz-natz)
-                $a=apple
-                $b=banana
+            description:
+                A fragment definition.
 
-                This is a sentence inside a fragment.
+            source:
+                ```(sam)
+                    ~~~(#foo3 ?gruz-natz)
+                        $a=apple
+                        $b=banana
 
-                ~~~(#gruznatz)
-                    $p=peach
+                        This is a sentence inside a fragment.
 
-                    This is a nested fragment.
+                        ~~~(#gruznatz)
+                            $p=peach
 
-            >>>(~foobar)
-                $a=apricot
-                $b=breadfruit
+                            This is a nested fragment.
 
+            markup:
+                ~~~(#foo3 ?gruz-natz)
+                    $a=apple
+                    $b=banana
 
+                    This is a sentence inside a fragment.
+
+                    ~~~(#gruznatz)
+                        $p=peach
+
+                        This is a nested fragment.
+
+            result:
+                ```(xml)
+                    <fragment conditions="gruz-natz" name="foo3">
+                    <string name="a">apple</string>
+                    <string name="b">banana</string>
+                    <p>This is a sentence inside a fragment.</p>
+                    <fragment name="gruznatz">
+                    <string name="p">peach</string>
+                    <p>This is a nested fragment.</p>
+                    </fragment>
+                    </fragment>
+
+        case: Insert a fragment
+
+            description:
+                An instruction to insert a fragment. Note that actually resolving an inserting
+                the fragment is a job for the application layer.
+
+            source:
+                ```(sam)
+                    >>>(~foobar)
+                        $a=apricot
+                        $b=breadfruit
+
+            markup:
+                >>>(~foobar)
+                    $a=apricot
+                    $b=breadfruit
+
+            result:
+                ```(xml)
+                    <insert item="foobar" type="fragment">
+                    <string name="a">apricot</string>
+                    <string name="b">breadfruit</string>
+                    </insert>
     test: Blockquotes
         description:
             Blockquotes are introduced by three quotations marke (single or double). The content of
