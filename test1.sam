@@ -27,6 +27,13 @@ tests:(!en) SAM Parser Tests
           differ in the order of attributes, the test will fail even though
           the two pieces of markup are semantically identical.
 
+        When running this test you should relieve one SAM Parser Warning:
+
+        ```(terminal)
+            SAM parser warning: Unannotated phrase found: {should be reported} If you are trying to insert curly braces into the document, use \{should be reported}.
+
+        This is a test to make sure unannotated phrases are being reported correctly.
+
     test: Blocks
 
         description:
