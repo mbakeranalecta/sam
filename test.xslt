@@ -202,6 +202,28 @@
         <br/>
     </xsl:template>
     
+    <xsl:template match="ll">
+        <xsl:apply-templates/>
+    </xsl:template>
+    
+    <xsl:template match="ll/li">
+        <xsl:apply-templates/>
+    </xsl:template>
+    
+    <xsl:template match="ll/li/label"/>
+    
+    <xsl:template match="ll/li/p[1]">
+        <p>
+           <b>
+               <xsl:value-of select="../label"/>
+               <xsl:text>: </xsl:text>
+           </b>
+            <xsl:apply-templates/>
+        </p>
+    </xsl:template>
+
+    
+
     <xsl:template name="string-replace-all">
         <xsl:param name="text" />
         <xsl:param name="replace" />

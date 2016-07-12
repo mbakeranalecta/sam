@@ -8,157 +8,78 @@
 
 tests:(!en) SAM Parser Tests
 
-    test: Annotations and Citations
+    test: Blocks
 
         description:
+            Blocks are the basic building block of a SAM file. This whole document is a
+            test case for blocks.
 
-            A phrase can have one or more annotations or citations attached to it.
-            On output, the text of the phrase is wrapped in the annotations and
-            citations in the order they were specified in source.
 
-        case: Multiple annotations
+        case: Language metadata
 
             description:
-                Spans with more than one attribute in a chain.
+                A block with language metadata.
 
             source:
                 ```(sam)
-                    This is {very}(bold) important.
-
-                    This is {very}(bold)(italic) important.
-
-                    This is {very}(bold)(italic)(green) important.
-
-                    This `foo`(bar) baz.
+                    section:(!sp)
+                        Feliz Navidad
 
             markup:
-                This is {very}(bold) important.
-
-                This is {very}(bold)(italic) important.
-
-                This is {very}(bold)(italic)(green) important.
-
+                section:(!sp)
+                    Feliz Navidad
 
             result:
                 ```(xml)
-                    <p>This is <span><annotation type="bold">very</annotation></span> important.</p>
-                    <p>This is <span><annotation type="bold"><annotation type="italic">very</annotation></annotation></span> important.</p>
-                    <p>This is <span><annotation type="bold"><annotation type="italic"><annotation type="green">very</annotation></annotation></annotation></span> important.</p>
+                    <section xml:lang="sp">
+                        <p>Feliz Navidad</p>
+                    </section>
 
 
-        case: Consecutive Annotations
+
+        case: Complex block structure
 
             description:
-                Two separate annotations with no space between them.
+                A complex block with various structures inside.
 
             source:
                 ```(sam)
-                    {The Duke}(actor "John Wayne")(if "1969"){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
+                    document:
+                        head:(#foo)
+                            foo: barney {and}(conjunction) betty
+                            baz: bat
+                            $name=fred {and}(conjunction) wilma
+                            history:: date, author, comment, status
+                                2014-06-23, mbaker, New\, Topic, In progress
+                                2016-07-01, mbaker, Revision, In progress
+                            index:: type, term
+                                feature, fragment
+                                feature, fragments
+                        body: How Fragments Work
+                            Stuff on how fragments work.
 
             markup:
-                {The Duke}(actor "John Wayne")(if "1969'){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
+                document:
+                    head:(#foo)
+                        foo: barney {and}(conjunction) betty
+                        baz: bat
+                        $name=fred {and}(conjunction) wilma
+                        history:: date, author, comment, status
+                            2014-06-23, mbaker, New\, Topic, In progress
+                            2016-07-01, mbaker, Revision, In progress
+                        index:: type, term
+                            feature, fragment
+                            feature, fragments
+                    body: How Fragments Work
+                        Stuff on how fragments work.
 
             result:
                 ```(xml)
-                    <p><span><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></span><span><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></span> plays Rooster Cogburn.</p>
-
-
-
-        case: Annotation followed by citation
-
-            description:
-                Observed in the wild: When an annotated phrase was followed by a
-                phrase with a citation, the end of the annotation was not found
-                and the two structures were recognized as one long citation.
-
-            source:
-                ```(sam)
-                    When using the map approach, it is important to
-                    think about how your content will {single
-                    source}(concept "single sourcing") to paper-like
-                    media and hypertext-media. Some people will output
-                    the same map to to both media. In hyper-text media
-                    that usually results in the map being turned into
-                    a table of contents, often displayed in a separate
-                    pane as in a help system. This may be fine if you
-                    are creating a help system, but it is not how Web
-                    content is usually displayed. Another approach to
-                    single sourcing content that uses the assemble from
-                    pieces approach is to create completely separate maps
-                    -- or even to use completely different assembly
-                    techniques that don't involve maps at all -- to produce
-                    paper-like and hypertext outputs. This can help you
-                    to work around some of the design limitations that
-                    we talked about in the {single sourcing
-                    chapter}[#single_source].
-
-            markup:
-                When using the map approach, it is important to
-                think about how your content will {single
-                source}(concept "single sourcing") to paper-like
-                media and hypertext-media. Some people will output
-                the same map to to both media. In hyper-text media
-                that usually results in the map being turned into
-                a table of contents, often displayed in a separate
-                pane as in a help system. This may be fine if you
-                are creating a help system, but it is not how Web
-                content is usually displayed. Another approach to
-                single sourcing content that uses the assemble from
-                pieces approach is to create completely separate maps
-                -- or even to use completely different assembly
-                techniques that don't involve maps at all -- to produce
-                paper-like and hypertext outputs. This can help you
-                to work around some of the design limitations that
-                we talked about in the {single sourcing
-                chapter}[#single_source].
-
-            result:
-                ```(xml)
-                    <p>When using the map approach, it is important to think about how your content will <span><annotation type="concept" specifically="single sourcing">single source</annotation></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span><citation type="nameref" value="single_source">single sourcing chapter</citation></span>.</p>
-
-        case: Annotation with language metadata
-            description:
-                You can add language metadata to a phrase.
-
-            source:
-                ```(sam)
-                    Press {Enter}(key !fr-CA)
-            markup:
-                Press {Enter}(key !fr-CA)
-
-            result:
-                ```(xml)
-                    <p>Press <span><annotation type="key" xml:lang="fr-CA">Enter</annotation></span></p>
-
-
-
-    test: Record sets
-
-        description:
-            Record sets are a structure similar to a database table. They
-            record data in rows with identical column names. Column names
-            are specified in the records set header.
-
-        case: Recordset
-
-            description:
-                Test that recordsets are recognized correctly. Includes a
-                test that character escapes are recognized in records and
-                commas can be escaped.
-
-            source:
-                ```(sam)
-                    history:: date, author, comment, status
-                        2014-06-23, mbaker, New\, Topic, In progress
-                        2016-07-01, mbaker, Revision, In progress
-
-            markup:
-                history:: date, author, comment, status
-                    2014-06-23, mbaker, New\, Topic, In progress
-                    2016-07-01, mbaker, Revision, In progress
-
-            result:
-                ```(xml)
+                    <document>
+                    <head name="foo">
+                    <foo>barney <span><annotation type="conjunction">and</annotation></span> betty</foo>
+                    <baz>bat</baz>
+                    <string name="name">fred <span><annotation type="conjunction">and</annotation></span> wilma</string>
                     <history>
                     <row>
                     <date>2014-06-23</date>
@@ -173,905 +94,82 @@ tests:(!en) SAM Parser Tests
                     <status>In progress</status>
                     </row>
                     </history>
+                    <index>
+                    <row>
+                    <type>feature</type>
+                    <term>fragment</term>
+                    </row>
+                    <row>
+                    <type>feature</type>
+                    <term>fragments</term>
+                    </row>
+                    </index>
+                    </head>
+                    <body>
+                    <title>How Fragments Work</title>
+                    <p>Stuff on how fragments work.</p>
+                    </body>
+                    </document>
 
-        case: Recordset with only one field name
+    test: Fields
+        description:
+            A field is a block without children. A field value does not
+            get wrapped in a title element. It is simple the value of the
+            field.
 
+        case: Nested fields
             description:
-                Test that a recordset works correctly with only one field.
+                Nested fields. Anything with a child, of course, is a block, not a field.
 
             source:
                 ```(sam)
-                    filmography:: film
-                        Rio Bravo
-                        The Shootish
+                    address:
+                        name: Fred Flintstone
+                        address: Bedrock
+                        era: Stone Age
 
             markup:
-                filmography:: film
-                    Rio Bravo
-                    The Shootish
+                address:
+                    name: Fred Flintstone
+                    address: Bedrock
+                    era: Stone Age
 
             result:
                 ```(xml)
-                    <filmography>
-                    <row>
-                    <film>Rio Bravo</film>
-                    </row>
-                    <row>
-                    <film>The Shootish</film>
-                    </row>
-                    </filmography>
+                    <address>
+                    <name>Fred Flintstone</name>
+                    <address>Bedrock</address>
+                    <era>Stone Age</era>
+                    </address>
 
-
-    test: Parens in link shortcuts
+    test: Paragraphs
 
         description:
+            A paragraph is a block of text over consecutive lines.
 
-            You can specify a link as a `link` annotation.
-
-            ```
-                foo {bar}(link "http://example.com/bar") baz
-
-            The link annotation shortcut lets you shorten this to:
-
-            ```
-                foo {bar}(http://example.com/bar) baz
-
-            However, use of the shortcut means you need to escape
-            any parens that occur in the URL.
-
-
-        case: Parens not escaped
-
+        case: Paragraph
             description:
-                The parens are not escaped, causing misreading of markup. This example
-                should be interpreted incorrectly.
-
+                A simple multi-line paragraph ending with a blank space.
 
             source:
                 ```(sam)
-                    Rio Bravo refers to the movie
-                    (and not to {the city in Texas or
-                    the nature reserve in
-                    Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
+                    Wafting zephyrs
+                    quickly vexed
+                    Jumbo.
 
             markup:
-                Rio Bravo refers to the movie
-                (and not to {the city in Texas or
-                the nature reserve in
-                Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
+                Wafting zephyrs
+                quickly vexed
+                Jumbo.
 
             result:
                 ```(xml)
-                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_" namespace="disambiguation">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
+                    <p>Wafting zephyrs quickly vexed Jumbo.</p>
 
-
-        case: Parens escaped with backslashes
-
-            description:
-                The parens in the URL are escaped with blackslashes. This example
-                should be interpreted correctly.
-
-            source:
-                ```(sam)
-                    Rio Bravo refers to the movie
-                    (and not to {the city in Texas or
-                    the nature reserve in
-                    Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
-
-            markup:
-                Rio Bravo refers to the movie
-                (and not to {the city in Texas or
-                the nature reserve in
-                Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
-
-            result:
-                ```(xml)
-                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
-
-        case: Using explicit link annotation instead of shortcut
+        case: With annotated phrase
 
             description:
-                The link is specified using a specific link annotation so the
-                URL is not in parens itself. This example should be interpreted
-                correctly.
-
-            source:
-                ```(sam)
-                    Rio Bravo refers to the movie
-                    (and not to {the city in Texas or
-                    the nature reserve in
-                    Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
-
-            markup:
-                Rio Bravo refers to the movie
-                (and not to {the city in Texas or
-                the nature reserve in
-                Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
-
-            result:
-                ```(xml)
-                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
-
-
-    test: Citations
-
-        description:
-            A citation is a reference to a source of information. You
-            can cite with a phrase or by reference to an ID or a name.
-
-        case: Citation on phrase
-
-            description:
-                A citation on a phrase
-
-            source:
-                ```(SAM)
-                    You can {call me Ishmael}[Melville, 1851].
-
-            markup:
-                You can {call me Ishmael}[Melville, 1851].
-
-            result:
-                ```(XML)
-                    <p>You can <span><citation type="citation" value="Melville, 1851">call me Ishmael</citation></span>.</p>
-
-        case: Literal square brackets
-            description:
-                If you want to enter literal square brackets, rather than create a citation,
-                escape the opening square bracket with a backslash.
-
-            source:
-                ```(xml)
-                    Press \[Enter].
-
-            markup:
-                Press \[Enter].
-
-            result:
-                ```(xml)
-                    <p>Press [Enter].</p>
-
-    test: Grids
-
-        description:
-
-            Grids are a simple form or table. They have no table heads or row or
-            column spanning. More complex tables can be modeled using explicit
-            blocks. Labeled lists can be modeled using the labeled list structure.
-            Database-like tables can be modeled using record sets.
-
-        case: Grid with heads
-
-            description:
-
-                Table heads are simulated using bold in the top row of the grid.
-
-            source:
-                ```(sam)
-                    +++
-                        *Type*  | *Term*    | *Notes*
-                        feature | fragment  | bing
-                        feature | fragments | bang
-
-            markup:
-                +++
-                    *Type*  | *Term*    | *Notes*
-                    feature | fragment  | bing
-                    feature | fragments | bang
-
-            result:
-                ```(xml)
-                    <grid>
-                    <row>
-                    <cell><span><annotation type="bold">Type</annotation></span></cell>
-                    <cell><span><annotation type="bold">Term</annotation></span></cell>
-                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
-                    </row>
-                    <row>
-                    <cell>feature</cell>
-                    <cell>fragment</cell>
-                    <cell>bing</cell>
-                    </row>
-                    <row>
-                    <cell>feature</cell>
-                    <cell>fragments</cell>
-                    <cell>bang</cell>
-                    </row>
-                    </grid>
-
-        case: Grid with management domain attributes
-
-            description:
-                The same grid only with management domain attributes attached
-                to the grid header.
-
-                Note that SAM Parser sorts block attributes alphabetically for
-                output, which makes it possible to test them with a simple string
-                comparison (such as that performed by test.xslt). However, this
-                is behavior of this parser, not a SAM language requirement.
-
-            source:
-                ```(sam)
-                    +++(*foom #bar ?baz)
-                        *Type*  | *Term*    | *Notes*
-
-                        feature | fragment  | bing
-
-                        feature | fragments | bang
-
-            markup:
-                +++(*foom #bar ?baz)
-                    *Type*  | *Term*    | *Notes*
-
-                    feature | fragment  | bing
-
-                    feature | fragments | bang
-
-            result:
-                ```(xml)
-                    <grid conditions="baz" id="foom" name="bar">
-                    <row>
-                    <cell><span><annotation type="bold">Type</annotation></span></cell>
-                    <cell><span><annotation type="bold">Term</annotation></span></cell>
-                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
-                    </row>
-                    <row>
-                    <cell>feature</cell>
-                    <cell>fragment</cell>
-                    <cell>bing</cell>
-                    </row>
-                    <row>
-                    <cell>feature</cell>
-                    <cell>fragments</cell>
-                    <cell>bang</cell>
-                    </row>
-                    </grid>
-
-
-        case: Grid with bold row
-
-            description:
-
-                Make an lower row bold.
-
-            source:
-                ```(sam)
-                    +++
-                        *Type*    | *Term*      | *Notes*
-                        feature   | fragment    | bing
-                        *feature* | *fragments* | *bang*
-            markup:
-                +++
-                    *Type*    | *Term*      | *Notes*
-                    feature   | fragment    | bing
-                    *feature* | *fragments* | *bang*
-
-            result:
-                ```(xml)
-                    <grid>
-                    <row>
-                    <cell><span><annotation type="bold">Type</annotation></span></cell>
-                    <cell><span><annotation type="bold">Term</annotation></span></cell>
-                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
-                    </row>
-                    <row>
-                    <cell>feature</cell>
-                    <cell>fragment</cell>
-                    <cell>bing</cell>
-                    </row>
-                    <row>
-                    <cell><span><annotation type="bold">feature</annotation></span></cell>
-                    <cell><span><annotation type="bold">fragments</annotation></span></cell>
-                    <cell><span><annotation type="bold">bang</annotation></span></cell>
-                    </row>
-                    </grid>
-
-
-        case: Grid with side heads
-
-            description:
-
-                Grid with row headings rather than column headings.
-
-            source:
-                ```(sam)
-                    +++
-                        *Type*    | Term      | Notes
-                        *feature* | fragment  | bing
-                        *feature* | fragments | bang
-            markup:
-                +++
-                    *Type*    | Term      | Notes
-                    *feature* | fragment  | bing
-                    *feature* | fragments | bang
-
-            result:
-                ```(xml)
-                    <grid>
-                    <row>
-                    <cell><span><annotation type="bold">Type</annotation></span></cell>
-                    <cell>Term</cell>
-                    <cell>Notes</cell>
-                    </row>
-                    <row>
-                    <cell><span><annotation type="bold">feature</annotation></span></cell>
-                    <cell>fragment</cell>
-                    <cell>bing</cell>
-                    </row>
-                    <row>
-                    <cell><span><annotation type="bold">feature</annotation></span></cell>
-                    <cell>fragments</cell>
-                    <cell>bang</cell>
-                    </row>
-                    </grid>
-
-    test: Smart quotes
-
-        description:
-            Smart quotes is an optional feature of the parser, not a
-            feature of the SAM language. It turns straight quotes into
-            curly quotes. It raises a warning when it can't figure out
-            how to handle a case. The algorithm could be improved in
-            the future to handle more cases correctly.
-
-            The canonical way to handle quotes in SAM is to use real
-            curly quotes to begin with. All SAM documents are UTF-8.
-
-            Note: These test will fail if smart quotes is not selected
-            using the `-q` option of the parser command line or by
-            setting the `smart_quotes` attribute of the SamParser
-            object to `True`.
-
-        case: Smart quotes
-
-            description:
-
-                Paragraphs illustrating most of the cases where smart quotes should
-                be recognized in ordinary English.
-
-            source:
-                ```(sam)
-                    "For once, 'sir' adding, 'you're making a
-                    scene.'" and "For once, 'sir' adding,
-                    'you're making a scene.'" In the winter
-                    of ’65. "Yes," he said, "I met her. She's
-                    very 'friendly.'" '"I don’t know what you
-                    mean by 'glory,'" Alice said.' "'I don’t
-                    know what you mean by "glory,"' Alice said."
-
-                    For "the Duke", perhaps?
-
-            markup:
-                "For once, 'sir' adding, 'you're making a
-                scene.'" and "For once, 'sir' adding,
-                'you're making a scene.'" In the winter
-                of ’65. "Yes," he said, "I met her. She's
-                very 'friendly.'" '"I don’t know what you
-                mean by 'glory,'" Alice said.' "'I don’t
-                know what you mean by "glory,"' Alice said."
-
-                For "the Duke", perhaps?
-
-            result:
-                ```(xml)
-                    <p>“For once, ‘sir’ adding, ‘you’re making a scene.’” and “For once, ‘sir’ adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
-                    <p>For “the Duke”, perhaps?</p>
-
-        case: Following an annotation
-
-            description:
-                Smart quotes also need to be recognized when they follow
-                SAM markup.
-
-            source:
-                ```(sam)
-
-                    interpretations of the `xref`'s instruction
-
-            markup:
-                interpretations of the `xref`'s instruction
-
-            result:
-                ```(xml)
-                    <p>interpretations of the <span><annotation type="code">xref</annotation></span>’s instruction</p>
-
-        case: Smart quotes with annotations
-
-            description:
-
-                Smart quotes surrounding annotated phrases.
-
-            source:
-                ```(sam)
-                    "For once, '{sir}(salutation)' adding, 'you're making a
-                    scene.'" and "For once, {'sir'}(salutation) adding,
-                    'you're making a scene.'" In the winter
-                    of ’65. "Yes," he said, "I met her. She's
-                    very 'friendly.'" '"I don’t know what you
-                    mean by 'glory,'" Alice said.' "'I don’t
-                    know what you mean by "glory,"' Alice said."
-
-            markup:
-                "For once, '{sir}(salutation)' adding, 'you're making a
-                scene.'" and "For once, {'sir'}(salutation) adding,
-                'you're making a scene.'" In the winter
-                of ’65. "Yes," he said, "I met her. She's
-                very 'friendly.'" '"I don’t know what you
-                mean by 'glory,'" Alice said.' "'I don’t
-                know what you mean by "glory,"' Alice said."
-
-            result:
-                ```(xml)
-                    <p>“For once, ‘<span><annotation type="salutation">sir</annotation></span>’ adding, ‘you’re making a scene.’” and “For once, <span><annotation type="salutation">‘sir’</annotation></span> adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
-
-        case: Adjacent to parentheses
-            description:
-                Quotes inside parentheses.
-
-            source:
-                ```(sam)
-                    A vector graphic program creates graphics as a collection of  objects ("vector" meaning the mathematical representation of a shape or line).
-
-                    The shape of the characters (technically, "glyphs") that make up the font are stored separately in font files.
-
-            markup:
-                A vector graphic program creates graphics as a collection of  objects ("vector" meaning the mathematical representation of a shape or line).
-
-                The shape of the characters (technically, "glyphs") that make up the font are stored separately in font files.
-
-            result:
-                ```(xml)
-                    <p>A vector graphic program creates graphics as a collection of  objects (“vector” meaning the mathematical representation of a shape or line).</p>
-                    <p>The shape of the characters (technically, “glyphs”) that make up the font are stored separately in font files.</p>
-
-
-        case: Escaped dumb quotes
-            description:
-                If you want to enter straight quotes and have them stay straight when
-                smart quotes are applied, you have to escape them with `\` or use the
-                `&quot;` character entity.
-
-            source:
-                ```(sam)
-                    This para uses \"dumb\" quotes. Don\'t get them &quot;mixed up&quot;.
-
-            markup:
-                This para uses \"dumb\" quotes. Don\'t get them &quot;mixed up&quot;.
-
-            result:
-                ```(xml)
-                    <p>This para uses "dumb" quotes. Don't get them "mixed up".</p>
-
-
-    test: Blank lines in codeblocks
-
-        description:
-
-            Blank lines are thrown away in SAM, but must be retained in codeblocks.
-
-        case: Blank lines in codeblock
-
-            description:
-                Blank lines in a code block. The display of the result will be
-                confusing here because the result is whitespace normalized for
-                ease of comparison with the generated XML.
-
-            source:
-                ```(sam)
-                    ```(sam)
-                        warnings:
-                            warning:(#warn_danger_domestic)
-                                title: Danger
-
-                                Be very very careful. This could kill you.
-
-                            warning:(#warn_danger_foreign)
-                                title: Look out!
-
-                                Pay close attention. You could really hurt yourself.
-            markup:
-                ```(sam)
-                    warnings:
-                        warning:(#warn_danger_domestic)
-                            title: Danger
-
-                            Be very very careful. This could kill you.
-
-                        warning:(#warn_danger_foreign)
-                            title: Look out!
-
-                            Pay close attention. You could really hurt yourself.
-            result:
-                ```(xml)
-                    <codeblock language="sam">
-                    warnings:
-                        warning:(#warn_danger_domestic)
-                            title: Danger
-
-                            Be very very careful. This could kill you.
-
-                        warning:(#warn_danger_foreign)
-                            title: Look out!
-
-                            Pay close attention. You could really hurt yourself.
-                    </codeblock>
-
-    test: Prior annotation lookup
-
-        description:
-            If a phrase has no annotation or citation attached to it, the parser will
-            attempt to find a suitable annotation by searching back up the document for
-            the most recent case of the same phrase. If it finds one, it will copy
-            the annotations and citations from that phrase to the current one. This
-            prevents writers from having to write the same annotation out over and
-            over again. If not prior phrase is found, a warning is issued.
-
-        case: Same para
-
-            description:
-
-                There is a previous instance of the phrase in the same paragraph.
-
-            source:
-                ```(sam)
-                    This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotation}.
-
-            markup:
-                This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotation}.
-
-            result:
-                ```(xml)
-                    <p>This <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span> is repeated <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span>.</p>
-
-        case: Earlier para
-
-            description:
-                The marching annotation is in an earlier paragraph in the document. (In this
-                case, in the preceding test case).
-
-            source:
-                ```(sam)
-                    This {annotation} occurs previously.
-
-            markup:
-                This {annotation} occurs previously.
-
-            result:
-                ```(xml)
-                    <p>This <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span> occurs previously.</p>
-
-
-        case: Failure
-            description:
-                There is no previous phrase. This should generate a warning when the test is run.
-
-            source:
-                ```(sam)
-                    This {should be reported}.
-
-            markup:
-                This {should be reported}.
-
-            result:
-                ```(xml)
-                    <p>This <span>should be reported</span>.</p>
-
-
-    test: Character entities
-
-        description:
-
-            All SAM documents are UTF-8 unicode documents. Therefore you should
-            be able to enter any character directly. However, typing extended
-            characters is not easy, so SAM supports character entities for
-            entering characters that are not easy to type.
-
-        case: HTML named entities
-
-            description:
-
-                All of the HTML named character entities are supported.
-
-            source:
-                ```(sam)
-                    The doggy in the window costs &pound;5.00.
-
-            markup:
-                The doggy in the window costs &pound;5.00.
-
-            result:
-                ```(xml)
-                    <p>The doggy in the window costs £5.00.</p>
-
-
-
-
-        case: Numeric entities
-
-            description:
-
-                XML-style decimal numeric character entities are supported.
-
-            source:
-                ```(sam)
-                    The doggy in the window costs &#163;5.00.
-
-            markup:
-                The doggy in the window costs &#163;5.00.
-
-            result:
-                ```(xml)
-                    <p>The doggy in the window costs £5.00.</p>
-
-
-        case: Hexadecimal entity
-
-            description:
-
-                XML-style hexadecimal numeric character entities are supported.
-
-            source:
-                ```(sam)
-                    The doggy in the window costs &#xA3;5.00.
-
-            markup:
-                The doggy in the window costs &#xA3;5.00.
-
-            result:
-                ```(xml)
-                    <p>The doggy in the window costs £5.00.</p>
-
-        case: Character entities inside phrases and decorations
-
-            description:
-                Make sure entities are recognized in phrases and
-                decorations.
-
-            source:
-                ```(sam)
-                    The doggy in the window costs *&#xA3;*5.00.
-
-                    The doggy in the window costs {&#xA3;5.00}(money).
-
-            markup:
-                The doggy in the window costs *&#xA3;*5.00.
-
-                The doggy in the window costs {&#xA3;5.00}(money).
-
-            result:
-                ```(xml)
-                    <p>The doggy in the window costs <span><annotation type="bold">£</annotation></span>5.00.</p>
-                    <p>The doggy in the window costs <span><annotation type="money">£5.00</annotation></span>.</p>
-
-
-        case: In code annotation shortcut:
-
-            description:
-
-                In a code decoration, character entities are not expanded.
-
-            source:
-                ```(sam)
-                    The doggy in the window costs `&#xA3;`5.00.
-
-            markup:
-                The doggy in the window costs `&#xA3;`5.00.
-
-            result:
-                ```(xml)
-                    <p>The doggy in the window costs <span><annotation type="code">&amp;#xA3;</annotation></span>5.00.</p>
-
-
-
-        case: In bold decoration escaped:
-
-            description:
-                Escaped version inside a bold decoration.
-
-            source:
-                ```(sam)
-                    The doggy in the window costs *\&#xA3;*5.00.
-
-            markup:
-                The doggy in the window costs *\&#xA3;*5.00.
-
-            result:
-                ```(xml)
-                    <p>The doggy in the window costs <span><annotation type="bold">&amp;#xA3;</annotation></span>5.00.</p>
-
-
-        case: Ampersand in a sentence, escaped with \ and not escaped.
-
-            description:
-
-                Unlike XML, SAM does not require that an ampersand be escaped if it is not part of a character entity. You
-                can escape it if you want to using a backslash. Both should output in XML as `&amp;`
-
-            source:
-                ```(sam)
-                    The cat & the dog.
-
-                    The cat \& the dog.
-
-            markup:
-                The cat & the dog.
-
-                The cat \& the dog.
-
-            result:
-                ```(xml)
-                    <p>The cat &amp; the dog.</p>
-                    <p>The cat &amp; the dog.</p>
-
-
-    test: Conditions on list items
-
-        description:
-
-            You can add conditions and other block metadata to list items.
-
-        case: Conditions on unordered list shortcut
-
-            description:
-
-                A condition on an unordered list item.
-
-            source:
-                ```(sam)
-                    * Fred
-
-                    *(?foo) Barney and
-                      Betty and
-                      Bam Bam.
-
-                    * Wilma
-
-            markup:
-
-                * Fred
-
-                *(?foo) Barney and
-                  Betty and
-                  Bam Bam.
-
-                * Wilma
-
-            result:
-                ```(xml)
-                    <ul>
-                    <li>
-                    <p>Fred</p>
-                    </li>
-                    <li conditions="foo">
-                    <p>Barney and Betty and Bam Bam.</p>
-                    </li>
-                    <li>
-                    <p>Wilma</p>
-                    </li>
-                    </ul>
-
-        case: Conditions on ordered list shortcut
-            description:
-                Condition on an ordered list item.
-
-            source:
-                ```(sam)
-                    1. Fred
-                    2.(?foo) Barney and
-                     Betty and
-                     Bam Bam.
-                    3. Wilma
-
-            markup:
-                1. Fred
-                2.(?foo) Barney and
-                 Betty and
-                 Bam Bam.
-                3. Wilma
-
-            result:
-                ```(xml)
-                    <ol>
-                    <li>
-                    <p>Fred</p>
-                    </li>
-                    <li conditions="foo">
-                    <p>Barney and Betty and Bam Bam.</p>
-                    </li>
-                    <li>
-                    <p>Wilma</p>
-                    </li>
-                    </ol>
-
-
-
-    test: Escapes in phrases and decorations
-
-        description:
-            Character escaping should be recognized inside phrases and decorations.
-
-        case: Escapes in explicit annotations
-
-            description:
-                Escaping curly braces and backslashes inside a phrase.
-
-            source:
-                ```(sam)
-                    There is a curly brace and two backslashes in {this \\\\\{ phrase}(bold).
-
-            markup:
-                There is a curly brace and two backslashes in {this \\\\\{ phrase}(bold).
-
-            result:
-                ```(xml)
-                    <p>There is a curly brace and two backslashes in <span><annotation type="bold">this \\{ phrase</annotation></span>.</p>
-
-        case: Escapes in code decorations
-
-            description:
-                Code decorations have different escaping rules. All characters are literal
-                except that the backtick character can be escaped with a double back tick.
-                Character entities are not translated in a code decoration. Smart quote
-                transformations are not applied.
-
-            source:
-                ```(sam)
-                    There is a backtick and two backslashes in `th\\is `` code` decoration.
-
-                    There is a backslash and a curly brace in `this \{ code` decoration.
-
-                    `pubwork="book"` is an attribute on the element `citetitle`.
-
-            markup:
-                There is a backtick and two backslashes in `th\\is `` code` decoration.
-
-                There is a backslash and a curly brace in `this \{ code` decoration.
-
-                `pubwork="book"` is an attribute on the element `citetitle`.
-
-            result:
-                ```(xml)
-                    <p>There is a backtick and two backslashes in <span><annotation type="code">th\\is ` code</annotation></span> decoration.</p>
-                    <p>There is a backslash and a curly brace in <span><annotation type="code">this \{ code</annotation></span> decoration.</p>
-                    <p><span><annotation type="code">pubwork="book"</annotation></span> is an attribute on the element <span><annotation type="code">citetitle</annotation></span>.</p>
-
-
-
-        case: Escapes in decorations
-
-            description:
-
-                Escape sequences are recognized inside decorations.
-
-            source:
-                ```(sam)
-                    There is a `*` in *this \* bold* decoration.
-
-                    There is a `_` in _this \_ italic_ decoration.
-
-            markup:
-                There is a `*` in *this \* bold* decoration.
-
-                There is a `_` in _this \_ italic_ decoration.
-
-            result:
-                ```(xml)
-                    <p>There is a <span><annotation type="code">*</annotation></span> in <span><annotation type="bold">this * bold</annotation></span> decoration.</p>
-
-
-
-
-    test: Paragraph continuation
-
-        description:
-
-            A paragraph is any block of text at the same indent level and
-            ending with a blank line.
-
-        case: Multiple lines joined to create one paragraph
-
-            description:
-                A paragraph over multiple lines with an inline annotation.
+                A paragraph over multiple lines with an annotated phrase.
 
             source:
                 ```(sam)
@@ -1088,18 +186,16 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>This is a <span><annotation type="foo">paragraph</annotation></span> that wraps across multiple lines.</p>
 
-
-
-    test: Numbered lists
+    test: Ordered lists
 
         description:
-            Numbered lists are created by starting a line with a number followed by a period.
+            Ordered lists are created by starting a line with a number followed by a period.
             Exact numbers are not retained.
 
-        case: Numbered list with spaces
+        case: Ordered list with spaces
 
             description:
-                Numbered lists can have blank lines between the items.
+                Ordered lists can have blank lines between the items.
 
 
             source:
@@ -1134,7 +230,7 @@ tests:(!en) SAM Parser Tests
                     </ol>
 
 
-        case: Numbered list no spaces
+        case: Ordered list no spaces
 
             description:
                 List are also recognized without space between items. List items can wrap
@@ -1174,10 +270,10 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
-        case: Numbered list mixed spacing
+        case: Ordered list mixed spacing
 
             description:
-                Numbered list with inconsistent spacing.
+                Ordered list with inconsistent spacing.
 
             source:
                 ```(sam)
@@ -1213,17 +309,10 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
-
-
-    test: Nested numbered lists
-
-        description:
-            Lists can be nested in other lists by indening them further.
-
-        case: Nested numbered list with spaces
+        case: Nested ordered list with spaces
 
             description:
-                Numbered lists at different indents, with spaces between lines.
+                Ordered lists at different indents, with spaces between lines.
 
             source:
                 ```(sam)
@@ -1286,10 +375,10 @@ tests:(!en) SAM Parser Tests
 
 
 
-        case: Nested numbered list with no spaces
+        case: Nested ordered lists with no spaces
 
             description:
-                Numbered lists at different indents, with no spaces between lines.
+                Ordered lists at different indents, with no spaces between lines.
 
             source:
                 ```(sam)
@@ -1338,10 +427,10 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
-        case: Nested numbered list with mixed spacing
+        case: Nested ordered list with mixed spacing
 
             description:
-                Numbered lists at different indents, with some spaces between lines.
+                Ordered lists at different indents, with some spaces between lines.
 
             source:
                 ```(sam)
@@ -1508,12 +597,6 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ul>
 
-
-    test: Nested unordered lists
-
-        description:
-
-            Lists can be nested using indents.
 
         case: Nested list with spaces
 
@@ -1695,11 +778,12 @@ tests:(!en) SAM Parser Tests
                     </ul>
 
 
-    test: Nested mixed lists
+    test: Mixed lists
 
         description:
 
-            You can nest ordered and unordered lists inside each other.
+            You can nest ordered and unordered lists inside each other or follow
+            a list of one type with a list of another type.
 
         case: Nested mixed lists with spaces
 
@@ -1882,14 +966,12 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
-    test: One list after another
 
-        description:
-            An ordered list can follow an unordered list directly and vice versa.
 
         case: Space between lists
             description:
-                An unordered list followed by an ordered list with a space between them.
+                An ordered list can follow an unordered list directly and vice versa.
+
 
             source:
                 ```(sam)
@@ -2054,113 +1136,498 @@ tests:(!en) SAM Parser Tests
                     <p>* This is just a paragraph</p>
 
 
-    test: XML reserved characters in attributes
+    test: Labeled lists
         description:
-            XML reserved characters should be translated to character entities
-            when producing XML output.
+            You can create lists with labels rather than bullets. The label is
+            contained between two pipe characters. There must be no space between
+            the opening pipe and the first character of the label (otherwise it
+            will be parsed as a line).
 
-        case: XML reserved characters in citation specifically attribute
+        case: Simple labeled list
 
             description:
-                XML reserved characters occurring within the text of a "specifically" attribute.
+                A labeled list.
 
             source:
                 ```(sam)
-                    {Skimbleshanks}(animal '"Old  <>& Possum"' (Eliott)).
+                    |Do| a deer, a female deer
+                    |Re| a drop of golden sun
+                    |Me| a name I call myself
+                    |Fa| a long long way to run
+                    |So| a needle pulling thread
+                    |La| a note to follow so
+                    |Te| a drink with jam and bread
 
             markup:
-                {Skimbleshanks}(animal '"Old  <>& Possum"' (Eliott)).
+                |Doe| a deer, a female deer
+                |Ray| a drop of golden sun
+                |Me| a name I call myself
+                |Far| a long long way to run
+                |Sew| a needle pulling thread
+                |La| a note to follow so
+                |Tea| a drink with jam and bread
 
             result:
                 ```(xml)
-                    <p><span><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp; Possum&quot;" namespace="Eliott">Skimbleshanks</annotation></span>.</p>
+                    <ll>
+                    <li>
+                    <label>Doe</label>
+                    <p>a deer, a female deer</p>
+                    </li>
+                    <li>
+                    <label>Ray</label>
+                    <p>a drop of golden sun</p>
+                    </li>
+                    <li>
+                    <label>Me</label>
+                    <p>a name I call myself</p>
+                    </li>
+                    <li>
+                    <label>Far</label>
+                    <p>a long long way to run</p>
+                    </li>
+                    <li>
+                    <label>Sew</label>
+                    <p>a needle pulling thread</p>
+                    </li>
+                    <li>
+                    <label>La</label>
+                    <p>a note to follow so</p>
+                    </li>
+                    <li>
+                    <label>Tea</label>
+                    <p>a drink with jam and bread</p>
+                    </li>
+                    </ll>
 
-    test: XML fragment
+    test: Record sets
 
         description:
-            You can insert a fragment of XML. It must be well formed and must start with an XML header. It must be UTF-8.
-            It will be copied to output verbatim, minus the XML header.
+            Record sets are a structure similar to a database table. They
+            record data in rows with identical column names. Column names
+            are specified in the records set header.
 
-        case: XML fragment
+        case: Recordset
 
             description:
-                A chunk of XML.
+                Test that recordsets are recognized correctly. Includes a
+                test that character escapes are recognized in records and
+                commas can be escaped.
 
             source:
                 ```(sam)
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <foo bar="bat">
-                        <boo/>
-                        <hoo/>
-                    </foo>
+                    history:: date, author, comment, status
+                        2014-06-23, mbaker, New\, Topic, In progress
+                        2016-07-01, mbaker, Revision, In progress
 
             markup:
-                <?xml version="1.0" encoding="UTF-8"?>
-                <foo bar="bat">
-                    <boo/>
-                    <hoo/>
-                </foo>
+                history:: date, author, comment, status
+                    2014-06-23, mbaker, New\, Topic, In progress
+                    2016-07-01, mbaker, Revision, In progress
 
             result:
                 ```(xml)
-                    <foo bar="bat">
-                        <boo/>
-                        <hoo/>
-                    </foo>
+                    <history>
+                    <row>
+                    <date>2014-06-23</date>
+                    <author>mbaker</author>
+                    <comment>New, Topic</comment>
+                    <status>In progress</status>
+                    </row>
+                    <row>
+                    <date>2016-07-01</date>
+                    <author>mbaker</author>
+                    <comment>Revision</comment>
+                    <status>In progress</status>
+                    </row>
+                    </history>
 
-    test: Nested fields
-        description:
-            You can create a structure of nested fields.
+        case: Recordset with only one field name
 
-        case: Nested fields
             description:
-                Nested fields. Anything with a child, of course, is a block, not a field.
+                Test that a recordset works correctly with only one field.
 
             source:
                 ```(sam)
-                    address:
-                        name: Fred Flintstone
-                        address: Bedrock
-                        era: Stone Age
+                    filmography:: film
+                        Rio Bravo
+                        The Shootish
 
             markup:
-                address:
-                    name: Fred Flintstone
-                    address: Bedrock
-                    era: Stone Age
+                filmography:: film
+                    Rio Bravo
+                    The Shootish
 
             result:
                 ```(xml)
-                    <address>
-                    <name>Fred Flintstone</name>
-                    <address>Bedrock</address>
-                    <era>Stone Age</era>
-                    </address>
+                    <filmography>
+                    <row>
+                    <film>Rio Bravo</film>
+                    </row>
+                    <row>
+                    <film>The Shootish</film>
+                    </row>
+                    </filmography>
 
-    test: Paragraphs
+
+    test: Grids
 
         description:
-            A paragraph is a block of text over consecutive lines.
 
-        case: Paragraph
+            Grids are a simple form of table. They are purely a layout device with
+            no semantic value. They have no table heads or row or
+            column spanning. More complex tables can be modeled using explicit
+            blocks. Labeled lists can be modeled using the labeled list structure.
+            Database-like tables can be modeled using record sets.
+
+        case: Grid with heads
+
             description:
-                A simple multi-line paragraph ending with a blank space.
+
+                Table heads are simulated using bold in the top row of the grid.
 
             source:
                 ```(sam)
-                    Wafting zephyrs
-                    quickly vexed
-                    Jumbo.
+                    +++
+                        *Type*  | *Term*    | *Notes*
+                        feature | fragment  | bing
+                        feature | fragments | bang
 
             markup:
-                Wafting zephyrs
-                quickly vexed
-                Jumbo.
+                +++
+                    *Type*  | *Term*    | *Notes*
+                    feature | fragment  | bing
+                    feature | fragments | bang
 
             result:
                 ```(xml)
-                    <p>Wafting zephyrs quickly vexed Jumbo.</p>
+                    <grid>
+                    <row>
+                    <cell><span><annotation type="bold">Type</annotation></span></cell>
+                    <cell><span><annotation type="bold">Term</annotation></span></cell>
+                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragment</cell>
+                    <cell>bing</cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragments</cell>
+                    <cell>bang</cell>
+                    </row>
+                    </grid>
 
+        case: Grid with management domain attributes
+
+            description:
+                The same grid only with management domain attributes attached
+                to the grid header.
+
+                Note that SAM Parser sorts block attributes alphabetically for
+                output, which makes it possible to test them with a simple string
+                comparison (such as that performed by test.xslt). However, this
+                is behavior of this parser, not a SAM language requirement.
+
+            source:
+                ```(sam)
+                    +++(*foom #bar ?baz)
+                        *Type*  | *Term*    | *Notes*
+
+                        feature | fragment  | bing
+
+                        feature | fragments | bang
+
+            markup:
+                +++(*foom #bar ?baz)
+                    *Type*  | *Term*    | *Notes*
+
+                    feature | fragment  | bing
+
+                    feature | fragments | bang
+
+            result:
+                ```(xml)
+                    <grid conditions="baz" id="foom" name="bar">
+                    <row>
+                    <cell><span><annotation type="bold">Type</annotation></span></cell>
+                    <cell><span><annotation type="bold">Term</annotation></span></cell>
+                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragment</cell>
+                    <cell>bing</cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragments</cell>
+                    <cell>bang</cell>
+                    </row>
+                    </grid>
+
+
+        case: Grid with bold row
+
+            description:
+
+                Make an lower row bold.
+
+            source:
+                ```(sam)
+                    +++
+                        *Type*    | *Term*      | *Notes*
+                        feature   | fragment    | bing
+                        *feature* | *fragments* | *bang*
+            markup:
+                +++
+                    *Type*    | *Term*      | *Notes*
+                    feature   | fragment    | bing
+                    *feature* | *fragments* | *bang*
+
+            result:
+                ```(xml)
+                    <grid>
+                    <row>
+                    <cell><span><annotation type="bold">Type</annotation></span></cell>
+                    <cell><span><annotation type="bold">Term</annotation></span></cell>
+                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragment</cell>
+                    <cell>bing</cell>
+                    </row>
+                    <row>
+                    <cell><span><annotation type="bold">feature</annotation></span></cell>
+                    <cell><span><annotation type="bold">fragments</annotation></span></cell>
+                    <cell><span><annotation type="bold">bang</annotation></span></cell>
+                    </row>
+                    </grid>
+
+
+        case: Grid with side heads
+
+            description:
+
+                Grid with row headings rather than column headings.
+
+            source:
+                ```(sam)
+                    +++
+                        *Type*    | Term      | Notes
+                        *feature* | fragment  | bing
+                        *feature* | fragments | bang
+            markup:
+                +++
+                    *Type*    | Term      | Notes
+                    *feature* | fragment  | bing
+                    *feature* | fragments | bang
+
+            result:
+                ```(xml)
+                    <grid>
+                    <row>
+                    <cell><span><annotation type="bold">Type</annotation></span></cell>
+                    <cell>Term</cell>
+                    <cell>Notes</cell>
+                    </row>
+                    <row>
+                    <cell><span><annotation type="bold">feature</annotation></span></cell>
+                    <cell>fragment</cell>
+                    <cell>bing</cell>
+                    </row>
+                    <row>
+                    <cell><span><annotation type="bold">feature</annotation></span></cell>
+                    <cell>fragments</cell>
+                    <cell>bang</cell>
+                    </row>
+                    </grid>
+
+    test: Blockquotes
+        description:
+            Blockquotes are introduced by three quotations marke (single or double). The content of
+            a blockquote is normal SAM markup.
+
+        case: Blockquote
+            description:
+                A blockquote with management domain metadata.
+
+
+            source:
+                ```(sam)
+                    After this paragraph, there is a blockquote:
+
+                    """(*foo #bar ?baz)
+                        The quick brown fox jumps over the lazy dog.
+
+                        And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
+
+            markup:
+                After this paragraph, there is a blockquote:
+
+                """(*foo #bar ?baz)
+                    The quick brown fox jumps over the lazy dog.
+
+                    And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
+
+            result:
+                ```(xml)
+                    <p>After this paragraph, there is a blockquote:</p>
+                    <blockquote conditions="baz" id="foo" name="bar">
+                    <p>The quick brown fox jumps over the lazy dog.</p>
+                    <p>And the <span><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></span> jumps over the moon.</p>
+                    </blockquote>
+
+        case: Explicit blockquote
+            description:
+                Blockquote with an explicit `blockquote` block tag.
+
+            source:
+                ```(sam)
+                    blockquote:[http://example.com/page]
+                        Wafting zyphers quickly vexed jumbo.
+
+                        Far and few are the lands where the jumblies live.
+
+            markup:
+                blockquote:[http://example.com/page]
+                    Wafting zyphers quickly vexed jumbo.
+
+                    Far and few are the lands where the jumblies live.
+
+            result:
+                ```(xml)
+                    <blockquote>
+                    <citation type="citation" value="http://example.com/page" extra=""/><p>Wafting zyphers quickly vexed jumbo.</p>
+                    <p>Far and few are the lands where the jumblies live.</p>
+                    </blockquote>
+
+        case: Alternate block quote
+            description:
+                Blockquote with single quotes.
+
+            source:
+                ```(sam)
+                    This is another paragraph. Then there is an alternate blockquote:
+
+                    '''( #foo5 ?bar ?baz)[Mother Goose]
+                        The quick brown fox jumps over the lazy dog.
+
+                    '''
+                        This is a blockquote without a citation.
+
+            markup:
+                This is another paragraph. Then there is an alternate blockquote:
+
+                '''( #foo5 ?bar ?baz)[Mother Goose]
+                    The quick brown fox jumps over the lazy dog.
+
+                '''
+                    This is a blockquote without a citation.
+
+
+            result:
+                ```(xml)
+                    <p>This is another paragraph. Then there is an alternate blockquote:</p>
+                    <blockquote conditions="bar baz" name="foo5">
+                    <citation type="citation" value="Mother Goose" extra=""/><p>The quick brown fox jumps over the lazy dog.</p>
+                    </blockquote>
+                    <blockquote>
+                    <p>This is a blockquote without a citation.</p>
+                    </blockquote>
+
+
+    test: Codeblocks
+        description:
+            A codeblock is a block of program code. A codeblock is treated as
+            plain text and is not parsed as SAM markup. It will be copied to
+            output exactly as it occurs in the source. Codeblocks are denoted
+            by three backtick at the start of a line. Codeblocks have a special
+            annotation. The first word of an annotation on a codeblock is
+            the language of the code.
+
+        case:Simple codeblock
+
+            description:
+                A simple codeblock.
+
+            source:
+                ```(sam)
+                    ```(python)
+                        def escape_for_xml(s):
+                            t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
+                            try:
+                                return s.translate(t)
+                            except AttributeError:
+                                return s
+            markup:
+                ```(python)
+                    def escape_for_xml(s):
+                        t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
+                        try:
+                            return s.translate(t)
+                        except AttributeError:
+                            return s
+
+            result:
+                ```(xml)
+                    <codeblock language="python">
+                    def escape_for_xml(s):
+                        t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
+                        try:
+                            return s.translate(t)
+                        except AttributeError:
+                            return s
+                    </codeblock>
+
+        case: Blank lines in codeblock
+
+            description:
+                Blank lines in a code block. The display of the result will be
+                confusing here because the result is whitespace normalized for
+                ease of comparison with the generated XML.
+
+            source:
+                ```(sam)
+                    ```(sam)
+                        warnings:
+                            warning:(#warn_danger_domestic)
+                                title: Danger
+
+                                Be very very careful. This could kill you.
+
+                            warning:(#warn_danger_foreign)
+                                title: Look out!
+
+                                Pay close attention. You could really hurt yourself.
+            markup:
+                ```(sam)
+                    warnings:
+                        warning:(#warn_danger_domestic)
+                            title: Danger
+
+                            Be very very careful. This could kill you.
+
+                        warning:(#warn_danger_foreign)
+                            title: Look out!
+
+                            Pay close attention. You could really hurt yourself.
+            result:
+                ```(xml)
+                    <codeblock language="sam">
+                    warnings:
+                        warning:(#warn_danger_domestic)
+                            title: Danger
+
+                            Be very very careful. This could kill you.
+
+                        warning:(#warn_danger_foreign)
+                            title: Look out!
+
+                            Pay close attention. You could really hurt yourself.
+                    </codeblock>
 
 
     test: Lines
@@ -2225,108 +1692,650 @@ tests:(!en) SAM Parser Tests
                     <line>   You gotta walk it by yourself.</line>
                     </blockquote>
 
-    test: Blocks
+
+
+
+    test: Annotations
 
         description:
-            Blocks are the basic building block of a SAM file. This whole document is a
-            test case for blocks.
 
+            A phrase can have one or more annotations or citations attached to it.
+            On output, the text of the phrase is wrapped in the annotations and
+            citations in the order they were specified in source.
 
-        case: Language metadata
+        case: Multiple annotations
 
             description:
-                A block with language metadata.
+                Spans with more than one attribute in a chain.
 
             source:
                 ```(sam)
-                    section:(!sp)
-                        Feliz Navidad
+                    This is {very}(bold) important.
+
+                    This is {very}(bold)(italic) important.
+
+                    This is {very}(bold)(italic)(green) important.
+
+                    This `foo`(bar) baz.
 
             markup:
-                section:(!sp)
-                    Feliz Navidad
+                This is {very}(bold) important.
+
+                This is {very}(bold)(italic) important.
+
+                This is {very}(bold)(italic)(green) important.
+
 
             result:
                 ```(xml)
-                    <section xml:lang="sp">
-                        <p>Feliz Navidad</p>
-                    </section>
+                    <p>This is <span><annotation type="bold">very</annotation></span> important.</p>
+                    <p>This is <span><annotation type="bold"><annotation type="italic">very</annotation></annotation></span> important.</p>
+                    <p>This is <span><annotation type="bold"><annotation type="italic"><annotation type="green">very</annotation></annotation></annotation></span> important.</p>
 
 
-
-        case: Complex block structure
+        case: Consecutive Annotations
 
             description:
-                A complex block with various structures inside.
+                Two separate annotations with no space between them.
 
             source:
                 ```(sam)
-                    document:
-                        head:(#foo)
-                            foo: barney {and}(conjunction) betty
-                            baz: bat
-                            $name=fred {and}(conjunction) wilma
-                            history:: date, author, comment, status
-                                2014-06-23, mbaker, New\, Topic, In progress
-                                2016-07-01, mbaker, Revision, In progress
-                            index:: type, term
-                                feature, fragment
-                                feature, fragments
-                        body: How Fragments Work
-                            Stuff on how fragments work.
+                    {The Duke}(actor "John Wayne")(if "1969"){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
 
             markup:
-                document:
-                    head:(#foo)
-                        foo: barney {and}(conjunction) betty
-                        baz: bat
-                        $name=fred {and}(conjunction) wilma
-                        history:: date, author, comment, status
-                            2014-06-23, mbaker, New\, Topic, In progress
-                            2016-07-01, mbaker, Revision, In progress
-                        index:: type, term
-                            feature, fragment
-                            feature, fragments
-                    body: How Fragments Work
-                        Stuff on how fragments work.
+                {The Duke}(actor "John Wayne")(if "1969'){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
 
             result:
                 ```(xml)
-                    <document>
-                    <head name="foo">
-                    <foo>barney <span><annotation type="conjunction">and</annotation></span> betty</foo>
-                    <baz>bat</baz>
-                    <string name="name">fred <span><annotation type="conjunction">and</annotation></span> wilma</string>
-                    <history>
-                    <row>
-                    <date>2014-06-23</date>
-                    <author>mbaker</author>
-                    <comment>New, Topic</comment>
-                    <status>In progress</status>
-                    </row>
-                    <row>
-                    <date>2016-07-01</date>
-                    <author>mbaker</author>
-                    <comment>Revision</comment>
-                    <status>In progress</status>
-                    </row>
-                    </history>
-                    <index>
-                    <row>
-                    <type>feature</type>
-                    <term>fragment</term>
-                    </row>
-                    <row>
-                    <type>feature</type>
-                    <term>fragments</term>
-                    </row>
-                    </index>
-                    </head>
-                    <body>
-                    <title>How Fragments Work</title>
-                    <p>Stuff on how fragments work.</p>
-                    </body>
-                    </document>
+                    <p><span><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></span><span><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></span> plays Rooster Cogburn.</p>
+
+
+
+        case: Annotation followed by citation
+
+            description:
+                Observed in the wild: When an annotated phrase was followed by a
+                phrase with a citation, the end of the annotation was not found
+                and the two structures were recognized as one long citation.
+
+            source:
+                ```(sam)
+                    When using the map approach, it is important to
+                    think about how your content will {single
+                    source}(concept "single sourcing") to paper-like
+                    media and hypertext-media. Some people will output
+                    the same map to to both media. In hyper-text media
+                    that usually results in the map being turned into
+                    a table of contents, often displayed in a separate
+                    pane as in a help system. This may be fine if you
+                    are creating a help system, but it is not how Web
+                    content is usually displayed. Another approach to
+                    single sourcing content that uses the assemble from
+                    pieces approach is to create completely separate maps
+                    -- or even to use completely different assembly
+                    techniques that don't involve maps at all -- to produce
+                    paper-like and hypertext outputs. This can help you
+                    to work around some of the design limitations that
+                    we talked about in the {single sourcing
+                    chapter}[#single_source].
+
+            markup:
+                When using the map approach, it is important to
+                think about how your content will {single
+                source}(concept "single sourcing") to paper-like
+                media and hypertext-media. Some people will output
+                the same map to to both media. In hyper-text media
+                that usually results in the map being turned into
+                a table of contents, often displayed in a separate
+                pane as in a help system. This may be fine if you
+                are creating a help system, but it is not how Web
+                content is usually displayed. Another approach to
+                single sourcing content that uses the assemble from
+                pieces approach is to create completely separate maps
+                -- or even to use completely different assembly
+                techniques that don't involve maps at all -- to produce
+                paper-like and hypertext outputs. This can help you
+                to work around some of the design limitations that
+                we talked about in the {single sourcing
+                chapter}[#single_source].
+
+            result:
+                ```(xml)
+                    <p>When using the map approach, it is important to think about how your content will <span><annotation type="concept" specifically="single sourcing">single source</annotation></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span><citation type="nameref" value="single_source">single sourcing chapter</citation></span>.</p>
+
+        case: Annotation with language metadata
+            description:
+                You can add language metadata to a phrase.
+
+            source:
+                ```(sam)
+                    Press {Enter}(key !fr-CA)
+            markup:
+                Press {Enter}(key !fr-CA)
+
+            result:
+                ```(xml)
+                    <p>Press <span><annotation type="key" xml:lang="fr-CA">Enter</annotation></span></p>
+
+        case: Prior annotation lookup
+
+            description:
+
+                If a phrase has no annotation or citation attached to it, the parser will
+                attempt to find a suitable annotation by searching back up the document for
+                the most recent case of the same phrase. If it finds one, it will copy
+                the annotations and citations from that phrase to the current one. This
+                prevents writers from having to write the same annotation out over and
+                over again. If not prior phrase is found, a warning is issued.
+
+
+            source:
+                ```(sam)
+                    This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotation}.
+
+            markup:
+                This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotation}.
+
+            result:
+                ```(xml)
+                    <p>This <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span> is repeated <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span>.</p>
+
+        case: Earlier para
+
+            description:
+                The marching annotation is in an earlier paragraph in the document. (In this
+                case, in the preceding test case).
+
+            source:
+                ```(sam)
+                    This {annotation} occurs previously.
+
+            markup:
+                This {annotation} occurs previously.
+
+            result:
+                ```(xml)
+                    <p>This <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span> occurs previously.</p>
+
+
+        case: Failure
+            description:
+                There is no previous phrase. This should generate a warning when the test is run.
+
+            source:
+                ```(sam)
+                    This {should be reported}.
+
+            markup:
+                This {should be reported}.
+
+            result:
+                ```(xml)
+                    <p>This <span>should be reported</span>.</p>
+
+
+
+
+    test: Links
+
+        description:
+
+            Links are created with an annotation.
+
+            You can specify a link as a `link` annotation.
+
+            ```
+                foo {bar}(link "http://example.com/bar") baz
+
+            The link annotation shortcut lets you shorten this to:
+
+            ```
+                foo {bar}(http://example.com/bar) baz
+
+            However, use of the shortcut means you need to escape
+            any parens that occur in the URL.
+
+
+        case: Parens not escaped
+
+            description:
+                The parens are not escaped, causing misreading of markup. This example
+                should be interpreted incorrectly.
+
+
+            source:
+                ```(sam)
+                    Rio Bravo refers to the movie
+                    (and not to {the city in Texas or
+                    the nature reserve in
+                    Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
+
+            markup:
+                Rio Bravo refers to the movie
+                (and not to {the city in Texas or
+                the nature reserve in
+                Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
+
+            result:
+                ```(xml)
+                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_" namespace="disambiguation">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
+
+
+        case: Parens escaped with backslashes
+
+            description:
+                The parens in the URL are escaped with blackslashes. This example
+                should be interpreted correctly.
+
+            source:
+                ```(sam)
+                    Rio Bravo refers to the movie
+                    (and not to {the city in Texas or
+                    the nature reserve in
+                    Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
+
+            markup:
+                Rio Bravo refers to the movie
+                (and not to {the city in Texas or
+                the nature reserve in
+                Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
+
+            result:
+                ```(xml)
+                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
+
+        case: Using explicit link annotation instead of shortcut
+
+            description:
+                The link is specified using a specific link annotation so the
+                URL is not in parens itself. This example should be interpreted
+                correctly.
+
+            source:
+                ```(sam)
+                    Rio Bravo refers to the movie
+                    (and not to {the city in Texas or
+                    the nature reserve in
+                    Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
+
+            markup:
+                Rio Bravo refers to the movie
+                (and not to {the city in Texas or
+                the nature reserve in
+                Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
+
+            result:
+                ```(xml)
+                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
+
+
+    test: Citations
+
+        description:
+            A citation is a reference to a source of information. You
+            can cite with a phrase or by reference to an ID or a name.
+
+        case: Citation on phrase
+
+            description:
+                A citation on a phrase
+
+            source:
+                ```(SAM)
+                    You can {call me Ishmael}[Melville, 1851].
+
+            markup:
+                You can {call me Ishmael}[Melville, 1851].
+
+            result:
+                ```(XML)
+                    <p>You can <span><citation type="citation" value="Melville, 1851">call me Ishmael</citation></span>.</p>
+
+        case: Literal square brackets
+            description:
+                If you want to enter literal square brackets, rather than create a citation,
+                escape the opening square bracket with a backslash.
+
+            source:
+                ```(xml)
+                    Press \[Enter].
+
+            markup:
+                Press \[Enter].
+
+            result:
+                ```(xml)
+                    <p>Press [Enter].</p>
+
+
+
+    test: Characters
+
+        description:
+
+            All SAM documents are UTF-8 unicode documents. Therefore you should
+            be able to enter any character directly. However, typing extended
+            characters is not easy, so SAM supports character entities for
+            entering characters that are not easy to type.
+
+        case: HTML named entities
+
+            description:
+
+                All of the HTML named character entities are supported.
+
+            source:
+                ```(sam)
+                    The doggy in the window costs &pound;5.00.
+
+            markup:
+                The doggy in the window costs &pound;5.00.
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs £5.00.</p>
+
+
+
+
+        case: Numeric entities
+
+            description:
+
+                XML-style decimal numeric character entities are supported.
+
+            source:
+                ```(sam)
+                    The doggy in the window costs &#163;5.00.
+
+            markup:
+                The doggy in the window costs &#163;5.00.
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs £5.00.</p>
+
+
+        case: Hexadecimal entity
+
+            description:
+
+                XML-style hexadecimal numeric character entities are supported.
+
+            source:
+                ```(sam)
+                    The doggy in the window costs &#xA3;5.00.
+
+            markup:
+                The doggy in the window costs &#xA3;5.00.
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs £5.00.</p>
+
+        case: Character entities inside phrases and decorations
+
+            description:
+                Make sure entities are recognized in phrases and
+                decorations.
+
+            source:
+                ```(sam)
+                    The doggy in the window costs *&#xA3;*5.00.
+
+                    The doggy in the window costs {&#xA3;5.00}(money).
+
+            markup:
+                The doggy in the window costs *&#xA3;*5.00.
+
+                The doggy in the window costs {&#xA3;5.00}(money).
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs <span><annotation type="bold">£</annotation></span>5.00.</p>
+                    <p>The doggy in the window costs <span><annotation type="money">£5.00</annotation></span>.</p>
+
+
+        case: In code annotation shortcut:
+
+            description:
+
+                In a code decoration, character entities are not expanded.
+
+            source:
+                ```(sam)
+                    The doggy in the window costs `&#xA3;`5.00.
+
+            markup:
+                The doggy in the window costs `&#xA3;`5.00.
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs <span><annotation type="code">&amp;#xA3;</annotation></span>5.00.</p>
+
+
+
+        case: In bold decoration escaped:
+
+            description:
+                Escaped version inside a bold decoration.
+
+            source:
+                ```(sam)
+                    The doggy in the window costs *\&#xA3;*5.00.
+
+            markup:
+                The doggy in the window costs *\&#xA3;*5.00.
+
+            result:
+                ```(xml)
+                    <p>The doggy in the window costs <span><annotation type="bold">&amp;#xA3;</annotation></span>5.00.</p>
+
+
+        case: Ampersand in a sentence, escaped with \ and not escaped.
+
+            description:
+
+                Unlike XML, SAM does not require that an ampersand be escaped if it is not part of a character entity. You
+                can escape it if you want to using a backslash. Both should output in XML as `&amp;`
+
+            source:
+                ```(sam)
+                    The cat & the dog.
+
+                    The cat \& the dog.
+
+            markup:
+                The cat & the dog.
+
+                The cat \& the dog.
+
+            result:
+                ```(xml)
+                    <p>The cat &amp; the dog.</p>
+                    <p>The cat &amp; the dog.</p>
+
+    test: Character escapes
+
+        description:
+            Character escaping
+
+
+
+        case: Escapes in explicit annotations
+
+            description:
+                Escaping curly braces and backslashes inside a phrase.
+
+            source:
+                ```(sam)
+                    There is a curly brace and two backslashes in {this \\\\\{ phrase}(bold).
+
+            markup:
+                There is a curly brace and two backslashes in {this \\\\\{ phrase}(bold).
+
+            result:
+                ```(xml)
+                    <p>There is a curly brace and two backslashes in <span><annotation type="bold">this \\{ phrase</annotation></span>.</p>
+
+        case: Escapes in code decorations
+
+            description:
+                Code decorations have different escaping rules. All characters are literal
+                except that the backtick character can be escaped with a double back tick.
+                Character entities are not translated in a code decoration. Smart quote
+                transformations are not applied.
+
+            source:
+                ```(sam)
+                    There is a backtick and two backslashes in `th\\is `` code` decoration.
+
+                    There is a backslash and a curly brace in `this \{ code` decoration.
+
+                    `pubwork="book"` is an attribute on the element `citetitle`.
+
+            markup:
+                There is a backtick and two backslashes in `th\\is `` code` decoration.
+
+                There is a backslash and a curly brace in `this \{ code` decoration.
+
+                `pubwork="book"` is an attribute on the element `citetitle`.
+
+            result:
+                ```(xml)
+                    <p>There is a backtick and two backslashes in <span><annotation type="code">th\\is ` code</annotation></span> decoration.</p>
+                    <p>There is a backslash and a curly brace in <span><annotation type="code">this \{ code</annotation></span> decoration.</p>
+                    <p><span><annotation type="code">pubwork="book"</annotation></span> is an attribute on the element <span><annotation type="code">citetitle</annotation></span>.</p>
+
+
+
+        case: Escapes in decorations
+
+            description:
+
+                Escape sequences are recognized inside decorations.
+
+            source:
+                ```(sam)
+                    There is a `*` in *this \* bold* decoration.
+
+                    There is a `_` in _this \_ italic_ decoration.
+
+            markup:
+                There is a `*` in *this \* bold* decoration.
+
+                There is a `_` in _this \_ italic_ decoration.
+
+            result:
+                ```(xml)
+                    <p>There is a <span><annotation type="code">*</annotation></span> in <span><annotation type="bold">this * bold</annotation></span> decoration.</p>
+
+
+        case: XML reserved characters in citation specifically attribute
+
+            description:
+                XML reserved characters occurring within the text of a "specifically" attribute.
+
+            source:
+                ```(sam)
+                    {Skimbleshanks}(animal '"Old  <>& Possum"' (Eliott)).
+
+            markup:
+                {Skimbleshanks}(animal '"Old  <>& Possum"' (Eliott)).
+
+            result:
+                ```(xml)
+                    <p><span><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp; Possum&quot;" namespace="Eliott">Skimbleshanks</annotation></span>.</p>
+
+
+
+
+    test: Conditions
+
+        description:
+
+            You can add conditions to block metadata using condition tokens.
+            Condition tokens start with `?` and must not contain spaces. The
+            application of conditions to text is up to the application layer.
+            SAM just provided a mechanism for recording conditions.
+
+        case: Conditions on unordered list shortcut
+
+            description:
+
+                A condition on an unordered list item.
+
+            source:
+                ```(sam)
+                    * Fred
+
+                    *(?foo) Barney and
+                      Betty and
+                      Bam Bam.
+
+                    * Wilma
+
+            markup:
+
+                * Fred
+
+                *(?foo) Barney and
+                  Betty and
+                  Bam Bam.
+
+                * Wilma
+
+            result:
+                ```(xml)
+                    <ul>
+                    <li>
+                    <p>Fred</p>
+                    </li>
+                    <li conditions="foo">
+                    <p>Barney and Betty and Bam Bam.</p>
+                    </li>
+                    <li>
+                    <p>Wilma</p>
+                    </li>
+                    </ul>
+
+        case: Conditions on ordered list shortcut
+            description:
+                Condition on an ordered list item.
+
+            source:
+                ```(sam)
+                    1. Fred
+                    2.(?foo) Barney and
+                     Betty and
+                     Bam Bam.
+                    3. Wilma
+
+            markup:
+                1. Fred
+                2.(?foo) Barney and
+                 Betty and
+                 Bam Bam.
+                3. Wilma
+
+            result:
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>Fred</p>
+                    </li>
+                    <li conditions="foo">
+                    <p>Barney and Betty and Bam Bam.</p>
+                    </li>
+                    <li>
+                    <p>Wilma</p>
+                    </li>
+                    </ol>
+
+
+
+
+
 
 
     test: Block inserts
@@ -2349,6 +2358,37 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <insert type="image" item="foo.gif"/>
+
+    test: Inline inserts
+
+        description:
+            Inline inserts are an instructions to insert something into the middle of a paragraph.
+
+        case: Inline inserts
+            description:
+                Inline inserts.
+
+            source:
+                ```(sam)
+                    Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
+                    reused, <fragments> & fragment references can both define local {strings}(feature).
+                    Any {string references}(feature) inside a fragment will be resolved by looking first
+                    at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
+                    in the fragment definition, and then at global strings. In effect, this means
+                    that you can define string substitutions whenever you insert a fragment into your content.
+
+            markup:
+
+                Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
+                reused, <fragments> & fragment references can both define local {strings}(feature).
+                Any {string references}(feature) inside a fragment will be resolved by looking first
+                at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
+                in the fragment definition, and then at global strings. In effect, this means
+                that you can define string substitutions whenever you insert a fragment into your content.
+
+            result:
+                ```(xml)
+                    <p>Because you often want to <insert item="foo.gif" name="bar" conditions="baz bat" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <span><annotation type="feature">strings</annotation></span>. Any <span><annotation type="feature">string references</annotation></span> inside a fragment will be resolved by looking first at local-strings defined in the <insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 
     test: Strings
 
@@ -2454,130 +2494,177 @@ tests:(!en) SAM Parser Tests
                     <string name="a">apricot</string>
                     <string name="b">breadfruit</string>
                     </insert>
-    test: Blockquotes
-        description:
-            Blockquotes are introduced by three quotations marke (single or double). The content of
-            a blockquote is normal SAM markup.
-
-        case: Blockquote
-            description:
-                A blockquote with management domain metadata.
-
-
-            source:
-                ```(sam)
-                    After this paragraph, there is a blockquote:
-
-                    """(*foo #bar ?baz)
-                        The quick brown fox jumps over the lazy dog.
-
-                        And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
-
-            markup:
-                After this paragraph, there is a blockquote:
-
-                """(*foo #bar ?baz)
-                    The quick brown fox jumps over the lazy dog.
-
-                    And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
-
-            result:
-                ```(xml)
-                    <p>After this paragraph, there is a blockquote:</p>
-                    <blockquote conditions="baz" id="foo" name="bar">
-                    <p>The quick brown fox jumps over the lazy dog.</p>
-                    <p>And the <span><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></span> jumps over the moon.</p>
-                    </blockquote>
-
-        case: Explicit blockquote
-            description:
-                Blockquote with an explicit `blockquote` block tag.
-
-            source:
-                ```(sam)
-                    blockquote:[http://example.com/page]
-                        Wafting zyphers quickly vexed jumbo.
-
-                        Far and few are the lands where the jumblies live.
-
-            markup:
-                blockquote:[http://example.com/page]
-                    Wafting zyphers quickly vexed jumbo.
-
-                    Far and few are the lands where the jumblies live.
-
-            result:
-                ```(xml)
-                    <blockquote>
-                    <citation type="citation" value="http://example.com/page" extra=""/><p>Wafting zyphers quickly vexed jumbo.</p>
-                    <p>Far and few are the lands where the jumblies live.</p>
-                    </blockquote>
-
-        case: Alternate block quote
-            description:
-                Blockquote with single quotes.
-
-            source:
-                ```(sam)
-                    This is another paragraph. Then there is an alternate blockquote:
-
-                    '''( #foo5 ?bar ?baz)[Mother Goose]
-                        The quick brown fox jumps over the lazy dog.
-
-                    '''
-                        This is a blockquote without a citation.
-
-            markup:
-                This is another paragraph. Then there is an alternate blockquote:
-
-                '''( #foo5 ?bar ?baz)[Mother Goose]
-                    The quick brown fox jumps over the lazy dog.
-
-                '''
-                    This is a blockquote without a citation.
-
-
-            result:
-                ```(xml)
-                    <p>This is another paragraph. Then there is an alternate blockquote:</p>
-                    <blockquote conditions="bar baz" name="foo5">
-                    <citation type="citation" value="Mother Goose" extra=""/><p>The quick brown fox jumps over the lazy dog.</p>
-                    </blockquote>
-                    <blockquote>
-                    <p>This is a blockquote without a citation.</p>
-                    </blockquote>
 
 
 
 
-
-    test: Inline inserts
+    test: XML fragments
 
         description:
-            Inline inserts are an instructions to insert something into the middle of a paragraph.
+            You can insert a fragment of XML. It must be well formed and must start with an XML header. It must be UTF-8.
+            It will be copied to output verbatim, minus the XML header.
 
-        case: Inline inserts
+        case: XML fragment
+
             description:
-                Inline inserts.
+                A chunk of XML.
 
             source:
                 ```(sam)
-                    Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
-                    reused, <fragments> & fragment references can both define local {strings}(feature).
-                    Any {string references}(feature) inside a fragment will be resolved by looking first
-                    at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
-                    in the fragment definition, and then at global strings. In effect, this means
-                    that you can define string substitutions whenever you insert a fragment into your content.
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <foo bar="bat">
+                        <boo/>
+                        <hoo/>
+                    </foo>
 
             markup:
-
-                Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
-                reused, <fragments> & fragment references can both define local {strings}(feature).
-                Any {string references}(feature) inside a fragment will be resolved by looking first
-                at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
-                in the fragment definition, and then at global strings. In effect, this means
-                that you can define string substitutions whenever you insert a fragment into your content.
+                <?xml version="1.0" encoding="UTF-8"?>
+                <foo bar="bat">
+                    <boo/>
+                    <hoo/>
+                </foo>
 
             result:
                 ```(xml)
-                    <p>Because you often want to <insert item="foo.gif" name="bar" conditions="baz bat" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <span><annotation type="feature">strings</annotation></span>. Any <span><annotation type="feature">string references</annotation></span> inside a fragment will be resolved by looking first at local-strings defined in the <insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+                    <foo bar="bat">
+                        <boo/>
+                        <hoo/>
+                    </foo>
+
+    test: Smart quotes
+
+        description:
+            Smart quotes is an optional feature of the parser, not a
+            feature of the SAM language. It turns straight quotes into
+            curly quotes. It raises a warning when it can't figure out
+            how to handle a case. The algorithm could be improved in
+            the future to handle more cases correctly.
+
+            The canonical way to handle quotes in SAM is to use real
+            curly quotes to begin with. All SAM documents are UTF-8.
+
+            Note: These test will fail if smart quotes is not selected
+            using the `-q` option of the parser command line or by
+            setting the `smart_quotes` attribute of the SamParser
+            object to `True`.
+
+        case: Smart quotes
+
+            description:
+
+                Paragraphs illustrating most of the cases where smart quotes should
+                be recognized in ordinary English.
+
+            source:
+                ```(sam)
+                    "For once, 'sir' adding, 'you're making a
+                    scene.'" and "For once, 'sir' adding,
+                    'you're making a scene.'" In the winter
+                    of ’65. "Yes," he said, "I met her. She's
+                    very 'friendly.'" '"I don’t know what you
+                    mean by 'glory,'" Alice said.' "'I don’t
+                    know what you mean by "glory,"' Alice said."
+
+                    For "the Duke", perhaps?
+
+            markup:
+                "For once, 'sir' adding, 'you're making a
+                scene.'" and "For once, 'sir' adding,
+                'you're making a scene.'" In the winter
+                of ’65. "Yes," he said, "I met her. She's
+                very 'friendly.'" '"I don’t know what you
+                mean by 'glory,'" Alice said.' "'I don’t
+                know what you mean by "glory,"' Alice said."
+
+                For "the Duke", perhaps?
+
+            result:
+                ```(xml)
+                    <p>“For once, ‘sir’ adding, ‘you’re making a scene.’” and “For once, ‘sir’ adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
+                    <p>For “the Duke”, perhaps?</p>
+
+        case: Following an annotation
+
+            description:
+                Smart quotes also need to be recognized when they follow
+                SAM markup.
+
+            source:
+                ```(sam)
+
+                    interpretations of the `xref`'s instruction
+
+            markup:
+                interpretations of the `xref`'s instruction
+
+            result:
+                ```(xml)
+                    <p>interpretations of the <span><annotation type="code">xref</annotation></span>’s instruction</p>
+
+        case: Smart quotes with annotations
+
+            description:
+
+                Smart quotes surrounding annotated phrases.
+
+            source:
+                ```(sam)
+                    "For once, '{sir}(salutation)' adding, 'you're making a
+                    scene.'" and "For once, {'sir'}(salutation) adding,
+                    'you're making a scene.'" In the winter
+                    of ’65. "Yes," he said, "I met her. She's
+                    very 'friendly.'" '"I don’t know what you
+                    mean by 'glory,'" Alice said.' "'I don’t
+                    know what you mean by "glory,"' Alice said."
+
+            markup:
+                "For once, '{sir}(salutation)' adding, 'you're making a
+                scene.'" and "For once, {'sir'}(salutation) adding,
+                'you're making a scene.'" In the winter
+                of ’65. "Yes," he said, "I met her. She's
+                very 'friendly.'" '"I don’t know what you
+                mean by 'glory,'" Alice said.' "'I don’t
+                know what you mean by "glory,"' Alice said."
+
+            result:
+                ```(xml)
+                    <p>“For once, ‘<span><annotation type="salutation">sir</annotation></span>’ adding, ‘you’re making a scene.’” and “For once, <span><annotation type="salutation">‘sir’</annotation></span> adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
+
+        case: Adjacent to parentheses
+            description:
+                Quotes inside parentheses.
+
+            source:
+                ```(sam)
+                    A vector graphic program creates graphics as a collection of  objects ("vector" meaning the mathematical representation of a shape or line).
+
+                    The shape of the characters (technically, "glyphs") that make up the font are stored separately in font files.
+
+            markup:
+                A vector graphic program creates graphics as a collection of  objects ("vector" meaning the mathematical representation of a shape or line).
+
+                The shape of the characters (technically, "glyphs") that make up the font are stored separately in font files.
+
+            result:
+                ```(xml)
+                    <p>A vector graphic program creates graphics as a collection of  objects (“vector” meaning the mathematical representation of a shape or line).</p>
+                    <p>The shape of the characters (technically, “glyphs”) that make up the font are stored separately in font files.</p>
+
+
+        case: Escaped dumb quotes
+            description:
+                If you want to enter straight quotes and have them stay straight when
+                smart quotes are applied, you have to escape them with `\` or use the
+                `&quot;` character entity.
+
+            source:
+                ```(sam)
+                    This para uses \"dumb\" quotes. Don\'t get them &quot;mixed up&quot;.
+
+            markup:
+                This para uses \"dumb\" quotes. Don\'t get them &quot;mixed up&quot;.
+
+            result:
+                ```(xml)
+                    <p>This para uses "dumb" quotes. Don't get them "mixed up".</p>
+
