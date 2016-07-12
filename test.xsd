@@ -6,6 +6,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="title"> </xs:element>
+                <xs:element name="description"/>
                 <xs:element maxOccurs="unbounded" name="test">
                     <xs:complexType>
                         <xs:sequence>
