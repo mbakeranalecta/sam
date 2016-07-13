@@ -1469,7 +1469,7 @@ class InlineInsert:
 
     def serialize_xml(self):
         yield '<insert'
-        for key, value in self.attributes.items():
+        for key, value in sorted(self.attributes.items()):
             yield " {0}=\"{1}\"".format(key, escape_for_xml_attribute(value))
         yield '/>'
 

@@ -20,14 +20,13 @@ tests:(!en) SAM Parser Tests
           should be retained, such as in codeblocks and at the beginning of
           lines.
 
-        * The SAM parser does not currently guarantee the order in which
-          XML attributes are generated. (From an XML point of view, it does
-          not need to.) However the expected result markup in the test document
-          lists them in a fixed order. If the expected and actual markup
-          differ in the order of attributes, the test will fail even though
-          the two pieces of markup are semantically identical.
+        * The SAM parser outputs attributes in alphabetical order. (From an XML point of view,
+          the order of attributes does not matter.) Test should be written such
+          that the attributes in the `result:` section are in alphabetical
+          order. If not, the test will fail even though the XML is semantically
+          identical.
 
-        When running this test you should relieve one SAM Parser Warning:
+        When running this test you should receive one SAM Parser Warning:
 
         ```(terminal)
             SAM parser warning: Unannotated phrase found: {should be reported} If you are trying to insert curly braces into the document, use \{should be reported}.
@@ -2381,7 +2380,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <insert type="image" item="foo.gif"/>
+                    <insert item="foo.gif" type="image"/>
 
     test: Inline inserts
 
@@ -2412,7 +2411,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Because you often want to <insert item="foo.gif" name="bar" conditions="baz bat" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+                    <p>Because you often want to <insert conditions="baz bat" item="foo.gif" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 
     test: Strings
 
@@ -2447,7 +2446,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                   <p>This sentence includes a string reference <insert type="string" item="name"/>. And a shortcut version <insert type="string" item="name"/>.</p>
+                   <p>This sentence includes a string reference <insert item="name" type="string"/>. And a shortcut version <insert item="name" type="string"/>.</p>
 
     test: Fragments
         description:
