@@ -233,10 +233,20 @@ class SamParser:
             self.doc.new_flow(f)
             return "END", context
 
+        first_line_indent = len(match.string) - len(match.string.lstrip())
+        this_line_indent = len(line) - len(line.lstrip())
+
         if self.patterns['blank-line'].match(line):
             f = para_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
             self.doc.new_flow(f)
+            return "SAM", context
+
+        if this_line_indent < first_line_indent:
+            f = para_parser.parse(self.current_text_block.text, self.doc)
+            self.current_text_block = None
+            self.doc.new_flow(f)
+            source.return_line()
             return "SAM", context
 
         if self.doc.in_context(['p', 'li']):

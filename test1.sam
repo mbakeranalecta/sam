@@ -39,8 +39,6 @@ tests:(!en) SAM Parser Tests
         description:
             Blocks are the basic building block of a SAM file. This whole document is a
             test case for blocks.
-
-
         case: Language metadata
 
             description:
