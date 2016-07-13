@@ -160,7 +160,7 @@
         [<xsl:apply-templates/>]?
     </xsl:template>
 
-    <xsl:template match="span">
+    <xsl:template match="phrase">
         <span style="color: green">
             <xsl:apply-templates/>
         </span>

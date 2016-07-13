@@ -103,9 +103,9 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <document>
                     <head name="foo">
-                    <foo>barney <span><annotation type="conjunction">and</annotation></span> betty</foo>
+                    <foo>barney <phrase><annotation type="conjunction">and</annotation></phrase> betty</foo>
                     <baz>bat</baz>
-                    <string name="name">fred <span><annotation type="conjunction">and</annotation></span> wilma</string>
+                    <string name="name">fred <phrase><annotation type="conjunction">and</annotation></phrase> wilma</string>
                     <history>
                     <row>
                     <date>2014-06-23</date>
@@ -210,7 +210,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>This is a <span><annotation type="foo">paragraph</annotation></span> that wraps across multiple lines.</p>
+                    <p>This is a <phrase><annotation type="foo">paragraph</annotation></phrase> that wraps across multiple lines.</p>
 
     test: Ordered lists
 
@@ -1329,9 +1329,9 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <grid>
                     <row>
-                    <cell><span><annotation type="bold">Type</annotation></span></cell>
-                    <cell><span><annotation type="bold">Term</annotation></span></cell>
-                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
+                    <cell><phrase><annotation type="bold">Type</annotation></phrase></cell>
+                    <cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
+                    <cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
                     </row>
                     <row>
                     <cell>feature</cell>
@@ -1377,9 +1377,9 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <grid conditions="baz" id="foom" name="bar">
                     <row>
-                    <cell><span><annotation type="bold">Type</annotation></span></cell>
-                    <cell><span><annotation type="bold">Term</annotation></span></cell>
-                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
+                    <cell><phrase><annotation type="bold">Type</annotation></phrase></cell>
+                    <cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
+                    <cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
                     </row>
                     <row>
                     <cell>feature</cell>
@@ -1416,9 +1416,9 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <grid>
                     <row>
-                    <cell><span><annotation type="bold">Type</annotation></span></cell>
-                    <cell><span><annotation type="bold">Term</annotation></span></cell>
-                    <cell><span><annotation type="bold">Notes</annotation></span></cell>
+                    <cell><phrase><annotation type="bold">Type</annotation></phrase></cell>
+                    <cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
+                    <cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
                     </row>
                     <row>
                     <cell>feature</cell>
@@ -1426,9 +1426,9 @@ tests:(!en) SAM Parser Tests
                     <cell>bing</cell>
                     </row>
                     <row>
-                    <cell><span><annotation type="bold">feature</annotation></span></cell>
-                    <cell><span><annotation type="bold">fragments</annotation></span></cell>
-                    <cell><span><annotation type="bold">bang</annotation></span></cell>
+                    <cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
+                    <cell><phrase><annotation type="bold">fragments</annotation></phrase></cell>
+                    <cell><phrase><annotation type="bold">bang</annotation></phrase></cell>
                     </row>
                     </grid>
 
@@ -1455,17 +1455,17 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <grid>
                     <row>
-                    <cell><span><annotation type="bold">Type</annotation></span></cell>
+                    <cell><phrase><annotation type="bold">Type</annotation></phrase></cell>
                     <cell>Term</cell>
                     <cell>Notes</cell>
                     </row>
                     <row>
-                    <cell><span><annotation type="bold">feature</annotation></span></cell>
+                    <cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
                     <cell>fragment</cell>
                     <cell>bing</cell>
                     </row>
                     <row>
-                    <cell><span><annotation type="bold">feature</annotation></span></cell>
+                    <cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
                     <cell>fragments</cell>
                     <cell>bang</cell>
                     </row>
@@ -1503,7 +1503,7 @@ tests:(!en) SAM Parser Tests
                     <p>After this paragraph, there is a blockquote:</p>
                     <blockquote conditions="baz" id="foo" name="bar">
                     <p>The quick brown fox jumps over the lazy dog.</p>
-                    <p>And the <span><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></span> jumps over the moon.</p>
+                    <p>And the <phrase><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
                     </blockquote>
 
         case: Explicit blockquote
@@ -1732,7 +1732,7 @@ tests:(!en) SAM Parser Tests
         case: Multiple annotations
 
             description:
-                Spans with more than one attribute in a chain.
+                Phrases with more than one attribute in a chain.
 
             source:
                 ```(sam)
@@ -1754,9 +1754,9 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>This is <span><annotation type="bold">very</annotation></span> important.</p>
-                    <p>This is <span><annotation type="bold"><annotation type="italic">very</annotation></annotation></span> important.</p>
-                    <p>This is <span><annotation type="bold"><annotation type="italic"><annotation type="green">very</annotation></annotation></annotation></span> important.</p>
+                    <p>This is <phrase><annotation type="bold">very</annotation></phrase> important.</p>
+                    <p>This is <phrase><annotation type="bold"><annotation type="italic">very</annotation></annotation></phrase> important.</p>
+                    <p>This is <phrase><annotation type="bold"><annotation type="italic"><annotation type="green">very</annotation></annotation></annotation></phrase> important.</p>
 
 
         case: Consecutive Annotations
@@ -1773,7 +1773,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p><span><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></span><span><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></span> plays Rooster Cogburn.</p>
+                    <p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
 
 
 
@@ -1827,7 +1827,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>When using the map approach, it is important to think about how your content will <span><annotation type="concept" specifically="single sourcing">single source</annotation></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span><citation type="nameref" value="single_source">single sourcing chapter</citation></span>.</p>
+                    <p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation type="nameref" value="single_source">single sourcing chapter</citation></phrase>.</p>
 
         case: Annotation with language metadata
             description:
@@ -1841,7 +1841,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Press <span><annotation type="key" xml:lang="fr-CA">Enter</annotation></span></p>
+                    <p>Press <phrase><annotation type="key" xml:lang="fr-CA">Enter</annotation></phrase></p>
 
         case: Prior annotation lookup
 
@@ -1864,7 +1864,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>This <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span> is repeated <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span>.</p>
+                    <p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase>.</p>
 
         case: Earlier para
 
@@ -1881,7 +1881,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>This <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></span> occurs previously.</p>
+                    <p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> occurs previously.</p>
 
 
         case: Failure
@@ -1897,7 +1897,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>This <span>should be reported</span>.</p>
+                    <p>This <phrase>should be reported</phrase>.</p>
 
 
 
@@ -1944,7 +1944,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_" namespace="disambiguation">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
+                    <p>Rio Bravo refers to the movie (and not to <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_" namespace="disambiguation">the city in Texas or the nature reserve in Belize</annotation></phrase>)</p>
 
 
         case: Parens escaped with backslashes
@@ -1968,7 +1968,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
+                    <p>Rio Bravo refers to the movie (and not to <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></phrase>)</p>
 
         case: Using explicit link annotation instead of shortcut
 
@@ -1992,7 +1992,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Rio Bravo refers to the movie (and not to <span><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></span>)</p>
+                    <p>Rio Bravo refers to the movie (and not to <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></phrase>)</p>
 
 
     test: Citations
@@ -2015,7 +2015,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(XML)
-                    <p>You can <span><citation type="citation" value="Melville, 1851">call me Ishmael</citation></span>.</p>
+                    <p>You can <phrase><citation type="citation" value="Melville, 1851">call me Ishmael</citation></phrase>.</p>
 
         case: Literal square brackets
             description:
@@ -2118,8 +2118,8 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>The doggy in the window costs <span><annotation type="bold">£</annotation></span>5.00.</p>
-                    <p>The doggy in the window costs <span><annotation type="money">£5.00</annotation></span>.</p>
+                    <p>The doggy in the window costs <phrase><annotation type="bold">£</annotation></phrase>5.00.</p>
+                    <p>The doggy in the window costs <phrase><annotation type="money">£5.00</annotation></phrase>.</p>
 
 
         case: In code annotation shortcut:
@@ -2137,7 +2137,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>The doggy in the window costs <span><annotation type="code">&amp;#xA3;</annotation></span>5.00.</p>
+                    <p>The doggy in the window costs <phrase><annotation type="code">&amp;#xA3;</annotation></phrase>5.00.</p>
 
 
 
@@ -2155,7 +2155,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>The doggy in the window costs <span><annotation type="bold">&amp;#xA3;</annotation></span>5.00.</p>
+                    <p>The doggy in the window costs <phrase><annotation type="bold">&amp;#xA3;</annotation></phrase>5.00.</p>
 
 
         case: Ampersand in a sentence, escaped with \ and not escaped.
@@ -2202,7 +2202,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>There is a curly brace and two backslashes in <span><annotation type="bold">this \\{ phrase</annotation></span>.</p>
+                    <p>There is a curly brace and two backslashes in <phrase><annotation type="bold">this \\{ phrase</annotation></phrase>.</p>
 
         case: Escapes in code decorations
 
@@ -2229,9 +2229,9 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>There is a backtick and two backslashes in <span><annotation type="code">th\\is ` code</annotation></span> decoration.</p>
-                    <p>There is a backslash and a curly brace in <span><annotation type="code">this \{ code</annotation></span> decoration.</p>
-                    <p><span><annotation type="code">pubwork="book"</annotation></span> is an attribute on the element <span><annotation type="code">citetitle</annotation></span>.</p>
+                    <p>There is a backtick and two backslashes in <phrase><annotation type="code">th\\is ` code</annotation></phrase> decoration.</p>
+                    <p>There is a backslash and a curly brace in <phrase><annotation type="code">this \{ code</annotation></phrase> decoration.</p>
+                    <p><phrase><annotation type="code">pubwork="book"</annotation></phrase> is an attribute on the element <phrase><annotation type="code">citetitle</annotation></phrase>.</p>
 
 
 
@@ -2254,8 +2254,8 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>There is a <span><annotation type="code">*</annotation></span> in <span><annotation type="bold">this * bold</annotation></span> decoration.</p>
-                    <p>There is a <span><annotation type="code">_</annotation></span> in <span><annotation type="italic">this _ italic</annotation></span> decoration.</p>
+                    <p>There is a <phrase><annotation type="code">*</annotation></phrase> in <phrase><annotation type="bold">this * bold</annotation></phrase> decoration.</p>
+                    <p>There is a <phrase><annotation type="code">_</annotation></phrase> in <phrase><annotation type="italic">this _ italic</annotation></phrase> decoration.</p>
 
         case: XML reserved characters in citation specifically attribute
 
@@ -2271,7 +2271,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p><span><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp; Possum&quot;" namespace="Eliott">Skimbleshanks</annotation></span>.</p>
+                    <p><phrase><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp; Possum&quot;" namespace="Eliott">Skimbleshanks</annotation></phrase>.</p>
 
 
 
@@ -2414,7 +2414,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Because you often want to <insert item="foo.gif" name="bar" conditions="baz bat" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <span><annotation type="feature">strings</annotation></span>. Any <span><annotation type="feature">string references</annotation></span> inside a fragment will be resolved by looking first at local-strings defined in the <insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+                    <p>Because you often want to <insert item="foo.gif" name="bar" conditions="baz bat" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 
     test: Strings
 
@@ -2625,7 +2625,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>interpretations of the <span><annotation type="code">xref</annotation></span>’s instruction</p>
+                    <p>interpretations of the <phrase><annotation type="code">xref</annotation></phrase>’s instruction</p>
 
         case: Smart quotes with annotations
 
@@ -2654,7 +2654,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>“For once, ‘<span><annotation type="salutation">sir</annotation></span>’ adding, ‘you’re making a scene.’” and “For once, <span><annotation type="salutation">‘sir’</annotation></span> adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
+                    <p>“For once, ‘<phrase><annotation type="salutation">sir</annotation></phrase>’ adding, ‘you’re making a scene.’” and “For once, <phrase><annotation type="salutation">‘sir’</annotation></phrase> adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
 
         case: Adjacent to parentheses
             description:
