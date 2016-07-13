@@ -992,7 +992,7 @@ class SamParaParser:
         self.stateMachine.add_state("PARA", self._para)
         self.stateMachine.add_state("ESCAPE", self._escape)
         self.stateMachine.add_state("END", None, end_state=1)
-        self.stateMachine.add_state("SPAN-START", self._span_start)
+        self.stateMachine.add_state("SPAN-START", self._phrase_start)
         self.stateMachine.add_state("ANNOTATION-START", self._annotation_start)
         self.stateMachine.add_state("CITATION-START", self._citation_start)
         self.stateMachine.add_state("BOLD-START", self._bold_start)
@@ -1006,7 +1006,7 @@ class SamParaParser:
         self.patterns = {
             'escape': re.compile(r'\\', re.U),
             'escaped-chars': re.compile('[\\\(\)\{\}\[\]_\*,\.\*`"&' + "']", re.U),
-            'span': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
+            'phrase': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
             'annotation': re.compile(
                 r'(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(!(?P<language>[\w-]+))?\))',
                 re.U),
@@ -1066,8 +1066,8 @@ class SamParaParser:
             self.current_string += char
             return "PARA", para
 
-    def _span_start(self, para):
-        match = self.patterns['span'].match(para.rest_of_para)
+    def _phrase_start(self, para):
+        match = self.patterns['phrase'].match(para.rest_of_para)
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
@@ -1338,12 +1338,12 @@ class Span:
         return u'{{{0:s}}}'.format(self.text)
 
     def serialize_xml(self):
-        yield '<span>'
+        yield '<phrase>'
         if self.child:
             yield from self.child.serialize_xml(escape_for_xml(self.text))
         else:
             yield escape_for_xml(self.text)
-        yield '</span>'
+        yield '</phrase>'
 
     def append(self, thing):
         if not self.child:
