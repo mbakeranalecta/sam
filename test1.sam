@@ -1578,7 +1578,7 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    ```(python)
+                    ```(python ?foo)
                         def escape_for_xml(s):
                             t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
                             try:
@@ -1586,7 +1586,7 @@ tests:(!en) SAM Parser Tests
                             except AttributeError:
                                 return s
             markup:
-                ```(python)
+                ```(python ?foo)
                     def escape_for_xml(s):
                         t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
                         try:
@@ -1596,7 +1596,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <codeblock language="python">
+                    <codeblock conditions="foo" language="python">
                     def escape_for_xml(s):
                         t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
                         try:
@@ -1832,13 +1832,27 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    Press {Enter}(key !fr-CA)
+                    Press {Enter}(key)(!fr-CA)
             markup:
-                Press {Enter}(key !fr-CA)
+                Press {Enter}(key)(!fr-CA)
 
             result:
                 ```(xml)
                     <p>Press <phrase><annotation type="key" xml:lang="fr-CA">Enter</annotation></phrase></p>
+
+        case: Annotation with a condition
+            description:
+                You can add condition metadata to a phrase.
+
+            source:
+                ```(sam)
+                    Press {Enter}(key)(?foo)
+            markup:
+                Press {Enter}(key)(?foo)
+
+            result:
+                ```(xml)
+                    <p>Press <phrase><annotation type="key" conditions="foo">Enter</annotation></phrase></p>
 
         case: Prior annotation lookup
 
@@ -2413,6 +2427,21 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>Because you often want to <insert conditions="baz bat" item="foo.gif" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 
+        case: Paragraph that is just an inline insert
+            description:
+                An inline insert on a line by itself creates a paragraph containing an insert, rather
+                than a standalone insert instruction.
+
+            source:
+                ```(sam)
+                    >(#foo)
+
+            markup:
+                >(#foo)
+
+            result:
+                ```(xml)
+                    <p><insert item="foo" type="name"/></p>
     test: Strings
 
         description:
