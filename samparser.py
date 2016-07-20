@@ -1598,8 +1598,7 @@ if __name__ == "__main__":
             if args.outfile:
                 if transformed:
                     with open(args.outfile, "wb") as outf:
-                        transformed_text = etree.tostring(transformed, method='xml', encoding="UTF-8")
-                        outf.write(transformed_text)
+                        outf.write(str(transformed).encode(encoding='utf-8'))
 
                     if transform.error_log:
                         SAM_parser_warning("Messages from the XSLT transformation:")
