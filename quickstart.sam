@@ -1,0 +1,574 @@
+sam:
+
+article: SAM Quick Start
+
+    SAM is a markup language for semantic authoring. It is not a fixed language like Markdown.
+    It is a meta-language like XML. Markdown has a fixed set of document structures that you
+    can use. SAM, like XML, lets you define and create your own structures to suit your own
+    needs. Unlike XML, however, and like Markdown, SAM is designed to be easy to write in
+    a plain text editor. SAM also provides a set of basic default structures that are shared
+    by all SAM document types. This base set is deliberately basic. It is designed to make
+    certain common structures easy to create. There are other document structures you will
+    probably need that you will have to design for your self using SAM's blocks and annotations.
+    See the {SAM Recipes} document (forthcoming) for some suggestions on how to create some
+    commonly used document structures.
+
+    SAM is designed for structured writing. That is, writing that obeys a specific defined
+    structure that tells you what goes into a document and how it is expressed. A structured
+    document is also one that you can process with algorithms in order to validate the content,
+    create new forms of content, or publish the content to different media and for different
+    purposes. The key to successful structured writing is that the writer must be able
+    to clearly see the structure as they are writing. That is not the case with XML, whether
+    you write it in a plain text editor or in a sophisticated XML editor that make it look
+    like a Word document. Verbose XML tags obscure structure and Word-like interfaces hide
+    structure behind an approximation of final formatting.
+
+    The easiest way to show the structure of a document is through labels and indentation.
+    Here is an example of a structured document, a recipe, written in SAM:
+
+    ```(sam)
+        sam:
+        recipe: Hard Boiled Egg
+            introduction:
+                A hard boiled egg is simple and nutritious. It makes
+                a quick and delicious addition to any breakfast.
+
+                Hard boiled eggs can also be an ingredients in
+                other dishes, such as a {Cobb Salad}(recipe).
+
+            ingredients:: ingredient, quantity
+                eggs, 12
+                water, 2qt
+            preparation:
+                1. Place eggs in pan and cover with water.
+                2. Bring water to a boil.
+                3. Remove from heat and cover for 12 minutes.
+                4. Place eggs in cold water to stop cooking.
+                5. Peel and serve.
+            prep-time: 15 minutes
+            serves: 6
+            wine-match: champagne and orange juice
+            beverage-match: orange juice
+            nutrition:
+                serving: 1 large (50 g)
+                calories: 78
+                total-fat: 5 g
+                saturated-fat: 0.7 g
+                polyunsaturated-fat: 0.7 g
+                monounsaturated-fat: 2 g
+                cholesterol: 186.5 mg
+                sodium: 62 mg
+                potassium: 63 mg
+                total-carbohydrate: 0.6 g
+                dietary-fiber: 0 g
+                sugar: 0.6 g
+                protein: 6 g
+
+    As you can see, each of the elements that makes up a recipe is individually labeled using
+    a one-word label followed by a colon. For example, the preparation time is labeled with
+    the label `prep-time:`. The overall structure of the recipe, and the relationship of
+    the structures within it are expressed by indentation. Thus the individual fields that
+    make up the nutrition information are indented under the `nutrition:` label.
+
+    This is a semantic version of the recipe. It does not tell you how the recipe should be
+    formatted. It does not even contain the headings that will probably be used when the
+    recipe is printed on paper or screen. To actually make a printed recipe, the semantic
+    version needs to be processed by an algorithm that decides which pieces of information
+    to publish, what order to publish them in, what titles to use for the sections, how
+    to format the text, and which media to publish to. However, the semantic version lets
+    you do cool stuff like make a collection of recipes with less than 80 calories per
+    serving that can be prepared in less than 20 minutes, because it makes those
+    pieces of information clearly available to algorithms for querying and processing. It
+    also helps to make sure tha people writing recipes provide all the information we
+    need in the order and form we want it in.
+
+    The main parts of a SAM document as as follows.
+
+    section: SAM declaration
+        A SAM document starts with a SAM declaration:
+
+        ```(sam)
+            sam:
+
+        A SAM declaration may also declare a schema or a namespace for the SAM document.
+        See the full languages description for details.
+
+    section: Blocks
+
+        A block is a container for other structures. It has a label. It may also have a title.
+        In the example above, `recipe:` starts a block that contains the entire recipe document.
+        `nutrition:` starts a block that contains the nutrition information. Blocks
+        are delimited by indentation. Everything indented under the block tag is part of the block.
+        Every SAM document must have a single root block that contains all the content of the
+        document. The root block does not need to be indented under the SAM declaration.
+
+        The recipe block has a title, "Hard Boiled Egg", which is the text after the colon
+        in `recipe:`.
+
+        ```(sam)
+            recipe: Hard Boiled Egg
+
+        This is a short cut and is exactly equivalent to this (provided there is nothing
+        indented under the `title` tag):
+
+        ```(sam)
+            recipe:
+                title: Hard Boiled Egg
+
+    section: Fields
+
+        A field is a container for a single value. Each of the lines in the nutrition
+        block is a field. For example, `sugar: 0.6 g` is a field with the label `sugar` and
+        the value `0.6 g`. A field has the same format as a block except that there is nothing
+        indented under it. Indent something under a field and it will become a block and its
+        value will become the title of the block.
+
+    section: Paragraphs
+
+        A paragraph is a string of text. Paragraph may run over several lines. A
+        paragraph ends with a blank line or when the block it belongs to ends (which means when
+        next line is less indented). Paragraph may not have children. That is, you can't
+        indent anything under a paragraph.
+
+    section: Lists
+
+        You can create lists in SAM two ways. One is by creating explicit `ol` and `li`
+        blocks like in HTML. The other is as shown above, by using numbers followed by a
+        period to start each line of the list.
+
+        ```(sam)
+            1. Place eggs in pan and cover with water.
+            2. Bring water to a boil.
+            3. Remove from heat and cover for 12 minutes.
+            4. Place eggs in cold water to stop cooking.
+            5. Peel and serve.
+
+        Numbered lists created like this will be converted
+        to a `ol` by the {SAM Parser}(tool). Unordered lists can be created the same way using
+        asterisks.
+
+        ```(sam)
+            * Dog
+            * Cat
+            * Monkey
+
+    section: Phrases:
+        A phrase is an and piece of text within a paragraph. A phrase is marked up with
+        curly braces. In the recipe example, the words "Cobb Salad" are marked up as a
+        phrase: `{Cobb Salad}`. We mark up phrases so that we can add semantic information
+        to them with annotations and citations.
+
+    section: Annotations
+        An annotation is a way of adding descriptive labels or metadata to individual
+        phrases within a text. Annotations can cover anything from formatting (bold, italic) to
+        linking to semantic annotation. Annotations are applied to phrases. In the example
+        above, the phrase "Cobb Salad" has an annotation "recipe" (`{Cobb
+        Salad}(recipe)`) which tells us that the phrase is the name of a recipe. There is
+        no fixed set of annotations in SAM. It is up to you to determine what annotations
+        you need for your content.
+
+    section: Annotation chaining
+        You cannot markup one phrase inside another phrase, however, you can add more than
+        one annotation to a phrase. To add additional annotations, simply follow one with
+        another without an space between them:
+
+        ```(sam)
+            {Clint Eastwood}(actor)(director) stared in and directed {Gran Torino}(movie).
+
+        You can also chain annotations and citations.
+
+    section: Links
+        Links are a form of annotation. As a meta-language, SAM does not support links
+        itself. It is up to you to decide if your markup language includes support for links
+        or not. However, SAM does reserve the annotation type `link` for creating links if
+        you want them, and has a shortcut for creating links, which looks like this:
+        `{Cobb
+        Salad}(http://allrecipes.com/recipe/14415/cobb-salad/)`. That is, if the
+        first thing in the annotation is recognized as a URL, it is assumed to be
+        a link annotation pointing to that URL.
+
+    section: Record sets
+
+        A record set is a kind of table. But because SAM is designed for semantic
+        authoring, record sets are designed more like a database table than
+        a formatted table. The content in a record set could be presented in a
+        table, but it could also be presented in other ways or queried like a
+        database table.
+
+        A record set consists of a block containing records. A record is a
+        set of fields. Each record in a record set has the same set of fields of
+        the same type. In the recipe example, the ingredients are specified using
+        a record set, with each ingredient forming a record.
+
+        ```(sam)
+            ingredients:: ingredient, quantity
+                eggs, 12
+                water, 2qt
+
+        The record set label is `ingredients::` and it is marked with two colons instead
+        of one. The field names follow the two colons, separated by commas. Each line
+        that follows contains a record of an ingredient, with the fields separated by
+        commas. If the above were written using regular blocks and fields rather than
+        a record set, it would look like this:
+
+        ```(sam)
+            ingredients:
+                row:
+                    ingredient: eggs
+                    quantity: 12
+                row:
+                    ingredient: water
+                    quantity: 2qt
+
+        You could use record sets to create a simple table layout:
+
+        ```(sam)
+            table:: cell, cell
+                eggs, 12
+                water, 2qt
+
+        This is equivalent to:
+
+        ```(sam)
+            table:
+                row:
+                    cell: eggs
+                    cell: 12
+                row:
+                    cell: water
+                    cell: 2qt
+
+        However, here the semantics of the content has been lost.
+
+    section: Grids
+
+        There is another way to do simple table layouts, using grids. A grid
+        looks like this:
+
+        ```(sam)
+            +++
+                eggs  | 12
+                water | 2qt
+
+        This is equivalent to a record set in the form:
+
+        ```(sam)
+            ingredients:: ingredient, quantity
+                eggs, 12
+                water, 2qt
+
+        Which is equivalent to blocks and fields like this:
+
+        ```(sam)
+            grid:
+                row:
+                    cell: eggs
+                    cell: 12
+                row:
+                    cell: water
+                    cell: 2qt
+
+        However, using grids can make it easier to read small table-like
+        structures more easily in the SAM source.
+
+        There are no advanced table features like table heads or row and
+        column spanning in grids. SAM is intended for semantic authoring
+        rather than complex layout effects. For suggestions on how to
+        handle complex tables in SAM, see the {SAM Recipes} document.
+
+    section: Code Blocks
+        A code block is a piece of computer code or perhaps the
+        text of a terminal display. Code blocks are usually presented
+        literally as written, often in a fixed space font and with
+        line breaks in the same place as in the source. Most code blocks
+        are in a specific programming or data structure language which
+        the processing routine may need to know to do things like
+        color coding the syntax. In SAM, a codeblock is introduced
+        with three back ticks. (```````).
+
+        ```(sam)
+            ```(python)
+                for i in range(1,10):
+                    print("Hello World " + str(i))
+
+        The code block must be intended under the codeblock header (the
+        three backticks). The indentation of the code block will be
+        calculated based on the least indented line. Thus in the example
+        above, the line `for i in range(1,10):` will be treated as having
+        and indent of 0, and the line `print("Hello World " + str(i))` will
+        have an indent of 4.
+
+        The language of the codeblock is given in the annotation immediately
+        following the three back ticks of the header. It must be single
+        token (no spaces).
+
+        The content of a code block is not processed as SAM markup. This
+        means that you do not have to escape any of the characters in you
+        code sample. It also means that you can quote SAM markup itself
+        without it being parsed as SAM markup. (Every example in this
+        document uses exactly this technique.)
+
+    section: Blockquotes
+
+        A block quote is a quotation from another document that is set
+        apart from the main text. In SAM, a block quote is introduced by
+        three quotation marks in a row. You can use either double or
+        single quotation marks. The body of the block quote is indented
+        under the block quote header:
+
+        ```(sam)
+
+            As Lewis Carroll observed:
+
+            """[Lewis Carroll, Alice in Wonderland]
+                Why, sometimes I've believed as many as six
+                impossible things before breakfast.
+
+        The content of a block quote is regular SAM markup and is processed
+        just like any other SAM markup.
+
+    section: Citations
+        A citation is a reference to the source of a piece of information. In the
+        previous example, there is a citation on the block quote that attributes
+        the quote to Lewis Carroll's _Alice in Wonderland_. In SAM, citations
+        are contained in square brackets.
+
+    section: Lines
+        A line is a piece of text with a fixed line ending. Poetry, for example,
+        is a set of lines. Normally, SAM runs the lines of a paragraph together
+        and leave it up to the publishing software to determine line breaks a
+        publishing time. To preserve the line breaks in your text, use lines.
+        In SAM, lines are created by preceding them with a pipe character followed
+        by a space:
+
+        ```(sam)
+            Jabberwocky is a nonsense poem by Lewis Carroll.
+
+            """[Lewis Carroll, Through the Looking-Glass, and What Alice Found There (1871)]
+
+                | 'Twas brillig, and the slithy toves
+                | Did gyre and gimble in the wabe;
+                | All mimsy were the borogoves,
+                | And the mome raths outgrabe.
+
+    section: Characters
+
+        SAM documents are {Unicode} documents encoded in {UTF-8}. You
+        can therefore enter any character you like as literal text. However,
+        there are two circumstances where you may need to enter characters
+        in a different way:
+
+        * You want to enter a character, such as an open curly brace, that
+          is a SAM markup character.
+
+        * You may want to enter a character that is not on your keyboard or
+          that is hard to type.
+
+        To enter a character that is a SAM markup character, precede it with
+        a backslash:
+
+        ```(sam)
+            The curly brace \{ is not a commonly used character.
+
+        Note that characters such as the curly brace are only recognized as
+        markup in SAM if they form part of a complete SAM markup structure. Because
+        there is no closing curly brace in the above sentence, the curly brace
+        by itself would still be recognized as text. However, using the backslash
+        character escape is probably still a good idea to prevent accidentally creating
+        markup sequences without realizing it.
+
+        To enter characters that are not on your keyboard, you can either type
+        unicode character using whatever keyboard sequence your OS provides or you
+        can enter an XML/HTML style character entity. For example, to enter the
+        symbol for a British pound, you can use the `&pound` character entity.
+
+        ```(sam)
+            The doggy in the window costs &pound;5.00.
+
+        SAM recognizes all of the HTML character entities. (Note, however, that
+        the recognition of HTML character entities could vary based on the SAM
+        parser used. The current SAM Parser uses the Python html library to do
+        character entity decoding. Running the parser with a different
+        version of the html library might result in a different set of named
+        entities being recognized.)
+
+        You can also use XML style numeric and hexadecimal character entities:
+
+        ```(sam)
+            The doggy in the window costs &#163;5.00.
+
+        and:
+
+        ```(sam)
+            The doggy in the window costs &#xA3;5.00.
+
+        Note that the use of character entities is an alternative to using backslash
+        character escapes, so you can do:
+
+        ```(sam)
+            The curly brace &lbrace; is not a commonly used character.
+
+        instead of
+
+        ```(sam)
+            The curly brace \{ is not a commonly used character.
+
+        If you wish.
+
+        To enter a literal backslash into your text you can either do:
+
+        ```(sam)
+            //
+
+        or
+
+        ```(sam)
+            &bsol;
+
+        or, if the backslash is not preceding any SAM markup character, you can just enter it
+        alone:
+
+        ```(sam)
+            \
+
+        To enter a literal character escape sequence, you can escape the leading `&` either
+        with a backslash:
+
+        ```(sam)
+            \&pound;
+
+        or with a character escape:
+
+        ```(sam)
+            &amp;pound;
+
+    section: Decorations
+        A decoration is a shortcut for entering common forms of format related
+        annotation in a paragraph. SAM supports three decorations, for bold,
+        italic, and code. Bold text is contained between asterisks:
+
+        ```(sam)
+            This text *is in bold* type.
+
+        This is equivalent to:
+
+        ```(sam)
+            This text {is in bold}(bold) type.
+
+        Italic text is contained between underscores:
+
+        ```(sam)
+            This text _is in italic_ type.
+
+        This is equivalent to:
+
+        ```(sam)
+            This text {is in italic}(italic) type.
+
+        Code is contained between underscores:
+
+        ```(sam)
+            Python uses the `print()` function to print output.
+
+        This is equivalent to:
+
+        ```(sam)
+            Python uses the {print()}(code) function to print output.
+
+        Note that the code decoration is no a generic monospaced type
+        decoration. It is intended specifically for code. Text in a
+        code decoration is not parsed the way ordinary SAM markup is
+        parsed. Character escapes are not recognized. The
+        text is presented verbatim. The only character escaping that
+        is done is for the back tick symbol. To enter a literal back
+        tick into a code decoration, use two back ticks in a row.
+
+        If you want to specify the language of a piece of inline code,
+        use the full annotation format:
+
+        ```(sam)
+            Python uses the {print()}(code (python)) function to print output.
+
+        But note that in this format, the content of the annotated phrase is
+        parsed like normal SAM content and you need to escape any
+        characters that could be interpreted as SAM markup. Thus if you
+        were referring to the code for a character entity in a code
+        decoration, you would do it like this:
+
+        ```(sam)
+            In XML use `&quot;` to enter a & character.
+
+        This will print the character escape literally. But if you were
+        using the full annotation format, you would need to escape the `&`:
+
+        ```(sam)
+            In XML use {\&quot;}(code (XML)) to enter a & character.
+
+        Also note that the `&` by itself does not need to be escaped in SAM.
+        It only needs to be escaped if it is part of a complete character
+        entity code.
+
+    section: Management annotations
+        Management annotations are annotations used to manage content rather than to elucidate
+        its meaning. Management domain annotations consist of a token preceded by a character
+        denoting their type. The types are:
+
+        |ID| An identifies for the block or field. An ID must be unique in the document. An ID is
+        preceded by an asterisk: `*my-id`.
+
+        |Name| A name also identifies a block or field but it has wider scope. Names are used
+        when you want to identify something across a set of documents. SAM does not check that
+        names are uniques across a set of documents (it has no way of knowing what that set
+        might be). Resolution of names is up to the processing software. A name is preceded by
+        a `#` symbol: `#my-name`.
+
+        |Condition| Specifying a condition token is a way of telling the publishing software
+        to include this block only when a certain condition is true. How the publishing
+        software determines if a condition is true is entirely up to it.
+
+        |Language| You can specify the language of a block
+
+
+
+    section: Conditions
+
+    section: Language
+
+        Management domain annotations can be applied to blocks but not phrases. This restriction
+        is deliberate. Attempting to manage units of content below the level of a paragraph
+        tends to lead to confusion and makes the content hard to read and to parse. To produce
+        different versions of the same paragraph is it usually better to use strings and/or fragments.
+        However, if you really want to add management domain annotations, you can define them
+        yourself as regular annotations. This also allows you to define management domain annotations
+        that are more complex than a simple token. For example:
+
+            ```(sam)
+                You have {very}(if "size > 14") {big}(if "size > 11") feet.
+
+    section: Block and field annotations
+        You can add annotations to blocks and fields. Since block names already define the
+        type of their content, blocks and fields take only {management domain annotations}.
+
+        Block and field annotations are contained in parentheses that follow immediately after the
+        colon on the block or field tag (no spaces):
+
+        ```(sam)
+            note:(?basic)
+                Do not immerse you Basic model Widget in Water. Only higher
+                trim levels are waterproof.
+
+        You can include several annotations in one set of parentheses.
+
+        Note that if you wish to add other forms of management domain metadata to your blocks
+        you can do so using fields within the block. SAM's set of management domain annotations
+        are just a convenience feature. You can add any management domain metadata you like using
+        regular fields. As a semantic format, there is nothing in SAM that says that all of the
+        content of blocks or fields has to appear in print. Blocks and fields can contain any
+        kind of data or metadata you like. It is up to the publishing algorithms to decide which
+        content to publish and which to use for management purposes.
+
+
+
+
+
+
