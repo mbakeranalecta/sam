@@ -1608,7 +1608,7 @@ if __name__ == "__main__":
                     transformed = transform(xml_doc)
 
                 if args.outdir:
-                    outputfile=os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension
+                    outputfile=os.path.join(args.outdir, os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension)
                 else:
                     outputfile=args.outfile
 
@@ -1637,7 +1637,7 @@ if __name__ == "__main__":
                             sys.stdout.buffer.write(i.encode('utf-8'))
 
                 if args.intermediatedir:
-                    intermediatefile=os.path.splitext(os.path.basename(inputfile))[0] + args.intermediateextension
+                    intermediatefile=os.path.join(args.intermediatedir, os.path.splitext(os.path.basename(inputfile))[0] + args.intermediateextension)
                 else:
                     intermediatefile=args.intermediatefile
 
@@ -1664,6 +1664,6 @@ if __name__ == "__main__":
             raise SAMParserError("No input file specified.")
 
         except SAMParserError as e:
-            sys.stderr.write('ERROR: ' + str(e))
+            sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
             #sys.exit(1)
             continue
