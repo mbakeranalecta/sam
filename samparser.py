@@ -46,6 +46,7 @@ class SamParser:
         self.stateMachine.add_state("NUM-LIST-ITEM", self._num_list_item)
         self.stateMachine.add_state("LABELED-LIST-ITEM", self._labeled_list_item)
         self.stateMachine.add_state("BLOCK-INSERT", self._block_insert)
+        self.stateMachine.add_state("INCLUDE", self._include)
         self.stateMachine.add_state("STRING-DEF", self._string_def)
         self.stateMachine.add_state("LINE-START", self._line_start)
         self.stateMachine.add_state("EMBEDDED-XML", self._embedded_xml)
@@ -75,6 +76,7 @@ class SamParser:
             'num-list-item': re.compile(re_indent + re_ol_marker + re_attributes + re_spaces + re_content, re.U),
             'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
             'block-insert': re.compile(re_indent + r'>>>' + re_attributes, re.U),
+            'include': re.compile(re_indent + r'<<<' + re_attributes, re.U),
             'string-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U),
             'embedded-xml': re.compile(re_indent + r'(?P<xmltag>\<\?xml.+)', re.U)
         }
@@ -292,6 +294,12 @@ class SamParser:
         self.doc.new_block("insert", attributes=parse_insert(match.group("attributes")), text=None, indent=indent)
         return "SAM", context
 
+    def _include(self, context):
+        source, match = context
+        indent = len(match.group("indent"))
+        self.doc.new_block("include", attributes={'href': match.group("attributes")}, text=None, indent=indent)
+        return "SAM", context
+
     def _string_def(self, context):
         source, match = context
         indent = len(match.group("indent"))
@@ -449,6 +457,10 @@ class SamParser:
         match = self.patterns['block-insert'].match(line)
         if match is not None:
             return "BLOCK-INSERT", (source, match)
+
+        match = self.patterns['include'].match(line)
+        if match is not None:
+            return "INCLUDE", (source, match)
 
         match = self.patterns['string-def'].match(line)
         if match is not None:
@@ -808,6 +820,13 @@ class DocStructure:
         self.doc = r
         self.current_block = r
 
+    def new_insert(self, insert):
+        pass
+
+        # get the file from the href
+        # create a new samParser and parse thefile
+        # get the samParser's self.doc and add to structure
+
     def add_block(self, block):
         """
         Adds a block to the current document structure. The location
@@ -1015,7 +1034,7 @@ class SamParaParser:
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\', re.U),
-            'escaped-chars': re.compile('[\\\(\)\{\}\[\]_\*,\.\*`"&' + "']", re.U),
+            'escaped-chars': re.compile('[\\\(\)\{\}\[\]_\*,\.\*`"&\<\>' + "']", re.U),
             'phrase': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
             'annotation': re.compile(
                 r'(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(!(?P<language>[\w-]+))?\))',

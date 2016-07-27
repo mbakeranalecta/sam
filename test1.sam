@@ -33,6 +33,24 @@ tests:(!en) SAM Parser Tests
 
         This is a test to make sure unannotated phrases are being reported correctly.
 
+    test: Includes
+
+        description:
+            Include content from another SAM file.
+
+        case: Simple include
+            description:
+                An include statement.
+
+            source:
+                ```(sam)
+                    <<<(foo.sam)
+
+            markup:
+                <<<(foo.sam)
+
+
+
     test: Blocks
 
         description:
