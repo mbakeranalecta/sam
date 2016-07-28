@@ -989,11 +989,11 @@ class DocStructure:
 
 class Include:
     def __init__(self, doc, indent):
-        self.doc=doc
+        self.children=doc
         self.indent = indent
 
     def serialize_xml(self):
-        for x in self.doc:
+        for x in self.children:
             yield from x.serialize_xml()
 
 

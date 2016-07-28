@@ -64,8 +64,8 @@ tests:(!en) SAM Parser Tests
                     <cell>bat</cell>
                     </row>
                     </grid>
+                    <p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
                     </message>
-
 
 
     test: Blocks
@@ -1911,6 +1911,23 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase>.</p>
+
+        case: Prior annotation lookup in included file
+
+            description:
+                Look up annotations in included files.
+
+            source:
+                ```(sam)
+                    Annotation lookup test: {test phrase}.
+
+            markup:
+                Annotation lookup test: {test phrase}.
+
+
+            result:
+                ```(xml)
+                    <p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
 
         case: Earlier para
 

@@ -6,3 +6,5 @@ sam:
         +++
             foo | bar
             baz | bat
+
+        Annotation lookup test: {test phrase}(test).
