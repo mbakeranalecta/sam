@@ -4,6 +4,8 @@ from lxml import etree
 import xml.parsers.expat
 import html
 import argparse
+import urllib.request
+import pathlib
 
 from urllib.parse import urlparse
 
@@ -297,7 +299,7 @@ class SamParser:
     def _include(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_block("include", attributes={'href': match.group("attributes")}, text=None, indent=indent)
+        self.doc.new_include(href=match.group("attributes"), indent=indent)
         return "SAM", context
 
     def _string_def(self, context):
@@ -780,6 +782,7 @@ class DocStructure:
         self.current_block = None
         self.default_namespace = None
         self.ids = []
+        self.indent=0
 
     def context(self, context_block=None):
         context = []
@@ -820,8 +823,25 @@ class DocStructure:
         self.doc = r
         self.current_block = r
 
-    def new_insert(self, insert):
-        pass
+    def new_include(self, href, indent):
+        try:
+            includeparser = SamParser()
+            with open(href, "r", encoding="utf-8-sig") as inf:
+                includeparser.parse(inf)
+                include = Include(includeparser.doc.doc.children, indent)
+
+
+            if self.doc is None:
+                raise SAMParserError('No root element found.')
+            elif self.current_block.indent < indent:
+                self.current_block.add_child(include)
+            elif self.current_block.indent == indent:
+                self.current_block.add_sibling(include)
+            else:
+                self.current_block.add_at_indent(include, indent)
+
+        except:
+            raise
 
         # get the file from the href
         # create a new samParser and parse thefile
@@ -965,6 +985,16 @@ class DocStructure:
             yield from self.doc.serialize_xml()
         else:
             raise SAMParserError("Unknown serialization protocol {0}".format(serialize_format))
+
+
+class Include:
+    def __init__(self, doc, indent):
+        self.doc=doc
+        self.indent = indent
+
+    def serialize_xml(self):
+        for x in self.doc:
+            yield from x.serialize_xml()
 
 
 class StringSource:

@@ -1,0 +1,8 @@
+sam:
+    message: Hello World.
+
+        This is the include test file.
+
+        +++
+            foo | bar
+            baz | bat

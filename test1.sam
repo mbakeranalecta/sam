@@ -44,10 +44,27 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    <<<(foo.sam)
+                    <<<(includeme.sam)
 
             markup:
-                <<<(foo.sam)
+                <<<(includeme.sam)
+
+            result:
+                ```(xml)
+                    <message>
+                    <title>Hello World.</title>
+                    <p>This is the include test file.</p>
+                    <grid>
+                    <row>
+                    <cell>foo</cell>
+                    <cell>bar</cell>
+                    </row>
+                    <row>
+                    <cell>baz</cell>
+                    <cell>bat</cell>
+                    </row>
+                    </grid>
+                    </message>
 
 
 
