@@ -1,9 +1,7 @@
 sam:
     message: Hello World.
 
-        This is the {include} test file.
-
-        <<<(includeme2.sam)
+        This is the include test file.
 
         +++
             foo | bar

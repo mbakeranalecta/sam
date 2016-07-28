@@ -67,6 +67,24 @@ tests:(!en) SAM Parser Tests
                     <p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
                     </message>
 
+        case: Nested includes
+            description:
+                Including a file that itself includes a file.
+
+            source:
+                ```(sam)
+                    <<<(includeme1.sam)
+
+            markup:
+                <<<(includeme1.sam)
+
+            result:
+                ```(xml)
+                    <message>
+                    <p>This file includes another file.</p>
+                    <p>Nested includes work! Yipee!</p>
+                    </message>
+
 
     test: Blocks
 

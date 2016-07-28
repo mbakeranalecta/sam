@@ -835,13 +835,7 @@ class DocStructure:
 #            with open(href, "r", encoding="utf-8-sig") as inf:
             with urllib.request.urlopen(href) as response:
                 includeparser.parse(reader(response))
-
-
-
-
                 include = Include(includeparser.doc.doc.children, indent)
-
-
             if self.doc is None:
                 raise SAMParserError('No root element found.')
             elif self.current_block.indent < indent:
