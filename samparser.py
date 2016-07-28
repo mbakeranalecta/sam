@@ -6,6 +6,7 @@ import html
 import argparse
 import urllib.request
 import pathlib
+import codecs
 
 from urllib.parse import urlparse
 
@@ -824,10 +825,19 @@ class DocStructure:
         self.current_block = r
 
     def new_include(self, href, indent):
+
+        reader = codecs.getreader("utf-8")
+
+        href = pathlib.Path(os.path.abspath(href)).as_uri()
         try:
             includeparser = SamParser()
-            with open(href, "r", encoding="utf-8-sig") as inf:
-                includeparser.parse(inf)
+#            with open(href, "r", encoding="utf-8-sig") as inf:
+            with urllib.request.urlopen(href) as response:
+                includeparser.parse(reader(response))
+
+
+
+
                 include = Include(includeparser.doc.doc.children, indent)
 
 
