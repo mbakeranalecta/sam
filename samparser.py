@@ -829,7 +829,7 @@ class DocStructure:
         reader = codecs.getreader("utf-8")
 
         href = pathlib.Path(os.path.abspath(href)).as_uri()
-        SAM_parser_info("Parsing " + href)
+        SAM_parser_info("Parsing include " + href)
         try:
             includeparser = SamParser()
 #            with open(href, "r", encoding="utf-8-sig") as inf:
@@ -855,10 +855,8 @@ class DocStructure:
             SAM_parser_warning("Unable to parse " + href + " because " + str(e))
         except:
             raise
-
-        # get the file from the href
-        # create a new samParser and parse thefile
-        # get the samParser's self.doc and add to structure
+        finally:
+            SAM_parser_info("Finished parsing include " + href)
 
     def add_block(self, block):
         """
