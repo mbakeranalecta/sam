@@ -829,6 +829,7 @@ class DocStructure:
         reader = codecs.getreader("utf-8")
 
         href = pathlib.Path(os.path.abspath(href)).as_uri()
+        SAM_parser_info("Parsing " + href)
         try:
             includeparser = SamParser()
 #            with open(href, "r", encoding="utf-8-sig") as inf:
@@ -850,6 +851,8 @@ class DocStructure:
             else:
                 self.current_block.add_at_indent(include, indent)
 
+        except SAMParserError as e:
+            SAM_parser_warning("Unable to parse " + href + " because " + str(e))
         except:
             raise
 
