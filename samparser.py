@@ -837,14 +837,6 @@ class DocStructure:
                 includeparser.parse(reader(response))
             include = Include(includeparser.doc.doc.children, indent)
             self.add_block(include)
-            # if self.doc is None:
-            #     raise SAMParserError('No root element found.')
-            # elif self.current_block.indent < indent:
-            #     self.current_block.add_child(include)
-            # elif self.current_block.indent == indent:
-            #     self.current_block.add_sibling(include)
-            # else:
-            #     self.current_block.add_at_indent(include, indent)
 
         except SAMParserError as e:
             SAM_parser_warning("Unable to parse " + href + " because " + str(e))
