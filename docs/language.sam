@@ -188,7 +188,8 @@ specification: Semantic Authoring Markdown (SAM)
 
         1. the type of the annotation 
         2. the URI of the material to be inserted 
-        3. an id, consisting of a # followed by a name (such as "#foo") 4. one or more conditions, consisting of ? followed by a token 
+        3. an id, consisting of a # followed by a name (such as "#foo")
+        4. one or more conditions, consisting of ? followed by a token
 
     section: Citations 
 

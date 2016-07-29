@@ -2440,11 +2440,6 @@ tests:(!en) SAM Parser Tests
                     </ol>
 
 
-
-
-
-
-
     test: Block inserts
 
         description:
@@ -2477,7 +2472,7 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
+                    Because you often want to >(image "foo.gif")(#bar)(?baz)(?bat) change some part of a text when it is being
                     reused, <fragments> & fragment references can both define local {strings}(feature).
                     Any {string references}(feature) inside a fragment will be resolved by looking first
                     at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
@@ -2486,7 +2481,7 @@ tests:(!en) SAM Parser Tests
 
             markup:
 
-                Because you often want to >(image "foo.gif" #bar ?baz ?bat) change some part of a text when it is being
+                Because you often want to >(image "foo.gif")(#bar)(?baz)(?bat) change some part of a text when it is being
                 reused, <fragments> & fragment references can both define local {strings}(feature).
                 Any {string references}(feature) inside a fragment will be resolved by looking first
                 at local-strings defined in the >(*my-table) fragment reference, then at local strings defined

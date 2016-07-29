@@ -835,15 +835,16 @@ class DocStructure:
 #            with open(href, "r", encoding="utf-8-sig") as inf:
             with urllib.request.urlopen(href) as response:
                 includeparser.parse(reader(response))
-                include = Include(includeparser.doc.doc.children, indent)
-            if self.doc is None:
-                raise SAMParserError('No root element found.')
-            elif self.current_block.indent < indent:
-                self.current_block.add_child(include)
-            elif self.current_block.indent == indent:
-                self.current_block.add_sibling(include)
-            else:
-                self.current_block.add_at_indent(include, indent)
+            include = Include(includeparser.doc.doc.children, indent)
+            self.add_block(include)
+            # if self.doc is None:
+            #     raise SAMParserError('No root element found.')
+            # elif self.current_block.indent < indent:
+            #     self.current_block.add_child(include)
+            # elif self.current_block.indent == indent:
+            #     self.current_block.add_sibling(include)
+            # else:
+            #     self.current_block.add_at_indent(include, indent)
 
         except SAMParserError as e:
             SAM_parser_warning("Unable to parse " + href + " because " + str(e))
@@ -992,10 +993,11 @@ class DocStructure:
             raise SAMParserError("Unknown serialization protocol {0}".format(serialize_format))
 
 
-class Include:
+class Include(Block):
     def __init__(self, doc, indent):
         self.children=doc
         self.indent = indent
+        self.namespace = None
 
     def serialize_xml(self):
         for x in self.children:
