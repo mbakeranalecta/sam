@@ -17,7 +17,7 @@ except ImportError:
 
 # Block regex component expressions
 re_indent = r'(?P<indent>\s*)'
-re_attributes = r'(\((?P<attributes>.*?(?<!\\))\))?'
+re_attributes = r'(?P<attributes>(\((.*?(?<!\\))\))*)'
 re_content = r'(?P<content>.*)'
 re_name = r'(?P<name>[\w_\.-]+?)'
 re_ul_marker = r'(?P<marker>\*)'
@@ -64,7 +64,7 @@ class SamParser:
             'comment': re.compile(re_indent + re_comment, re.U),
             'block-start': re.compile(re_indent + re_name + r':' + re_attributes + re_content + r'?', re.U),
             'codeblock-start': re.compile(
-                re_indent + r'(?P<flag>```)(\((?P<language>\S*)\s*(["\'](?P<source>.+?)["\'])?\s*(\((?P<namespace>\S+?)\))?(?P<other>.+?)?\))?',
+                re_indent + r'(?P<flag>```)(' + re_attributes + ')?',
                 re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(
@@ -114,23 +114,23 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
 
-        attributes = {}
+        attributes = self.parse_block_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
-        language = match.group("language")
-        if language is not None:
-            attributes['language'] = language
-
-        source = match.group("source")
-        if source is not None:
-            attributes["source"] = source
-
-        namespace = match.group("namespace")
-        if namespace is not None:
-            attributes["namespace"] = namespace
-
-        other = match.group("other")
-        if other is not None:
-            attributes.update(self.parse_block_attributes(other))
+        # language = match.group("language")
+        # if language is not None:
+        #     attributes['language'] = language
+        #
+        # source = match.group("source")
+        # if source is not None:
+        #     attributes["source"] = source
+        #
+        # namespace = match.group("namespace")
+        # if namespace is not None:
+        #     attributes["namespace"] = namespace
+        #
+        # other = match.group("other")
+        # if other is not None:
+        #     attributes.update(self.parse_block_attributes(other))
 
         self.doc.new_block('codeblock', attributes, None, indent)
         self.current_text_block = TextBlock()
@@ -294,13 +294,14 @@ class SamParser:
     def _block_insert(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_block("insert", attributes=parse_insert(match.group("attributes")), text=None, indent=indent)
+        self.doc.new_block("insert", attributes=parse_insert(match.group("attributes")[1:-1]), text=None, indent=indent)
         return "SAM", context
 
     def _include(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_include(href=match.group("attributes"), indent=indent)
+        # FIXME: Should validate attributes.
+        self.doc.new_include(href=match.group("attributes")[1:-1], indent=indent)
         return "SAM", context
 
     def _string_def(self, context):
@@ -490,22 +491,32 @@ class SamParser:
     def serialize(self, serialize_format):
         yield from self.doc.serialize(serialize_format)
 
-    def parse_block_attributes(self, attributes_string):
+    def parse_block_attributes(self, attributes_string, flagged="?#*!", unflagged=None):
         result = {}
         try:
-            attributes_list = attributes_string.split()
+            #attributes_list = attributes_string.split()
+            attributes_list = [x[1:-1].strip() for x in re.findall(r"(\(.*?(?<!\\)\))", attributes_string)]
         except AttributeError:
             return None
-        unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*!')]
-        if unexpected_attributes:
-            raise SAMParserError("Unexpected attribute(s): {0}".format(', '.join(unexpected_attributes)))
+        unflagged_attributes = [x for x in attributes_list if not (x[0] in '?#*!')]
+        if unflagged_attributes:
+            if unflagged is None:
+                raise SAMParserError("Unexpected attribute(s): {0}".format(', '.join(unflagged_attributes)))
+            else:
+                result[unflagged] = " ".join(unflagged_attributes)
         ids = [x[1:] for x in attributes_list if x[0] == '*']
+        if ids and not '*' in flagged:
+            raise SAMParserError("IDs not allowed in this context. Found: *{0}".format(', *'.join(ids)))
         if len(ids) > 1:
             raise SAMParserError("More than one ID specified: " + ", ".join(ids))
         names = [x[1:] for x in attributes_list if x[0] == '#']
+        if names and not '#' in flagged:
+            raise SAMParserError("Names not allowed in this context. Found: #{0}".format(', #'.join(names)))
         if len(names) > 1:
             raise SAMParserError("More than one name specified: " + ", ".join(names))
         language = [x[1:] for x in attributes_list if x[0] == '!']
+        if language and not '!' in flagged:
+            raise SAMParserError("Language specification not allowed in this context. Found: !{0}".format(', !'.join(language)))
         if len(language) > 1:
             raise SAMParserError("More than one language specified: " + ", ".join(language))
         conditions = [x[1:] for x in attributes_list if x[0] == '?']
@@ -710,12 +721,12 @@ class Flow(list):
 
     def append(self, thing):
         if type(thing) is Annotation:
-            if type(self[-1]) is Span:
+            if type(self[-1]) is Phrase:
                 self[-1].append(thing)
             else:
                 super(Flow, self).append(thing)
         elif type(thing) is Citation:
-            if type(self[-1]) is Span:
+            if type(self[-1]) is Phrase:
                 self[-1].append(thing)
             else:
                 super(Flow, self).append(thing)
@@ -725,7 +736,7 @@ class Flow(list):
     def find_last_annotation(self, text):
         for i in reversed(self):
 
-            if type(i) is Span:
+            if type(i) is Phrase:
                 c = i.child
                 while c:
                     if type(c) is Annotation:
@@ -1050,7 +1061,7 @@ class SamParaParser:
         self.stateMachine.add_state("PARA", self._para)
         self.stateMachine.add_state("ESCAPE", self._escape)
         self.stateMachine.add_state("END", None, end_state=1)
-        self.stateMachine.add_state("SPAN-START", self._phrase_start)
+        self.stateMachine.add_state("PHRASE-START", self._phrase_start)
         self.stateMachine.add_state("ANNOTATION-START", self._annotation_start)
         self.stateMachine.add_state("CITATION-START", self._citation_start)
         self.stateMachine.add_state("BOLD-START", self._bold_start)
@@ -1103,7 +1114,7 @@ class SamParaParser:
         if char == '\\':
             return "ESCAPE", para
         elif char == '{':
-            return "SPAN-START", para
+            return "PHRASE-START", para
         elif char == '[':
             return "CITATION-START", para
         elif char == "*":
@@ -1133,7 +1144,7 @@ class SamParaParser:
             if self.smart_quotes:
                 text=multi_replace(text, smart_quote_subs)
             # FIXME: Scan text for smart quotes
-            self.flow.append(Span(text))
+            self.flow.append(Phrase(text))
             para.advance(len(match.group(0)))
 
             if self.patterns['annotation'].match(para.rest_of_para):
@@ -1245,7 +1256,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Span(self._unescape(match.group("text"))))
+            self.flow.append(Phrase(self._unescape(match.group("text"))))
             self.flow.append(Annotation('bold'))
             para.advance(len(match.group(0)) - 1)
         else:
@@ -1257,7 +1268,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Span(self._unescape(match.group("text"))))
+            self.flow.append(Phrase(self._unescape(match.group("text"))))
             self.flow.append(Annotation('italic'))
             para.advance(len(match.group(0)) - 1)
         else:
@@ -1269,7 +1280,7 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Span((match.group("text")).replace("``", "`")))
+            self.flow.append(Phrase((match.group("text")).replace("``", "`")))
             self.flow.append(Annotation('code'))
             para.advance(len(match.group(0)) - 1)
         else:
@@ -1387,7 +1398,7 @@ class SamParaParser:
             return string
 
 
-class Span:
+class Phrase:
     def __init__(self, text):
         self.text = text
         self.child = None
@@ -1397,6 +1408,7 @@ class Span:
 
     def serialize_xml(self):
         yield '<phrase>'
+
         if self.child:
             yield from self.child.serialize_xml(escape_for_xml(self.text))
         else:

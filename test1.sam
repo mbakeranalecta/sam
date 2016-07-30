@@ -1408,7 +1408,7 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    +++(*foom #bar ?baz)
+                    +++(*foom)(#bar)(?baz)
                         *Type*  | *Term*    | *Notes*
 
                         feature | fragment  | bing
@@ -1416,7 +1416,7 @@ tests:(!en) SAM Parser Tests
                         feature | fragments | bang
 
             markup:
-                +++(*foom #bar ?baz)
+                +++(*foom)(#bar)(?baz)
                     *Type*  | *Term*    | *Notes*
 
                     feature | fragment  | bing
@@ -1535,7 +1535,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     After this paragraph, there is a blockquote:
 
-                    """(*foo #bar ?baz)
+                    """(*foo)(#bar)(?baz)
                         The quick brown fox jumps over the lazy dog.
 
                         And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
@@ -1543,7 +1543,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 After this paragraph, there is a blockquote:
 
-                """(*foo #bar ?baz)
+                """(*foo)(#bar)(?baz)
                     The quick brown fox jumps over the lazy dog.
 
                     And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
@@ -1588,7 +1588,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     This is another paragraph. Then there is an alternate blockquote:
 
-                    '''( #foo5 ?bar ?baz)[Mother Goose]
+                    '''( #foo5)(?bar)(?baz)[Mother Goose]
                         The quick brown fox jumps over the lazy dog.
 
                     '''
@@ -1597,7 +1597,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 This is another paragraph. Then there is an alternate blockquote:
 
-                '''( #foo5 ?bar ?baz)[Mother Goose]
+                '''( #foo5)(?bar)(?baz)[Mother Goose]
                     The quick brown fox jumps over the lazy dog.
 
                 '''
@@ -1631,7 +1631,7 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    ```(python ?foo)
+                    ```(python)(?foo)
                         def escape_for_xml(s):
                             t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
                             try:
@@ -1639,7 +1639,7 @@ tests:(!en) SAM Parser Tests
                             except AttributeError:
                                 return s
             markup:
-                ```(python ?foo)
+                ```(python)(?foo)
                     def escape_for_xml(s):
                         t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
                         try:
@@ -1891,7 +1891,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Press <phrase><annotation type="key" xml:lang="fr-CA">Enter</annotation></phrase></p>
+                    <p>Press <phrase xml:lang="fr-CA"><annotation type="key">Enter</annotation></phrase></p>
 
         case: Annotation with a condition
             description:
@@ -1905,7 +1905,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Press <phrase><annotation type="key" conditions="foo">Enter</annotation></phrase></p>
+                    <p>Press <phrase conditions="foo"><annotation type="key">Enter</annotation></phrase></p>
 
         case: Prior annotation lookup
 
@@ -2553,7 +2553,7 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    ~~~(#foo3 ?gruz-natz)
+                    ~~~(#foo3)(?gruz-natz)
                         $a=apple
                         $b=banana
 
@@ -2565,7 +2565,7 @@ tests:(!en) SAM Parser Tests
                             This is a nested fragment.
 
             markup:
-                ~~~(#foo3 ?gruz-natz)
+                ~~~(#foo3)(?gruz-natz)
                     $a=apple
                     $b=banana
 
