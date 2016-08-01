@@ -2121,28 +2121,20 @@ tests:(!en) SAM Parser Tests
                     </embed>
 
 
-        case: Attribute on a string definition
+        case: Attributes on inserts
             description:
-                Attribute on a string definition.
+                Attributes on inserts.
 
             source:
                 ```(sam)
-                    $foo(!en-CA)(?a)(?b) = bar bar black sheep
+                    >>>(image foo.gif)(*id)(#name)(?a)(?b)
 
             markup:
-                $foo(!en-CA)(?a)(?b) = bar bar black sheep
+                >>>(image foo.gif)(*id)(#name)(?a)(?b)
 
             result:
                 ```(xml)
-                    <string conditions="a,b" name="foo" xml:lang="en-CA">bar bar black sheep</string>
-
-
-
-#    block insert:       type item #name, ?condition, *id
-#    inline insert:      type item #name, ?condition, *id
-#    include:            href
-
-
+                    <insert conditions="a,b" id="id" item="foo.gif" name="name" type="image"/>
 
 
     test: Annotations

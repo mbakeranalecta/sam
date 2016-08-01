@@ -64,7 +64,7 @@ class SamParser:
             'comment': re.compile(re_indent + re_comment, re.U),
             'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + re_content + r'?', re.U),
             'codeblock-start': re.compile(
-                re_indent + r'(?P<flag>```)(' + re_attributes + ')?'+ '\s*(?P<unexpected>.*)',
+                re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
                 re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(
@@ -78,7 +78,7 @@ class SamParser:
             'list-item': re.compile(re_indent + re_ul_marker + re_attributes + re_spaces + re_content, re.U),
             'num-list-item': re.compile(re_indent + re_ol_marker + re_attributes + re_spaces + re_content, re.U),
             'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
-            'block-insert': re.compile(re_indent + r'>>>(?P<insert>\((.*?(?<!\\))\))' + re_attributes, re.U),
+            'block-insert': re.compile(re_indent + r'>>>(?P<insert>\((.*?(?<!\\))\))(' + re_attributes + ')?\s*(?P<unexpected>.*)', re.U),
             'include': re.compile(re_indent + r'<<<' + re_attributes, re.U),
             'string-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U),
             'embedded-xml': re.compile(re_indent + r'(?P<xmltag>\<\?xml.+)', re.U)
@@ -279,9 +279,11 @@ class SamParser:
 
     def _block_insert(self, context):
         source, match = context
+        if match.group("unexpected"):
+            raise SAMParserError("Unexpected characters in block insert. Found: " + match.group("unexpected"))
         indent = len(match.group("indent"))
         attributes = parse_insert(match.group("insert"))
-        attributes.update( parse_attributes(match.group("attributes")))
+        attributes.update( parse_attributes(match.group("attributes"), flagged="*#?"))
         self.doc.new_block("insert", attributes=attributes, text=None, indent=indent)
         return "SAM", context
 

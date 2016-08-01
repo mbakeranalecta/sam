@@ -280,7 +280,29 @@ specification: Semantic Authoring Markdown (SAM)
 
         Names are merely assigned to the block by the parser. No namespace or uniqueness constraints are enforced. It is up to the application to decide how name are used. However, it is considered a SPFE idiom that names are scoped to the type of objects they apply to. In other words, fragment names are in a different namespace from string names. 
 
-        This implies that string references are distinct from fragment references. 
+        This implies that string references are distinct from fragment references.
+
+    section: Strings
+
+        You can define a string:
+
+        ```(sam)
+            $foo = bar
+
+        The string can then be inserted using a block or inline insert:
+
+        ```(sam)
+            >($foo)
+            >>>($foo)
+
+        String handling occurs in the application layer.
+
+        String definitions do not take any attributes. The string name is a name. String ids are not supported. If
+        you want to make string definitions conditional, use fragments.
+
+        ```(sam)
+            ~~~(?foo)
+                $foo = bar
 
     section: Fragments 
 
