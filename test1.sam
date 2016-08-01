@@ -3149,6 +3149,36 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>“What is truth?”<citation type="citation" value="John 18:38"/></p>
 
+        case: Miscellaneous cases
+
+            description:
+                A bunch of miscellaneous cases.
+
+
+            source:
+                ```(sam)
+                    "title"?
+
+                    {DocBook}(language)'s
+
+                    {DITA} and {Information Mapping}'s
+
+            markup:
+                "title"?
+
+                {DocBook}(language)'s
+
+                {DITA} and {Information Mapping}'s
+
+            result:
+                ```(xml)
+                    <p>“title”?</p>
+                    <p><phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
+                    <p><phrase>DITA</phrase> and <phrase>Information Mapping</phrase>’s</p>
+
+
+
+
         case: Escaped dumb quotes
             description:
                 If you want to enter straight quotes and have them stay straight when
