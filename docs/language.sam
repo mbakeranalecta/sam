@@ -365,6 +365,19 @@ specification: Semantic Authoring Markdown (SAM)
             # Source is not needed is we can do citations.
             # Also not sure what use namespace is in this context.
 
+    section: Embedded markup
+        You can embed markup in other markup languages. Unlike a codeblock, the intended semantics of
+        an embed are that the markup will be processed in the application layer. For example, a piece
+        of latex math markup might be processed in the application layer to display an equation.
+
+        Note that SAM knows nothing about the embedded markup and does not processes it in any way.
+        It merely captures it and sends it on to the application layer.
+
+        An embed works just like a codeblock, except with three equals instead of three backticks.
+
+        ```(sam)
+            ===(latexmathml)(*id13)(#name)(?a)(?b)
+                n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
     section: Blockquotes 
 
