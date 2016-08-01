@@ -1045,9 +1045,9 @@ class StringSource:
 
 
 # Flow regex component expressions
-re_single_quote_close = '(?<=[\w\.\,\"\)}])\'((?=[\.\s"}])|$)'
+re_single_quote_close = '(?<=[\w\.\,\"\)}\?])\'((?=[\.\s"},!:;\[])|$)'
 re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{])'
-re_double_quote_close = '(?<=[\w\.\,\'\)\}])"((?=[\.\s\'\)},!:;])|$)'
+re_double_quote_close = '(?<=[\w\.\,\'\)\}\?])"((?=[\.\s\'\)},!:;\[])|$)'
 re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{])'
 re_apostrophe = "(?<=[\w`\*_])'(?=\w)"
 

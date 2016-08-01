@@ -3134,6 +3134,21 @@ tests:(!en) SAM Parser Tests
                     <p>The shape of the characters (technically, “glyphs”) that make up the font are stored separately in font files.</p>
 
 
+        case: Close quote followed by citation.
+            description:
+                Close quote followed by citation.
+
+            source:
+                ```(sam)
+                    "What is truth?"[John 18:38]
+
+            markup:
+                "What is truth?"[John 18:38]
+
+            result:
+                ```(xml)
+                    <p>“What is truth?”<citation type="citation" value="John 18:38"/></p>
+
         case: Escaped dumb quotes
             description:
                 If you want to enter straight quotes and have them stay straight when
