@@ -2112,11 +2112,11 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 ===(latexmathml)(*id13)(#name)(?a)(?b)
-
+                    n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             result:
                 ```(xml)
-                    <embed conditions="a,b" id="id13" language="python" name="name">
+                    <embed conditions="a,b" id="id13" language="latexmathml" name="name">
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
                     </embed>
 

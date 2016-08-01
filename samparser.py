@@ -37,6 +37,8 @@ class SamParser:
         self.stateMachine.add_state("BLOCK", self._block)
         self.stateMachine.add_state("CODEBLOCK-START", self._codeblock_start)
         self.stateMachine.add_state("CODEBLOCK", self._codeblock)
+        self.stateMachine.add_state("EMBED-START", self._embed_start)
+        self.stateMachine.add_state("EMBED", self._embed)
         self.stateMachine.add_state("BLOCKQUOTE-START", self._blockquote_start)
         self.stateMachine.add_state("FRAGMENT-START", self._fragment_start)
         self.stateMachine.add_state("PARAGRAPH-START", self._paragraph_start)
@@ -65,6 +67,9 @@ class SamParser:
             'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + re_content + r'?', re.U),
             'codeblock-start': re.compile(
                 re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
+                re.U),
+            'embed-start': re.compile(
+                re_indent + r'(?P<flag>===)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
                 re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(
@@ -143,6 +148,40 @@ class SamParser:
         else:
             self.current_text_block.append(line)
             return "CODEBLOCK", context
+
+    def _embed_start(self, context):
+        source, match = context
+        if match.group("unexpected"):
+            raise SAMParserError("Unexpected characters in embed header. Found: " + match.group("unexpected"))
+        indent = len(match.group("indent"))
+
+        attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
+
+        self.doc.new_block('embed', attributes, None, indent)
+        self.current_text_block = TextBlock()
+        return "EMBED", context
+
+    def _embed(self, context):
+        source, match = context
+        try:
+            line = source.next_line
+        except EOFError:
+            self.doc.new_flow(Pre(self.current_text_block))
+            self.current_text_block = None
+            return "END", context
+
+        indent = len(line) - len(line.lstrip())
+        if self.patterns['blank-line'].match(line):
+            self.current_text_block.append(line)
+            return "EMBED", context
+        if indent <= self.doc.current_block.indent:
+            source.return_line()
+            self.doc.new_flow(Pre(self.current_text_block.strip()))
+            self.current_text_block = None
+            return "SAM", context
+        else:
+            self.current_text_block.append(line)
+            return "EMBED", context
 
     def _blockquote_start(self, context):
         source, match = context
@@ -424,6 +463,10 @@ class SamParser:
         match = self.patterns['codeblock-start'].match(line)
         if match is not None:
             return "CODEBLOCK-START", (source, match)
+
+        match = self.patterns['embed-start'].match(line)
+        if match is not None:
+            return "EMBED-START", (source, match)
 
         match = self.patterns['blockquote-start'].match(line)
         if match is not None:
