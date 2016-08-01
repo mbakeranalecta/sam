@@ -794,7 +794,6 @@ class DocStructure:
         SAM_parser_info("Parsing include " + href)
         try:
             includeparser = SamParser()
-#            with open(href, "r", encoding="utf-8-sig") as inf:
             with urllib.request.urlopen(href) as response:
                 includeparser.parse(reader(response))
             include = Include(includeparser.doc.doc.children, indent)
@@ -802,8 +801,6 @@ class DocStructure:
 
         except SAMParserError as e:
             SAM_parser_warning("Unable to parse " + href + " because " + str(e))
-        except:
-            raise
         finally:
             SAM_parser_info("Finished parsing include " + href)
 
@@ -823,6 +820,13 @@ class DocStructure:
         :param block: The Block object to be added.
         :return: None
         """
+        try:
+            if 'id' in block.attributes:
+                if block.attributes['id'] in self.ids:
+                    raise SAMParserError("Duplicate ID found: " + block.attributes['id'])
+                self.ids.extend(block.attributes['id'])
+        except (TypeError, AttributeError):
+            pass
 
         if block.namespace is None and self.default_namespace is not None:
             block.namespace = self.default_namespace
@@ -891,6 +895,11 @@ class DocStructure:
         self.current_block = p
 
     def new_flow(self, flow):
+        ids=[f._id for f in flow if type(f) is Phrase and f._id is not None]
+        for id in ids:
+            if id in self.ids:
+                raise SAMParserError("Duplicate ID found: " + ids[0])
+            self.ids.extend(id)
         self.current_block.add_child(flow)
         self.current_block = self.current_block.parent
 

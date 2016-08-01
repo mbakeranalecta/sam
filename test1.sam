@@ -10,7 +10,8 @@ tests:(!en) SAM Parser Tests
 
     description:
 
-        This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string
+        This document is the output of the test document processed by test.xslt.
+        That stylesheet attempt to validate the outcome of tests by generating a string
         version of the markup under the `markup:` heading and comparing it to the
         text of the expected result as shown under the `result:` heading in the
         test file. This is not a perfect test. Two issues are known:
