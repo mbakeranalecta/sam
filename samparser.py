@@ -64,7 +64,7 @@ class SamParser:
             'comment': re.compile(re_indent + re_comment, re.U),
             'block-start': re.compile(re_indent + re_name + r':' + re_attributes + re_content + r'?', re.U),
             'codeblock-start': re.compile(
-                re_indent + r'(?P<flag>```)(' + re_attributes + ')?',
+                re_indent + r'(?P<flag>```)(' + re_attributes + ')?'+ '\s*(?P<unexpected>.*)',
                 re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(
@@ -112,6 +112,8 @@ class SamParser:
 
     def _codeblock_start(self, context):
         source, match = context
+        if match.group("unexpected"):
+            raise SAMParserError("Unexpected characters in codeblock header. Found: " + match.group("unexpected"))
         indent = len(match.group("indent"))
 
         attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")

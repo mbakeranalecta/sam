@@ -6,8 +6,6 @@
 
 # Need test for unicode characters and numbers in names.
 
-$foo=bar
-
 tests:(!en) SAM Parser Tests
 
     description:
