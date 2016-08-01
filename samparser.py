@@ -62,7 +62,7 @@ class SamParser:
         self.patterns = {
             'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?', re.U),
             'comment': re.compile(re_indent + re_comment, re.U),
-            'block-start': re.compile(re_indent + re_name + r':' + re_attributes + re_content + r'?', re.U),
+            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + re_content + r'?', re.U),
             'codeblock-start': re.compile(
                 re_indent + r'(?P<flag>```)(' + re_attributes + ')?'+ '\s*(?P<unexpected>.*)',
                 re.U),
