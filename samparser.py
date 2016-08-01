@@ -574,9 +574,10 @@ class Paragraph(Block):
         self.children.append(b)
 
 
-class Comment(Block):
+class Comment:
     def __init__(self, content='', indent=0):
-        super().__init__(name='comment', content=content, indent=indent)
+        self.content=content
+        self.indent=indent
 
     def __str__(self):
         return u"[#comment:'{1:s}']".format(self.content)
@@ -618,8 +619,8 @@ class Root(Block):
         # calling this function. Not sure what the options are. Could detect
         # the error at the XML output stage, I suppose, but would rather
         # catch it earlier and give feedback.
-        if any(type(x) is Block for x in self.children):
-            raise SAMParserError("A SAM document can only have one root.")
+        if any( issubclass(type(x), Block) for x in self.children):
+            raise SAMParserError("A SAM document can only have one root. Found: "+ str(b))
         b.parent = self
         self.children.append(b)
 
