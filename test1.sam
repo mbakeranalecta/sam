@@ -1607,7 +1607,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <p>This is another paragraph. Then there is an alternate blockquote:</p>
-                    <blockquote conditions="bar baz" name="foo5">
+                    <blockquote conditions="bar,baz" name="foo5">
                     <citation type="citation" value="Mother Goose" extra=""/><p>The quick brown fox jumps over the lazy dog.</p>
                     </blockquote>
                     <blockquote>
@@ -2452,14 +2452,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >>>(image foo.gif)
+                    >>>(image foo.gif)(?goo)
 
             markup:
-                >>>(image foo.gif)
+                >>>(image foo.gif)(?goo)
 
             result:
                 ```(xml)
-                    <insert item="foo.gif" type="image"/>
+                    <insert conditions="goo" item="foo.gif" type="image"/>
 
     test: Inline inserts
 
@@ -2490,7 +2490,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Because you often want to <insert conditions="baz bat" item="foo.gif" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+                    <p>Because you often want to <insert conditions="baz,bat" item="foo.gif" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 
         case: Paragraph that is just an inline insert
             description:

@@ -78,7 +78,7 @@ class SamParser:
             'list-item': re.compile(re_indent + re_ul_marker + re_attributes + re_spaces + re_content, re.U),
             'num-list-item': re.compile(re_indent + re_ol_marker + re_attributes + re_spaces + re_content, re.U),
             'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
-            'block-insert': re.compile(re_indent + r'>>>' + re_attributes, re.U),
+            'block-insert': re.compile(re_indent + r'>>>(?P<insert>\((.*?(?<!\\))\))' + re_attributes, re.U),
             'include': re.compile(re_indent + r'<<<' + re_attributes, re.U),
             'string-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U),
             'embedded-xml': re.compile(re_indent + r'(?P<xmltag>\<\?xml.+)', re.U)
@@ -104,7 +104,7 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
         block_name = match.group("name").strip()
-        attributes = self.parse_block_attributes(match.group("attributes"))
+        attributes = parse_attributes(match.group("attributes"))
         content = match.group("content").strip()
         parsed_content = None if content == '' else para_parser.parse(content, self.doc)
         self.doc.new_block(block_name, attributes, parsed_content, indent)
@@ -114,23 +114,7 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
 
-        attributes = self.parse_block_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
-
-        # language = match.group("language")
-        # if language is not None:
-        #     attributes['language'] = language
-        #
-        # source = match.group("source")
-        # if source is not None:
-        #     attributes["source"] = source
-        #
-        # namespace = match.group("namespace")
-        # if namespace is not None:
-        #     attributes["namespace"] = namespace
-        #
-        # other = match.group("other")
-        # if other is not None:
-        #     attributes.update(self.parse_block_attributes(other))
+        attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
         self.doc.new_block('codeblock', attributes, None, indent)
         self.current_text_block = TextBlock()
@@ -169,7 +153,7 @@ class SamParser:
         if extra:
             raise SAMParserError("Extra text found after blockquote start: " + extra)
 
-        attributes = self.parse_block_attributes(match.group("attributes"))
+        attributes = parse_attributes(match.group("attributes"))
 
         b = self.doc.new_block('blockquote', attributes, None, indent)
 
@@ -215,7 +199,7 @@ class SamParser:
 
         attributes_string = match.group("attributes")
         if attributes_string is not None:
-            attributes.update(self.parse_block_attributes(attributes_string))
+            attributes.update(parse_attributes(attributes_string))
 
         self.doc.new_block('fragment', attributes, None, indent)
         return "SAM", context
@@ -269,7 +253,7 @@ class SamParser:
     def _list_item(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        attributes = self.parse_block_attributes(match.group("attributes"))
+        attributes = parse_attributes(match.group("attributes"))
         self.doc.new_unordered_list_item(attributes, indent)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
@@ -277,7 +261,7 @@ class SamParser:
     def _num_list_item(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        attributes = self.parse_block_attributes(match.group("attributes"))
+        attributes = parse_attributes(match.group("attributes"))
         self.doc.new_ordered_list_item(attributes, indent)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
@@ -286,7 +270,7 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
         label = match.group("label")
-        attributes = self.parse_block_attributes(match.group("attributes"))
+        attributes = parse_attributes(match.group("attributes"))
         self.doc.new_labeled_list_item(attributes, indent, label)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
@@ -294,7 +278,9 @@ class SamParser:
     def _block_insert(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_block("insert", attributes=parse_insert(match.group("attributes")[1:-1]), text=None, indent=indent)
+        attributes = parse_insert(match.group("insert"))
+        attributes.update( parse_attributes(match.group("attributes")))
+        self.doc.new_block("insert", attributes=attributes, text=None, indent=indent)
         return "SAM", context
 
     def _include(self, context):
@@ -313,7 +299,7 @@ class SamParser:
     def _line_start(self, context):
         source, match = context
         indent = len(match.group("indent"))
-        self.doc.new_block('line', self.parse_block_attributes(match.group("attributes")),
+        self.doc.new_block('line', parse_attributes(match.group("attributes")),
                            para_parser.parse(match.group('content'), self.doc, strip=False), indent=indent)
         return "SAM", context
 
@@ -353,7 +339,7 @@ class SamParser:
 
         attributes_string = match.group("attributes")
         if attributes_string is not None:
-            attributes.update(self.parse_block_attributes(attributes_string))
+            attributes.update(parse_attributes(attributes_string))
 
         self.doc.new_block('grid', attributes, None, indent)
         return "GRID", context
@@ -491,47 +477,6 @@ class SamParser:
     def serialize(self, serialize_format):
         yield from self.doc.serialize(serialize_format)
 
-    def parse_block_attributes(self, attributes_string, flagged="?#*!", unflagged=None):
-        result = {}
-        try:
-            #attributes_list = attributes_string.split()
-            attributes_list = [x[1:-1].strip() for x in re.findall(r"(\(.*?(?<!\\)\))", attributes_string)]
-        except AttributeError:
-            return None
-        unflagged_attributes = [x for x in attributes_list if not (x[0] in '?#*!')]
-        if unflagged_attributes:
-            if unflagged is None:
-                raise SAMParserError("Unexpected attribute(s): {0}".format(', '.join(unflagged_attributes)))
-            else:
-                result[unflagged] = " ".join(unflagged_attributes)
-        ids = [x[1:] for x in attributes_list if x[0] == '*']
-        if ids and not '*' in flagged:
-            raise SAMParserError("IDs not allowed in this context. Found: *{0}".format(', *'.join(ids)))
-        if len(ids) > 1:
-            raise SAMParserError("More than one ID specified: " + ", ".join(ids))
-        names = [x[1:] for x in attributes_list if x[0] == '#']
-        if names and not '#' in flagged:
-            raise SAMParserError("Names not allowed in this context. Found: #{0}".format(', #'.join(names)))
-        if len(names) > 1:
-            raise SAMParserError("More than one name specified: " + ", ".join(names))
-        language = [x[1:] for x in attributes_list if x[0] == '!']
-        if language and not '!' in flagged:
-            raise SAMParserError("Language specification not allowed in this context. Found: !{0}".format(', !'.join(language)))
-        if len(language) > 1:
-            raise SAMParserError("More than one language specified: " + ", ".join(language))
-        conditions = [x[1:] for x in attributes_list if x[0] == '?']
-        if ids:
-            if ids[0] in self.doc.ids:
-                raise SAMParserError("Duplicate ID found: " + ids[0])
-            self.doc.ids.extend(ids)
-            result["id"] = "".join(ids)
-        if names:
-            result["name"] = "".join(names)
-        if language:
-            result["xml:lang"] = "".join(language)
-        if conditions:
-            result["conditions"] = " ".join(conditions)
-        return result
 
 
 class Block:
@@ -720,7 +665,13 @@ class Flow(list):
         return "[{0}]".format(''.join([str(x) for x in self]))
 
     def append(self, thing):
-        if type(thing) is Annotation:
+        if type(thing) is Attribute:
+            for i in reversed(self):
+                if type(i is Phrase):
+                    i.add_attribute(thing)
+                    break
+
+        elif type(thing) is Annotation:
             if type(self[-1]) is Phrase:
                 self[-1].append(thing)
             else:
@@ -1077,7 +1028,7 @@ class SamParaParser:
             'escaped-chars': re.compile('[\\\(\)\{\}\[\]_\*,\.\*`"&\<\>' + "']", re.U),
             'phrase': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
             'annotation': re.compile(
-                r'(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\s*(!(?P<language>[\w-]+))?\))',
+                r'(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))',
                 re.U),
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
@@ -1087,7 +1038,8 @@ class SamParaParser:
             'single_quote_open': re.compile(re_single_quote_open, re.U),
             'double_quote_close': re.compile(re_double_quote_close, re.U),
             'double_quote_open': re.compile(re_double_quote_open, re.U),
-            'inline-insert': re.compile(r'>\((?P<attributes>.*?)\)', re.U),
+            'inline-insert': re.compile(r'>(?P<insert>\((.*?(?<!\\))\))' + re_attributes, re.U),
+
             'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
             'citation': re.compile(
                 r'((\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
@@ -1184,7 +1136,6 @@ class SamParaParser:
         match = self.patterns['annotation'].match(para.rest_of_para)
         if match:
             annotation_type = match.group('type')
-            language = match.group('language')
 
             # Check for link shortcut
             if urlparse(annotation_type, None).scheme is not None:
@@ -1193,7 +1144,16 @@ class SamParaParser:
             else:
                 specifically = match.group('specifically') if match.group('specifically') is not None else None
             namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
-            self.flow.append(Annotation(annotation_type, self._unescape(specifically), namespace, language))
+            if annotation_type[0] == '!':
+                self.flow.append(Attribute('language', self._unescape(annotation_type[1:])))
+            elif annotation_type[0] == '*':
+                self.flow.append(Attribute('id', self._unescape(annotation_type[1:])))
+            elif annotation_type[0] == '#':
+                self.flow.append(Attribute('name', self._unescape(annotation_type[1:])))
+            elif annotation_type[0] == '?':
+                self.flow.append(Attribute('condition', self._unescape(annotation_type[1:])))
+            else:
+                self.flow.append(Annotation(annotation_type, self._unescape(specifically), namespace))
             para.advance(len(match.group(0)))
             if self.patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
@@ -1328,7 +1288,10 @@ class SamParaParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(InlineInsert(parse_insert(match.group("attributes"))))
+            attributes = parse_insert(match.group("insert"))
+            attributes.update( parse_attributes(match.group("attributes")))
+
+            self.flow.append(InlineInsert(attributes))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '>'
@@ -1402,13 +1365,62 @@ class Phrase:
     def __init__(self, text):
         self.text = text
         self.child = None
+        self._id = None
+        self._name = None
+        self._language = None
+        self._conditions = []
 
     def __str__(self):
         return u'{{{0:s}}}'.format(self.text)
 
-    def serialize_xml(self):
-        yield '<phrase>'
+    def add_attribute(self,attr):
+        if attr.type == 'id':
+            self.id = attr.value
+        elif attr.type == 'name':
+            self.name = attr.value
+        elif attr.type == 'language':
+            self.language = attr.value
+        elif attr.type == 'condition':
+            self.condition = attr.value
 
+
+    def setid(self, id):
+        if self._id is not None:
+            raise SAMParserError("A phrase cannot have more than one ID: "+ self._id + ',' + id)
+        self._id = id
+
+    id = property(None,setid)
+
+    def setname(self, name):
+        if self._name is not None:
+            raise SAMParserError("A phrase cannot have more than one name: "+ self._name + ',' + name)
+        self._name = name
+
+    name = property(None,setname)
+
+    def setlanguage(self, language):
+        if self._language is not None:
+            raise SAMParserError("A phrase cannot have more than one language: "+ self._language + ',' + language)
+        self._language = language
+
+    language = property(None,setlanguage)
+
+    def setcondition(self, condition):
+        self._conditions.append(condition)
+
+    condition = property(None,setcondition)
+
+    def serialize_xml(self):
+        yield '<phrase'
+        if self._id:
+            yield ' id="' + escape_for_xml_attribute(self._id) + '"'
+        if self._conditions:
+            yield ' conditions="' + ",".join(self._conditions) + '"'
+        if self._name:
+            yield ' name="' + escape_for_xml_attribute(self._name) + '"'
+        if self._language:
+            yield ' xml:lang="' + escape_for_xml_attribute(self._language) + '"'
+        yield '>'
         if self.child:
             yield from self.child.serialize_xml(escape_for_xml(self.text))
         else:
@@ -1445,6 +1457,21 @@ class Para:
 
     def retreat(self, count):
         self.currentCharNumber -= count
+
+
+class Attribute:
+    def __init__(self, type, value):
+        self.type = type
+        self.value = value
+
+    def __str__(self):
+        return '%s ="%s" ' % (self.type, self.value)
+
+    def serialize_xml(self):
+        if self.type == 'language':
+             yield ' xml:lang ="%s"' % (escape_for_xml_attribute(self.value))
+        else:
+            yield ' %s ="%s"' % (self.type, escape_for_xml_attribute(self.value))
 
 
 class Annotation:
@@ -1539,10 +1566,54 @@ class SAMParserError(Exception):
     Raised if the SAM parser encounters an error.
     """
 
-
-def parse_insert(insert_string):
+def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     result = {}
-    attributes_list = insert_string.split()
+    try:
+        #attributes_list = attributes_string.split()
+        attributes_list = [x[1:-1].strip() for x in re.findall(r"(\(.*?(?<!\\)\))", attributes_string)]
+    except AttributeError:
+        return None
+    unflagged_attributes = [x for x in attributes_list if not (x[0] in '?#*!')]
+    if unflagged_attributes:
+        if unflagged is None:
+            raise SAMParserError("Unexpected attribute(s): {0}".format(', '.join(unflagged_attributes)))
+        else:
+            result[unflagged] = " ".join(unflagged_attributes)
+    ids = [x[1:] for x in attributes_list if x[0] == '*']
+    if ids and not '*' in flagged:
+        raise SAMParserError("IDs not allowed in this context. Found: *{0}".format(', *'.join(ids)))
+    if len(ids) > 1:
+        raise SAMParserError("More than one ID specified: " + ", ".join(ids))
+    names = [x[1:] for x in attributes_list if x[0] == '#']
+    if names and not '#' in flagged:
+        raise SAMParserError("Names not allowed in this context. Found: #{0}".format(', #'.join(names)))
+    if len(names) > 1:
+        raise SAMParserError("More than one name specified: " + ", ".join(names))
+    language = [x[1:] for x in attributes_list if x[0] == '!']
+    if language and not '!' in flagged:
+        raise SAMParserError("Language specification not allowed in this context. Found: !{0}".format(', !'.join(language)))
+    if len(language) > 1:
+        raise SAMParserError("More than one language specified: " + ", ".join(language))
+    conditions = [x[1:] for x in attributes_list if x[0] == '?']
+    if ids:
+        # if ids[0] in self.doc.ids:
+        #     raise SAMParserError("Duplicate ID found: " + ids[0])
+        # self.doc.ids.extend(ids)
+        result["id"] = "".join(ids)
+    if names:
+        result["name"] = "".join(names)
+    if language:
+        result["xml:lang"] = "".join(language)
+    if conditions:
+        result["conditions"] = ",".join(conditions)
+    return result
+
+
+def parse_insert(annotation_string):
+    result = {}
+
+    insert_annotation = re.match(r'(\(.*?(?<!\\)\))', annotation_string)
+    attributes_list = insert_annotation.group(0)[1:-1].split()
     insert_type = attributes_list.pop(0)
     if insert_type[0] == '$':
         insert_item = insert_type[1:]
@@ -1572,13 +1643,6 @@ def parse_insert(insert_string):
     # strip unnecessary quotes from insert item
     insert_item = re.sub(r'^(["\'])|(["\'])$', '', insert_item)
     result['item'] = insert_item
-
-    if insert_ids:
-        result['id'] = "".join(insert_ids)
-    if insert_names:
-        result['name'] = "".join(insert_names)
-    if insert_conditions:
-        result['conditions'] = " ".join(insert_conditions)
     return result
 
 

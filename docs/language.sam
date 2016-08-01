@@ -191,6 +191,31 @@ specification: Semantic Authoring Markdown (SAM)
         3. an id, consisting of a # followed by a name (such as "#foo")
         4. one or more conditions, consisting of ? followed by a token
 
+    section: Includes
+
+        You can include one SAM file in another. The included file must be a complete SAM file, with SAM
+        declaration. Its structured is included in the stricture of the included file at the indent level
+        of the include statement.
+
+        ```(sam)
+            <<<(foo.sam)
+
+        Unlike inserts, which are simply parsed by the parser and passed on to the application layer
+        for processing, includes are executed by the parser. The result of the include is presented
+        to the application layer as part of the parsed document. This means that includes cannot be
+        made conditional, since conditions are parsed by the application layer. If you want a conditional
+        include in your tagging language, use a field.
+
+        ```(sam)
+            my-include:(?bar) foo.sam
+
+        Naturally, this include must be processed by the application layer.
+
+        For similar reasons, an include cannot have a name, id, or language attribute, since it
+        does not produce a artifact in the output. If you need to
+        apply any of these things to the included content, you can wrap the include statement
+        in another structure such as a block or a fragment and apply the attributes to that.
+
     section: Citations 
 
         Citations are any reference to another resource. This includes internal references to other structures within the file, such as to a graphic,procedure, or footnote, as well as references to external works.
