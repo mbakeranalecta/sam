@@ -1577,7 +1577,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <blockquote>
-                    <citation type="citation" value="http://example.com/page" extra=""/><p>Wafting zyphers quickly vexed jumbo.</p>
+                    <citation type="citation" value="http://example.com/page"/><p>Wafting zyphers quickly vexed jumbo.</p>
                     <p>Far and few are the lands where the jumblies live.</p>
                     </blockquote>
 
@@ -1609,7 +1609,7 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>This is another paragraph. Then there is an alternate blockquote:</p>
                     <blockquote conditions="bar,baz" name="foo5">
-                    <citation type="citation" value="Mother Goose" extra=""/><p>The quick brown fox jumps over the lazy dog.</p>
+                    <citation type="citation" value="Mother Goose"/><p>The quick brown fox jumps over the lazy dog.</p>
                     </blockquote>
                     <blockquote>
                     <p>This is a blockquote without a citation.</p>
@@ -1768,6 +1768,379 @@ tests:(!en) SAM Parser Tests
                     <line conditions="bar">Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
                     </blockquote>
+
+
+    test: Attributes
+
+        description:
+
+            SAM supports four explicit attributes: ids, names, conditions, and language. There is no
+            general attribute mechanism such as that in XML. You can generally encode the same data
+            in SAM using fields or annotations.
+
+            Attributes can
+            be applied to blocks, phrases, and inserts. You cannot apply attributes to a paragraph,
+            but you can wrap a paragraph in a fragment and apply attributes to the fragment.
+
+            Attributes are applied using annotation markup, but with a specific initial character to
+            denote each kind of attribute:
+
+            * `(*id)` creates an ID attribute.
+            * `(#name)` creates a name attribute.
+            * `(?condition)` creates a condition attribute.
+            * `(!en-CA)` creates a language attribute.
+
+            You can only apply one id, name, or language attribute to a block or phrase. You can apply more
+            than one condition attribute. On output to XML, the condition attributes will be converted to
+            a single `conditions` attribute with the individual conditions separated by commas. (For which reason,
+            condition statements can't include commas.)
+
+        case: Attributes on block
+
+            description: Attributes on a block
+
+
+            source:
+                ```(sam)
+                    block:(!en-CA)(*id)(#name)(?a)(?b) Title
+
+                        Content of the block.
+
+            markup:
+                block:(!en-CA)(*id)(#name)(?a)(?b) Title
+
+                    Content of the block.
+
+            result:
+                ```(xml)
+                    <block conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <title>Title</title>
+                    <p>Content of the block.</p>
+                    </block>
+
+        case: Attributes on field
+
+            description: Attributes on a field
+
+
+            source:
+                ```(sam)
+                    field:(!en-CA)(*id)(#name)(?a)(?b) Value of the field.
+
+            markup:
+                field:(!en-CA)(*id)(#name)(?a)(?b) Value of the field.
+
+            result:
+                ```(xml)
+                    <field conditions="a,b" id="id" name="name" xml:lang="en-CA">Value of the field.</field>
+
+        case: Attributes on fragment
+
+            description: Attributes on a fragment
+
+
+            source:
+                ```(sam)
+                    ~~~(!en-CA)(*id)(#name)(?a)(?b)
+
+                        Content of the fragment.
+
+            markup:
+                ~~~(!en-CA)(*id)(#name)(?a)(?b)
+
+                        Content of the fragment.
+
+            result:
+                ```(xml)
+                    <fragment conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <p>Content of the fragment.</p>
+                    </fragment>
+
+        case: attributes on grid
+
+            description: Attributes on a grid
+
+
+            source:
+                ```(sam)
+                    +++(!en-CA)(*id)(#name)(?a)(?b)
+
+                        Content | of
+                        the     | grid.
+
+            markup:
+                +++(!en-CA)(*id)(#name)(?a)(?b)
+
+                    Content | of
+                    the     | grid.
+
+            result:
+                ```(xml)
+                    <grid conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <row>
+                    <cell>Content</cell>
+                    <cell>of</cell>
+                    </row>
+                    <row>
+                    <cell>the</cell>
+                    <cell>grid.</cell>
+                    </row>
+                    </grid>
+
+        case: attributes on record set
+
+            description: Attributes on a record set
+
+
+            source:
+                ```(sam)
+                    recordset::(!en-CA)(*id)(#name)(?a)(?b) foo, bar
+
+                        a, b
+                        c, d
+
+            markup:
+                recordset::(!en-CA)(*id)(#name)(?a)(?b) foo, bar
+
+                    a, b
+                    c, d
+
+            result:
+                ```(xml)
+                    <recordset conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <row>
+                    <foo>a</foo>
+                    <bar>b</bar>
+                    </row>
+                    <row>
+                    <foo>c</foo>
+                    <bar>d</bar>
+                    </row>
+                    </recordset>
+
+
+        case: Attributes on unordered list
+
+            description:
+
+                Attributes on an unordered list item.
+
+            source:
+                ```(sam)
+                    * Fred
+
+                    *(!en-CA)(*id)(#name)(?a)(?b) Barney and
+                      Betty and
+                      Bam Bam.
+
+                    * Wilma
+
+            markup:
+
+                * Fred
+
+                *(!en-CA)(*id)(#name)(?a)(?b) Barney and
+                  Betty and
+                  Bam Bam.
+
+                * Wilma
+
+            result:
+                ```(xml)
+                    <ul>
+                    <li>
+                    <p>Fred</p>
+                    </li>
+                    <li conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <p>Barney and Betty and Bam Bam.</p>
+                    </li>
+                    <li>
+                    <p>Wilma</p>
+                    </li>
+                    </ul>
+
+        case: Attributes on ordered list
+            description:
+                Attributes on an ordered list item.
+
+            source:
+                ```(sam)
+                    1. Fred
+                    2.(!en-CA)(*id)(#name)(?a)(?b) Barney and
+                     Betty and
+                     Bam Bam.
+                    3. Wilma
+
+            markup:
+                1. Fred
+                2.(!en-CA)(*id)(#name)(?a)(?b) Barney and
+                 Betty and
+                 Bam Bam.
+                3. Wilma
+
+            result:
+                ```(xml)
+                    <ol>
+                    <li>
+                    <p>Fred</p>
+                    </li>
+                    <li conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <p>Barney and Betty and Bam Bam.</p>
+                    </li>
+                    <li>
+                    <p>Wilma</p>
+                    </li>
+                    </ol>
+
+        case: Attributes on lines
+
+            description:
+                Lines with annotations:
+
+            source:
+                ```(sam)
+                    |(!en-CA)(*id)(#name)(?a)(?b) You gotta walk that lonesome valley,[*bing page 22]
+                    | You gotta walk it by yourself,
+                    | Nobody here can walk it for you,
+                    |    You gotta walk it by yourself.
+            markup:
+                |(!en-CA)(*id)(#name)(?a)(?b) You gotta walk that lonesome valley,[*bing page 22]
+                | You gotta walk it by yourself,
+                | Nobody here can walk it for you,
+                |    You gotta walk it by yourself.
+
+            result:
+                ```(xml)
+                    <line conditions="a,b" id="id" name="name" xml:lang="en-CA">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+                    <line>You gotta walk it by yourself,</line>
+                    <line>Nobody here can walk it for you,</line>
+                    <line>   You gotta walk it by yourself.</line>
+
+
+        case: Attributes on blockquote
+            description:
+                A blockquote with attributes and a citation.
+
+
+            source:
+                ```(sam)
+                    After this paragraph, there is a blockquote:
+
+                    """(!en-CA)(*id)(#name)(?a)(?b)[*cit]
+                        The quick brown fox jumps over the lazy dog.
+
+                        And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
+
+            markup:
+                After this paragraph, there is a blockquote:
+
+                """(!en-CA)(*id)(#name)(?a)(?b)[*cit]
+                    The quick brown fox jumps over the lazy dog.
+
+                    And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
+
+            result:
+                ```(xml)
+                    <p>After this paragraph, there is a blockquote:</p>
+                    <blockquote conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <citation type="idref" value="cit"/><p>The quick brown fox jumps over the lazy dog.</p>
+
+                    <p>And the <phrase><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
+                    </blockquote>
+
+
+        case: Attributes on a phrase
+
+            description:
+                Attributes on a phrase.
+
+            source:
+                ```(sam)
+                    {The Duke}(actor "John Wayne")(!en-CA)(*id)(#name)(?a)(?b)[*cit] plays Rooster Cogburn.
+
+            markup:
+                {The Duke}(actor "John Wayne")(!en-CA)(*id)(#name)(?a)(?b)[*cit] plays Rooster Cogburn.
+
+            result:
+                ```(xml)
+                    <p><phrase id="id" conditions="a,b" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type="idref" value="cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
+
+
+        case:Attributes on a codeblock
+
+            description:
+                Attributes on a codeblock.
+
+            source:
+                ```(sam)
+                    ```(python)(*id)(#name)(?a)(?b)
+                        def escape_for_xml(s):
+                            t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
+                            try:
+                                return s.translate(t)
+                            except AttributeError:
+                                return s
+            markup:
+                ```(python)(*id)(#name)(?a)(?b)
+                    def escape_for_xml(s):
+                        t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
+                        try:
+                            return s.translate(t)
+                        except AttributeError:
+                            return s
+
+            result:
+                ```(xml)
+                    <codeblock conditions="a,b" id="id" language="python" name="name">
+                    def escape_for_xml(s):
+                        t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
+                        try:
+                            return s.translate(t)
+                        except AttributeError:
+                            return s
+                    </codeblock>
+
+        case:Attributes on an embed
+
+            description:
+                Attributes on a embed.
+
+            source:
+                ```(sam)
+                    ===(latexmathml)(*id)(#name)(?a)(?b)
+                        n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
+
+            markup:
+                ===(latexmathml)(*id)(#name)(?a)(?b)
+
+
+            result:
+                ```(xml)
+                    <embed conditions="a,b" id="id" language="python" name="name">
+                    n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
+                    </embed>
+
+
+        case: Attribute on a string definition
+            description:
+                Attribute on a string definition.
+
+            source:
+                ```(sam)
+                    $foo(!en-CA)(?a)(?b) = bar bar black sheep
+
+            markup:
+                $foo(!en-CA)(?a)(?b) = bar bar black sheep
+
+            result:
+                ```(xml)
+                    <string conditions="a,b" name="foo" xml:lang="en-CA">bar bar black sheep</string>
+
+
+
+#    block insert:       type item #name, ?condition, *id
+#    inline insert:      type item #name, ?condition, *id
+#    include:            href
 
 
 

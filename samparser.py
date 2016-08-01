@@ -68,13 +68,13 @@ class SamParser:
                 re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(
-                re_indent + r'("""|\'\'\'|blockquote:)' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.+?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.+?)\])|(\[\s*(?P<citation>.*?)\]))?',
+                re_indent + r'("""|\'\'\'|blockquote:)' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.*?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.*?)\])|(\[\s*(?P<citation>.*?)\]))?',
                 re.U),
             'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
             'paragraph-start': re.compile(r'\w*', re.U),
             'line-start': re.compile(re_indent + r'\|' + re_attributes + re_one_space + re_content, re.U),
             'blank-line': re.compile(r'^\s*$'),
-            'record-start': re.compile(re_indent + re_name + r'::(?P<field_names>.*)', re.U),
+            'record-start': re.compile(re_indent + re_name + r'(?<!\\)::' + re_attributes + '(?P<field_names>.*)', re.U),
             'list-item': re.compile(re_indent + re_ul_marker + re_attributes + re_spaces + re_content, re.U),
             'num-list-item': re.compile(re_indent + re_ol_marker + re_attributes + re_spaces + re_content, re.U),
             'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
@@ -309,8 +309,9 @@ class SamParser:
         source, match = context
         indent = len(match.group("indent"))
         record_name = match.group("name").strip()
+        attributes = parse_attributes(match.group('attributes'))
         field_names = [x.strip() for x in match.group("field_names").split(',')]
-        self.doc.new_record_set(record_name, field_names, indent)
+        self.doc.new_record_set(record_name, attributes, field_names, indent)
         return "RECORD", context
 
     def _record(self, context):
@@ -917,8 +918,8 @@ class DocStructure:
         s = StringDef(string_name, value, indent)
         self.add_block(s)
 
-    def new_record_set(self, name, field_names, indent):
-        b = Block(name, None, None, None, indent)
+    def new_record_set(self, name, attributes, field_names, indent):
+        b = Block(name, attributes, None, None, indent)
         self.add_block(b)
         self.current_record = {'local_element': name, 'local_indent': indent}
         self.fields = field_names
@@ -1540,7 +1541,8 @@ class Citation:
     def serialize_xml(self, payload=None):
         yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml_attribute(self.citation_value))
         if self.citation_extra is not None:
-            yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
+            if self.citation_extra:
+                yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
         if self.child:
             yield '>'
             yield from self.child.serialize_xml(payload)
