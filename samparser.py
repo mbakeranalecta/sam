@@ -830,7 +830,7 @@ class DocStructure:
             if 'id' in block.attributes:
                 if block.attributes['id'] in self.ids:
                     raise SAMParserError("Duplicate ID found: " + block.attributes['id'])
-                self.ids.extend(block.attributes['id'])
+                self.ids.append(block.attributes['id'])
         except (TypeError, AttributeError):
             pass
 
@@ -905,7 +905,7 @@ class DocStructure:
         for id in ids:
             if id in self.ids:
                 raise SAMParserError("Duplicate ID found: " + ids[0])
-            self.ids.extend(id)
+            self.ids.append(id)
         self.current_block.add_child(flow)
         self.current_block = self.current_block.parent
 

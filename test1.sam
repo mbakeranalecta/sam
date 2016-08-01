@@ -1802,18 +1802,18 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    block:(!en-CA)(*id)(#name)(?a)(?b) Title
+                    block:(!en-CA)(*id2)(#name)(?a)(?b) Title
 
                         Content of the block.
 
             markup:
-                block:(!en-CA)(*id)(#name)(?a)(?b) Title
+                block:(!en-CA)(*id2)(#name)(?a)(?b) Title
 
                     Content of the block.
 
             result:
                 ```(xml)
-                    <block conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <block conditions="a,b" id="id2" name="name" xml:lang="en-CA">
                     <title>Title</title>
                     <p>Content of the block.</p>
                     </block>
@@ -1825,14 +1825,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    field:(!en-CA)(*id)(#name)(?a)(?b) Value of the field.
+                    field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 
             markup:
-                field:(!en-CA)(*id)(#name)(?a)(?b) Value of the field.
+                field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 
             result:
                 ```(xml)
-                    <field conditions="a,b" id="id" name="name" xml:lang="en-CA">Value of the field.</field>
+                    <field conditions="a,b" id="id3" name="name" xml:lang="en-CA">Value of the field.</field>
 
         case: Attributes on fragment
 
@@ -1841,18 +1841,18 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    ~~~(!en-CA)(*id)(#name)(?a)(?b)
+                    ~~~(!en-CA)(*id4)(#name)(?a)(?b)
 
                         Content of the fragment.
 
             markup:
-                ~~~(!en-CA)(*id)(#name)(?a)(?b)
+                ~~~(!en-CA)(*id4)(#name)(?a)(?b)
 
                         Content of the fragment.
 
             result:
                 ```(xml)
-                    <fragment conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <fragment conditions="a,b" id="id4" name="name" xml:lang="en-CA">
                     <p>Content of the fragment.</p>
                     </fragment>
 
@@ -1863,20 +1863,20 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    +++(!en-CA)(*id)(#name)(?a)(?b)
+                    +++(!en-CA)(*id5)(#name)(?a)(?b)
 
                         Content | of
                         the     | grid.
 
             markup:
-                +++(!en-CA)(*id)(#name)(?a)(?b)
+                +++(!en-CA)(*id5)(#name)(?a)(?b)
 
                     Content | of
                     the     | grid.
 
             result:
                 ```(xml)
-                    <grid conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <grid conditions="a,b" id="id5" name="name" xml:lang="en-CA">
                     <row>
                     <cell>Content</cell>
                     <cell>of</cell>
@@ -1894,20 +1894,20 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    recordset::(!en-CA)(*id)(#name)(?a)(?b) foo, bar
+                    recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 
                         a, b
                         c, d
 
             markup:
-                recordset::(!en-CA)(*id)(#name)(?a)(?b) foo, bar
+                recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 
                     a, b
                     c, d
 
             result:
                 ```(xml)
-                    <recordset conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <recordset conditions="a,b" id="id6" name="name" xml:lang="en-CA">
                     <row>
                     <foo>a</foo>
                     <bar>b</bar>
@@ -1929,7 +1929,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     * Fred
 
-                    *(!en-CA)(*id)(#name)(?a)(?b) Barney and
+                    *(!en-CA)(*id7)(#name)(?a)(?b) Barney and
                       Betty and
                       Bam Bam.
 
@@ -1939,7 +1939,7 @@ tests:(!en) SAM Parser Tests
 
                 * Fred
 
-                *(!en-CA)(*id)(#name)(?a)(?b) Barney and
+                *(!en-CA)(*id7)(#name)(?a)(?b) Barney and
                   Betty and
                   Bam Bam.
 
@@ -1951,7 +1951,7 @@ tests:(!en) SAM Parser Tests
                     <li>
                     <p>Fred</p>
                     </li>
-                    <li conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <li conditions="a,b" id="id7" name="name" xml:lang="en-CA">
                     <p>Barney and Betty and Bam Bam.</p>
                     </li>
                     <li>
@@ -1966,14 +1966,14 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     1. Fred
-                    2.(!en-CA)(*id)(#name)(?a)(?b) Barney and
+                    2.(!en-CA)(*id8)(#name)(?a)(?b) Barney and
                      Betty and
                      Bam Bam.
                     3. Wilma
 
             markup:
                 1. Fred
-                2.(!en-CA)(*id)(#name)(?a)(?b) Barney and
+                2.(!en-CA)(*id8)(#name)(?a)(?b) Barney and
                  Betty and
                  Bam Bam.
                 3. Wilma
@@ -1984,7 +1984,7 @@ tests:(!en) SAM Parser Tests
                     <li>
                     <p>Fred</p>
                     </li>
-                    <li conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <li conditions="a,b" id="id8" name="name" xml:lang="en-CA">
                     <p>Barney and Betty and Bam Bam.</p>
                     </li>
                     <li>
@@ -1999,19 +1999,19 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    |(!en-CA)(*id)(#name)(?a)(?b) You gotta walk that lonesome valley,[*bing page 22]
+                    |(!en-CA)(*id9)(#name)(?a)(?b) You gotta walk that lonesome valley,[*bing page 22]
                     | You gotta walk it by yourself,
                     | Nobody here can walk it for you,
                     |    You gotta walk it by yourself.
             markup:
-                |(!en-CA)(*id)(#name)(?a)(?b) You gotta walk that lonesome valley,[*bing page 22]
+                |(!en-CA)(*id9)(#name)(?a)(?b) You gotta walk that lonesome valley,[*bing page 22]
                 | You gotta walk it by yourself,
                 | Nobody here can walk it for you,
                 |    You gotta walk it by yourself.
 
             result:
                 ```(xml)
-                    <line conditions="a,b" id="id" name="name" xml:lang="en-CA">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+                    <line conditions="a,b" id="id9" name="name" xml:lang="en-CA">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
                     <line>You gotta walk it by yourself,</line>
                     <line>Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
@@ -2026,7 +2026,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     After this paragraph, there is a blockquote:
 
-                    """(!en-CA)(*id)(#name)(?a)(?b)[*cit]
+                    """(!en-CA)(*id10)(#name)(?a)(?b)[*cit]
                         The quick brown fox jumps over the lazy dog.
 
                         And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
@@ -2034,7 +2034,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 After this paragraph, there is a blockquote:
 
-                """(!en-CA)(*id)(#name)(?a)(?b)[*cit]
+                """(!en-CA)(*id10)(#name)(?a)(?b)[*cit]
                     The quick brown fox jumps over the lazy dog.
 
                     And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
@@ -2042,7 +2042,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <p>After this paragraph, there is a blockquote:</p>
-                    <blockquote conditions="a,b" id="id" name="name" xml:lang="en-CA">
+                    <blockquote conditions="a,b" id="id10" name="name" xml:lang="en-CA">
                     <citation type="idref" value="cit"/><p>The quick brown fox jumps over the lazy dog.</p>
 
                     <p>And the <phrase><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
@@ -2056,14 +2056,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    {The Duke}(actor "John Wayne")(!en-CA)(*id)(#name)(?a)(?b)[*cit] plays Rooster Cogburn.
+                    {The Duke}(actor "John Wayne")(!en-CA)(*id11)(#name)(?a)(?b)[*cit] plays Rooster Cogburn.
 
             markup:
-                {The Duke}(actor "John Wayne")(!en-CA)(*id)(#name)(?a)(?b)[*cit] plays Rooster Cogburn.
+                {The Duke}(actor "John Wayne")(!en-CA)(*id11)(#name)(?a)(?b)[*cit] plays Rooster Cogburn.
 
             result:
                 ```(xml)
-                    <p><phrase id="id" conditions="a,b" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type="idref" value="cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
+                    <p><phrase id="id11" conditions="a,b" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type="idref" value="cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
 
 
         case:Attributes on a codeblock
@@ -2073,7 +2073,7 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    ```(python)(*id)(#name)(?a)(?b)
+                    ```(python)(*id12)(#name)(?a)(?b)
                         def escape_for_xml(s):
                             t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
                             try:
@@ -2081,7 +2081,7 @@ tests:(!en) SAM Parser Tests
                             except AttributeError:
                                 return s
             markup:
-                ```(python)(*id)(#name)(?a)(?b)
+                ```(python)(*id12)(#name)(?a)(?b)
                     def escape_for_xml(s):
                         t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
                         try:
@@ -2091,7 +2091,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <codeblock conditions="a,b" id="id" language="python" name="name">
+                    <codeblock conditions="a,b" id="id12" language="python" name="name">
                     def escape_for_xml(s):
                         t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
                         try:
@@ -2107,16 +2107,16 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    ===(latexmathml)(*id)(#name)(?a)(?b)
+                    ===(latexmathml)(*id13)(#name)(?a)(?b)
                         n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             markup:
-                ===(latexmathml)(*id)(#name)(?a)(?b)
+                ===(latexmathml)(*id13)(#name)(?a)(?b)
 
 
             result:
                 ```(xml)
-                    <embed conditions="a,b" id="id" language="python" name="name">
+                    <embed conditions="a,b" id="id13" language="python" name="name">
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
                     </embed>
 
@@ -2127,14 +2127,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >>>(image foo.gif)(*id)(#name)(?a)(?b)
+                    >>>(image foo.gif)(*id14)(#name)(?a)(?b)
 
             markup:
-                >>>(image foo.gif)(*id)(#name)(?a)(?b)
+                >>>(image foo.gif)(*id14)(#name)(?a)(?b)
 
             result:
                 ```(xml)
-                    <insert conditions="a,b" id="id" item="foo.gif" name="name" type="image"/>
+                    <insert conditions="a,b" id="id14" item="foo.gif" name="name" type="image"/>
 
 
     test: Annotations
