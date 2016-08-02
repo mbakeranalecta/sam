@@ -1690,6 +1690,9 @@ def parse_insert(annotation_string):
     elif insert_type[0] == '~':
         insert_item = insert_type[1:]
         insert_type = 'fragment'
+    elif insert_type[0] == '%':
+        insert_item = insert_type[1:]
+        insert_type = 'key'
     else:
         insert_item = attributes_list.pop(0)
     insert_ids = [x[1:] for x in attributes_list if x[0] == '*']

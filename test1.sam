@@ -2827,6 +2827,23 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <insert conditions="goo" item="foo.gif" type="image"/>
 
+        case: Key insert
+            description:
+                Insert the value of a key. Syntax for creating keys is left to the language designer.
+                Key resolution belongs to the application layer.
+
+            source:
+                ```(sam)
+                    >>>(%glug)
+
+            markup:
+                >>>(%glug)
+
+            result:
+                ```(xml)
+                    <insert item="glug" type="key"/>
+
+
     test: Inline inserts
 
         description:
