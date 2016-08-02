@@ -1,0 +1,125 @@
+sam:
+article: SAM Recipes
+
+    SAM is an abstract markup language, otherwise known as a meta-language. This means that it is intended, like XML,
+    defining your own markup languages. Unlike XML, however, SAM pre-defines a basic set of structures.
+    SAMs predefined structures provide a simple clear syntax of common text structures, but they don't cover
+    everything you might need. The following recipes are suggestions on how to handle some common markup
+    problems in SAM. But remember, these involve you defining markup for yourself and require you to handle that
+    markup in the application layer.
+
+    recipe: Footnotes
+
+        SAM does not have an predefined markup for footnotes, but it does have support for IDs and citations,
+        which provide a reference mechanism for footnotes. The suggested recipe for footnotes is to create a
+        footnote block with an id, and use a citation to reference that id:
+
+        ```(sam)
+            This paragraph reqires a footnote.[*1]
+
+            footnote:(*1)
+                This is a footnote.
+
+        The footnote structure can be anywhere in the document, but it makes sense to place it immediately
+        after the paragraph in which the reference occurs. You can move it to the bottom of the page or the
+        of the chapter or book in the publishing process.
+
+        Note that the footnote structure is not a child of the paragraph but a sibling at the same
+        level of indentation. Paragraphs cannot have block children.
+
+    recipe: Terminal sessions
+
+        There is no support for SAM markup in the body of a codeblock. This works for code, since it
+        requires no escaping, regardless of language. It does not work so well for terminal sessions
+        if you want to markup the prompt, input, and output. If you need this kind of terminal session
+        support, the suggested recipe is to create a terminal session block and use fields for
+        the sequence of prompt, input, and response. This reads quite clearly and you can easily
+        use it to construct a formatted terminal session illustration when publishing.
+
+        ```(sam)
+            terminal:
+                prompt: $
+                input: dir
+                response: Empty directory.
+
+    recipe: Semantic lists
+
+        Sometimes you have semantic lists. That is, the list and its items are of a specific type. For
+        example:
+
+        ```(sam)
+            filmography:
+                film: Rio Bravo
+                film: The Shootist
+
+        If you don't want to have to repeat the item name over and over, you can use a recordset
+        with a single field.
+
+        ```(sam)
+            filmography:: film
+                Rio Bravo
+                The Shootish
+
+        Notice that while these two constructions capture the same data and the same semantics,
+        they are not the same structure, and therefore not to interchangeable. You have to decide
+        which one you want in your markup language and provide processing for it accordingly.
+
+        Also note the the XML representation of the two forms is different. The first outputs this:
+
+        ```(xml)
+             <filmography>
+             <film>Rio Bravo</film>
+             <film>The Shootist</film>
+             </filmography>
+
+        The second outputs this:
+
+        ```(xml)
+             <filmography>
+             <row>
+             <film>Rio Bravo</film>
+             </row>
+             <row>
+             <film>The Shootist</film>
+             </row>
+             </filmography>
+
+        Of course, it is easy enough to transform the second output into the first in post-processing.
+
+    recipe: Subscripts and superscripts
+        SAM does not have predefined support for superscripts and subscripts. If you need then, you
+        need to define a tagging language the provides them. You would do this with annotations:
+
+        ```(sam)
+            H{2}(super)S0{4}(super)
+
+    recipe: Conditional paragraphs
+        You can't apply attributes to a paragraph. If you want to make paragraphs conditional,
+        support fragments in your tagging language and put the conditions on the fragments.
+
+        ```(sam)
+            ~~~(?novice)
+                Be very careful and ask for help if you need it.
+
+            Push the big red button and run.
+
+    recipe: Use a lookup file to make annotations easier
+        SAM allows you to omit the annotations on a phrase after you have annotated it the first
+        time in a file. When the parser sees a phrase with no annotation or citation, it looks
+        back through the file an finds the last instance of that phrase and copies its annotation.
+
+        This is a time saver. If you have a set of phrases that are commonly annotated
+        the same way across a number of documents, you can create a lookup file in which those
+        phrases are annotated and import it into each document. You with then not need to
+        annotate any of those phrases in the document. Just mark them up as phrases using
+        curly braces and the parser will fill in the annotations.
+
+        You need to make sure that the contents of the lookup file do not become part of the
+        published document. To do this, simply create a structure in the lookup file to hold
+        the list of annotations and suppress that structure in the application layer.
+
+        ```(sam)
+            dont-publish-this:
+                {Enter}(key)
+                {the Duke}(actor "John Wayne" (SAG))
+
