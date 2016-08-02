@@ -108,7 +108,7 @@ article: SAM Quick Start
         ```(sam)
             recipe: Hard Boiled Egg
 
-        This is a short cut and is exactly equivalent to this (provided there is nothing
+        This is a shortcut and is exactly equivalent to this (provided there is nothing
         indented under the `title` tag):
 
         ```(sam)
@@ -120,20 +120,19 @@ article: SAM Quick Start
         A field is a container for a single value. Each of the lines in the nutrition
         block is a field. For example, `sugar: 0.6 g` is a field with the label `sugar` and
         the value `0.6 g`. A field has the same format as a block except that there is nothing
-        indented under it. Indent something under a field and it will become a block and its
+        indented under it. If you indent something under a field it will become a block and its
         value will become the title of the block.
 
     section: Paragraphs
 
         A paragraph is a string of text. Paragraph may run over several lines. A
         paragraph ends with a blank line or when the block it belongs to ends (which means when
-        next line is less indented). Paragraph may not have children. That is, you can't
+        next line is less indented). Paragraphs may not have children. That is, you can't
         indent anything under a paragraph.
 
     section: Lists
 
-        You can create lists in SAM two ways. One is by creating explicit `ol` and `li`
-        blocks like in HTML. The other is as shown above, by using numbers followed by a
+        You can create ordered lists by using numbers followed by a
         period to start each line of the list.
 
         ```(sam)
@@ -143,9 +142,7 @@ article: SAM Quick Start
             4. Place eggs in cold water to stop cooking.
             5. Peel and serve.
 
-        Numbered lists created like this will be converted
-        to a `ol` by the {SAM Parser}(tool). Unordered lists can be created the same way using
-        asterisks.
+        Unordered lists can be created the same way using asterisks.
 
         ```(sam)
             * Dog
@@ -153,10 +150,11 @@ article: SAM Quick Start
             * Monkey
 
     section: Phrases:
-        A phrase is an and piece of text within a paragraph. A phrase is marked up with
+        A phrase is a piece of text within a paragraph that you want to apply metadata to.
+        A phrase is marked up with
         curly braces. In the recipe example, the words "Cobb Salad" are marked up as a
         phrase: `{Cobb Salad}`. We mark up phrases so that we can add semantic information
-        to them with annotations and citations.
+        to them with {annotations} and {citations}.
 
     section: Annotations
         An annotation is a way of adding descriptive labels or metadata to individual
@@ -170,12 +168,12 @@ article: SAM Quick Start
     section: Annotation chaining
         You cannot markup one phrase inside another phrase, however, you can add more than
         one annotation to a phrase. To add additional annotations, simply follow one with
-        another without an space between them:
+        another without any space between them:
 
         ```(sam)
             {Clint Eastwood}(actor)(director) stared in and directed {Gran Torino}(movie).
 
-        You can also chain annotations and citations.
+        You can also chain {annotations} and {citations}.
 
     section: Links
         Links are a form of annotation. As a meta-language, SAM does not support links
@@ -253,7 +251,7 @@ article: SAM Quick Start
         This is equivalent to a record set in the form:
 
         ```(sam)
-            ingredients:: ingredient, quantity
+            grid:: cell, cell
                 eggs, 12
                 water, 2qt
 
@@ -292,18 +290,17 @@ article: SAM Quick Start
                     print("Hello World " + str(i))
 
         The code block must be intended under the codeblock header (the
-        three backticks). The indentation of the code block will be
+        three backticks). The indentation of the code in the code block will be
         calculated based on the least indented line. Thus in the example
         above, the line `for i in range(1,10):` will be treated as having
         and indent of 0, and the line `print("Hello World " + str(i))` will
         have an indent of 4.
 
         The language of the codeblock is given in the annotation immediately
-        following the three back ticks of the header. It must be single
-        token (no spaces).
+        following the three back ticks of the header.
 
         The content of a code block is not processed as SAM markup. This
-        means that you do not have to escape any of the characters in you
+        means that you do not have to escape any of the characters in your
         code sample. It also means that you can quote SAM markup itself
         without it being parsed as SAM markup. (Every example in this
         document uses exactly this technique.)
@@ -327,19 +324,13 @@ article: SAM Quick Start
         The content of a block quote is regular SAM markup and is processed
         just like any other SAM markup.
 
-    section: Citations
-        A citation is a reference to the source of a piece of information. In the
-        previous example, there is a citation on the block quote that attributes
-        the quote to Lewis Carroll's _Alice in Wonderland_. In SAM, citations
-        are contained in square brackets.
-
     section: Lines
         A line is a piece of text with a fixed line ending. Poetry, for example,
         is a set of lines. Normally, SAM runs the lines of a paragraph together
-        and leave it up to the publishing software to determine line breaks a
+        and leaves it up to the publishing software to determine line breaks a
         publishing time. To preserve the line breaks in your text, use lines.
         In SAM, lines are created by preceding them with a pipe character followed
-        by a space:
+        by a space (the space is important!):
 
         ```(sam)
             Jabberwocky is a nonsense poem by Lewis Carroll.
@@ -361,7 +352,7 @@ article: SAM Quick Start
         * You want to enter a character, such as an open curly brace, that
           is a SAM markup character.
 
-        * You may want to enter a character that is not on your keyboard or
+        * You want to enter a character that is not on your keyboard or
           that is hard to type.
 
         To enter a character that is a SAM markup character, precede it with
@@ -443,7 +434,7 @@ article: SAM Quick Start
             &amp;pound;
 
     section: Decorations
-        A decoration is a shortcut for entering common forms of format related
+        A decoration is a shortcut for entering common types of format related
         annotation in a paragraph. SAM supports three decorations, for bold,
         italic, and code. Bold text is contained between asterisks:
 
@@ -465,7 +456,7 @@ article: SAM Quick Start
         ```(sam)
             This text {is in italic}(italic) type.
 
-        Code is contained between underscores:
+        Code is contained between backticks:
 
         ```(sam)
             Python uses the `print()` function to print output.
@@ -475,7 +466,7 @@ article: SAM Quick Start
         ```(sam)
             Python uses the {print()}(code) function to print output.
 
-        Note that the code decoration is no a generic monospaced type
+        Note that the code decoration is not a generic monospaced type
         decoration. It is intended specifically for code. Text in a
         code decoration is not parsed the way ordinary SAM markup is
         parsed. Character escapes are not recognized. The
@@ -508,17 +499,30 @@ article: SAM Quick Start
         It only needs to be escaped if it is part of a complete character
         entity code.
 
-    section: Management annotations
-        Management annotations are annotations used to manage content rather than to elucidate
-        its meaning. Management domain annotations consist of a token preceded by a character
-        denoting their type. The types are:
+    section: Attributes
+        SAM does not have a general attribute mechanism like XML. XML attributes are one of the
+        things that make it hard to write in, even in a structured editor. However, SAM does
+        provide some basic attributes that are commonly needed for content management purposes.
+
+        You can attach attributes to blocks and block-like things and to phrases. An attribute
+        looks like an annotation, in the sense that it is contained in parentheses, but attributes
+        as distinguished by an initial character the specifies their type. Thus a condition starts
+        with a question mark `(?deluxe)`.
+
+        To attach an attribute to a block, place it directly after the colon of the block header:
+
+        ```(sam)
+            introduction:(?deluxe)
+
+
+        The types are:
 
         |ID| An identifies for the block or field. An ID must be unique in the document. An ID is
         preceded by an asterisk: `*my-id`.
 
         |Name| A name also identifies a block or field but it has wider scope. Names are used
         when you want to identify something across a set of documents. SAM does not check that
-        names are uniques across a set of documents (it has no way of knowing what that set
+        names are unique  across a set of documents (it has no way of knowing what that set
         might be). Resolution of names is up to the processing software. A name is preceded by
         a `#` symbol: `#my-name`.
 
@@ -528,6 +532,13 @@ article: SAM Quick Start
 
         |Language| You can specify the language of a block
 
+        You can apply multiple attributes to a block:
+
+        ```(sam)
+            introuction(*intro)(?deluxe)
+
+        You can only apply one each of  the {id}, {name}, and {language} attributes, but you can
+        apply as many condition attributes to a block as you need.
 
 
     section: Conditions

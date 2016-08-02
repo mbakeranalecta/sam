@@ -849,7 +849,7 @@ class DocStructure:
             includeparser = SamParser()
             with urllib.request.urlopen(href) as response:
                 includeparser.parse(reader(response))
-            include = Include(includeparser.doc.doc.children, indent)
+            include = Include(includeparser.doc, indent)
             self.add_block(include)
 
         except SAMParserError as e:
@@ -878,6 +878,15 @@ class DocStructure:
                 if block.attributes['id'] in self.ids:
                     raise SAMParserError("Duplicate ID found: " + block.attributes['id'])
                 self.ids.append(block.attributes['id'])
+        except (TypeError, AttributeError):
+            pass
+
+        # IDs from included files
+        try:
+            overlapping_ids = set(block.ids) & set(self.ids)
+            if overlapping_ids:
+                raise SAMParserError("Duplicate ID found: " + ', '.join(overlapping_ids))
+            self.ids.extend(block.ids)
         except (TypeError, AttributeError):
             pass
 
@@ -1011,9 +1020,10 @@ class DocStructure:
 
 class Include(Block):
     def __init__(self, doc, indent):
-        self.children=doc
+        self.children=doc.doc.children
         self.indent = indent
         self.namespace = None
+        self.ids = doc.ids
 
     def serialize_xml(self):
         for x in self.children:

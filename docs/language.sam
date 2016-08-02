@@ -210,16 +210,34 @@ specification: Semantic Authoring Markdown (SAM)
             include           | href      |       |           |     |             |
 
 
-    section: Inserts 
+    section: Inserts
 
-        Insertions are indicated by >>> followed by parentheses containing the type and identity of the thing to be inserted. SAM knows nothing about the types of things you might insert. It simply passes on the type to the processing application.
+        An insert is an instruction to the application layer to insert a resource into the document output.
 
-        The parameters of an insertion are different from those of an annotation. They are: 
+        Inserts may be created at the block level or inside a flow. At the block level, and insert is placed
+        on a line by itself and is indicated by three greater-than signs:
 
-        1. the type of the annotation 
-        2. the URI of the material to be inserted 
-        3. an id, consisting of a # followed by a name (such as "#foo")
-        4. one or more conditions, consisting of ? followed by a token
+        ```(sam)
+            >>>(image foo.png)
+
+        Inside a flow, an insert is indicated by a single greater-than followed the the identification of the
+        resource in parentheses:
+
+        ```(sam)
+            My favorite flavor of ice cream is >($favorite-flavor).
+
+
+        The resource to be inserted may be identified either by type and url as in the block example above or by
+        referece to an id, name, fragment, string, or key as in the flow example.
+
+
+        You can also assign names, conditions, or ids to an insert. For example, to insert a fragment containing
+        the introduction to the deluxe version of a product, you could do this:
+
+        ```(sam)
+            >>>(~deluxe-intro)(?model=deluxe)
+
+        Remember that it is up to the application layer to implement such inserts.
 
     section: Includes
 
@@ -244,7 +262,9 @@ specification: Semantic Authoring Markdown (SAM)
         For similar reasons, an include cannot have a name, id, or language attribute, since it
         does not produce a artifact in the output. If you need to
         apply any of these things to the included content, you can wrap the include statement
-        in another structure such as a block or a fragment and apply the attributes to that.
+        in another structure such as a block or a fragment and apply the attributes to that. This will
+        result in the included content being wrapped in that block of fragment in the output
+        where the application layer can deal with it appropriately.
 
     section: Citations 
 
@@ -308,7 +328,7 @@ specification: Semantic Authoring Markdown (SAM)
     
         Blocks can be assigned names and IDs. Both are used to reference the block from elsewhere in the content. The difference is that ids are local to the current document and must be unique within the current document. If a duplicate ID is found, the parser will raise an error. 
 
-        Names are merely assigned to the block by the parser. No namespace or uniqueness constraints are enforced. It is up to the application to decide how name are used. However, it is considered a SPFE idiom that names are scoped to the type of objects they apply to. In other words, fragment names are in a different namespace from string names. 
+        Names are merely assigned to the block by the parser. No namespace or uniqueness constraints are enforced. It is up to the application to decide how names are used. However, it is considered a SPFE idiom that names are scoped to the type of objects they apply to. In other words, fragment names are in a different namespace from string names.
 
         This implies that string references are distinct from fragment references.
 
@@ -387,13 +407,15 @@ specification: Semantic Authoring Markdown (SAM)
         Code must be indented under the codeblock marker. The codeblock ends at the first line that is less indented than the codeblock, or at the end of the file.
 
         section: codeblock annotations
-            Codeblock annotations are different from block annotations. The take the form:
+            Codeblock annotations are different from block annotations. They take the form:
 
             ```
-                (language "source" (namespace) #name *id ?condition)
+                ```(language)
 
-            # Source is not needed is we can do citations.
-            # Also not sure what use namespace is in this context.
+            You can add the attributes {id}, {name}, and {condition} to a codeblock:
+
+            ```(sam)
+                ```(python)(?lang=python)
 
     section: Embedded markup
         You can embed markup in other markup languages. Unlike a codeblock, the intended semantics of

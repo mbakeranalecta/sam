@@ -23,26 +23,14 @@ rule:(#header) SAM Schema Header
     followed optionally by a namespace URI in curly braces. For example:
 
     ```(samschema)
-    samschema:{http://spfeopentoolkit.org/ns/spfe-doc}
-    ```
+        samschema:{http://spfeopentoolkit.org/ns/spfe-doc}
+
 
     If specified, the namespace URI specifies the default namespace of all the
     elements defined in the schema.
 
 rule:(#namespaces) Namespaces
 
-    A SAM element may be placed in a namespace. Unlike XML, in which an element
-    is placed in a namespace in the instance, in SAM, a element is placed in a namespace
-    by the schema. There is no indication of the namespace in the instance. Elements
-    are assigned to their namespaces by the parser, based on the definitions in
-    the schema.
-
-    If there is no schema specified for a document, then all elements are in the
-    default namespace.
-
-    This imposes the restriction that there cannot be a place in the schema where
-    the same elements name could occur in more than one namespace, since there is
-    no way to distinguish them in the namespace.
 
 rule:(#root) Root element declaration
 
@@ -62,9 +50,9 @@ rule:(#includes) Includes
     Included samschemas are processed as if they were part of the current
     samschema with the following provisions:
 
-    * The included sam schema may not include a [root element declaration](rule "#root").
+    * The included sam schema may not include a {root element declaration}[#root]).
     This means that any elements declared in an included samschama must be
-    declared inside [named structures](rule "#stuctures").
+    declared inside {named structures}[#stuctures].
 
     * If the included sam schema contains a default namespace, it will be used
     as the namespace for the elements defined in the included samschema.
@@ -92,8 +80,8 @@ rule:(#blocks) blocks declarations
 rule:(#implicit) Implicit elements
 
     SAM recognized certain elements by their context in the SAM document. They
-    do not have explicit tags in the content. These implicit are delineated either by
-    punctuation or by their position relative to other elements.
+    do not have explicit tags in the content. These implicit elements are delineated
+    either by punctuation or by their position relative to other elements.
 
     Implicit elements are implicit in the instance. They must be declared in the
     schema. It is an error if an implicit element occurs in the instance in a
@@ -167,8 +155,8 @@ rule:(#ideomatic-annotation-types) Idiomatic annotations
     with the idiomatic type can be applied to the new type:
 
     ```(samschema)
-    href=link
-    ```
+        href=link
+
 
 rule:(#idiomatic-elements) Idiomatic elements
 
@@ -225,8 +213,8 @@ rule:(#rename-implicit) Renaming implicit structures
     element as follows:
 
     ```(samschema)
-    para=p
-    ```
+        para=p
+
 
 rule:(#create-implicit) Creating implicit structures
 
