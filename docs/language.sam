@@ -250,20 +250,26 @@ specification: Semantic Authoring Markdown (SAM)
 
         Unlike inserts, which are simply parsed by the parser and passed on to the application layer
         for processing, includes are executed by the parser. The result of the include is presented
-        to the application layer as part of the parsed document. This means that includes cannot be
+        to the application layer as part of the parsed document.
+
+        The ID uniqueness constraint that applies to individual SAM document also applies to included
+        files. The IDs must be unique across the entire document parsed from the source file and
+        any included files.
+
+        Includes cannot be
         made conditional, since conditions are parsed by the application layer. If you want a conditional
-        include in your tagging language, use a field.
+        include in your tagging language, add a field for this purpose to your tagging language.
 
         ```(sam)
             my-include:(?bar) foo.sam
 
         Naturally, this include must be processed by the application layer.
 
-        For similar reasons, an include cannot have a name, id, or language attribute, since it
+        For similar reasons, an include cannot have a {name}, {id}, or {language} attribute, since it
         does not produce a artifact in the output. If you need to
         apply any of these things to the included content, you can wrap the include statement
-        in another structure such as a block or a fragment and apply the attributes to that. This will
-        result in the included content being wrapped in that block of fragment in the output
+        in another structure such as a {block} or a {fragment} and apply the attributes to that. This will
+        result in the included content being wrapped in that block or fragment in the output
         where the application layer can deal with it appropriately.
 
     section: Citations 
