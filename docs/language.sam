@@ -184,30 +184,30 @@ specification: Semantic Authoring Markdown (SAM)
         This is the list of the annotations and attributes allowed on each structure:
 
         +++
-            block|              !language| #name| ?condition| *id||
-            field|              !language| #name| ?condition| *id||
-            fragment|           !language| #name| ?condition| *id ||
-            grid|               !language| #name| ?condition| *id||
-            recordset|          !language| #name| ?condition| *id||
-            ordered-list-item|  !language| #name| ?condition| *id||
-            unorderd-list-item| !language| #name| ?condition| *id||
-            line|               !language| #name| ?condition| *id||
+            block             | !language | #name | ?condition| *id |             |
+            field             | !language | #name | ?condition| *id |             |
+            fragment          | !language | #name | ?condition| *id |             |
+            grid              | !language | #name | ?condition| *id |             |
+            recordset         | !language | #name | ?condition| *id |             |
+            ordered-list-ite  | !language | #name | ?condition| *id |             |
+            unorderd-list-item| !language | #name | ?condition| *id |             |
+            line              | !language | #name | ?condition| *id |             |
 
-            blockquote|         !language| #name| ?condition| *id| [citation]|
-            phrase|             !language| #name| ?condition| *id| [citation]| (annotation)
+            blockquote        | !language | #name | ?condition| *id | \[citation] |
+            phrase            | !language | #name | ?condition| *id | \[citation] | (annotation)
 
-            codeblock|          encoding | #name| ?condition| *id||
-            embed|              encoding | #name| ?condition| *id||
+            codeblock         | encoding  | #name | ?condition| *id |             |
+            embed             | encoding  | #name | ?condition| *id |             |
 
-            string-def|   #none          |||||
+            string-def        | #none     |       |           |     |             |
 
-            paragraph|    #none          |||||
-            record|       #none          |||||
-            XML|          #none          |||||
+            paragraph         | #none     |       |           |     |             |
+            record            | #none     |       |           |     |             |
+            XML               | #none     |       |           |     |             |
 
-            block insert|       type     | item | #name| ?condition| *id|
-            inline insert|      type     | item | #name| ?condition| *id|
-            include|            href     |||||
+            block insert      |           | #name | ?condition| *id | type        | item
+            inline insert     |           | #name | ?condition| *id | type        | item
+            include           | href      |       |           |     |             |
 
 
     section: Inserts 
