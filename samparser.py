@@ -726,10 +726,14 @@ class Flow(list):
             else:
                 super(Flow, self).append(thing)
         elif type(thing) is Citation:
-            if type(self[-1]) is Phrase:
-                self[-1].append(thing)
-            else:
+            try:
+                if type(self[-1]) is Phrase:
+                    self[-1].append(thing)
+                else:
+                    super(Flow, self).append(thing)
+            except IndexError:
                 super(Flow, self).append(thing)
+
         elif not thing == '':
             super(Flow, self).append(thing)
 
