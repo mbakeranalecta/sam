@@ -123,3 +123,18 @@ article: SAM Recipes
                 {Enter}(key)
                 {the Duke}(actor "John Wayne" (SAG))
 
+    recipe: Complex labeled lists
+        SAM provides a simple labeled list format that allows only one paragraph attached to a
+        label. For anything more complex than this, construct a labeled list structured with
+        blocks and fields.
+
+        ```(sam)
+            ll:
+                li:
+                    lable: Item label
+                    item:
+                        The text of the item, including:
+
+                        * paragraphs
+                        * lists
+                        * etc

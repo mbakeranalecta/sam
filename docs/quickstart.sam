@@ -522,39 +522,26 @@ article: SAM Quick Start
 
         |Name| A name also identifies a block or field but it has wider scope. Names are used
         when you want to identify something across a set of documents. SAM does not check that
-        names are unique  across a set of documents (it has no way of knowing what that set
+        names are unique across a set of documents (it has no way of knowing what that set
         might be). Resolution of names is up to the processing software. A name is preceded by
         a `#` symbol: `#my-name`.
 
         |Condition| Specifying a condition token is a way of telling the publishing software
         to include this block only when a certain condition is true. How the publishing
-        software determines if a condition is true is entirely up to it.
+        software determines if a condition is true is entirely up to the application layer.
+        A condition attribute is preceded by a `?`.
 
-        |Language| You can specify the language of a block
+        |Language| You can specify the language of a block using a language attribute. The
+        language attribute should a {W3C language tag}(https://www.w3.org/International/articles/language-tags/).
+        It is preceded by a `!`: `!en-CA`.
 
         You can apply multiple attributes to a block:
 
         ```(sam)
             introuction(*intro)(?deluxe)
 
-        You can only apply one each of  the {id}, {name}, and {language} attributes, but you can
-        apply as many condition attributes to a block as you need.
-
-
-    section: Conditions
-
-    section: Language
-
-        Management domain annotations can be applied to blocks but not phrases. This restriction
-        is deliberate. Attempting to manage units of content below the level of a paragraph
-        tends to lead to confusion and makes the content hard to read and to parse. To produce
-        different versions of the same paragraph is it usually better to use strings and/or fragments.
-        However, if you really want to add management domain annotations, you can define them
-        yourself as regular annotations. This also allows you to define management domain annotations
-        that are more complex than a simple token. For example:
-
-            ```(sam)
-                You have {very}(if "size > 14") {big}(if "size > 11") feet.
+        You can only apply one each of  the {id}, {name}, and {language} {attributes}, but you can
+        apply as many condition attributes to a {block} as you need.
 
     section: Block and field annotations
         You can add annotations to blocks and fields. Since block names already define the
@@ -568,7 +555,7 @@ article: SAM Quick Start
                 Do not immerse you Basic model Widget in Water. Only higher
                 trim levels are waterproof.
 
-        You can include several annotations in one set of parentheses.
+
 
         Note that if you wish to add other forms of management domain metadata to your blocks
         you can do so using fields within the block. SAM's set of management domain annotations

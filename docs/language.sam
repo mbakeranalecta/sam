@@ -320,12 +320,14 @@ specification: Semantic Authoring Markdown (SAM)
             Moby Dick[Melville, 1851] is about a big fish.
 
 
-        SAM does not attempt to decode the format of this style of citation. It just delivers it as a string. 
+        SAM does not attempt to decode the format of this style of citation. It just delivers it as a string to the application layer.
+
+         The application layer is responsible for all processing of references.
 
 
     section: Conditions 
 
-        Conditions are indicated in annotations, blocks, and inserts using a question mark followed by a token. 
+        Conditions are indicated using the {condition attribute}.
 
         SAM itself does not execute conditions, it merely encodes them for later processing. Therefore it has no idea what the tokens mean or how they will be interpreted. However, using simple tokens is recommended as a best practice. 
 
