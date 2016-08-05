@@ -853,7 +853,7 @@ class DocStructure:
         if bool(urllib.parse.urlparse(href).netloc):# An absolute URL
             fullhref = href
         elif os.path.isabs(href):  # An absolute file path
-            fullhref = pathlib.Path(os.path.abspath(href)).as_uri()
+            fullhref = pathlib.Path(href).as_uri()
         elif self.source:
             fullhref = urllib.parse.urljoin(self.source, href)
         else:
