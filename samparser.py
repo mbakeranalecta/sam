@@ -7,6 +7,7 @@ import argparse
 import urllib.request
 import pathlib
 import codecs
+import os
 
 from urllib.parse import urlparse
 
@@ -91,6 +92,10 @@ class SamParser:
 
     def parse(self, source):
         self.source = StringSource(source)
+        try:
+            self.doc.source = source.geturl()
+        except:
+            self.doc.source = pathlib.Path(os.path.abspath(source.name)).as_uri()
         try:
             self.stateMachine.run(self.source)
         except EOFError:
@@ -799,6 +804,7 @@ class DocStructure:
         self.default_namespace = None
         self.ids = []
         self.indent=0
+        self.source = None
 
     def context(self, context_block=None):
         context = []
@@ -842,20 +848,24 @@ class DocStructure:
     def new_include(self, href, indent):
 
         reader = codecs.getreader("utf-8")
-
-        href = pathlib.Path(os.path.abspath(href)).as_uri()
+        fullhref= urllib.parse.urljoin(self.source, href)
+        #href = pathlib.Path(os.path.abspath(href)).as_uri()
         SAM_parser_info("Parsing include " + href)
         try:
             includeparser = SamParser()
-            with urllib.request.urlopen(href) as response:
+            with urllib.request.urlopen(fullhref) as response:
                 includeparser.parse(reader(response))
             include = Include(includeparser.doc, indent)
             self.add_block(include)
-
+            SAM_parser_info("Finished parsing include " + href)
         except SAMParserError as e:
             SAM_parser_warning("Unable to parse " + href + " because " + str(e))
-        finally:
-            SAM_parser_info("Finished parsing include " + href)
+        except FileNotFoundError as e:
+            SAM_parser_warning(str(e))
+        except urllib.error.URLError as  e:
+            SAM_parser_warning(str(e))
+
+
 
     def add_block(self, block):
         """
@@ -1789,9 +1799,10 @@ if __name__ == "__main__":
         raise SAMParserError('Input and output files cannot have the same name.')
 
     for inputfile in glob.glob(args.infile):
-        SAM_parser_info("Parsing " + inputfile)
         try:
             with open(inputfile, "r", encoding="utf-8-sig") as inf:
+
+                SAM_parser_info("Parsing " + os.path.abspath(inf.name))
                 samParser.parse(inf)
 
 
