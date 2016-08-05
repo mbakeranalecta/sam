@@ -45,10 +45,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    <<<(includeme.sam)
+                    <<<(C:\Users\Mark\sam\includeme.sam)
 
             markup:
-                <<<(includeme.sam)
+                <<<(C:\Users\Mark\sam\includeme.sam)
 
             result:
                 ```(xml)
@@ -74,10 +74,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    <<<(includeme1.sam)
+                    <<<(file:///C:/Users/Mark/sam/includeme1.sam)
 
             markup:
-                <<<(includeme1.sam)
+                <<<(file:///C:/Users/Mark/sam/includeme1.sam)
 
             result:
                 ```(xml)

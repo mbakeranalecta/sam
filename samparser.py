@@ -850,15 +850,15 @@ class DocStructure:
 
     def new_include(self, href, indent):
 
-        if self.source is None:
-            # test if the href is absolute
-            if bool(urlparse.urlparse(href).netloc):
-                fullhref = href
-            else:
-                SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known. ")
-                fullhref = None
-        else:
+        if bool(urllib.parse.urlparse(href).netloc):# An absolute URL
+            fullhref = href
+        elif os.path.isabs(href):  # An absolute file path
+            fullhref = pathlib.Path(os.path.abspath(href)).as_uri()
+        elif self.source:
             fullhref = urllib.parse.urljoin(self.source, href)
+        else:
+            SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known. ")
+            fullhref = None
 
         if fullhref:
             reader = codecs.getreader("utf-8")
