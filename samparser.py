@@ -95,7 +95,10 @@ class SamParser:
         try:
             self.doc.source = source.geturl()
         except:
-            self.doc.source = pathlib.Path(os.path.abspath(source.name)).as_uri()
+            try:
+                self.doc.source = pathlib.Path(os.path.abspath(source.name)).as_uri()
+            except:
+                self.doc.source = None
         try:
             self.stateMachine.run(self.source)
         except EOFError:
@@ -847,23 +850,32 @@ class DocStructure:
 
     def new_include(self, href, indent):
 
-        reader = codecs.getreader("utf-8")
-        fullhref= urllib.parse.urljoin(self.source, href)
-        #href = pathlib.Path(os.path.abspath(href)).as_uri()
-        SAM_parser_info("Parsing include " + href)
-        try:
-            includeparser = SamParser()
-            with urllib.request.urlopen(fullhref) as response:
-                includeparser.parse(reader(response))
-            include = Include(includeparser.doc, indent)
-            self.add_block(include)
-            SAM_parser_info("Finished parsing include " + href)
-        except SAMParserError as e:
-            SAM_parser_warning("Unable to parse " + href + " because " + str(e))
-        except FileNotFoundError as e:
-            SAM_parser_warning(str(e))
-        except urllib.error.URLError as  e:
-            SAM_parser_warning(str(e))
+        if self.source is None:
+            # test if the href is absolute
+            if bool(urlparse.urlparse(href).netloc):
+                fullhref = href
+            else:
+                SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known. ")
+                fullhref = None
+        else:
+            fullhref = urllib.parse.urljoin(self.source, href)
+
+        if fullhref:
+            reader = codecs.getreader("utf-8")
+            SAM_parser_info("Parsing include " + href)
+            try:
+                includeparser = SamParser()
+                with urllib.request.urlopen(fullhref) as response:
+                    includeparser.parse(reader(response))
+                include = Include(includeparser.doc, indent)
+                self.add_block(include)
+                SAM_parser_info("Finished parsing include " + href)
+            except SAMParserError as e:
+                SAM_parser_warning("Unable to parse " + href + " because " + str(e))
+            except FileNotFoundError as e:
+                SAM_parser_warning(str(e))
+            except urllib.error.URLError as  e:
+                SAM_parser_warning(str(e))
 
 
 
@@ -1679,9 +1691,6 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         raise SAMParserError("More than one language specified: " + ", ".join(language))
     conditions = [x[1:] for x in attributes_list if x[0] == '?']
     if ids:
-        # if ids[0] in self.doc.ids:
-        #     raise SAMParserError("Duplicate ID found: " + ids[0])
-        # self.doc.ids.extend(ids)
         result["id"] = "".join(ids)
     if names:
         result["name"] = "".join(names)
