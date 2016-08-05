@@ -858,24 +858,23 @@ class DocStructure:
             fullhref = urllib.parse.urljoin(self.source, href)
         else:
             SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known. ")
-            fullhref = None
+            return
 
-        if fullhref:
-            reader = codecs.getreader("utf-8")
-            SAM_parser_info("Parsing include " + href)
-            try:
-                includeparser = SamParser()
-                with urllib.request.urlopen(fullhref) as response:
-                    includeparser.parse(reader(response))
-                include = Include(includeparser.doc, indent)
-                self.add_block(include)
-                SAM_parser_info("Finished parsing include " + href)
-            except SAMParserError as e:
-                SAM_parser_warning("Unable to parse " + href + " because " + str(e))
-            except FileNotFoundError as e:
-                SAM_parser_warning(str(e))
-            except urllib.error.URLError as  e:
-                SAM_parser_warning(str(e))
+        reader = codecs.getreader("utf-8")
+        SAM_parser_info("Parsing include " + href)
+        try:
+            includeparser = SamParser()
+            with urllib.request.urlopen(fullhref) as response:
+                includeparser.parse(reader(response))
+            include = Include(includeparser.doc, indent)
+            self.add_block(include)
+            SAM_parser_info("Finished parsing include " + href)
+        except SAMParserError as e:
+            SAM_parser_warning("Unable to parse " + href + " because " + str(e))
+        except FileNotFoundError as e:
+            SAM_parser_warning(str(e))
+        except urllib.error.URLError as  e:
+            SAM_parser_warning(str(e))
 
 
 
