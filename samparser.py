@@ -850,7 +850,7 @@ class DocStructure:
 
     def new_include(self, href, indent):
 
-        if bool(urllib.parse.urlparse(href).netloc):# An absolute URL
+        if bool(urllib.parse.urlparse(href).netloc):  # An absolute URL
             fullhref = href
         elif os.path.isabs(href):  # An absolute file path
             fullhref = pathlib.Path(href).as_uri()
