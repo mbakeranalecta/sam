@@ -138,3 +138,10 @@ article: SAM Recipes
                         * paragraphs
                         * lists
                         * etc
+
+    recipe: Single sourcing via attribute substitution
+        You can provide single sourcing support via attribute chaining. That is, you can provide but an
+        HTTP link and a subject annotation. But if you use the trick of importing a file of
+        annotation definitions and relying on annotation lookup to add them to the content, you
+        can also substitute in different annotation lookup sets for different media (or different
+        anything else). This will get easier when we add catalog support.
