@@ -145,3 +145,41 @@ article: SAM Recipes
         annotation definitions and relying on annotation lookup to add them to the content, you
         can also substitute in different annotation lookup sets for different media (or different
         anything else). This will get easier when we add catalog support.
+
+    recipe: Index markers
+
+        There are a number of ways to implement index markers in SAM. The first it to avoid the
+        use of explict index marker altogether and to generate an index based on semantic annotation.
+
+        ```(sam)
+            {The Duke}(actor "John Wayne") plays an ex-Union colonel.
+
+        In this case you could generate an index entry for `John Wayne`, and a categorized entry
+        for `Actor:John Wayne` from this annotation.
+
+        To implement explicit index markers, you can use annotations with a type `index`:
+
+        ```(sam)
+            {The Duke}(index "John Wayne; Actor:John Wayne") plays an ex-Union colonel.
+
+        To implement index markers that span a passage, you can use a field on a block:
+
+        ```(sam)
+            bio: John Wayne
+                index: John Wayne; Actor:John Wayne
+
+                John Wayne was an actor known for his roles in westerns.
+
+        To implement index markers that span an arbitrary passage within a block, you
+        can use a field on a fragment:
+
+        ```(sam)
+            ~~~
+                index: John Wayne; Actor:John Wayne
+
+                Jimmy Stewart also made a number of films with John Wayne.
+                ...
+
+        Remember that these are suggestions as to how you might implement index markers
+        in a tagging language based on SAM. SAM does not provide explicit support for
+        index markers.

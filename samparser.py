@@ -857,7 +857,7 @@ class DocStructure:
         elif self.source:
             fullhref = urllib.parse.urljoin(self.source, href)
         else:
-            SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known. ")
+            SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known.")
             return
 
         reader = codecs.getreader("utf-8")
