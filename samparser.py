@@ -94,10 +94,10 @@ class SamParser:
         self.source = StringSource(source)
         try:
             self.doc.source = source.geturl()
-        except:
+        except AttributeError:
             try:
                 self.doc.source = pathlib.Path(os.path.abspath(source.name)).as_uri()
-            except:
+            except AttributeError:
                 self.doc.source = None
         try:
             self.stateMachine.run(self.source)
@@ -755,11 +755,6 @@ class Flow(list):
                         if i.text == text:
                             return c
                     c=c.child
-
-
-            # if type(i) is Annotation:
-            #     if i.text == text:
-            #         return i
         return None
 
     def serialize_xml(self):
@@ -849,7 +844,6 @@ class DocStructure:
         self.current_block = r
 
     def new_include(self, href, indent):
-
         if bool(urllib.parse.urlparse(href).netloc):  # An absolute URL
             fullhref = href
         elif os.path.isabs(href):  # An absolute file path
@@ -873,7 +867,7 @@ class DocStructure:
             SAM_parser_warning("Unable to parse " + href + " because " + str(e))
         except FileNotFoundError as e:
             SAM_parser_warning(str(e))
-        except urllib.error.URLError as  e:
+        except urllib.error.URLError as e:
             SAM_parser_warning(str(e))
 
 
