@@ -3178,20 +3178,20 @@ tests:(!en) SAM Parser Tests
 
                     {DocBook}(language)'s
 
-                    {DITA} and {Information Mapping}'s
+                    {DITA}(language) and {DocBook}'s
 
             markup:
                 "title"?
 
                 {DocBook}(language)'s
 
-                {DITA} and {Information Mapping}'s
+                {DITA}(language) and {DocBook}'s
 
             result:
                 ```(xml)
                     <p>“title”?</p>
                     <p><phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
-                    <p><phrase>DITA</phrase> and <phrase>Information Mapping</phrase>’s</p>
+                    <p><phrase>DITA</phrase> and <phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
 
 
 

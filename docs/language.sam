@@ -20,11 +20,13 @@ specification: Semantic Authoring Markdown (SAM)
             
             Most lightweight markup languages provide a fixed set of document structures with little or no extensibility. XML provides no document structures by default and makes you specify everything in a schema. SAM defines a limited set of core text structures such as paragraph and lists and then leaves it to you to specify the semantic structures that contain the text. 
             
-        section: Presumed semantics
+        section: Presumptive semantics
         
             SAM is a cross between an abstract or meta language like XML and a concrete language like MarkDown. XML does not describe the semantics of any of the tagging languages you base on it. The XML parser does not implement any markup semantics. Implementing semantics is left to the application layer. Markdown describes the entire semantics of the language. The markdown processor executes the entire semantics of the language, producing HTML output directly from Markdown. 
             
-            SAM follows the XML model. The SAM parser simply reads the SAM markup and extracts its structures. It does not interpret the semantics of the document, but leaves that to the application layer. However, it contains concrete markup which the writer is entitled to expect will be processed in a particular way. These are the presumed semantics of SAM. The application layer is expected to honor the presumed semantics of SAM markup. 
+            SAM follows the XML model. The SAM parser simply reads the SAM markup and extracts its structures. It does not interpret the semantics of the document, but leaves that to the application layer. However, it contains concrete markup which the writer is entitled to expect will be processed in a particular way. These are the presumptive semantics of SAM. The application layer is expected to honor and implement the presumptive semantics of SAM markup. 
+            
+            A lot of SAM's concrete markup is simply shortcuts for common writing structures like lists. The exact same structures could be created using blocks, fields, and paragraphs, and you can create variant structures (other types of lists, for example) using these standard components. However, some of SAM's concrete markup expresses a particular view about markup language design. For example, it use of annotations and citations expresses a particular view about how text inside paragraphs should be marked up. Since SAM does not provide other facilities to create markup in paragraphs, it may not be suitable for expressing all types of markup language design. SAM is not, and is not intended to be, a full replacement for XML.
             
         section: Creating output from SAM
             
@@ -59,6 +61,12 @@ specification: Semantic Authoring Markdown (SAM)
             |lines| A line is a single line of text, as in a poem, with a fixed line end. The contents of a line is a {flow}.
 
             |paragraphs| A paragraph is a continuous block of text across one or more contiguous lines. The content of a paragraph is a {flow}.
+            
+            |ordered list items| An ordered list is as list in which the order of the items is meaningful. An ordered list is any sequence of one or more ordered list items. 
+            
+            |unordered list items| An unordered list is a list in which the order of the items is not meaningful (as least as far as markup semantics is concerned). A unordered list is any sequence of one or more unordered list items. 
+            
+            |labeled list items| A labeled list is a list in which each item has a label (rather than a bullet or a number). A labeled list is an sequence of one or more labeled list items. A labeled list item consists of a label and a single paragraph. 
 
             |phrases| A phrase is a string of characters in a paragraph or field. You use a phrase when you want to attach an annotation or a citation to a string of text.
 
