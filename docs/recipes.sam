@@ -157,6 +157,11 @@ article: SAM Recipes
         In this case you could generate an index entry for `John Wayne`, and a categorized entry
         for `Actor:John Wayne` from this annotation.
 
+
+        Note that you don't have to generate an index entry for every instance of
+        and annotated phrase. You can choose to generate an entry only for the first occurrence of
+        an annotated phrase in a section or chapter, for instance.
+
         To implement explicit index markers, you can use annotations with a type `index`:
 
         ```(sam)
