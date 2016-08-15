@@ -1,6 +1,4 @@
-﻿sam:
-
-# This file is part of the SPFE Open Toolkit. See the accompanying license.txt file
+﻿# This file is part of the SPFE Open Toolkit. See the accompanying license.txt file
  # for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
@@ -3191,7 +3189,7 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>“title”?</p>
                     <p><phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
-                    <p><phrase>DITA</phrase> and <phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
+                    <p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
 
 
 

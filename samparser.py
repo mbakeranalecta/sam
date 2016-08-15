@@ -57,7 +57,7 @@ class SamParser:
         self.stateMachine.add_state("LINE-START", self._line_start)
         self.stateMachine.add_state("EMBEDDED-XML", self._embedded_xml)
         self.stateMachine.add_state("END", None, end_state=1)
-        self.stateMachine.set_start("NEW")
+        self.stateMachine.set_start("SAM")
         self.current_text_block = None
         self.doc = DocStructure()
         self.source = None
@@ -100,7 +100,8 @@ class SamParser:
             except AttributeError:
                 self.doc.source = None
         try:
-            self.stateMachine.run(self.source)
+            self.doc.new_root()
+            self.stateMachine.run((self.source, None))
         except EOFError:
             raise SAMParserError("Document ended before structure was complete.")
 
@@ -834,11 +835,11 @@ class DocStructure:
         except AttributeError:
             raise SAMParserError("Indentation error found at " + str(self.current_block))
 
-    def new_root(self, match):
-        if match.group('schema') is not None:
-            pass
-        elif match.group('namespace') is not None:
-            self.default_namespace = match.group('namespace')
+    def new_root(self):
+        # if match.group('schema') is not None:
+        #     pass
+        # elif match.group('namespace') is not None:
+        #     self.default_namespace = match.group('namespace')
         r = Root()
         self.doc = r
         self.current_block = r
