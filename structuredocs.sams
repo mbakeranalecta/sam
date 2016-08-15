@@ -1,36 +1,34 @@
-samschema:{http://spfeopentoolkit.org/ns/spfe-docs}
-
-structure-docs
+structure-docs{http://spfeopentoolkit.org/ns/spfe-docs}
 	description
-		!text-general
+		@text-general
 	*group
 		title
 		description
-			!text-general
+			@text-general
 		+element
-			!index
+			@index
 			type(xs:string)
 			description
-				!text-general
+				@text-general
 
-!text-general
+@text-general
 	*{
 		para=p
 		ul
 		ol
 	}
 	
-!annotations
+@annotations
 	element-name
 	group-name
 	
-!decorations
+@decorations
 	bold
 	italic
 	quotes
 	code=pre
 
-!index
+@index
 	index
 		*entry::type(xs:NMTOKEN),+term
 

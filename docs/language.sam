@@ -1,6 +1,4 @@
-sam: 
-
-specification: Semantic Authoring Markdown (SAM) 
+specification: Semantic Authoring Markdown (SAM)
 
     introduction:
 
@@ -20,22 +18,19 @@ specification: Semantic Authoring Markdown (SAM)
             
             Most lightweight markup languages provide a fixed set of document structures with little or no extensibility. XML provides no document structures by default and makes you specify everything in a schema. SAM defines a limited set of core text structures such as paragraph and lists and then leaves it to you to specify the semantic structures that contain the text. 
             
-        section: Presumptive semantics
+        section: Processing model
         
-            SAM is a cross between an abstract or meta language like XML and a concrete language like MarkDown. XML does not describe the semantics of any of the tagging languages you base on it. The XML parser does not implement any markup semantics. Implementing semantics is left to the application layer. Markdown describes the entire semantics of the language. The markdown processor executes the entire semantics of the language, producing HTML output directly from Markdown. 
+            SAM is a cross between an abstract or meta language like XML and a concrete language like MarkDown. XML does not describe the semantics of any of the tagging languages you base on it. The XML parser does not implement any markup semantics. Implementing semantics is left to the application layer -- another program or set of program that process the output of the parser. In many XML-based tool chains, the application layer is written in XSLT. Markdown describes the entire semantics of the language. The Markdown processor executes the entire semantics of the language, producing HTML output directly from Markdown. It does not require a separate application layer.
             
-            SAM follows the XML model. The SAM parser simply reads the SAM markup and extracts its structures. It does not interpret the semantics of the document, but leaves that to the application layer. However, it contains concrete markup which the writer is entitled to expect will be processed in a particular way. These are the presumptive semantics of SAM. The application layer is expected to honor and implement the presumptive semantics of SAM markup. 
-            
-            A lot of SAM's concrete markup is simply shortcuts for common writing structures like lists. The exact same structures could be created using blocks, fields, and paragraphs, and you can create variant structures (other types of lists, for example) using these standard components. However, some of SAM's concrete markup expresses a particular view about markup language design. For example, it use of annotations and citations expresses a particular view about how text inside paragraphs should be marked up. Since SAM does not provide other facilities to create markup in paragraphs, it may not be suitable for expressing all types of markup language design. SAM is not, and is not intended to be, a full replacement for XML.
-            
-        section: Creating output from SAM
-            
-            Unlike most lightweight markup languages, SAM does not output directly to a final format, such as HTML. Rather, it outputs an intermediate XML format that captures the specific semantics of the SAM document. This can then be processed with standard XML tools to produce whatever kind of final output is required. For instance, you might use XSLT to transform the SAM output into HTML.
+            SAM follows the XML model. The SAM parser simply reads the SAM markup and extracts its structures. It does not interpret the semantics of the document, but leaves that to the application layer.
 
-            Another approach to producing final output is to create an intermediate file in a format for which a publishing tool chain already exists. For instance, you might transform the XML produced by SAM into DocBook and then use existing DocBook tools for final publishing.    
+            A SAM parser may make the structure of a SAM document available to the applications layer in different ways. It can expose the structure via an API and/or it may output an XML representation of the structure of the SAM document.
             
-            To make simple transformations easier, the SAM Parser allows you to specify an XSLT 1.0 stylesheet to transform the XML output in a single step. With an appropriate stylesheet in place, you can use SAM to generate output directly, just as you would with Markdown or another lightweight language.
-            
+        section: Presumptive semantics
+            While the SAM parser does not act on the semantics of the document, deferring that to the application layer, it contains concrete markup which the writer is entitled to expect will be processed in a particular way. These are the presumptive semantics of SAM. The application layer is expected to honor and implement the presumptive semantics of SAM markup.
+
+            A lot of SAM's concrete markup is simply shortcuts for common writing structures like lists. The exact same structures could be created using blocks, fields, and paragraphs, and you can create variant structures (other types of lists, for example) using these standard components. However, some of SAM's concrete markup expresses a particular view about markup language design. For example, it use of annotations and citations expresses a particular view about how text inside paragraphs should be marked up. Since SAM does not provide other facilities to create markup in paragraphs, it may not be suitable for expressing all types of markup language design. SAM is not, and is not intended to be, a full replacement for XML.
+
         section: SAM Syntax
             
             Syntactically, SAM takes its cues from YAML and Python (for displaying overall structure), from Markdown (for displaying text structures) and from common English usage (for displaying annotations.) In contrast to some of the richer lightweight markup languages, it tries to minimize the use of exotic forms of punctuation to delineate structures. 
@@ -52,62 +47,65 @@ specification: Semantic Authoring Markdown (SAM)
 
             A SAM document contains the following structures:
 
-            |blocks| Blocks are elements that contain other elements. For instance, a section is a block. 
+            |block| Blocks are structures that contain other structures. For instance, a section is a block.
+
+            |field| Fields are structures that contain individual values. For instance, the date a document  is usually a field.
+
+            |flow| A flow is a string of text. All text content in a SAM document constitutes a flow. A {paragraph} is a flow. The {value} of a field is a flow. A {title} is a flow. Etc. Flows can contain {phrases}, {citations}, and {inserts}.
+
+            |phrase| A phrase is a string of characters in a flow. You use a phrase when you want to attach an annotation or a citation to a string of text.
+
+            |annotation| Annotations are metadata attached to a phrase.
+
+            |attributes| Attributes are metadata attached to a block. There are a very limited set of attributes with specific rules for where they can appear. For most of the purposes for which you would use attributes in XML, you should use fields in SAM.
+
+            |insertions| Insertions are an instruction to the application layer in content from an internal or external source.
             
-            |flows| A flow is a string of text. All text content in a SAM document constitutes a flow. A {paragraph} is a flow. The {value} of a field is a flow. A {title} is a flow. Etc. Flows can contain {phrases}, {citations}, and {inserts}.
-
-            |fields| Fields are elements that contain individual values. For instance, the date a document was written is usually a field. 
-
-            |lines| A line is a single line of text, as in a poem, with a fixed line end. The contents of a line is a {flow}.
-
-            |paragraphs| A paragraph is a continuous block of text across one or more contiguous lines. The content of a paragraph is a {flow}.
-            
-            |ordered list items| An ordered list is as list in which the order of the items is meaningful. An ordered list is any sequence of one or more ordered list items. 
-            
-            |unordered list items| An unordered list is a list in which the order of the items is not meaningful (as least as far as markup semantics is concerned). A unordered list is any sequence of one or more unordered list items. 
-            
-            |labeled list items| A labeled list is a list in which each item has a label (rather than a bullet or a number). A labeled list is an sequence of one or more labeled list items. A labeled list item consists of a label and a single paragraph. 
-
-            |phrases| A phrase is a string of characters in a paragraph or field. You use a phrase when you want to attach an annotation or a citation to a string of text.
-
-            |record sets| A record set is a simple database table with named columns. It allows you to capture tabular data at a semantic level rather than at the presentation level of a table. 
-            
-            |grids| A grid is a simple table-like layout structure. 
-
-            |strings| Strings are named pieces of text that can be included by reference in other parts of a document or in other documents. 
-
-            |fragments| Fragments are sections of a documents (potentially larger than a single paragraph) that can be included by reference in other parts of a document or in other documents. Strings used in a fragment can be redefined when a fragment is reused, allowing you to vary the text of the fragment when it is used in different places. (Note that this is describes the {presumed semantics} of fragments. Implementation of these semantics is up to the application layer.  
-
-            |annotations| Annotations are metadata attached to a structure. Different structures take different types of annotations that hold different types of metadata. 
-
-            |insertions| Insertions bring in content from an external source.
-            
-            |citations| Citations are references to other works or structures. They generate an appropriate reference to that work. This reference is a piece of generated text in the current document. It is not a link, though it may also be linked. For example, you could cite a footnote or a figure. 
+            |citations| Citations are references to other works or structures.
             
             |embedded XML| You can embed XML in a SAM document. 
             
-            |includes| You can include one SAM file in another.
+            |include| You can include one SAM file in another.
+
+            SAM has concrete syntax that defines a number of block types with presumptive semantics:
+
+            |paragraphs| A paragraph is a continuous block of text across one or more contiguous lines. The content of a paragraph is a {flow}.
+
+            |ordered list| An ordered list is as list in which the order of the items is meaningful. An ordered list is any sequence of one or more ordered list items.
+
+            |unordered list| An unordered list is a list in which the order of the items is not meaningful (as least as far as markup semantics is concerned). A unordered list is any sequence of one or more unordered list items.
+
+            |labeled list| A labeled list is a list in which each item has a label (rather than a bullet or a number). A labeled list is an sequence of one or more labeled list items. A labeled list item consists of a label and a single paragraph.
+
+            |line| A line is a single line of text, as in a poem, with a fixed line end. The contents of a line is a {flow}.
+
+            |record set| A record set is a simple database table with named columns. It allows you to capture tabular data at a semantic level rather than at the presentation level of a table.
+
+            |grid| A grid is a simple table-like layout structure.
+
+            |string| Strings are named pieces of text that can be included by reference in other parts of a document or in other documents.
+
+            |fragment| Fragments are sections of a documents (potentially larger than a single paragraph) that can be included by reference in other parts of a document or in other documents. Strings used in a fragment can be redefined when a fragment is reused, allowing you to vary the text of the fragment when it is used in different places. (Note that this is describes the {presumed semantics} of fragments. Implementation of these semantics is up to the application layer.
+
+            |title|
 
     structures:
         
-        structure:(#declaration) Sam declaration 
+        structure:(#directive) Directives
 
-            A SAM file starts with a sam declaration, which much start at the beginning of the first line. 
+            A SAM file may start with one or more directives. Directives must come before all other content. A directive gives the SAM parser information it needs to correctly parse the file. Directives do not become part of the output.
 
             ```(sam) 
-                sam:
+                !namespace: http://spfeopentoolkit.org/sam/ns/tests
+
+            Currently the only directive supported is the namespace directive which sets the namespace for
+            the entire SAM document. (You cannot assign namespaces to individual elements in a SAM document.)
 
             future:
-                The sam declaration may specify the location of a schema file. The location will be processed through an XML catalog if one is specified to the parser. 
+                The schema directive specifies the location of a schema file. The location will be processed through an XML catalog if one is specified to the parser. If a schema is specified, the namespace directive is ignored and namespaces are assigned per the schema. A schema may assign different elements to different namespaces.
 
                 ```(sam) 
-                    sam: http://spfeopentoolkit.org/schemas/think-plan-do-topic.sams
-
-
-            If the sam declaration does not specify a schema, it may specify a namespace URI. All elements will be output in that namespace. (Namespaces may not be assigned on individual elements.) If a schema is specified, namespaces will be assigned in the schema. 
-
-            ```(sam) 
-                sam: {http://spfeopentoolkit.org/ns/spfe-docs}
+                    !schema: http://spfeopentoolkit.org/schemas/think-plan-do-topic.sams
 
 
         feature:(#block) Blocks
@@ -271,6 +269,8 @@ specification: Semantic Authoring Markdown (SAM)
         section: Citations 
 
             Citations are any reference to another resource. This includes internal references to other structures within the file, such as to a graphic,procedure, or footnote, as well as references to external works.
+
+            They generate an appropriate reference to that work. This reference is a piece of generated text in the current document. It is not a link, though it may also be linked. For example, you could cite a footnote or a figure.
 
             Citations can be applied to:
 

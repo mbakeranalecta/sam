@@ -33,8 +33,8 @@ class SamParser:
     def __init__(self):
 
         self.stateMachine = StateMachine()
-        self.stateMachine.add_state("NEW", self._new_file)
         self.stateMachine.add_state("SAM", self._sam)
+        #self.stateMachine.add_state("DIRECTIVE", self._directive)
         self.stateMachine.add_state("BLOCK", self._block)
         self.stateMachine.add_state("CODEBLOCK-START", self._codeblock_start)
         self.stateMachine.add_state("CODEBLOCK", self._codeblock)
@@ -63,8 +63,8 @@ class SamParser:
         self.source = None
         self.smart_quotes = False
         self.patterns = {
-            'sam-declaration': re.compile(r'sam:\s*(?:(?:\{(?P<namespace>\S+?)\})|(?P<schema>\S+))?', re.U),
             'comment': re.compile(re_indent + re_comment, re.U),
+            'directive': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
             'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + re_content + r'?', re.U),
             'codeblock-start': re.compile(
                 re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
@@ -104,15 +104,6 @@ class SamParser:
             self.stateMachine.run((self.source, None))
         except EOFError:
             raise SAMParserError("Document ended before structure was complete.")
-
-    def _new_file(self, source):
-        line = source.next_line
-        match = self.patterns['sam-declaration'].match(line)
-        if match:
-            self.doc.new_root(match)
-            return "SAM", (source, None)
-        else:
-            raise SAMParserError("Not a SAM file!")
 
     def _block(self, context):
         source, match = context
@@ -455,6 +446,11 @@ class SamParser:
             line = source.next_line
         except EOFError:
             return "END", context
+
+        match = self.patterns['directive'].match(line)
+        if match is not None:
+            self.doc.new_directive(match)
+            return "SAM", (source, match)
 
         match = self.patterns['comment'].match(line)
         if match is not None:
@@ -804,6 +800,16 @@ class DocStructure:
         self.ids = []
         self.indent=0
         self.source = None
+
+    def new_directive(self, match):
+        name=match.group('name').strip()
+        content=match.group('content').strip()
+        if self.doc.children:
+            raise SAMParserError ("Directives must come before all other content. Found:" + match.group(0))
+        if name == 'namespace':
+            self.default_namespace = content
+        else:
+            raise SAMParserError("Unknown directive: " + match.group(0))
 
     def context(self, context_block=None):
         context = []
@@ -1865,13 +1871,14 @@ if __name__ == "__main__":
                     except etree.XMLSchemaParseError as e:
                         print(e, file=sys.stderr)
                         exit(1)
-
+                    SAM_parser_info("Validating output using " + args.xsd)
                     try:
                         xmlschema.assertValid(xml_doc)
                     except etree.DocumentInvalid as e:
                         print('STRUCTURE ERROR: ' + str(e), file=sys.stderr)
                         #exit(1)
-
+                    else:
+                        SAM_parser_info("Validation successful.")
 
 
         except FileNotFoundError:

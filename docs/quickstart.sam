@@ -84,15 +84,6 @@ article: SAM Quick Start
 
     The main parts of a SAM document as as follows.
 
-    section: SAM declaration
-        A SAM document starts with a SAM declaration:
-
-        ```(sam)
-            sam:
-
-        A SAM declaration may also declare a schema or a namespace for the SAM document.
-        See the full languages description for details.
-
     section: Blocks
 
         A block is a container for other structures. It has a label. It may also have a title.
@@ -100,7 +91,7 @@ article: SAM Quick Start
         `nutrition:` starts a block that contains the nutrition information. Blocks
         are delimited by indentation. Everything indented under the block tag is part of the block.
         Every SAM document must have a single root block that contains all the content of the
-        document. The root block does not need to be indented under the SAM declaration.
+        document.
 
         The recipe block has a title, "Hard Boiled Egg", which is the text after the colon
         in `recipe:`.
