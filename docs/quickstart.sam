@@ -1,5 +1,3 @@
-sam:
-
 article: SAM Quick Start
 
     SAM is a markup language for semantic authoring. It is not a fixed language like Markdown.
@@ -27,7 +25,6 @@ article: SAM Quick Start
     Here is an example of a structured document, a recipe, written in SAM:
 
     ```(sam)
-        sam:
         recipe: Hard Boiled Egg
             introduction:
                 A hard boiled egg is simple and nutritious. It makes

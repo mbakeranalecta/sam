@@ -45,13 +45,15 @@ specification: Semantic Authoring Markdown (SAM)
 
             XML does this by having an explicit end tag for every element. A large part of the verbosity of XML comes from its requirement to close every element tag. Many programming languages, which similarly have to express nested structures, use some form of brackets to delineate each structure. Python is an exception to this. It uses indentation to express the relationship between structures. This is a far more natural way for writers to express the subordination of elements -- one that is sometimes also used in published works. SAM uses this approach and avoids the use of end tags entirely.
 
-            A SAM document contains the following structures:
+            SAM syntax defines the following structures:
 
-            |block| Blocks are structures that contain other structures. For instance, a section is a block.
+            |block| Blocks are structures that contain other structures. For instance, a section is a block. Blocks must have names. Names blocks (and named fields) are how you introduce new structures into a SAM document.
 
             |field| Fields are structures that contain individual values. For instance, the date a document  is usually a field.
 
             |flow| A flow is a string of text. All text content in a SAM document constitutes a flow. A {paragraph} is a flow. The {value} of a field is a flow. A {title} is a flow. Etc. Flows can contain {phrases}, {citations}, and {inserts}.
+
+            |paragraph| A paragraph is a continuous block of text across one or more contiguous lines. The content of a paragraph is a {flow}.
 
             |phrase| A phrase is a string of characters in a flow. You use a phrase when you want to attach an annotation or a citation to a string of text.
 
@@ -71,10 +73,6 @@ specification: Semantic Authoring Markdown (SAM)
             
             |include| You can include one SAM file in another.
 
-            SAM has concrete syntax that defines a number of block types with presumptive semantics:
-
-            |paragraphs| A paragraph is a continuous block of text across one or more contiguous lines. The content of a paragraph is a {flow}.
-
             |ordered list| An ordered list is as list in which the order of the items is meaningful. An ordered list is any sequence of one or more ordered list items.
 
             |unordered list| An unordered list is a list in which the order of the items is not meaningful (as least as far as markup semantics is concerned). A unordered list is any sequence of one or more unordered list items.
@@ -89,7 +87,9 @@ specification: Semantic Authoring Markdown (SAM)
 
             |fragment| Fragments are sections of a documents (potentially larger than a single paragraph) that can be included by reference in other parts of a document or in other documents. Strings used in a fragment can be redefined when a fragment is reused, allowing you to vary the text of the fragment when it is used in different places. (Note that this is describes the {presumed semantics} of fragments. Implementation of these semantics is up to the application layer.
 
-            |title|
+            |title| The title of a block.
+
+
 
     structures:
         
