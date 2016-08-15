@@ -34,7 +34,6 @@ class SamParser:
 
         self.stateMachine = StateMachine()
         self.stateMachine.add_state("SAM", self._sam)
-        #self.stateMachine.add_state("DIRECTIVE", self._directive)
         self.stateMachine.add_state("BLOCK", self._block)
         self.stateMachine.add_state("CODEBLOCK-START", self._codeblock_start)
         self.stateMachine.add_state("CODEBLOCK", self._codeblock)
@@ -64,7 +63,7 @@ class SamParser:
         self.smart_quotes = False
         self.patterns = {
             'comment': re.compile(re_indent + re_comment, re.U),
-            'directive': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
+            'declaration': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
             'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + re_content + r'?', re.U),
             'codeblock-start': re.compile(
                 re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
@@ -447,9 +446,9 @@ class SamParser:
         except EOFError:
             return "END", context
 
-        match = self.patterns['directive'].match(line)
+        match = self.patterns['declaration'].match(line)
         if match is not None:
-            self.doc.new_directive(match)
+            self.doc.new_declaration(match)
             return "SAM", (source, match)
 
         match = self.patterns['comment'].match(line)
@@ -801,15 +800,15 @@ class DocStructure:
         self.indent=0
         self.source = None
 
-    def new_directive(self, match):
+    def new_declaration(self, match):
         name=match.group('name').strip()
         content=match.group('content').strip()
         if self.doc.children:
-            raise SAMParserError ("Directives must come before all other content. Found:" + match.group(0))
+            raise SAMParserError ("Declarations must come before all other content. Found:" + match.group(0))
         if name == 'namespace':
             self.default_namespace = content
         else:
-            raise SAMParserError("Unknown directive: " + match.group(0))
+            raise SAMParserError("Unknown declaration: " + match.group(0))
 
     def context(self, context_block=None):
         context = []

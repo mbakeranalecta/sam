@@ -55,11 +55,15 @@ specification: Semantic Authoring Markdown (SAM)
 
             |phrase| A phrase is a string of characters in a flow. You use a phrase when you want to attach an annotation or a citation to a string of text.
 
+            |string| Strings are named pieces of text that can be included by reference in other parts of a document or in other documents.
+
             |annotation| Annotations are metadata attached to a phrase.
 
             |attributes| Attributes are metadata attached to a block. There are a very limited set of attributes with specific rules for where they can appear. For most of the purposes for which you would use attributes in XML, you should use fields in SAM.
 
-            |insertions| Insertions are an instruction to the application layer in content from an internal or external source.
+            |block insertion| Block insertions are an instruction to the application layer in content from an internal or external source at the block level.
+
+            |flow insertion|  Flow insertions are an instruction to the application layer in content from an internal or external source at the flow level (that is, inside a flow).
             
             |citations| Citations are references to other works or structures.
             
@@ -83,26 +87,24 @@ specification: Semantic Authoring Markdown (SAM)
 
             |grid| A grid is a simple table-like layout structure.
 
-            |string| Strings are named pieces of text that can be included by reference in other parts of a document or in other documents.
-
             |fragment| Fragments are sections of a documents (potentially larger than a single paragraph) that can be included by reference in other parts of a document or in other documents. Strings used in a fragment can be redefined when a fragment is reused, allowing you to vary the text of the fragment when it is used in different places. (Note that this is describes the {presumed semantics} of fragments. Implementation of these semantics is up to the application layer.
 
             |title|
 
     structures:
         
-        structure:(#directive) Directives
+        structure:(#declaration) Declarations
 
-            A SAM file may start with one or more directives. Directives must come before all other content. A directive gives the SAM parser information it needs to correctly parse the file. Directives do not become part of the output.
+            A SAM file may start with one or more declarations. Declarations must come before all other content. A declarations gives the SAM parser information it needs to correctly parse the file. Declarations do not become part of the output.
 
             ```(sam) 
                 !namespace: http://spfeopentoolkit.org/sam/ns/tests
 
-            Currently the only directive supported is the namespace directive which sets the namespace for
+            Currently the only declaration supported is the namespace declaration which sets the namespace for
             the entire SAM document. (You cannot assign namespaces to individual elements in a SAM document.)
 
             future:
-                The schema directive specifies the location of a schema file. The location will be processed through an XML catalog if one is specified to the parser. If a schema is specified, the namespace directive is ignored and namespaces are assigned per the schema. A schema may assign different elements to different namespaces.
+                The schema declaration specifies the location of a schema file. The location will be processed through an XML catalog if one is specified to the parser. If a schema is specified, the namespace declaration is ignored and namespaces are assigned per the schema. A schema may assign different elements to different namespaces.
 
                 ```(sam) 
                     !schema: http://spfeopentoolkit.org/schemas/think-plan-do-topic.sams
