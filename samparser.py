@@ -1803,6 +1803,9 @@ if __name__ == "__main__":
     if (args.intermediatefile or args.intermediatedir) and not args.xslt:
         raise SAMParserError("Do not specify an intermediate file or directory if an XSLT file is not specified.")
 
+    if args.xslt and not (args.intermediatefile or args.intermediatedir):
+        raise SAMParserError("An intermediate file or directory must be specified if an XSLT file is specified.")
+
     if args.infile == args.outfile:
         raise SAMParserError('Input and output files cannot have the same name.')
 
