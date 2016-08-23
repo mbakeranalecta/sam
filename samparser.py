@@ -1832,8 +1832,8 @@ if __name__ == "__main__":
                     except FileNotFoundError as e:
                         raise SAMParserError(e.strerror + ' ' + e.filename)
 
-                xml_input = etree.parse(open(intermediatefile, 'r', encoding="utf-8-sig"))
-                transformed = transform(xml_input)
+                    xml_input = etree.parse(open(intermediatefile, 'r', encoding="utf-8-sig"))
+                    transformed = transform(xml_input)
 
                 if args.outdir:
                     outputfile=os.path.join(args.outdir, os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension)
