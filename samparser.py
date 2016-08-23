@@ -1817,14 +1817,23 @@ if __name__ == "__main__":
                 xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
                 xml_doc = etree.fromstring(xml_string)
 
+                if args.intermediatedir:
+                    intermediatefile=os.path.join(args.intermediatedir, os.path.splitext(os.path.basename(inputfile))[0] + args.intermediateextension)
+                else:
+                    intermediatefile=args.intermediatefile
+
+                if intermediatefile:
+                    with open(intermediatefile, "wb") as intermediate:
+                        intermediate.write(xml_string)
+
                 if args.xslt:
                     try:
-                        with open(args.xslt, "r") as xsltf:
-                            transform = etree.XSLT(etree.parse(xsltf))
+                        transform = etree.XSLT(etree.parse(args.xslt))
                     except FileNotFoundError as e:
                         raise SAMParserError(e.strerror + ' ' + e.filename)
 
-                    transformed = transform(xml_doc)
+                xml_input = etree.parse(open(intermediatefile, 'r', encoding="utf-8-sig"))
+                transformed = transform(xml_input)
 
                 if args.outdir:
                     outputfile=os.path.join(args.outdir, os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension)
@@ -1855,14 +1864,6 @@ if __name__ == "__main__":
                         for i in samParser.serialize('xml'):
                             sys.stdout.buffer.write(i.encode('utf-8'))
 
-                if args.intermediatedir:
-                    intermediatefile=os.path.join(args.intermediatedir, os.path.splitext(os.path.basename(inputfile))[0] + args.intermediateextension)
-                else:
-                    intermediatefile=args.intermediatefile
-
-                if intermediatefile:
-                    with open(intermediatefile, "wb") as intermediate:
-                        intermediate.write(xml_string)
 
                 if args.xsd:
                     try:
