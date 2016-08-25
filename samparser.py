@@ -1704,8 +1704,8 @@ def parse_insert(annotation_string):
     result = {}
 
     insert_annotation = re.match(r'(\(.*?(?<!\\)\))', annotation_string)
-    attributes_list = insert_annotation.group(0)[1:-1].split()
-    insert_type = attributes_list.pop(0)
+    attributes_list = insert_annotation.group(0)[1:-1].partition(' ')
+    insert_type = attributes_list[0]
     if insert_type[0] == '$':
         insert_item = insert_type[1:]
         insert_type = 'string'
@@ -1722,17 +1722,7 @@ def parse_insert(annotation_string):
         insert_item = insert_type[1:]
         insert_type = 'key'
     else:
-        insert_item = attributes_list.pop(0)
-    insert_ids = [x[1:] for x in attributes_list if x[0] == '*']
-    insert_names = [x[1:] for x in attributes_list if x[0] == '#']
-    insert_conditions = [x[1:] for x in attributes_list if x[0] == '?']
-    unexpected_attributes = [x for x in attributes_list if not (x[0] in '?#*')]
-    if len(insert_ids) > 1:
-        raise SAMParserError("SAM parser error: More than one ID specified: " + ", ".join(insert_ids))
-    if len(insert_names) > 1:
-        raise SAMParserError("SAM parser error: More than one name specified: " + ", ".join(insert_names))
-    if unexpected_attributes:
-        raise SAMParserError("SAM parser error: Unexpected insert attribute(s): {0}".format(unexpected_attributes))
+        insert_item = attributes_list[2].strip()
     result['type'] = insert_type
     # strip unnecessary quotes from insert item
     insert_item = re.sub(r'^(["\'])|(["\'])$', '', insert_item)
