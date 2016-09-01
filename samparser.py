@@ -58,7 +58,7 @@ class SamParser:
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("SAM")
         self.current_text_block = None
-        self.doc = DocStructure()
+        self.doc = None
         self.source = None
         self.smart_quotes = False
         self.patterns = {
@@ -91,6 +91,7 @@ class SamParser:
 
     def parse(self, source):
         self.source = StringSource(source)
+        self.doc = DocStructure()
         try:
             self.doc.source = source.geturl()
         except AttributeError:
