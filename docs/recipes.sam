@@ -187,3 +187,19 @@ article: SAM Recipes
         Remember that these are suggestions as to how you might implement index markers
         in a tagging language based on SAM. SAM does not provide explicit support for
         index markers.
+
+    recipe: Code callouts
+
+        There is no way to insert markup into a regular codeblock. If you want to do callouts
+        in code, you can use lines for the code and citations for the callouts. (The presumptive
+        semantics for citations is that what they produce is base on the thing they refer to.)
+
+        ```(sam)
+        codesample:
+            language: python
+            code:
+                | print("Hello World")[*c1]
+                | print ("Goodbye, cruel World")[*c2]
+            callouts:
+                callout:(*c1) This prints "Hello World".
+                callout:(*c2) This prints "Goodbye, cruel World".

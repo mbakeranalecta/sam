@@ -322,7 +322,7 @@ class SamParser:
             raise SAMParserError("Unexpected characters in block insert. Found: " + match.group("unexpected"))
         indent = len(match.group("indent"))
         attributes = parse_insert(match.group("insert"))
-        attributes.update( parse_attributes(match.group("attributes"), flagged="*#?"))
+        attributes.update(parse_attributes(match.group("attributes"), flagged="*#?"))
         self.doc.new_block("insert", attributes=attributes, text=None, indent=indent)
         return "SAM", context
 
@@ -1727,6 +1727,8 @@ def parse_insert(annotation_string):
     result['type'] = insert_type
     # strip unnecessary quotes from insert item
     insert_item = re.sub(r'^(["\'])|(["\'])$', '', insert_item)
+    if insert_item == '':
+        raise SAMParserError ("Insert item not specified in: " + annotation_string)
     result['item'] = insert_item
     return result
 
