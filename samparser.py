@@ -1650,7 +1650,7 @@ class InlineInsert:
         return "[#insert:'%s']" % self.attributes
 
     def serialize_xml(self):
-        yield '<insert'
+        yield '<inline-insert'
         for key, value in sorted(self.attributes.items()):
             yield " {0}=\"{1}\"".format(key, escape_for_xml_attribute(value))
         yield '/>'
