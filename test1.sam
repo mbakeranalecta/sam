@@ -1647,7 +1647,7 @@ tests:(!en) SAM Parser Tests
             annotation. The first word of an annotation on a codeblock is
             the language of the code.
 
-        case:Simple codeblock
+        case: Simple codeblock
 
             description:
                 A simple codeblock.
@@ -2088,7 +2088,7 @@ tests:(!en) SAM Parser Tests
                     <p><phrase id="id11" conditions="a,b" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type="idref" value="cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
 
 
-        case:Attributes on a codeblock
+        case: Attributes on a codeblock
 
             description:
                 Attributes on a codeblock.
@@ -2122,7 +2122,7 @@ tests:(!en) SAM Parser Tests
                             return s
                     </codeblock>
 
-        case:Attributes on an embed
+        case: Attributes on an embed
 
             description:
                 Attributes on a embed.
