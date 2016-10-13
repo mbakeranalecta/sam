@@ -64,7 +64,7 @@ class SamParser:
         self.patterns = {
             'comment': re.compile(re_indent + re_comment, re.U),
             'declaration': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
-            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + re_content + r'?', re.U),
+            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + '\s' + re_content + r'?', re.U),
             'codeblock-start': re.compile(
                 re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
                 re.U),

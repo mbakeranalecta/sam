@@ -186,6 +186,30 @@ tests:(!en) SAM Parser Tests
                     </body>
                     </document>
 
+        case: Paragraph with colon in first word
+
+            description:
+                Case related to issue #94.
+
+            source:
+                ```(sam)
+                    article: Foo
+
+                        foo{bar}(http://www.example.com/).
+
+            markup:
+                article: Foo
+
+                    foo{bar}(http://www.example.com/).
+
+            result:
+                ```(xml)
+                    <article>
+                    <title>Foo</title>
+                    <p>foo<phrase><annotation type="link" specifically="http://www.example.com/">bar</annotation></phrase>.</p>
+                    </article>
+
+
     test: Fields
         description:
             A field is a block without children. A field value does not
