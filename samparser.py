@@ -1136,7 +1136,7 @@ class SamParaParser:
 
             'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
             'citation': re.compile(
-                r'((\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
+                r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
                 re.U)
         }
 

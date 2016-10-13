@@ -7,4 +7,4 @@ http://www.eclipse.org/legal/epl-v10.html
 A copy of the Apache Software Foundation License 2.0 is available at 
 http://opensource.org/licenses/apache2.0.php
 
-This statement must be included in any copies of SPFE Open Toolkit.
+This statement must be included in any copies of SAM.

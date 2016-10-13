@@ -2468,7 +2468,7 @@ tests:(!en) SAM Parser Tests
                 escape the opening square bracket with a backslash.
 
             source:
-                ```(xml)
+                ```(sam)
                     Press \[Enter].
 
             markup:
@@ -2478,6 +2478,21 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>Press [Enter].</p>
 
+        case: Multiple citations is a paragraph
+
+            description:
+                 Making sure that when there are multiple citations in a paragraph they are all detected separately.
+
+            source:
+                 ```(sam)
+                    Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in [#chapter.linking] and the subject-based composition and architecture algorithms described in [#chapter.composition] and [#chapter.architecture], including bottom-up information architecture.
+
+            markup:
+                Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in [#chapter.linking] and the subject-based composition and architecture algorithms described in [#chapter.composition] and [#chapter.architecture], including bottom-up information architecture.
+
+            result:
+                ```(xml)
+                    <p>Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in <citation type="nameref" value="chapter.linking"/> and the subject-based composition and architecture algorithms described in <citation type="nameref" value="chapter.composition"/> and <citation type="nameref" value="chapter.architecture"/>, including bottom-up information architecture.</p>
 
 
     test: Characters
