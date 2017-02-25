@@ -1728,6 +1728,40 @@ tests:(!en) SAM Parser Tests
                             Pay close attention. You could really hurt yourself.
                     </codeblock>
 
+        case: Invalid blockstart in codeblock
+            description:
+                This is an construct that raise an error in an actual document. Curious because
+                lots of valid block starts in other codeblocks did not cause a problem. But this
+                one raised an invalid block name error. Turns out this was caused by tabs instead
+                of spaces used to indent the line, which promoted it to a higher level of the
+                document hierarchy and thus outside the codeblock. But the test is worth keeping
+                to make sure that the contents of codeblocks are not being interpreted as SAM markup.
+
+            source:
+                ```(sam)
+                    ```
+                        first-ordered-list-item =
+                            {fontx: 12pt "Century Schoolbook"}<count=1>.[tab]
+                        ordered-list-item =
+                            {fonty: 12pt "Century Schoolbook"}<++count>.[tab]
+
+            markup:
+                ```
+                    first-ordered-list-item =
+                        {fontx: 12pt "Century Schoolbook"}<count=1>.[tab]
+                    ordered-list-item =
+                        {fonty: 12pt "Century Schoolbook"}<++count>.[tab]
+
+            result:
+                ```(xml)
+                    <codeblock>
+                    first-ordered-list-item =
+                        {fontx: 12pt "Century Schoolbook"}&lt;count=1&gt;.[tab]
+                    ordered-list-item =
+                        {fonty: 12pt "Century Schoolbook"}&lt;++count&gt;.[tab]
+                    </codeblock>
+
+
 
     test: Lines
 
