@@ -1081,17 +1081,21 @@ class StringSource:
 
 
 # Flow regex component expressions
-re_single_quote_close = '(?<=[\w\.\,\"\)}\?])\'((?=[\.\s"},\?!:;\[])|$)'
-re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{])'
-re_double_quote_close = '(?<=[\w\.\,\'\)\}\?])"((?=[\.\s\'\)},\?!:;\[])|$)'
-re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{])'
+re_single_quote_close = '(?<=[\w\.\,\"\)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
+re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{-])'
+re_double_quote_close = '(?<=[\w\.\,\'\)\}\?-])\"((?=[\.\s\'\)},\?!:;\[-])|$)'
+re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{-])'
 re_apostrophe = "(?<=[\w`\*_\}\)])'(?=\w)"
+re_en_dash = "(?<=[\w\*_`\"\'\)\}]\s)--(?=\s[\w\*_`\"\'\{\(])"
+re_em_dash = "(?<=[\w\*_`\"\'\)\}])---(?=[\w\*_`\"\'\{\(])"
 
 smart_quote_subs = {re_double_quote_close:'”',
                     re_double_quote_open: '“',
                     re_single_quote_close:'’',
                     re_single_quote_open: '‘',
-                    re_apostrophe: '’'}
+                    re_apostrophe: '’',
+                    re_en_dash: '–',
+                    re_em_dash: '—'}
 
 class SamParaParser:
     def __init__(self):
@@ -1114,6 +1118,7 @@ class SamParaParser:
         self.stateMachine.add_state("CODE-START", self._code_start)
         self.stateMachine.add_state("DOUBLE_QUOTE", self._double_quote)
         self.stateMachine.add_state("SINGLE_QUOTE", self._single_quote)
+        self.stateMachine.add_state("DASH-START", self._dash_start)
         self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
         self.stateMachine.add_state("CHARACTER-ENTITY", self._character_entity)
         self.stateMachine.set_start("PARA")
@@ -1133,7 +1138,8 @@ class SamParaParser:
             'double_quote_close': re.compile(re_double_quote_close, re.U),
             'double_quote_open': re.compile(re_double_quote_open, re.U),
             'inline-insert': re.compile(r'>(?P<insert>\((.*?(?<!\\))\))' + re_attributes, re.U),
-
+            'en-dash': re.compile(re_en_dash, re.U),
+            'em-dash': re.compile(re_em_dash, re.U),
             'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
             'citation': re.compile(
                 r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
@@ -1177,6 +1183,8 @@ class SamParaParser:
             return "INLINE-INSERT", para
         elif char == "&":
             return "CHARACTER-ENTITY", para
+        elif char == "-":
+            return "DASH-START", para
         else:
             self.current_string += char
             return "PARA", para
@@ -1188,8 +1196,7 @@ class SamParaParser:
             self.current_string = ''
             text = self._unescape(match.group("text"))
             if self.smart_quotes:
-                text=multi_replace(text, smart_quote_subs)
-            # FIXME: Scan text for smart quotes
+                text = multi_replace(text, smart_quote_subs)
             self.flow.append(Phrase(text))
             para.advance(len(match.group(0)))
 
@@ -1339,6 +1346,23 @@ class SamParaParser:
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '`'
+        return "PARA", para
+
+    def _dash_start(self, para):
+        if self.smart_quotes:
+            if self.patterns['en-dash'].search(para.para, para.currentCharNumber,
+                                                          para.currentCharNumber + 5):
+                self.current_string += '–'
+                self.para.advance(1)
+
+            elif self.patterns['em-dash'].search(para.para, para.currentCharNumber,
+                                                           para.currentCharNumber + 5):
+                self.current_string += '—'
+                self.para.advance(2)
+            else:
+                self.current_string += '-'
+        else:
+            self.current_string += '-'
         return "PARA", para
 
     def _double_quote(self, para):

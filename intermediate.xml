@@ -2108,7 +2108,7 @@ warnings:
 <case>
 <title>Invalid blockstart in codeblock</title>
 <description>
-<p>This is an construct that raise an error in an actual document. Curious because lots of valid block starts in other codeblocks did not cause a problem. But this one raised an invalid block name error.</p>
+<p>This is an construct that raise an error in an actual document. Curious because lots of valid block starts in other codeblocks did not cause a problem. But this one raised an invalid block name error. Turns out this was caused by tabs instead of spaces used to indent the line, which promoted it to a higher level of the document hierarchy and thus outside the codeblock. But the test is worth keeping to make sure that the contents of codeblocks are not being interpreted as SAM markup.</p>
 </description>
 <source>
 <codeblock language="sam">
@@ -2701,7 +2701,7 @@ chapter}[#single_source].
 </codeblock>
 </source>
 <markup>
-<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation type="nameref" value="single_source">single sourcing chapter</citation></phrase>.</p>
+<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation type="nameref" value="single_source">single sourcing chapter</citation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3719,6 +3719,35 @@ This para uses \"dumb\" quotes. Don\'t get them &amp;quot;mixed up&amp;quot;.
 <result>
 <codeblock language="xml">
 &lt;p&gt;This para uses "dumb" quotes. Don't get them "mixed up".&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Em and en dashes</title>
+<description>
+<p>The smart quote feature will also transform double hyphens surrounded by spaces and triple hyphens surrounded by letters into en and em dashes respectively.</p>
+</description>
+<source>
+<codeblock language="sam">
+This para contains -- an en dash and an---em dash.
+</codeblock>
+</source>
+<markup>
+<p>This para contains – an en dash and an—em dash.</p>
+<p>This para contains – <phrase><annotation type="word">an</annotation></phrase> en dash and an—<phrase><annotation type="word">em</annotation></phrase> dash.</p>
+<p>This para <phrase><annotation type="word">contains</annotation></phrase> – an en dash and <phrase><annotation type="word">an</annotation></phrase>—em dash.</p>
+<p>This para <phrase><annotation type="bold">contains</annotation></phrase> – an en dash and <phrase><annotation type="italic">an</annotation></phrase>—em dash.</p>
+<p>This para <phrase><annotation type="code">contains</annotation></phrase> – an en dash and “an”—em dash.</p>
+<p>This para ‘contains’ – an en dash and <phrase><annotation type="code">an</annotation></phrase>—em dash.</p>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;p&gt;This para contains – an en dash and an—em dash.&lt;/p&gt;
+&lt;p&gt;This para contains – &lt;phrase&gt;&lt;annotation type="word"&gt;an&lt;/annotation&gt;&lt;/phrase&gt; en dash and an—&lt;phrase&gt;&lt;annotation type="word"&gt;em&lt;/annotation&gt;&lt;/phrase&gt; dash.&lt;/p&gt;
+&lt;p&gt;This para &lt;phrase&gt;&lt;annotation type="word"&gt;contains&lt;/annotation&gt;&lt;/phrase&gt; – an en dash and &lt;phrase&gt;&lt;annotation type="word"&gt;an&lt;/annotation&gt;&lt;/phrase&gt;—em dash.&lt;/p&gt;
+&lt;p&gt;This para &lt;phrase&gt;&lt;annotation type="bold"&gt;contains&lt;/annotation&gt;&lt;/phrase&gt; – an en dash and &lt;phrase&gt;&lt;annotation type="italic"&gt;an&lt;/annotation&gt;&lt;/phrase&gt;—em dash.&lt;/p&gt;
+&lt;p&gt;This para &lt;phrase&gt;&lt;annotation type="code"&gt;contains&lt;/annotation&gt;&lt;/phrase&gt; – an en dash and “an”—em dash.&lt;/p&gt;
+&lt;p&gt;This para ‘contains’ – an en dash and &lt;phrase&gt;&lt;annotation type="code"&gt;an&lt;/annotation&gt;&lt;/phrase&gt;—em dash.&lt;/p&gt;
 
 </codeblock>
 </result>

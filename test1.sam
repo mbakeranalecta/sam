@@ -3284,3 +3284,35 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>This para uses "dumb" quotes. Don't get them "mixed up".</p>
 
+        case: Em and en dashes
+            description:
+                The smart quote feature will also transform double hyphens surrounded
+                by spaces and triple hyphens surrounded by letters into en and em
+                dashes respectively.
+
+            source:
+                ```(sam)
+                    This para contains -- an en dash and an---em dash.
+
+            markup:
+                This para contains -- an en dash and an---em dash.
+
+                This para contains -- {an}(word) en dash and an---{em}(word) dash.
+
+                This para {contains}(word) -- an en dash and {an}(word)---em dash.
+
+                This para *contains* -- an en dash and _an_---em dash.
+
+                This para `contains` -- an en dash and "an"---em dash.
+
+                This para 'contains' -- an en dash and `an`---em dash.
+
+            result:
+                ```(xml)
+                    <p>This para contains – an en dash and an—em dash.</p>
+                    <p>This para contains – <phrase><annotation type="word">an</annotation></phrase> en dash and an—<phrase><annotation type="word">em</annotation></phrase> dash.</p>
+                    <p>This para <phrase><annotation type="word">contains</annotation></phrase> – an en dash and <phrase><annotation type="word">an</annotation></phrase>—em dash.</p>
+                    <p>This para <phrase><annotation type="bold">contains</annotation></phrase> – an en dash and <phrase><annotation type="italic">an</annotation></phrase>—em dash.</p>
+                    <p>This para <phrase><annotation type="code">contains</annotation></phrase> – an en dash and “an”—em dash.</p>
+                    <p>This para ‘contains’ – an en dash and <phrase><annotation type="code">an</annotation></phrase>—em dash.</p>
+
