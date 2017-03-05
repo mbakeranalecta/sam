@@ -240,7 +240,7 @@ specification: Semantic Authoring Markdown (SAM)
         section: Includes
 
             You can include one SAM file in another. The included file must be a complete SAM file, with SAM
-            declaration. Its structured is included in the stricture of the included file at the indent level
+            declaration. Its structured is included in the structure of the included file at the indent level
             of the include statement.
 
             ```(sam)

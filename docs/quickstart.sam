@@ -503,3 +503,17 @@ article: SAM Quick Start
         Naturally, this include must be processed by the application layer.
 
         For similar reasons, an include cannot have a {name}, {id}, or {language} attribute, since it does not produce a artifact in the output. If you need to apply any of these things to the included content, you can wrap the include statement in another structure such as a {block} or a {fragment} and apply the attributes to that. This will result in the included content being wrapped in that block or fragment in the output where the application layer can deal with it appropriately. 
+        
+    section: String
+    
+        You can define a string variable using the form:
+        
+        ```(sam)
+            $foo=bar
+            
+        To insert the value of a string, use an insert (block level or inline) with the variable name:
+        
+        ```(sam)
+            >($title)
+            
+        Note that the SAM parser does not resolve strings. The string definitions and string insert instructions are passed through to the application layer and must be resolved by the processing application. This allows the processing application to determine the scope within which string names will be resolved. 
