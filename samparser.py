@@ -1826,6 +1826,7 @@ if __name__ == "__main__":
     if args.infile == args.outfile:
         raise SAMParserError('Input and output files cannot have the same name.')
 
+    error_count = 0
     for inputfile in glob.glob(args.infile):
         try:
             with open(inputfile, "r", encoding="utf-8-sig") as inf:
@@ -1906,5 +1907,10 @@ if __name__ == "__main__":
 
         except SAMParserError as e:
             sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
+            error_count += 1
             #sys.exit(1)
             continue
+
+    print('Process completed with %d errors.' % error_count, file=sys.stderr)
+    if error_count > 0:
+        sys.exit(1)
