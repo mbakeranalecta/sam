@@ -1854,7 +1854,10 @@ if __name__ == "__main__":
                         raise SAMParserError(e.strerror + ' ' + e.filename)
 
                     xml_input = etree.parse(open(intermediatefile, 'r', encoding="utf-8-sig"))
-                    transformed = transform(xml_input)
+                    try:
+                        transformed = transform(xml_input)
+                    except etree.XSLTApplyError as e:
+                        raise SAMParserError("XSLT processor reported error: " + str(e))
 
                 if args.outdir:
                     outputfile=os.path.join(args.outdir, os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension)
@@ -1908,7 +1911,6 @@ if __name__ == "__main__":
         except SAMParserError as e:
             sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
             error_count += 1
-            #sys.exit(1)
             continue
 
     print('Process completed with %d errors.' % error_count, file=sys.stderr)
