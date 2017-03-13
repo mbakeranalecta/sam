@@ -969,8 +969,8 @@ class DocStructure:
     def new_labeled_list_item(self, attributes, indent, label):
         lli = Block('li', attributes, '', None, indent + .2)
         lli.add_child(Block('label', None, para_parser.parse(label, self.doc), None, indent))
-        if self.current_block.name == 'li':
-            self.current_block.add_sibling(lli)
+        if self.in_context(['p', 'li']):
+            self.current_block.parent.add_sibling(lli)
         else:
             ll = Block('ll', None, '', None, indent)
             self.add_block(ll)
