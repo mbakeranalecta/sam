@@ -7,6 +7,8 @@
 <title>SAM Parser Tests</title>
 <description>
 <p>This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <phrase><annotation type="code">markup:</annotation></phrase> heading and comparing it to the text of the expected result as shown under the <phrase><annotation type="code">result:</annotation></phrase> heading in the test file. This is not a perfect test. Two issues are known:</p>
+<p>This should cause an error.</p>
+<p>Another error should occur here.</p>
 <ul>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
@@ -45,10 +47,7 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 <cell>foo</cell>
 <cell>bar</cell>
 </row>
-<row>
-<cell>baz</cell>
-<cell>bat</cell>
-</row>
+<p>baz | bat</p>
 </grid>
 <p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
 </message>
@@ -398,7 +397,7 @@ multiple lines.
 0. Two this
    paragraph wraps.
 
- This is another para in the list item.
+   This is another para in the list item.
 99999. Three
 </codeblock>
 </source>
@@ -492,7 +491,7 @@ multiple lines.
 <codeblock language="sam">
 0. One
 
-0. Two
+0. Two x
 
     5. Two and a quarter
 
@@ -511,7 +510,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two x</p>
 <ol>
 <li>
 <p>Two and a quarter</p>
@@ -539,7 +538,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two x&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a quarter&lt;/p&gt;
@@ -570,7 +569,7 @@ multiple lines.
 <source>
 <codeblock language="sam">
 0. One
-0. Two
+0. Two z
     5. Two and a quarter
     6. Two and a half
     9. Two and three quarters
@@ -584,7 +583,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two z</p>
 <ol>
 <li>
 <p>Two and a quarter</p>
@@ -612,7 +611,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two z&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a quarter&lt;/p&gt;
@@ -643,7 +642,7 @@ multiple lines.
 <source>
 <codeblock language="sam">
 0. One
-0. Two
+0. Two r
     5. Two and a quarter
 
     6. Two and a half
@@ -660,7 +659,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two r</p>
 <ol>
 <li>
 <p>Two and a quarter</p>
@@ -688,7 +687,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two r&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a quarter&lt;/p&gt;
@@ -726,7 +725,7 @@ multiple lines.
 <codeblock language="sam">
 * One
 
-* Two
+* Two t
 
 * Three
 </codeblock>
@@ -737,7 +736,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two t</p>
 </li>
 <li>
 <p>Three</p>
@@ -751,7 +750,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two t&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Three&lt;/p&gt;
@@ -768,7 +767,7 @@ multiple lines.
 <source>
 <codeblock language="sam">
 * One
-* Two
+* Two y
 * Three
 </codeblock>
 </source>
@@ -778,7 +777,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two y</p>
 </li>
 <li>
 <p>Three</p>
@@ -792,7 +791,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two y&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Three&lt;/p&gt;
@@ -809,7 +808,7 @@ multiple lines.
 <source>
 <codeblock language="sam">
 * One
-* Two
+* Two u
 
 * Three
 * Four
@@ -821,7 +820,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two u</p>
 </li>
 <li>
 <p>Three</p>
@@ -838,7 +837,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two u&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Three&lt;/p&gt;
@@ -859,7 +858,7 @@ multiple lines.
 <codeblock language="sam">
 * One
 
-* Two
+* Two i
 
     * Two and a quarter
 
@@ -878,7 +877,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two i</p>
 <ul>
 <li>
 <p>Two and a quarter</p>
@@ -906,7 +905,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two i&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a quarter&lt;/p&gt;
@@ -937,7 +936,7 @@ multiple lines.
 <source>
 <codeblock language="sam">
 * One
-* Two
+* Two k
     * Two and a quarter
     * Two and a half
     * Two and three quarters
@@ -951,7 +950,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two k</p>
 <ul>
 <li>
 <p>Two and a quarter</p>
@@ -979,7 +978,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two k&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a quarter&lt;/p&gt;
@@ -1010,7 +1009,7 @@ multiple lines.
 <source>
 <codeblock language="sam">
 * One
-* Two
+* Two p
     * Two and a quarter
 
     * Two and a half
@@ -1026,7 +1025,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two p</p>
 <ul>
 <li>
 <p>Two and a quarter</p>
@@ -1054,7 +1053,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two p&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a quarter&lt;/p&gt;
@@ -1092,7 +1091,7 @@ multiple lines.
 <codeblock language="sam">
 0. One
 
-0. Two
+0. Two a
 
     * Two and a quarter
 
@@ -1111,7 +1110,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two a</p>
 <ul>
 <li>
 <p>Two and a quarter</p>
@@ -1139,7 +1138,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two a&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a quarter&lt;/p&gt;
@@ -1170,7 +1169,7 @@ multiple lines.
 <source>
 <codeblock language="sam">
 0. One
-0. Two
+0. Two s
     * Two and a quarter
     * Two and a half
     * Two and three quarters
@@ -1184,7 +1183,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two s</p>
 <ul>
 <li>
 <p>Two and a quarter</p>
@@ -1212,7 +1211,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two s&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a quarter&lt;/p&gt;
@@ -1244,7 +1243,7 @@ multiple lines.
 <codeblock language="sam">
 0. One
 
-0. Two
+0. Two d
     * Two and a quarter
 
     * Two and a half
@@ -1260,7 +1259,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two d</p>
 <ul>
 <li>
 <p>Two and a quarter</p>
@@ -1288,7 +1287,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two d&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a quarter&lt;/p&gt;
@@ -1319,11 +1318,11 @@ multiple lines.
 <source>
 <codeblock language="sam">
 * One
-* Two
+* Two f
 * Three
 
 1. One
-2. Two
+2. Two g
 3. Three
 </codeblock>
 </source>
@@ -1333,7 +1332,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two f</p>
 </li>
 <li>
 <p>Three</p>
@@ -1344,7 +1343,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two g</p>
 </li>
 <li>
 <p>Three</p>
@@ -1358,7 +1357,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two f&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Three&lt;/p&gt;
@@ -1369,7 +1368,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two g&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Three&lt;/p&gt;
@@ -1386,10 +1385,10 @@ multiple lines.
 <source>
 <codeblock language="sam">
 * One
-* Two
+* Two h
 * Three
 1. One
-2. Two
+2. Two j
 3. Three
 </codeblock>
 </source>
@@ -1399,7 +1398,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two h</p>
 </li>
 <li>
 <p>Three</p>
@@ -1410,7 +1409,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two</p>
+<p>Two j</p>
 </li>
 <li>
 <p>Three</p>
@@ -1424,7 +1423,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two h&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Three&lt;/p&gt;
@@ -1435,7 +1434,7 @@ multiple lines.
 &lt;p&gt;One&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Two&lt;/p&gt;
+&lt;p&gt;Two j&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Three&lt;/p&gt;
@@ -1532,26 +1531,38 @@ multiple lines.
 <label>Doe</label>
 <p>a deer, a female deer</p>
 </li>
+</ll>
+<ll>
 <li>
 <label>Ray</label>
 <p>a drop of golden sun</p>
 </li>
+</ll>
+<ll>
 <li>
 <label>Me</label>
 <p>a name I call myself</p>
 </li>
+</ll>
+<ll>
 <li>
 <label>Far</label>
 <p>a long long way to run</p>
 </li>
+</ll>
+<ll>
 <li>
 <label>Sew</label>
 <p>a needle pulling thread</p>
 </li>
+</ll>
+<ll>
 <li>
 <label>La</label>
 <p>a note to follow so</p>
 </li>
+</ll>
+<ll>
 <li>
 <label>Tea</label>
 <p>a drink with jam and bread</p>
@@ -1707,16 +1718,7 @@ filmography:: film
 <cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
 <cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
 </row>
-<row>
-<cell>feature</cell>
-<cell>fragment</cell>
-<cell>bing</cell>
-</row>
-<row>
-<cell>feature</cell>
-<cell>fragments</cell>
-<cell>bang</cell>
-</row>
+<p>feature | fragment  | bing feature | fragments | bang</p>
 </grid>
 </markup>
 <result>
@@ -1764,16 +1766,8 @@ filmography:: film
 <cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
 <cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
 </row>
-<row>
-<cell>feature</cell>
-<cell>fragment</cell>
-<cell>bing</cell>
-</row>
-<row>
-<cell>feature</cell>
-<cell>fragments</cell>
-<cell>bang</cell>
-</row>
+<p>feature | fragment  | bing</p>
+<p>feature | fragments | bang</p>
 </grid>
 </markup>
 <result>
@@ -1818,16 +1812,7 @@ filmography:: film
 <cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
 <cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
 </row>
-<row>
-<cell>feature</cell>
-<cell>fragment</cell>
-<cell>bing</cell>
-</row>
-<row>
-<cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
-<cell><phrase><annotation type="bold">fragments</annotation></phrase></cell>
-<cell><phrase><annotation type="bold">bang</annotation></phrase></cell>
-</row>
+<p>feature   | fragment    | bing <phrase><annotation type="bold">feature</annotation></phrase> | <phrase><annotation type="bold">fragments</annotation></phrase> | <phrase><annotation type="bold">bang</annotation></phrase></p>
 </grid>
 </markup>
 <result>
@@ -1872,16 +1857,7 @@ filmography:: film
 <cell>Term</cell>
 <cell>Notes</cell>
 </row>
-<row>
-<cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
-<cell>fragment</cell>
-<cell>bing</cell>
-</row>
-<row>
-<cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
-<cell>fragments</cell>
-<cell>bang</cell>
-</row>
+<p><phrase><annotation type="bold">feature</annotation></phrase> | fragment  | bing <phrase><annotation type="bold">feature</annotation></phrase> | fragments | bang</p>
 </grid>
 </markup>
 <result>
@@ -2310,10 +2286,7 @@ field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 <cell>Content</cell>
 <cell>of</cell>
 </row>
-<row>
-<cell>the</cell>
-<cell>grid.</cell>
-</row>
+<p>the     | grid.</p>
 </grid>
 </markup>
 <result>
@@ -2705,7 +2678,7 @@ chapter}[#single_source].
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;When using the map approach, it is important to think about how your content will &lt;phrase&gt;&lt;annotation type="concept" specifically="single sourcing"&gt;single source&lt;/annotation&gt;&lt;/phrase&gt; to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the &lt;phrase&gt;&lt;citation type="nameref" value="single_source"&gt;single sourcing chapter&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;When using the map approach, it is important to think about how your content will &lt;phrase&gt;&lt;annotation type="concept" specifically="single sourcing"&gt;single source&lt;/annotation&gt;&lt;/phrase&gt; to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the &lt;phrase&gt;&lt;citation type="nameref" value="single_source"&gt;single sourcing chapter&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>

@@ -574,7 +574,7 @@ class Block:
         return ''.join(self._output_block())
 
     def _output_block(self):
-        yield " " * self.indent
+        yield " " * int(self.indent)
         yield "[%s:'%s'" % (self.name, self.content)
         for x in self.children:
             yield "\n"
@@ -620,11 +620,16 @@ class Paragraph(Block):
 
     def add_child(self, b):
         if not type(b) is Flow:
-            raise SAMParserError(
-                'A paragraph cannot have block children. At \"{0}\".'.format(
+            if self.parent.name == 'li':
+                b.parent = self.parent
+                self.parent.children.append(b)
+            else:
+                raise SAMParserError(
+                    'A paragraph cannot have block children. At \"{0}\".'.format(
                     str(self)))
-        b.parent = self
-        self.children.append(b)
+        else:
+            b.parent = self
+            self.children.append(b)
 
 
 class Comment:
@@ -924,6 +929,7 @@ class DocStructure:
         else:
             self.current_block.add_at_indent(block, block.indent)
         self.current_block = block
+        pass
         # Useful lines for debugging the build of the tree
         # print(self.doc)
         # print('-----------------------------------------------------')
@@ -946,7 +952,7 @@ class DocStructure:
             ul = Block('ul', None, '', None, indent)
             self.add_block(ul)
             self.add_block(uli)
-        p = Paragraph(None, '', None, indent + .2)
+        p = Paragraph(None, '', None, indent + 3)
         self.add_block(p)
 
     def new_ordered_list_item(self, attributes, indent):
@@ -957,7 +963,7 @@ class DocStructure:
             ol = Block('ol', None, '', None, indent)
             self.add_block(ol)
             self.add_block(oli)
-        p = Paragraph(None, '', None, indent + .2)
+        p = Paragraph(None, '', None, indent + 3)
         self.add_block(p)
 
     def new_labeled_list_item(self, attributes, indent, label):
@@ -974,7 +980,7 @@ class DocStructure:
         # element that is not an ll we be at same indent as ll, causing
         # ll to end. Because indent is fractional, and block child will
         # be more indented, which is illegal and will trigger an error.
-        p = Paragraph(None, '', None, indent + .5)
+        p = Paragraph(None, '', None, indent + 5)
         lli.add_child(p)
         self.current_block = p
 
@@ -985,7 +991,7 @@ class DocStructure:
                 raise SAMParserError("Duplicate ID found: " + ids[0])
             self.ids.append(id)
         self.current_block.add_child(flow)
-        self.current_block = self.current_block.parent
+       # self.current_block = self.current_block.parent
 
     def new_comment(self, comment):
         self.current_block.add_child(comment)
