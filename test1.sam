@@ -1024,7 +1024,8 @@ tests:(!en) SAM Parser Tests
 
                         * Two and a half
                         * Two and three quarters
-                    99999. Three
+                    99999. Three times
+                           three is nine.
 
                     7. Four
 
@@ -1036,7 +1037,12 @@ tests:(!en) SAM Parser Tests
 
                     * Two and a half
                     * Two and three quarters
-                99999. Three
+                99999. Three times
+                       three is nine.
+
+                       Four times four is sixteen.
+
+                            Five time five is twenty five.
 
                 7. Four
 
@@ -1062,7 +1068,7 @@ tests:(!en) SAM Parser Tests
                     </ul>
                     </li>
                     <li>
-                    <p>Three</p>
+                    <p>Three times three is nine.</p>
                     </li>
                     <li>
                     <p>Four</p>

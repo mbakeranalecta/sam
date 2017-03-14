@@ -140,7 +140,7 @@ class SamParser:
         if self.patterns['blank-line'].match(line):
             self.current_text_block.append(line)
             return "CODEBLOCK", context
-        if indent <= self.doc.current_block.indent:
+        if indent <= self.doc.ancestor_or_self('codeblock').indent:
             source.return_line()
             self.doc.new_flow(Pre(self.current_text_block.strip()))
             self.current_text_block = None
@@ -174,7 +174,7 @@ class SamParser:
         if self.patterns['blank-line'].match(line):
             self.current_text_block.append(line)
             return "EMBED", context
-        if indent <= self.doc.current_block.indent:
+        if indent <= self.doc.ancestor_or_self('embed').indent:
             source.return_line()
             self.doc.new_flow(Pre(self.current_text_block.strip()))
             self.current_text_block = None
@@ -352,7 +352,7 @@ class SamParser:
         record_name = match.group("name").strip()
         attributes = parse_attributes(match.group('attributes'))
         field_names = [x.strip() for x in match.group("field_names").split(',')]
-        self.doc.new_record_set(record_name, attributes, field_names, indent)
+        self.doc.new_record_set(record_name, field_names, attributes, indent)
         return "RECORD", context
 
     def _record(self, context):
@@ -368,11 +368,8 @@ class SamParser:
             source.return_line()
             return "SAM", context
         else:
-            field_values = [x.strip() for x in re.split(r'(?<!\\),', line)]
-            if len(field_values) != len(self.doc.fields):
-                raise SAMParserError("Record length does not match record set header. At:\n\n " + line)
-            record = list(zip(self.doc.fields, field_values))
-            self.doc.new_record(record, indent)
+            field_values = [para_parser.parse(x.strip(), self.doc) for x in re.split(r'(?<!\\),', line)]
+            self.doc.new_record(field_values, indent)
             return "RECORD", context
 
     def _grid_start(self, context):
@@ -397,7 +394,7 @@ class SamParser:
         indent = len(line) - len(line.lstrip())
         if self.patterns['blank-line'].match(line):
             return "GRID", context
-        elif indent < self.doc.current_block.indent:
+        elif indent <= self.doc.ancestor_or_self('grid').indent:
             source.return_line()
             return "SAM", context
         else:
@@ -613,6 +610,57 @@ class Block:
                 yield from self.content.serialize_xml()
                 yield "</{0}>\n".format(self.name)
 
+class RecordSet(Block):
+    def __init__(self, name, field_names, attributes=None, content=None, namespace=None, indent=0):
+        super().__init__(name=name, attributes=attributes, content=content, namespace=namespace, indent=indent)
+        self.field_names = field_names
+
+    def add_child(self, r):
+        if not type(r) is Record:
+            raise SAMParserError('A RecordSet can only have Record children. At \"{0}\".'.format(
+                    str(self)))
+        if len(r.field_values) != len(self.field_names):
+            raise SAMParserError('Record length does not match record set header. At: \n{0}\n'.format(
+                    str(self)))
+        r.record = list(zip(self.field_names, r.field_values))
+        r.parent = self
+        self.children.append(r)
+
+
+
+class Record(Block):
+    def __init__(self, field_values, attributes=None, content=None, namespace=None, indent=0):
+        self.field_values = field_values
+        self.attributes = attributes
+        self.content = content
+        self.namespace = namespace
+        self.indent = indent
+        self.record=None
+
+    def _output_block(self):
+        yield " " * int(self.indent)
+        yield "[row:'%s'" % (self.content) + '\n'
+        for x in self.record:
+            yield " " * int(self.indent + 4) + x[0] + ' = ' + x[1] + "\n"
+        yield "]"
+
+    def serialize_xml(self):
+        yield '<row'
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+
+        if self.attributes:
+            for key, value in sorted(self.attributes.items()):
+                yield " {0}=\"{1}\"".format(key, value)
+        yield ">\n"
+
+        for x in self.record:
+            yield "<{0}>".format(x[0])
+            yield from x[1].serialize_xml()
+            yield "</{0}>\n".format(x[0])
+        yield "</row>\n"
 
 class Paragraph(Block):
     def __init__(self, attributes=None, content=None, namespace=None, indent=0):
@@ -787,12 +835,14 @@ class Pre(Flow):
 
 class EmbeddedXML(Block):
     def __init__(self, text, indent):
-        self.text = text
+        self.content = text
         self.indent = indent
         self.namespace = None
+        self.name = "<?xml?>"
+        self.children = []
 
     def serialize_xml(self):
-        yield self.text
+        yield self.content
 
 
 class DocStructure:
@@ -805,6 +855,17 @@ class DocStructure:
         self.ids = []
         self.indent=0
         self.source = None
+
+    def cur_blk(self):
+        cur = self.doc
+        try:
+            while True:
+                cur = cur.children[-1]
+        except(IndexError):
+            return cur
+        except(AttributeError):
+            return cur
+
 
     def new_declaration(self, match):
         name=match.group('name').strip()
@@ -846,6 +907,29 @@ class DocStructure:
         except AttributeError:
             raise SAMParserError("Indentation error found at " + str(self.current_block))
 
+    def ancestor_or_self(self,ancestor_name, block=None):
+        if block is None:
+            block = self.current_block
+        try:
+            while True:
+                if block.name == ancestor_name:
+                    return block
+                block = block.parent
+        except(AttributeError):
+            return None
+
+    def ancestor_or_self_type(self,ancestor_type, block=None):
+        if block is None:
+            block = self.current_block
+        try:
+            while True:
+                if type(block) is ancestor_type:
+                    return block
+                block = block.parent
+        except(AttributeError):
+            return None
+
+
     def new_root(self):
         # if match.group('schema') is not None:
         #     pass
@@ -872,7 +956,7 @@ class DocStructure:
             includeparser = SamParser()
             with urllib.request.urlopen(fullhref) as response:
                 includeparser.parse(reader(response))
-            include = Include(includeparser.doc, indent)
+            include = Include(includeparser.doc, fullhref, indent)
             self.add_block(include)
             SAM_parser_info("Finished parsing include " + href)
         except SAMParserError as e:
@@ -929,7 +1013,8 @@ class DocStructure:
         else:
             self.current_block.add_at_indent(block, block.indent)
         self.current_block = block
-        pass
+        #print(self.cur_blk(), '|', self.current_block)
+        #pass
         # Useful lines for debugging the build of the tree
         # print(self.doc)
         # print('-----------------------------------------------------')
@@ -1004,23 +1089,17 @@ class DocStructure:
         s = StringDef(string_name, value, indent)
         self.add_block(s)
 
-    def new_record_set(self, name, attributes, field_names, indent):
-        b = Block(name, attributes, None, None, indent)
-        self.add_block(b)
-        self.current_record = {'local_element': name, 'local_indent': indent}
-        self.fields = field_names
+    def new_record_set(self, name, field_names, attributes, indent):
+        rs = RecordSet(name, field_names, attributes, None, None, indent)
+        self.add_block(rs)
 
-    def new_record(self, record, indent):
-        b = Block('row', None, '', None, indent)
-        if self.current_block.indent == b.indent:
-            self.current_block.add_sibling(b)
-        else:
-            self.current_block.add_child(b)
-
-        self.current_block = b
-        for name, content in record:
-            b = Block(name, None, para_parser.parse(content, self.doc), None, self.current_block.indent + 4)
-            self.current_block.add_child(b)
+    def new_record(self, field_values, indent):
+        record_set = self.ancestor_or_self_type(RecordSet)
+        if record_set is None:
+            raise SAMParserError('Attempted to add record where no record set is present.')
+        r = Record(field_values=field_values, indent=indent)
+        record_set.add_child(r)
+        self.current_block = r
 
     def find_last_annotation(self, text, node=None):
         if node is None:
@@ -1047,11 +1126,13 @@ class DocStructure:
 
 
 class Include(Block):
-    def __init__(self, doc, indent):
+    def __init__(self, doc, href, indent):
         self.children=doc.doc.children
         self.indent = indent
         self.namespace = None
         self.ids = doc.ids
+        self.name = "<<<"
+        self.content = href
 
     def serialize_xml(self):
         for x in self.children:

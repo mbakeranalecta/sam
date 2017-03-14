@@ -47,7 +47,10 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 <cell>foo</cell>
 <cell>bar</cell>
 </row>
-<p>baz | bat</p>
+<row>
+<cell>baz</cell>
+<cell>bat</cell>
+</row>
 </grid>
 <p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
 </message>
@@ -1248,7 +1251,8 @@ multiple lines.
 
     * Two and a half
     * Two and three quarters
-99999. Three
+99999. Three times
+       three is nine.
 
 7. Four
 </codeblock>
@@ -1273,7 +1277,9 @@ multiple lines.
 </ul>
 </li>
 <li>
-<p>Three</p>
+<p>Three times three is nine.</p>
+<p>Four times four is sixteen.</p>
+<p>Five time five is twenty five.</p>
 </li>
 <li>
 <p>Four</p>
@@ -1301,7 +1307,7 @@ multiple lines.
 &lt;/ul&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;p&gt;Three&lt;/p&gt;
+&lt;p&gt;Three times three is nine.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Four&lt;/p&gt;
@@ -1706,7 +1712,16 @@ filmography:: film
 <cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
 <cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
 </row>
-<p>feature | fragment  | bing feature | fragments | bang</p>
+<row>
+<cell>feature</cell>
+<cell>fragment</cell>
+<cell>bing</cell>
+</row>
+<row>
+<cell>feature</cell>
+<cell>fragments</cell>
+<cell>bang</cell>
+</row>
 </grid>
 </markup>
 <result>
@@ -1754,8 +1769,16 @@ filmography:: film
 <cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
 <cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
 </row>
-<p>feature | fragment  | bing</p>
-<p>feature | fragments | bang</p>
+<row>
+<cell>feature</cell>
+<cell>fragment</cell>
+<cell>bing</cell>
+</row>
+<row>
+<cell>feature</cell>
+<cell>fragments</cell>
+<cell>bang</cell>
+</row>
 </grid>
 </markup>
 <result>
@@ -1800,7 +1823,16 @@ filmography:: film
 <cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
 <cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
 </row>
-<p>feature   | fragment    | bing <phrase><annotation type="bold">feature</annotation></phrase> | <phrase><annotation type="bold">fragments</annotation></phrase> | <phrase><annotation type="bold">bang</annotation></phrase></p>
+<row>
+<cell>feature</cell>
+<cell>fragment</cell>
+<cell>bing</cell>
+</row>
+<row>
+<cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
+<cell><phrase><annotation type="bold">fragments</annotation></phrase></cell>
+<cell><phrase><annotation type="bold">bang</annotation></phrase></cell>
+</row>
 </grid>
 </markup>
 <result>
@@ -1845,7 +1877,16 @@ filmography:: film
 <cell>Term</cell>
 <cell>Notes</cell>
 </row>
-<p><phrase><annotation type="bold">feature</annotation></phrase> | fragment  | bing <phrase><annotation type="bold">feature</annotation></phrase> | fragments | bang</p>
+<row>
+<cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
+<cell>fragment</cell>
+<cell>bing</cell>
+</row>
+<row>
+<cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
+<cell>fragments</cell>
+<cell>bang</cell>
+</row>
 </grid>
 </markup>
 <result>
@@ -2274,7 +2315,10 @@ field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 <cell>Content</cell>
 <cell>of</cell>
 </row>
-<p>the     | grid.</p>
+<row>
+<cell>the</cell>
+<cell>grid.</cell>
+</row>
 </grid>
 </markup>
 <result>
