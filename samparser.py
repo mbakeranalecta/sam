@@ -293,17 +293,19 @@ class SamParser:
 
     def _list_item(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
+        content_start=match.start("content")+1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_unordered_list_item(attributes, indent)
+        self.doc.new_unordered_list_item(attributes, indent, content_start)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
     def _num_list_item(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
+        content_start=match.start("content")+1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_ordered_list_item(attributes, indent)
+        self.doc.new_ordered_list_item(attributes, indent, content_start)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -667,17 +669,16 @@ class Paragraph(Block):
         super().__init__(name='p', attributes=attributes, content=None, namespace=namespace, indent=indent)
 
     def add_child(self, b):
-        if not type(b) is Flow:
-            if self.parent.name == 'li':
-                b.parent = self.parent
-                self.parent.children.append(b)
-            else:
-                raise SAMParserError(
-                    'A paragraph cannot have block children. At \"{0}\".'.format(
-                    str(self)))
-        else:
+        if type(b) is Flow:
             b.parent = self
             self.children.append(b)
+        elif self.parent.name == 'li' and b.name in ['ol', 'ul']:
+            b.parent = self.parent
+            self.parent.children.append(b)
+        else:
+            raise SAMParserError(
+                'A paragraph cannot have block children. Following \"{0}\".'.format(
+                    str(self)))
 
 
 class Comment:
@@ -1029,7 +1030,7 @@ class DocStructure:
         self.add_block(b)
         return b
 
-    def new_unordered_list_item(self, attributes, indent):
+    def new_unordered_list_item(self, attributes, indent, content_start):
         uli = Block('li', attributes, '', None, indent + .1)
         if self.context_at_indent(indent + .1)[:2] == ['li', 'ul']:
             self.add_block(uli)
@@ -1037,10 +1038,10 @@ class DocStructure:
             ul = Block('ul', None, '', None, indent)
             self.add_block(ul)
             self.add_block(uli)
-        p = Paragraph(None, None, indent + 3)
+        p = Paragraph(None, None, content_start)
         self.add_block(p)
 
-    def new_ordered_list_item(self, attributes, indent):
+    def new_ordered_list_item(self, attributes, indent, content_start):
         oli = Block('li', attributes, '', None, indent + .1)
         if self.context_at_indent(indent + .1)[:2] == ['li', 'ol']:
             self.add_block(oli)
@@ -1048,7 +1049,7 @@ class DocStructure:
             ol = Block('ol', None, '', None, indent)
             self.add_block(ol)
             self.add_block(oli)
-        p = Paragraph(None, None, indent + 3)
+        p = Paragraph(None, None, content_start)
         self.add_block(p)
         pass
     def new_labeled_list_item(self, attributes, indent, label):

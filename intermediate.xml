@@ -6,9 +6,18 @@
 <tests xml:lang="en">
 <title>SAM Parser Tests</title>
 <description>
+<ol>
+<li>
+<p>One and a bit.</p>
+<p>A bit more.</p>
+<p>Too much</p>
+</li>
+<li>
+<p>Two</p>
+</li>
+</ol>
 <p>This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <phrase><annotation type="code">markup:</annotation></phrase> heading and comparing it to the text of the expected result as shown under the <phrase><annotation type="code">result:</annotation></phrase> heading in the test file. This is not a perfect test. Two issues are known:</p>
-<p>This should cause an error.</p>
-<p>Another error should occur here.</p>
+<p>This should cause an error if indented below the para above.</p>
 <ul>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
@@ -354,6 +363,11 @@ multiple lines.
 <source>
 <codeblock language="sam">
 0. One
+   and a bit.
+
+   A bit more.
+
+   Too much
 
 0. Two
 
@@ -363,7 +377,9 @@ multiple lines.
 <markup>
 <ol>
 <li>
-<p>One</p>
+<p>One and a bit.</p>
+<p>A bit more.</p>
+<p>Too much</p>
 </li>
 <li>
 <p>Two</p>
