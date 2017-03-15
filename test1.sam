@@ -1277,8 +1277,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    |Do| a deer, a female deer
-                    |Re| a drop of golden sun
+                    |Do| a deer,
+                    a female deer
+
+                    Also called a doe.
+                    |Re| a drop of
+                         golden sun
+
+                         Is it a particle or a wave?
                     |Me| a name I call myself
                     |Fa| a long long way to run
                     |So| a needle pulling thread
@@ -1286,13 +1292,21 @@ tests:(!en) SAM Parser Tests
                     |Te| a drink with jam and bread
 
             markup:
-                |Doe| a deer, a female deer
-                |Ray| a drop of golden sun
+                |Do| a deer,
+                     a female deer
+
+                Also called a doe.
+
+                |Re| a drop of
+                     golden sun
+
+                     Is it a particle or a wave?
+
                 |Me| a name I call myself
-                |Far| a long long way to run
-                |Sew| a needle pulling thread
+                |Fa| a long long way to run
+                |So| a needle pulling thread
                 |La| a note to follow so
-                |Tea| a drink with jam and bread
+                |Te| a drink with jam and bread
 
             result:
                 ```(xml)

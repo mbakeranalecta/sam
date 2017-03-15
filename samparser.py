@@ -107,7 +107,7 @@ class SamParser:
 
     def _block(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         block_name = match.group("name").strip()
         attributes = parse_attributes(match.group("attributes"))
         content = match.group("content").strip()
@@ -119,7 +119,7 @@ class SamParser:
         source, match = context
         if match.group("unexpected"):
             raise SAMParserError("Unexpected characters in codeblock header. Found: " + match.group("unexpected"))
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
 
         attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
@@ -153,7 +153,7 @@ class SamParser:
         source, match = context
         if match.group("unexpected"):
             raise SAMParserError("Unexpected characters in embed header. Found: " + match.group("unexpected"))
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
 
         attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
@@ -185,7 +185,7 @@ class SamParser:
 
     def _blockquote_start(self, context):
         source, match = context
-        indent = len(match.group('indent'))
+        indent = match.end("indent")
 
         # TODO: Refactor this with the paraparser version
 
@@ -234,7 +234,7 @@ class SamParser:
 
     def _fragment_start(self, context):
         source, match = context
-        indent = len(match.group('indent'))
+        indent = match.end("indent")
 
         attributes = {}
 
@@ -311,10 +311,11 @@ class SamParser:
 
     def _labeled_list_item(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         label = match.group("label")
+        content_start = match.start("content") + 1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_labeled_list_item(attributes, indent, label)
+        self.doc.new_labeled_list_item(attributes, indent, label, content_start)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -322,7 +323,7 @@ class SamParser:
         source, match = context
         if match.group("unexpected"):
             raise SAMParserError("Unexpected characters in block insert. Found: " + match.group("unexpected"))
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         attributes = parse_insert(match.group("insert"))
         attributes.update(parse_attributes(match.group("attributes"), flagged="*#?"))
         self.doc.new_block("insert", attributes=attributes, text=None, indent=indent)
@@ -330,27 +331,27 @@ class SamParser:
 
     def _include(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         # FIXME: Should validate attributes.
         self.doc.new_include(href=match.group("attributes")[1:-1], indent=indent)
         return "SAM", context
 
     def _string_def(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         self.doc.new_string_def(match.group('name'), para_parser.parse(match.group('content'), self.doc), indent=indent)
         return "SAM", context
 
     def _line_start(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         self.doc.new_block('line', parse_attributes(match.group("attributes")),
                            para_parser.parse(match.group('content'), self.doc, strip=False), indent=indent)
         return "SAM", context
 
     def _record_start(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         record_name = match.group("name").strip()
         attributes = parse_attributes(match.group('attributes'))
         field_names = [x.strip() for x in match.group("field_names").split(',')]
@@ -376,7 +377,7 @@ class SamParser:
 
     def _grid_start(self, context):
         source, match = context
-        indent = len(match.group('indent'))
+        indent = match.end("indent")
 
         attributes = {}
 
@@ -414,7 +415,7 @@ class SamParser:
 
     def _embedded_xml(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         embedded_xml_parser = xml.parsers.expat.ParserCreate()
         embedded_xml_parser.XmlDeclHandler = self._embedded_xml_declaration_check
         embedded_xml_parser.Parse(source.current_line.strip())
@@ -1051,8 +1052,8 @@ class DocStructure:
             self.add_block(oli)
         p = Paragraph(None, None, content_start)
         self.add_block(p)
-        pass
-    def new_labeled_list_item(self, attributes, indent, label):
+
+    def new_labeled_list_item(self, attributes, indent, label, content_start):
         lli = Block('li', attributes, '', None, indent + .2)
         lli.add_child(Block('label', None, para_parser.parse(label, self.doc), None, indent))
         if self.in_context(['p', 'li']):
@@ -1066,7 +1067,7 @@ class DocStructure:
         # element that is not an ll we be at same indent as ll, causing
         # ll to end. Because indent is fractional, and block child will
         # be more indented, which is illegal and will trigger an error.
-        p = Paragraph(None, None, indent + 5)
+        p = Paragraph(None, None, content_start)
         lli.add_child(p)
         self.current_block = p
 

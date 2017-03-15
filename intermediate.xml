@@ -1538,8 +1538,14 @@ multiple lines.
 </description>
 <source>
 <codeblock language="sam">
-|Do| a deer, a female deer
-|Re| a drop of golden sun
+|Do| a deer,
+a female deer
+
+Also called a doe.
+|Re| a drop of
+     golden sun
+
+     Is it a particle or a wave?
 |Me| a name I call myself
 |Fa| a long long way to run
 |So| a needle pulling thread
@@ -1550,23 +1556,27 @@ multiple lines.
 <markup>
 <ll>
 <li>
-<label>Doe</label>
+<label>Do</label>
 <p>a deer, a female deer</p>
 </li>
+</ll>
+<p>Also called a doe.</p>
+<ll>
 <li>
-<label>Ray</label>
+<label>Re</label>
 <p>a drop of golden sun</p>
+<p>Is it a particle or a wave?</p>
 </li>
 <li>
 <label>Me</label>
 <p>a name I call myself</p>
 </li>
 <li>
-<label>Far</label>
+<label>Fa</label>
 <p>a long long way to run</p>
 </li>
 <li>
-<label>Sew</label>
+<label>So</label>
 <p>a needle pulling thread</p>
 </li>
 <li>
@@ -1574,7 +1584,7 @@ multiple lines.
 <p>a note to follow so</p>
 </li>
 <li>
-<label>Tea</label>
+<label>Te</label>
 <p>a drink with jam and bread</p>
 </li>
 </ll>
