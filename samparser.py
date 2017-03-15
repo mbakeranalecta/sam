@@ -249,7 +249,7 @@ class SamParser:
         source, match = context
         line = source.current_line
         local_indent = len(line) - len(line.lstrip())
-        self.doc.new_paragraph(None, '', local_indent)
+        self.doc.new_paragraph(None, local_indent)
         self.current_text_block = TextBlock(line)
         return "PARAGRAPH", context
 
@@ -663,8 +663,8 @@ class Record(Block):
         yield "</row>\n"
 
 class Paragraph(Block):
-    def __init__(self, attributes=None, content=None, namespace=None, indent=0):
-        super().__init__(name='p', attributes=attributes, content=content, namespace=namespace, indent=indent)
+    def __init__(self, attributes=None,  namespace=None, indent=0):
+        super().__init__(name='p', attributes=attributes, content=None, namespace=namespace, indent=indent)
 
     def add_child(self, b):
         if not type(b) is Flow:
@@ -1024,8 +1024,8 @@ class DocStructure:
         self.add_block(b)
         return b
 
-    def new_paragraph(self, attributes, text, indent):
-        b = Paragraph(attributes, text, None, indent)
+    def new_paragraph(self, attributes, indent):
+        b = Paragraph(attributes, None, indent)
         self.add_block(b)
         return b
 
@@ -1037,7 +1037,7 @@ class DocStructure:
             ul = Block('ul', None, '', None, indent)
             self.add_block(ul)
             self.add_block(uli)
-        p = Paragraph(None, '', None, indent + 3)
+        p = Paragraph(None, None, indent + 3)
         self.add_block(p)
 
     def new_ordered_list_item(self, attributes, indent):
@@ -1048,9 +1048,9 @@ class DocStructure:
             ol = Block('ol', None, '', None, indent)
             self.add_block(ol)
             self.add_block(oli)
-        p = Paragraph(None, '', None, indent + 3)
+        p = Paragraph(None, None, indent + 3)
         self.add_block(p)
-
+        pass
     def new_labeled_list_item(self, attributes, indent, label):
         lli = Block('li', attributes, '', None, indent + .2)
         lli.add_child(Block('label', None, para_parser.parse(label, self.doc), None, indent))
@@ -1065,7 +1065,7 @@ class DocStructure:
         # element that is not an ll we be at same indent as ll, causing
         # ll to end. Because indent is fractional, and block child will
         # be more indented, which is illegal and will trigger an error.
-        p = Paragraph(None, '', None, indent + 5)
+        p = Paragraph(None, None, indent + 5)
         lli.add_child(p)
         self.current_block = p
 
