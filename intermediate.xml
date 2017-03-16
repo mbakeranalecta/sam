@@ -6,29 +6,27 @@
 <tests xml:lang="en">
 <title>SAM Parser Tests</title>
 <description>
-<ol>
+<ol/>
 <li>
 <p>One and a bit.</p>
 <p>A bit more.</p>
 <p>Too much</p>
 </li>
+<ol/>
 <li>
 <p>Two</p>
 </li>
-</ol>
 <p>This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <phrase><annotation type="code">markup:</annotation></phrase> heading and comparing it to the text of the expected result as shown under the <phrase><annotation type="code">result:</annotation></phrase> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <!-- This should cause an error if indented below the para above. -->
-<ul>
+<ol/>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
 </li>
-</ul>
 <!-- Will this work? -->
-<ul>
+<ol/>
 <li>
 <p>The SAM parser outputs attributes in alphabetical order. (From an XML point of view, the order of attributes does not matter.) Test should be written such that the attributes in the <phrase><annotation type="code">result:</annotation></phrase> section are in alphabetical order. If not, the test will fail even though the XML is semantically identical.</p>
 </li>
-</ul>
 <p>When running this test you should receive one SAM Parser Warning:</p>
 <codeblock language="terminal">
 SAM parser warning: Unannotated phrase found: {should be reported} If you are trying to insert curly braces into the document, use \{should be reported}.
@@ -378,19 +376,20 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>One and a bit.</p>
 <p>A bit more.</p>
 <p>Too much</p>
 </li>
+<ol/>
 <li>
 <p>Two</p>
 </li>
+<ol/>
 <li>
 <p>Three</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -424,18 +423,19 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>One</p>
 </li>
+<ol/>
 <li>
 <p>Two this paragraph wraps.</p>
 <p>This is another para in the list item.</p>
 </li>
+<ol/>
 <li>
 <p>Three</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -470,20 +470,22 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>One</p>
 </li>
+<ol/>
 <li>
 <p>Two</p>
 </li>
+<ol/>
 <li>
 <p>Three</p>
 </li>
+<ol/>
 <li>
 <p>Four</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -527,31 +529,34 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>One</p>
 </li>
+<ol/>
 <li>
 <p>Two x</p>
-<ol>
+<ol/>
 <li>
 <p>Two and a quarter</p>
 </li>
+<ol/>
 <li>
 <p>Two and a half</p>
 </li>
+<ol/>
 <li>
 <p>Two and three quarters</p>
 </li>
-</ol>
 </li>
+<ol/>
 <li>
 <p>Three</p>
 </li>
+<ol/>
 <li>
 <p>Four</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -600,31 +605,34 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>One</p>
 </li>
+<ol/>
 <li>
 <p>Two z</p>
-<ol>
+<ol/>
 <li>
 <p>Two and a quarter</p>
 </li>
+<ol/>
 <li>
 <p>Two and a half</p>
 </li>
+<ol/>
 <li>
 <p>Two and three quarters</p>
 </li>
-</ol>
 </li>
+<ol/>
 <li>
 <p>Three</p>
 </li>
+<ol/>
 <li>
 <p>Four</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -676,31 +684,34 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>One</p>
 </li>
+<ol/>
 <li>
 <p>Two r</p>
-<ol>
+<ol/>
 <li>
 <p>Two and a quarter</p>
 </li>
+<ol/>
 <li>
 <p>Two and a half</p>
 </li>
+<ol/>
 <li>
 <p>Two and three quarters</p>
 </li>
-</ol>
 </li>
+<ol/>
 <li>
 <p>Three</p>
 </li>
+<ol/>
 <li>
 <p>Four</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -1127,10 +1138,11 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>One</p>
 </li>
+<ol/>
 <li>
 <p>Two a</p>
 <ul>
@@ -1145,13 +1157,14 @@ multiple lines.
 </li>
 </ul>
 </li>
+<ol/>
 <li>
 <p>Three</p>
 </li>
+<ol/>
 <li>
 <p>Four</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -1200,10 +1213,11 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>One</p>
 </li>
+<ol/>
 <li>
 <p>Two s</p>
 <ul>
@@ -1218,13 +1232,14 @@ multiple lines.
 </li>
 </ul>
 </li>
+<ol/>
 <li>
 <p>Three</p>
 </li>
+<ol/>
 <li>
 <p>Four</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -1277,10 +1292,11 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>One</p>
 </li>
+<ol/>
 <li>
 <p>Two d</p>
 <ul>
@@ -1295,15 +1311,16 @@ multiple lines.
 </li>
 </ul>
 </li>
+<ol/>
 <li>
 <p>Three times three is nine.</p>
 <p>Four times four is sixteen.</p>
 <p>Five time five is twenty five.</p>
 </li>
+<ol/>
 <li>
 <p>Four</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -1363,17 +1380,18 @@ multiple lines.
 <p>Three</p>
 </li>
 </ul>
-<ol>
+<ol/>
 <li>
 <p>One</p>
 </li>
+<ol/>
 <li>
 <p>Two g</p>
 </li>
+<ol/>
 <li>
 <p>Three</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -1429,17 +1447,18 @@ multiple lines.
 <p>Three</p>
 </li>
 </ul>
-<ol>
+<ol/>
 <li>
 <p>One</p>
 </li>
+<ol/>
 <li>
 <p>Two j</p>
 </li>
+<ol/>
 <li>
 <p>Three</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -2463,17 +2482,18 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>Fred</p>
 </li>
+<ol/>
 <li conditions="a,b" id="id8" name="name" xml:lang="en-CA">
 <p>Barney and Betty and Bam Bam.</p>
 </li>
+<ol/>
 <li>
 <p>Wilma</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3308,17 +3328,18 @@ There is a `_` in _this \_ italic_ decoration.
 </codeblock>
 </source>
 <markup>
-<ol>
+<ol/>
 <li>
 <p>Fred</p>
 </li>
+<ol/>
 <li conditions="foo">
 <p>Barney and Betty and Bam Bam.</p>
 </li>
+<ol/>
 <li>
 <p>Wilma</p>
 </li>
-</ol>
 </markup>
 <result>
 <codeblock language="xml">

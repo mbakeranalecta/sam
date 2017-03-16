@@ -26,14 +26,14 @@ tests:(!en) SAM Parser Tests
 
         #This should cause an error if indented below the para above.
 
-        * Test are done on whitespace normalized versions of the XML markup
+        1. Test are done on whitespace normalized versions of the XML markup
           strings. As such, they do not validly test situations where whitespace
           should be retained, such as in codeblocks and at the beginning of
           lines.
 
         #Will this work?
 
-        * The SAM parser outputs attributes in alphabetical order. (From an XML point of view,
+        2. The SAM parser outputs attributes in alphabetical order. (From an XML point of view,
           the order of attributes does not matter.) Test should be written such
           that the attributes in the `result:` section are in alphabetical
           order. If not, the test will fail even though the XML is semantically
@@ -314,7 +314,7 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
 
-                    0. One
+                    0. Onex
                        and a bit.
 
                        A bit more.
@@ -327,7 +327,7 @@ tests:(!en) SAM Parser Tests
 
             markup:
 
-                0. One
+                0. Onex
                    and a bit.
 
                    A bit more.
@@ -443,7 +443,7 @@ tests:(!en) SAM Parser Tests
 
                     0. Two x
 
-                        5. Two and a quarter
+                        5. Two and a quarter x
 
                         6. Two and a half
 
@@ -458,7 +458,7 @@ tests:(!en) SAM Parser Tests
 
                 0. Two x
 
-                    5. Two and a quarter
+                    5. Two and a quarter x
 
                     6. Two and a half
 
@@ -507,7 +507,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     0. One
                     0. Two z
-                        5. Two and a quarter
+                        5. Two and a quarter z
                         6. Two and a half
                         9. Two and three quarters
                     99999. Three
@@ -516,7 +516,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 0. One
                 0. Two z
-                    5. Two and a quarter
+                    5. Two and a quarter z
                     6. Two and a half
                     9. Two and three quarters
                 99999. Three
@@ -559,7 +559,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     0. One
                     0. Two r
-                        5. Two and a quarter
+                        5. Two and a quarter r
 
                         6. Two and a half
                         9. Two and three quarters
@@ -571,7 +571,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 0. One
                 0. Two r
-                    5. Two and a quarter
+                    5. Two and a quarter r
 
                     6. Two and a half
                     9. Two and three quarters
@@ -795,8 +795,6 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-
-
                     * One
                     * Two k
                         * Two and a quarter
@@ -849,11 +847,9 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-
-
                     * One
                     * Two p
-                        * Two and a quarter
+                        * Two and a quarter p
 
                         * Two and a half
                         * Two and three quarters
@@ -864,7 +860,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 * One
                 * Two p
-                    * Two and a quarter
+                    * Two and a quarter p
 
                     * Two and a half
                     * Two and three quarters

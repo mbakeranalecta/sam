@@ -552,6 +552,14 @@ class Block(ABC):
         self.parent = None
         self.children = []
 
+    def add(self, b):
+        if self.indent < b.indent:
+            self.add_child(b)
+        elif self.indent == b.indent:
+            self.add_sibling(b)
+        else:
+            self.parent.add(b)
+
     def add_child(self, b):
         b.parent = self
         self.children.append(b)
@@ -576,7 +584,9 @@ class Block(ABC):
 
     def _output_block(self):
         yield " " * int(self.indent)
-        yield "[%s:'%s'" % (self.name, self.content)
+        yield "[%s:" % (self.name)
+        if self.content:
+            yield "['%s'" % (self.content)
         for x in self.children:
             yield "\n"
             yield str(x)
@@ -719,9 +729,17 @@ class Comment(Block):
         self.name='#comment'
         self.namespace=None
 
+    def add_child(self, b):
+        if self.parent.name == 'li' and b.name in ['ol', 'ul', '#comment']:
+            b.parent = self.parent
+            self.parent.children.append(b)
+        else:
+            raise SAMParserError(
+                'A comment cannot have block children. Following \"{0}\".'.format(
+                    str(self)))
 
     def __str__(self):
-        return u"[#comment:'{1:s}']".format(self.content)
+        return u"[#{0}]".format(self.content)
 
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
@@ -1040,13 +1058,10 @@ class DocStructure:
 
         if self.doc is None:
             raise SAMParserError('No root element found.')
-        elif self.current_block.indent < block.indent:
-            self.current_block.add_child(block)
-        elif self.current_block.indent == block.indent:
-            self.current_block.add_sibling(block)
-        else:
-            self.current_block.add_at_indent(block, block.indent)
+
+        self.current_block.add(block)
         self.current_block = block
+
         #print(self.cur_blk(), '|', self.current_block)
         #pass
         # Useful lines for debugging the build of the tree
@@ -1064,24 +1079,24 @@ class DocStructure:
         return b
 
     def new_unordered_list_item(self, attributes, indent, content_start):
-        uli = Block('li', attributes, '', None, indent + .1)
-        if self.context_at_indent(indent + .1)[:2] == ['li', 'ul']:
+        uli = Block('li', attributes, '', None, indent)
+        if type(self.current_block.parent) is UnorderedList:
             self.add_block(uli)
         else:
             ul = UnorderedList( None, '', None, indent)
             self.add_block(ul)
-            self.add_block(uli)
+            ul.add(uli)
         p = Paragraph(None, None, content_start)
         self.add_block(p)
 
     def new_ordered_list_item(self, attributes, indent, content_start):
-        oli = Block('li', attributes, '', None, indent + .1)
-        if self.context_at_indent(indent + .1)[:2] == ['li', 'ol']:
+        oli = Block('li', attributes, '', None, indent )
+        if type(self.current_block.parent) is OrderedList:
             self.add_block(oli)
         else:
             ol = OrderedList(None, '', None, indent)
             self.add_block(ol)
-            self.add_block(oli)
+            ol.add(oli)
         p = Paragraph(None, None, content_start)
         self.add_block(p)
 
