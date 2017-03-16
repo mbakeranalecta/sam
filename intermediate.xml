@@ -17,11 +17,14 @@
 </li>
 </ol>
 <p>This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <phrase><annotation type="code">markup:</annotation></phrase> heading and comparing it to the text of the expected result as shown under the <phrase><annotation type="code">result:</annotation></phrase> heading in the test file. This is not a perfect test. Two issues are known:</p>
-<p>This should cause an error if indented below the para above.</p>
+<!-- This should cause an error if indented below the para above. -->
 <ul>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
 </li>
+</ul>
+<!-- Will this work? -->
+<ul>
 <li>
 <p>The SAM parser outputs attributes in alphabetical order. (From an XML point of view, the order of attributes does not matter.) Test should be written such that the attributes in the <phrase><annotation type="code">result:</annotation></phrase> section are in alphabetical order. If not, the test will fail even though the XML is semantically identical.</p>
 </li>

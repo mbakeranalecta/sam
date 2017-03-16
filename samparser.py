@@ -8,6 +8,7 @@ import urllib.request
 import pathlib
 import codecs
 import os
+from abc import ABC, abstractmethod
 
 from urllib.parse import urlparse
 
@@ -26,7 +27,7 @@ re_ol_marker = r'(?P<marker>[0-9]+\.)'
 re_ll_marker = r'\|(?P<label>\S.*?)(?<!\\)\|'
 re_spaces = r'\s+'
 re_one_space = r'\s'
-re_comment = r'#.*'
+re_comment = r'#(?P<comment>.*)'
 
 
 class SamParser:
@@ -454,7 +455,7 @@ class SamParser:
 
         match = self.patterns['comment'].match(line)
         if match is not None:
-            self.doc.new_comment(Comment(line.strip()[1:]))
+            self.doc.new_comment(match.group('comment'), match.end('indent'))
             return "SAM", (source, match)
 
         match = self.patterns['record-start'].match(line)
@@ -532,7 +533,7 @@ class SamParser:
 
 
 
-class Block:
+class Block(ABC):
     def __init__(self, name, attributes=None, content=None, namespace=None, indent=0):
 
         # Test for a valid block name. Must be valid XML name.
@@ -629,8 +630,6 @@ class RecordSet(Block):
         r.parent = self
         self.children.append(r)
 
-
-
 class Record(Block):
     def __init__(self, field_values, attributes=None, content=None, namespace=None, indent=0):
         self.field_values = field_values
@@ -665,6 +664,37 @@ class Record(Block):
             yield "</{0}>\n".format(x[0])
         yield "</row>\n"
 
+
+class List(Block):
+    @abstractmethod
+    def __init__(self,*args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def add_sibling(self, b):
+        if type(b) is Comment:
+            b.parent = self
+            self.add_child(b)
+        else:
+            b.parent = self.parent
+            self.parent.add_child(b)
+
+
+class UnorderedList(List):
+    def __init__(self, attributes=None, content=None, namespace=None, indent=0):
+        super().__init__(name='ul', attributes=attributes, content=None, namespace=namespace, indent=indent)
+
+
+class OrderedList(List):
+    def __init__(self, attributes=None, content=None, namespace=None, indent=0):
+        super().__init__(name='ol', attributes=attributes, content=None, namespace=namespace, indent=indent)
+
+
+class LabeledList(List):
+    def __init__(self, label=None, attributes=None, content=None, namespace=None, indent=0):
+        super().__init__(name='ll', attributes=attributes, content=None, namespace=namespace, indent=indent)
+        self.lable = label
+
+
 class Paragraph(Block):
     def __init__(self, attributes=None,  namespace=None, indent=0):
         super().__init__(name='p', attributes=attributes, content=None, namespace=namespace, indent=indent)
@@ -673,7 +703,7 @@ class Paragraph(Block):
         if type(b) is Flow:
             b.parent = self
             self.children.append(b)
-        elif self.parent.name == 'li' and b.name in ['ol', 'ul']:
+        elif self.parent.name == 'li' and b.name in ['ol', 'ul', '#comment']:
             b.parent = self.parent
             self.parent.children.append(b)
         else:
@@ -682,10 +712,13 @@ class Paragraph(Block):
                     str(self)))
 
 
-class Comment:
+class Comment(Block):
     def __init__(self, content='', indent=0):
         self.content=content
         self.indent=indent
+        self.name='#comment'
+        self.namespace=None
+
 
     def __str__(self):
         return u"[#comment:'{1:s}']".format(self.content)
@@ -727,7 +760,7 @@ class Root(Block):
         # calling this function. Not sure what the options are. Could detect
         # the error at the XML output stage, I suppose, but would rather
         # catch it earlier and give feedback.
-        if any( issubclass(type(x), Block) for x in self.children):
+        if any( type(x) is not Comment for x in self.children):
             raise SAMParserError("A SAM document can only have one root. Found: "+ str(b))
         b.parent = self
         self.children.append(b)
@@ -867,7 +900,6 @@ class DocStructure:
             return cur
         except(AttributeError):
             return cur
-
 
     def new_declaration(self, match):
         name=match.group('name').strip()
@@ -1036,7 +1068,7 @@ class DocStructure:
         if self.context_at_indent(indent + .1)[:2] == ['li', 'ul']:
             self.add_block(uli)
         else:
-            ul = Block('ul', None, '', None, indent)
+            ul = UnorderedList( None, '', None, indent)
             self.add_block(ul)
             self.add_block(uli)
         p = Paragraph(None, None, content_start)
@@ -1047,7 +1079,7 @@ class DocStructure:
         if self.context_at_indent(indent + .1)[:2] == ['li', 'ol']:
             self.add_block(oli)
         else:
-            ol = Block('ol', None, '', None, indent)
+            ol = OrderedList(None, '', None, indent)
             self.add_block(ol)
             self.add_block(oli)
         p = Paragraph(None, None, content_start)
@@ -1078,10 +1110,10 @@ class DocStructure:
                 raise SAMParserError("Duplicate ID found: " + ids[0])
             self.ids.append(id)
         self.current_block.add_child(flow)
-       # self.current_block = self.current_block.parent
 
-    def new_comment(self, comment):
-        self.current_block.add_child(comment)
+    def new_comment(self, comment, indent):
+        c = Comment(comment,indent)
+        self.add_block(c)
 
     def new_embedded_xml(self, text, indent):
         b = EmbeddedXML(text=text, indent=indent)

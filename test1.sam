@@ -1,5 +1,5 @@
 ﻿# This file is part of the SPFE Open Toolkit. See the accompanying license.txt file
- # for applicable licenses.
+# for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
 # Need test for unicode characters and numbers in names.
@@ -24,12 +24,14 @@ tests:(!en) SAM Parser Tests
         text of the expected result as shown under the `result:` heading in the
         test file. This is not a perfect test. Two issues are known:
 
-        This should cause an error if indented below the para above.
+        #This should cause an error if indented below the para above.
 
         * Test are done on whitespace normalized versions of the XML markup
           strings. As such, they do not validly test situations where whitespace
           should be retained, such as in codeblocks and at the beginning of
           lines.
+
+        #Will this work?
 
         * The SAM parser outputs attributes in alphabetical order. (From an XML point of view,
           the order of attributes does not matter.) Test should be written such
@@ -1293,7 +1295,7 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 |Do| a deer,
-                     a female deer
+                a female deer
 
                 Also called a doe.
 
