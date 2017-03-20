@@ -22,9 +22,7 @@
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
 </li>
-</ol>
 <!-- Will this work? -->
-<ol>
 <li>
 <p>The SAM parser outputs attributes in alphabetical order. (From an XML point of view, the order of attributes does not matter.) Test should be written such that the attributes in the <phrase><annotation type="code">result:</annotation></phrase> section are in alphabetical order. If not, the test will fail even though the XML is semantically identical.</p>
 </li>
@@ -269,6 +267,7 @@ article: Foo
 </result>
 </case>
 </test>
+<!--  FIXME: Need tests for comments. -->
 <test>
 <title>Fields</title>
 <description>
@@ -365,12 +364,7 @@ multiple lines.
 </description>
 <source>
 <codeblock language="sam">
-0. Onex
-   and a bit.
-
-   A bit more.
-
-   Too much
+0. One
 
 0. Two
 
@@ -380,9 +374,7 @@ multiple lines.
 <markup>
 <ol>
 <li>
-<p>Onex and a bit.</p>
-<p>A bit more.</p>
-<p>Too much</p>
+<p>One</p>
 </li>
 <li>
 <p>Two</p>
@@ -563,7 +555,7 @@ multiple lines.
 &lt;p&gt;Two x&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
-&lt;p&gt;Two and a quarter&lt;/p&gt;
+&lt;p&gt;Two and a quarter x&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a half&lt;/p&gt;
@@ -636,7 +628,7 @@ multiple lines.
 &lt;p&gt;Two z&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
-&lt;p&gt;Two and a quarter&lt;/p&gt;
+&lt;p&gt;Two and a quarter z&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a half&lt;/p&gt;
@@ -712,7 +704,7 @@ multiple lines.
 &lt;p&gt;Two r&lt;/p&gt;
 &lt;ol&gt;
 &lt;li&gt;
-&lt;p&gt;Two and a quarter&lt;/p&gt;
+&lt;p&gt;Two and a quarter r&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a half&lt;/p&gt;
@@ -1078,7 +1070,7 @@ multiple lines.
 &lt;p&gt;Two p&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;
-&lt;p&gt;Two and a quarter&lt;/p&gt;
+&lt;p&gt;Two and a quarter p&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Two and a half&lt;/p&gt;
@@ -1273,6 +1265,11 @@ multiple lines.
 99999. Three times
        three is nine.
 
+       Four times four is sixteen.
+
+       Five time five is twenty five.
+
+
 7. Four
 </codeblock>
 </source>
@@ -1327,6 +1324,8 @@ multiple lines.
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Three times three is nine.&lt;/p&gt;
+&lt;p&gt;Four times four is sixteen.&lt;/p&gt;
+&lt;p&gt;Five time five is twenty five.&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;Four&lt;/p&gt;
@@ -1543,8 +1542,6 @@ multiple lines.
 <codeblock language="sam">
 |Do| a deer,
 a female deer
-
-Also called a doe.
 |Re| a drop of
      golden sun
 
@@ -1559,28 +1556,32 @@ Also called a doe.
 <markup>
 <ll>
 <li>
+<label>Do</label>
 <p>a deer, a female deer</p>
 </li>
-</ll>
-<p>Also called a doe.</p>
-<ll>
 <li>
+<label>Re</label>
 <p>a drop of golden sun</p>
 <p>Is it a particle or a wave?</p>
 </li>
 <li>
+<label>Me</label>
 <p>a name I call myself</p>
 </li>
 <li>
+<label>Fa</label>
 <p>a long long way to run</p>
 </li>
 <li>
+<label>So</label>
 <p>a needle pulling thread</p>
 </li>
 <li>
+<label>La</label>
 <p>a note to follow so</p>
 </li>
 <li>
+<label>Te</label>
 <p>a drink with jam and bread</p>
 </li>
 </ll>
@@ -1589,23 +1590,24 @@ Also called a doe.
 <codeblock language="xml">
 &lt;ll&gt;
 &lt;li&gt;
-&lt;label&gt;Doe&lt;/label&gt;
+&lt;label&gt;Do&lt;/label&gt;
 &lt;p&gt;a deer, a female deer&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;label&gt;Ray&lt;/label&gt;
+&lt;label&gt;Re&lt;/label&gt;
 &lt;p&gt;a drop of golden sun&lt;/p&gt;
+&lt;p&gt;Is it a particle or a wave?&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
 &lt;label&gt;Me&lt;/label&gt;
 &lt;p&gt;a name I call myself&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;label&gt;Far&lt;/label&gt;
+&lt;label&gt;Fa&lt;/label&gt;
 &lt;p&gt;a long long way to run&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;label&gt;Sew&lt;/label&gt;
+&lt;label&gt;So&lt;/label&gt;
 &lt;p&gt;a needle pulling thread&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
@@ -1613,7 +1615,7 @@ Also called a doe.
 &lt;p&gt;a note to follow so&lt;/p&gt;
 &lt;/li&gt;
 &lt;li&gt;
-&lt;label&gt;Tea&lt;/label&gt;
+&lt;label&gt;Te&lt;/label&gt;
 &lt;p&gt;a drink with jam and bread&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ll&gt;

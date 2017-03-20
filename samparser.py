@@ -754,6 +754,8 @@ class OrderedList(List):
         else:
             if type(b) is OrderedListItem:
                 self._add_child(b)
+            elif type(b) is Comment:
+                self._add_child(b)
             else:
                 self.parent.add(b)
 
@@ -777,6 +779,23 @@ class LabeledListItem(ListItem):
     def __init__(self, indent, label, attributes=None, content=None, namespace=None):
         super().__init__(name = "li", indent = indent, attributes = attributes, content = None, namespace = namespace)
         self.label = label
+
+    def serialize_xml(self):
+        yield "<{0}>\n".format(self.name)
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+
+        if self.attributes:
+            for key, value in sorted(self.attributes.items()):
+                yield " {0}=\"{1}\"".format(key, value)
+
+        yield "<label>" + self.label + "</label>\n"
+        for x in self.children:
+            if x is not None:
+                yield from x.serialize_xml()
+        yield "</{0}>\n".format(self.name)
 
 
 class LabeledList(List):

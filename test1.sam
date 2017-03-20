@@ -223,6 +223,7 @@ tests:(!en) SAM Parser Tests
                     <p>foo<phrase><annotation type="link" specifically="http://www.example.com/">bar</annotation></phrase>.</p>
                     </article>
 
+    # FIXME: Need tests for comments.
 
     test: Fields
         description:
@@ -314,12 +315,7 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
 
-                    0. Onex
-                       and a bit.
-
-                       A bit more.
-
-                       Too much
+                    0. One
 
                     0. Two
 
@@ -327,12 +323,7 @@ tests:(!en) SAM Parser Tests
 
             markup:
 
-                0. Onex
-                   and a bit.
-
-                   A bit more.
-
-                   Too much
+                0. One
 
                 0. Two
 
@@ -478,7 +469,7 @@ tests:(!en) SAM Parser Tests
                     <p>Two x</p>
                     <ol>
                     <li>
-                    <p>Two and a quarter</p>
+                    <p>Two and a quarter x</p>
                     </li>
                     <li>
                     <p>Two and a half</p>
@@ -532,7 +523,7 @@ tests:(!en) SAM Parser Tests
                     <p>Two z</p>
                     <ol>
                     <li>
-                    <p>Two and a quarter</p>
+                    <p>Two and a quarter z</p>
                     </li>
                     <li>
                     <p>Two and a half</p>
@@ -590,7 +581,7 @@ tests:(!en) SAM Parser Tests
                     <p>Two r</p>
                     <ol>
                     <li>
-                    <p>Two and a quarter</p>
+                    <p>Two and a quarter r</p>
                     </li>
                     <li>
                     <p>Two and a half</p>
@@ -878,7 +869,7 @@ tests:(!en) SAM Parser Tests
                     <p>Two p</p>
                     <ul>
                     <li>
-                    <p>Two and a quarter</p>
+                    <p>Two and a quarter p</p>
                     </li>
                     <li>
                     <p>Two and a half</p>
@@ -1043,6 +1034,11 @@ tests:(!en) SAM Parser Tests
                     99999. Three times
                            three is nine.
 
+                           Four times four is sixteen.
+
+                           Five time five is twenty five.
+
+
                     7. Four
 
             markup:
@@ -1085,6 +1081,8 @@ tests:(!en) SAM Parser Tests
                     </li>
                     <li>
                     <p>Three times three is nine.</p>
+                    <p>Four times four is sixteen.</p>
+                    <p>Five time five is twenty five.</p>
                     </li>
                     <li>
                     <p>Four</p>
@@ -1277,8 +1275,6 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     |Do| a deer,
                     a female deer
-
-                    Also called a doe.
                     |Re| a drop of
                          golden sun
 
@@ -1292,14 +1288,10 @@ tests:(!en) SAM Parser Tests
             markup:
                 |Do| a deer,
                 a female deer
-
-                Also called a doe.
-
                 |Re| a drop of
                      golden sun
 
                      Is it a particle or a wave?
-
                 |Me| a name I call myself
                 |Fa| a long long way to run
                 |So| a needle pulling thread
@@ -1310,23 +1302,24 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <ll>
                     <li>
-                    <label>Doe</label>
+                    <label>Do</label>
                     <p>a deer, a female deer</p>
                     </li>
                     <li>
-                    <label>Ray</label>
+                    <label>Re</label>
                     <p>a drop of golden sun</p>
+                    <p>Is it a particle or a wave?</p>
                     </li>
                     <li>
                     <label>Me</label>
                     <p>a name I call myself</p>
                     </li>
                     <li>
-                    <label>Far</label>
+                    <label>Fa</label>
                     <p>a long long way to run</p>
                     </li>
                     <li>
-                    <label>Sew</label>
+                    <label>So</label>
                     <p>a needle pulling thread</p>
                     </li>
                     <li>
@@ -1334,7 +1327,7 @@ tests:(!en) SAM Parser Tests
                     <p>a note to follow so</p>
                     </li>
                     <li>
-                    <label>Tea</label>
+                    <label>Te</label>
                     <p>a drink with jam and bread</p>
                     </li>
                     </ll>
