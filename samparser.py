@@ -113,7 +113,7 @@ class SamParser:
         attributes = parse_attributes(match.group("attributes"))
         content = match.group("content").strip()
         parsed_content = None if content == '' else para_parser.parse(content, self.doc)
-        self.doc.new_block(block_name, attributes, parsed_content, indent)
+        self.doc.new_block(block_name, indent, attributes, parsed_content)
         return "SAM", context
 
     def _codeblock_start(self, context):
@@ -124,7 +124,7 @@ class SamParser:
 
         attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
-        self.doc.new_block('codeblock', attributes, None, indent)
+        self.doc.new_block('codeblock', indent, attributes, None)
         self.current_text_block = TextBlock()
         return "CODEBLOCK", context
 
@@ -158,7 +158,7 @@ class SamParser:
 
         attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
-        self.doc.new_block('embed', attributes, None, indent)
+        self.doc.new_block('embed', indent, attributes, None)
         self.current_text_block = TextBlock()
         return "EMBED", context
 
@@ -197,7 +197,7 @@ class SamParser:
 
         attributes = parse_attributes(match.group("attributes"))
 
-        b = self.doc.new_block('blockquote', attributes, None, indent)
+        b = self.doc.new_block('blockquote', indent, attributes, None)
 
         # see if there is a citation
         try:
@@ -229,7 +229,7 @@ class SamParser:
 
         if citation_type:
             cit = (Citation(citation_type, citation_value, extra))
-            b.add_child(cit)
+            b._add_child(cit)
 
         return "SAM", context
 
@@ -243,14 +243,14 @@ class SamParser:
         if attributes_string is not None:
             attributes.update(parse_attributes(attributes_string))
 
-        self.doc.new_block('fragment', attributes, None, indent)
+        self.doc.new_block('fragment', indent, attributes, None)
         return "SAM", context
 
     def _paragraph_start(self, context):
         source, match = context
         line = source.current_line
         local_indent = len(line) - len(line.lstrip())
-        self.doc.new_paragraph(None, local_indent)
+        self.doc.new_paragraph(local_indent, None )
         self.current_text_block = TextBlock(line)
         return "PARAGRAPH", context
 
@@ -297,7 +297,7 @@ class SamParser:
         indent = match.end("indent")
         content_start=match.start("content")+1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_unordered_list_item(attributes, indent, content_start)
+        self.doc.new_unordered_list_item(indent, attributes, content_start)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -306,7 +306,7 @@ class SamParser:
         indent = match.end("indent")
         content_start=match.start("content")+1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_ordered_list_item(attributes, indent, content_start)
+        self.doc.new_ordered_list_item(indent, attributes, content_start)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -316,7 +316,7 @@ class SamParser:
         label = match.group("label")
         content_start = match.start("content") + 1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_labeled_list_item(attributes, indent, label, content_start)
+        self.doc.new_labeled_list_item(indent, label, attributes, content_start)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -327,7 +327,7 @@ class SamParser:
         indent = match.end("indent")
         attributes = parse_insert(match.group("insert"))
         attributes.update(parse_attributes(match.group("attributes"), flagged="*#?"))
-        self.doc.new_block("insert", attributes=attributes, text=None, indent=indent)
+        self.doc.new_block("insert", indent=indent, attributes=attributes, text=None)
         return "SAM", context
 
     def _include(self, context):
@@ -346,8 +346,8 @@ class SamParser:
     def _line_start(self, context):
         source, match = context
         indent = match.end("indent")
-        self.doc.new_block('line', parse_attributes(match.group("attributes")),
-                           para_parser.parse(match.group('content'), self.doc, strip=False), indent=indent)
+        self.doc.new_block('line', indent, parse_attributes(match.group("attributes")),
+                           para_parser.parse(match.group('content'), self.doc, strip=False))
         return "SAM", context
 
     def _record_start(self, context):
@@ -356,7 +356,7 @@ class SamParser:
         record_name = match.group("name").strip()
         attributes = parse_attributes(match.group('attributes'))
         field_names = [x.strip() for x in match.group("field_names").split(',')]
-        self.doc.new_record_set(record_name, field_names, attributes, indent)
+        self.doc.new_record_set(record_name, field_names, indent, attributes)
         return "RECORD", context
 
     def _record(self, context):
@@ -372,6 +372,7 @@ class SamParser:
             source.return_line()
             return "SAM", context
         else:
+            #FIXME: splitting field values belongs to record object
             field_values = [para_parser.parse(x.strip(), self.doc) for x in re.split(r'(?<!\\),', line)]
             self.doc.new_record(field_values, indent)
             return "RECORD", context
@@ -386,7 +387,7 @@ class SamParser:
         if attributes_string is not None:
             attributes.update(parse_attributes(attributes_string))
 
-        self.doc.new_block('grid', attributes, None, indent)
+        self.doc.new_block('grid', indent, attributes, None)
         return "GRID", context
 
     def _grid(self, context):
@@ -406,9 +407,9 @@ class SamParser:
             if self.doc.current_block.name == 'row':
                 if len(self.doc.current_block.children) != len(cell_values):
                     raise SAMParserError('Uneven number of cells in grid row at: "' + line + '"')
-            self.doc.new_block('row', None, None, indent)
+            self.doc.new_block('row', indent, None, None)
             for content in cell_values:
-                self.doc.new_block('cell', None, None, indent + 1)
+                self.doc.new_block('cell', indent + 1, None, None)
                 self.doc.new_flow(para_parser.parse(content, self.doc))
             # Test for consistency with previous rows?
 
@@ -534,7 +535,7 @@ class SamParser:
 
 
 class Block(ABC):
-    def __init__(self, name, attributes=None, content=None, namespace=None, indent=0):
+    def __init__(self, name, indent, attributes=None, content=None, namespace=None ):
 
         # Test for a valid block name. Must be valid XML name.
         try:
@@ -553,25 +554,47 @@ class Block(ABC):
         self.children = []
 
     def add(self, b):
-        if self.indent < b.indent:
-            self.add_child(b)
-        elif self.indent == b.indent:
-            self.add_sibling(b)
-        else:
-            self.parent.add(b)
+        """
+        Add a block to the the current block or hand it off to the parent block.
+        If the block is more indented than self, add it as a child.
+        Otherwise call add on the parent block of self. This will recurse until
+        the block finds it rightful home in the hierarchy.
 
-    def add_child(self, b):
+        Return the block you added so that the document structure can update
+        the current_record variable. This way any additional blocks created
+        :param b: The block to add.
+
+        """
+        if b.indent <= self.indent:
+            self.parent.add(b)
+        else:
+            if type(b) is OrderedListItem:
+                ol = OrderedList(indent=b.indent)
+                self.add(ol)
+                ol.add(b)
+            elif type(b) is UnorderedListItem:
+                ul = UnorderedList(indent=b.indent)
+                self.add(ul)
+                ul.add(b)
+            elif type(b) is LabeledListItem:
+                ll = LabeledList(indent=b.indent)
+                self.add(ll)
+                ll.add(b)
+            else:
+                self._add_child(b)
+
+    def _add_child(self, b):
+        """
+        Adds a child block to the current block.
+        The main reason for this being separated from the add method is so that
+        block types that override add can sill inherit add_child, ensuring that
+        they do not forget to update the block's parent attribute.
+        :param b: The block to add.
+        :return: None
+        """
         b.parent = self
         self.children.append(b)
 
-    def add_sibling(self, b):
-        b.parent = self.parent
-        self.parent.add_child(b)
-
-    def add_at_indent(self, b, indent):
-        x = self.ancestor_at_indent(indent)
-        b.parent = x
-        x.children.append(b)
 
     def ancestor_at_indent(self, indent):
         x = self.parent
@@ -625,20 +648,23 @@ class Block(ABC):
                 yield "</{0}>\n".format(self.name)
 
 class RecordSet(Block):
-    def __init__(self, name, field_names, attributes=None, content=None, namespace=None, indent=0):
-        super().__init__(name=name, attributes=attributes, content=content, namespace=namespace, indent=indent)
+    def __init__(self, name, field_names, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name=name, indent=indent, attributes=attributes, content=content, namespace=namespace)
         self.field_names = field_names
 
-    def add_child(self, r):
-        if not type(r) is Record:
+    def add(self, b):
+        if b.indent <= self.indent:
+            self.parent.add(b)
+        elif not type(b) is Record:
             raise SAMParserError('A RecordSet can only have Record children. At \"{0}\".'.format(
                     str(self)))
-        if len(r.field_values) != len(self.field_names):
+        elif len(b.field_values) != len(self.field_names):
             raise SAMParserError('Record length does not match record set header. At: \n{0}\n'.format(
                     str(self)))
-        r.record = list(zip(self.field_names, r.field_values))
-        r.parent = self
-        self.children.append(r)
+        else:
+            b.record = list(zip(self.field_names, b.field_values))
+            b.parent = self
+            self.children.append(b)
 
 class Record(Block):
     def __init__(self, field_values, attributes=None, content=None, namespace=None, indent=0):
@@ -682,34 +708,103 @@ class List(Block):
 
     def add_sibling(self, b):
         if type(b) is Comment:
-            b.parent = self
-            self.add_child(b)
+            self._add_child(b)
+        if b.name == 'li':
+            self._add_child(b)
         else:
-            b.parent = self.parent
-            self.parent.add_child(b)
+            self.parent._add_child(b)
 
 
 class UnorderedList(List):
-    def __init__(self, attributes=None, content=None, namespace=None, indent=0):
-        super().__init__(name='ul', attributes=attributes, content=None, namespace=namespace, indent=indent)
+    def __init__(self, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name='ul', indent=indent, attributes=attributes, content=None, namespace=namespace)
 
+    def add(self, b):
+        """
+        Override the Block add method to:
+        * Accept UnorderedListItems as children
+        * Raise error is asked to add anything else
+
+        :param b: The block to add.
+
+        """
+        if b.indent < self.indent:
+            self.parent.add(b)
+        else:
+            if type(b) is UnorderedListItem:
+                self._add_child(b)
+            else:
+                self.parent.add(b)
 
 class OrderedList(List):
-    def __init__(self, attributes=None, content=None, namespace=None, indent=0):
-        super().__init__(name='ol', attributes=attributes, content=None, namespace=namespace, indent=indent)
+    def __init__(self, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name='ol', indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+    def add(self, b):
+        """
+        Override the Block add method to:
+        * Accept OrderedListItems as children
+        * Raise error is asked to add anything else
+
+        :param b: The block to add.
+
+        """
+        if b.indent < self.indent:
+            self.parent.add(b)
+        else:
+            if type(b) is OrderedListItem:
+                self._add_child(b)
+            else:
+                self.parent.add(b)
+
+class ListItem(Block):
+    @abstractmethod
+    def __init__(self, name, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name=name, indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+
+class OrderedListItem(ListItem):
+    def __init__(self, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name = "li", indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+
+class UnorderedListItem(ListItem):
+    def __init__(self, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name =  "li", indent = indent, attributes = attributes, content = None, namespace = namespace)
+
+
+class LabeledListItem(ListItem):
+    def __init__(self, indent, label, attributes=None, content=None, namespace=None):
+        super().__init__(name = "li", indent = indent, attributes = attributes, content = None, namespace = namespace)
+        self.label = label
 
 
 class LabeledList(List):
-    def __init__(self, label=None, attributes=None, content=None, namespace=None, indent=0):
-        super().__init__(name='ll', attributes=attributes, content=None, namespace=namespace, indent=indent)
-        self.lable = label
+    def __init__(self, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name='ll', indent=indent, attributes=attributes, content=None, namespace=namespace)
 
+    def add(self, b):
+        """
+        Override the Block add method to:
+        * Accept LabeledListItems as children
+        * Raise error is asked to add anything else
+
+        :param b: The block to add.
+
+        """
+        if b.indent < self.indent:
+            self.parent.add(b)
+        else:
+            if type(b) is LabeledListItem:
+                self._add_child(b)
+            else:
+                self.parent.add(b)
 
 class Paragraph(Block):
-    def __init__(self, attributes=None,  namespace=None, indent=0):
-        super().__init__(name='p', attributes=attributes, content=None, namespace=namespace, indent=indent)
+    def __init__(self, indent, attributes=None,  namespace=None):
+        super().__init__(name='p', indent=indent, attributes=attributes, content=None, namespace=namespace)
 
-    def add_child(self, b):
+    def _add_child(self, b):
         if type(b) is Flow:
             b.parent = self
             self.children.append(b)
@@ -729,7 +824,7 @@ class Comment(Block):
         self.name='#comment'
         self.namespace=None
 
-    def add_child(self, b):
+    def _add_child(self, b):
         if self.parent.name == 'li' and b.name in ['ol', 'ul', '#comment']:
             b.parent = self.parent
             self.parent.children.append(b)
@@ -772,7 +867,7 @@ class Root(Block):
         for x in self.children:
             yield from x.serialize_xml()
 
-    def add_child(self, b):
+    def _add_child(self, b):
         # This is a hack to catch the creation of a second root-level block.
         # It is not good because people can add to the children list without
         # calling this function. Not sure what the options are. Could detect
@@ -1059,6 +1154,7 @@ class DocStructure:
         if self.doc is None:
             raise SAMParserError('No root element found.')
 
+        # Every verion of add should return the last block it adds to update current_block
         self.current_block.add(block)
         self.current_block = block
 
@@ -1068,55 +1164,32 @@ class DocStructure:
         # print(self.doc)
         # print('-----------------------------------------------------')
 
-    def new_block(self, block_type, attributes, text, indent):
-        b = Block(block_type, attributes, text, None, indent)
+    def new_block(self, block_type, indent, attributes, text):
+        b = Block(block_type, indent, attributes, text, None)
         self.add_block(b)
         return b
 
-    def new_paragraph(self, attributes, indent):
-        b = Paragraph(attributes, None, indent)
+    def new_paragraph(self, indent, attributes):
+        b = Paragraph(indent, attributes, None)
         self.add_block(b)
-        return b
 
-    def new_unordered_list_item(self, attributes, indent, content_start):
-        uli = Block('li', attributes, '', None, indent)
-        if type(self.current_block.parent) is UnorderedList:
-            self.add_block(uli)
-        else:
-            ul = UnorderedList( None, '', None, indent)
-            self.add_block(ul)
-            ul.add(uli)
-        p = Paragraph(None, None, content_start)
+    def new_unordered_list_item(self, indent, attributes, content_start):
+        uli = UnorderedListItem(indent, attributes)
+        self.add_block(uli)
+        p = Paragraph(content_start, None, None)
         self.add_block(p)
 
-    def new_ordered_list_item(self, attributes, indent, content_start):
-        oli = Block('li', attributes, '', None, indent )
-        if type(self.current_block.parent) is OrderedList:
-            self.add_block(oli)
-        else:
-            ol = OrderedList(None, '', None, indent)
-            self.add_block(ol)
-            ol.add(oli)
-        p = Paragraph(None, None, content_start)
+    def new_ordered_list_item(self, indent, attributes, content_start):
+        oli = OrderedListItem(indent, attributes)
+        self.add_block(oli)
+        p = Paragraph(content_start)
         self.add_block(p)
 
-    def new_labeled_list_item(self, attributes, indent, label, content_start):
-        lli = Block('li', attributes, '', None, indent + .2)
-        lli.add_child(Block('label', None, para_parser.parse(label, self.doc), None, indent))
-        if self.in_context(['p', 'li']):
-            self.current_block.parent.add_sibling(lli)
-        else:
-            ll = Block('ll', None, '', None, indent)
-            self.add_block(ll)
-            ll.add_child(lli)
-
-        # Assign the paragraph a fractional indent so that any following
-        # element that is not an ll we be at same indent as ll, causing
-        # ll to end. Because indent is fractional, and block child will
-        # be more indented, which is illegal and will trigger an error.
-        p = Paragraph(None, None, content_start)
-        lli.add_child(p)
-        self.current_block = p
+    def new_labeled_list_item(self, indent, label, attributes, content_start):
+        lli = LabeledListItem(indent, label, attributes, para_parser.parse(label, self.doc))
+        self.add_block(lli)
+        p = Paragraph(content_start)
+        self.add_block(p)
 
     def new_flow(self, flow):
         ids=[f._id for f in flow if type(f) is Phrase and f._id is not None]
@@ -1124,7 +1197,7 @@ class DocStructure:
             if id in self.ids:
                 raise SAMParserError("Duplicate ID found: " + ids[0])
             self.ids.append(id)
-        self.current_block.add_child(flow)
+        self.current_block._add_child(flow)
 
     def new_comment(self, comment, indent):
         c = Comment(comment,indent)
@@ -1138,8 +1211,8 @@ class DocStructure:
         s = StringDef(string_name, value, indent)
         self.add_block(s)
 
-    def new_record_set(self, name, field_names, attributes, indent):
-        rs = RecordSet(name, field_names, attributes, None, None, indent)
+    def new_record_set(self, name, field_names, indent, attributes):
+        rs = RecordSet(name, field_names, indent, attributes, None, None)
         self.add_block(rs)
 
     def new_record(self, field_values, indent):
@@ -1147,7 +1220,7 @@ class DocStructure:
         if record_set is None:
             raise SAMParserError('Attempted to add record where no record set is present.')
         r = Record(field_values=field_values, indent=indent)
-        record_set.add_child(r)
+        record_set.add(r)
         self.current_block = r
 
     def find_last_annotation(self, text, node=None):
