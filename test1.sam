@@ -8,30 +8,16 @@ tests:(!en) SAM Parser Tests
 
     description:
 
-        0. One
-           and a bit.
-
-           A bit more.
-
-           Too much
-
-        0. Two
-
-
         This document is the output of the test document processed by test.xslt.
         That stylesheet attempt to validate the outcome of tests by generating a string
         version of the markup under the `markup:` heading and comparing it to the
         text of the expected result as shown under the `result:` heading in the
         test file. This is not a perfect test. Two issues are known:
 
-        #This should cause an error if indented below the para above.
-
         1. Test are done on whitespace normalized versions of the XML markup
           strings. As such, they do not validly test situations where whitespace
           should be retained, such as in codeblocks and at the beginning of
           lines.
-
-        #Will this work?
 
         2. The SAM parser outputs attributes in alphabetical order. (From an XML point of view,
           the order of attributes does not matter.) Test should be written such
