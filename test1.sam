@@ -1275,6 +1275,39 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ll>
 
+        case: XML markup characters in list labels
+
+            description:
+                Making sure that the contents of a list label are properly escaped when generating XML.
+
+            source:
+                ```(sam)
+                  |foo1 & bar1| foobar1
+                  |foo2 & bar2| foobar2
+                  |foo3 & bar3| foobar3
+
+            markup:
+                |foo1 & bar1| foobar1
+                |foo2 & bar2| foobar2
+                |foo3 & bar3| foobar3
+
+            result:
+                ```(xml)
+                    <ll>
+                    <li>
+                    <label>foo1 &amp; bar1</label>
+                    <p>foobar1</p>
+                    </li>
+                    <li>
+                    <label>foo2 &amp; bar2</label>
+                    <p>foobar2</p>
+                    </li>
+                    <li>
+                    <label>foo3 &amp; bar3</label>
+                    <p>foobar3</p>
+                    </li>
+                    </ll>
+
     test: Record sets
 
         description:
