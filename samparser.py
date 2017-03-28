@@ -316,7 +316,7 @@ class SamParser:
         label = match.group("label")
         content_start = match.start("content") + 1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_labeled_list_item(indent, label, attributes, content_start)
+        self.doc.new_labeled_list_item(indent, para_parser.parse(label, self.doc), attributes, content_start)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -791,7 +791,9 @@ class LabeledListItem(ListItem):
             for key, value in sorted(self.attributes.items()):
                 yield " {0}=\"{1}\"".format(key, value)
 
-        yield "<label>" + self.label + "</label>\n"
+        yield "<label>"
+        yield from self.label.serialize_xml()
+        yield "</label>\n"
         for x in self.children:
             if x is not None:
                 yield from x.serialize_xml()
@@ -1205,7 +1207,7 @@ class DocStructure:
         self.add_block(p)
 
     def new_labeled_list_item(self, indent, label, attributes, content_start):
-        lli = LabeledListItem(indent, label, attributes, para_parser.parse(label, self.doc))
+        lli = LabeledListItem(indent, label, attributes)
         self.add_block(lli)
         p = Paragraph(content_start)
         self.add_block(p)
