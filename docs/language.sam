@@ -114,7 +114,7 @@ specification: Semantic Authoring Markdown (SAM)
 
         feature:(#block) Blocks
 
-            Blocks are indicated by a {name token}(feature) followed by a semicolon at the start of a line. 
+            Blocks are indicated by a {name token}(feature) followed by a colon at the start of a line.
 
             Blocks can have {attributes}(feature) in parens that follow the colon with no space:
 
@@ -129,7 +129,7 @@ specification: Semantic Authoring Markdown (SAM)
             * {IDs}(feature), which start with `*`
             * {Language tags}(feature), which start with `!`
             
-            If there is any content after the colon and the attributes, it is considered a title for the block and generates a title structure.
+            If there is any content after the colon and the attributes, it is considered a title for the block and generates a title structure. There must be a space between the colon or the closing parens and the content.
             
             Thus the SAM markup above would create the following XML output:
             
@@ -240,7 +240,7 @@ specification: Semantic Authoring Markdown (SAM)
         section: Includes
 
             You can include one SAM file in another. The included file must be a complete SAM file, with SAM
-            declaration. Its structured is included in the stricture of the included file at the indent level
+            declaration. Its structured is included in the structure of the included file at the indent level
             of the include statement.
 
             ```(sam)

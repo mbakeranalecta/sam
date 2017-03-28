@@ -1,5 +1,5 @@
 ﻿# This file is part of the SPFE Open Toolkit. See the accompanying license.txt file
- # for applicable licenses.
+# for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
 
 # Need test for unicode characters and numbers in names.
@@ -14,12 +14,12 @@ tests:(!en) SAM Parser Tests
         text of the expected result as shown under the `result:` heading in the
         test file. This is not a perfect test. Two issues are known:
 
-        * Test are done on whitespace normalized versions of the XML markup
+        1. Test are done on whitespace normalized versions of the XML markup
           strings. As such, they do not validly test situations where whitespace
           should be retained, such as in codeblocks and at the beginning of
           lines.
 
-        * The SAM parser outputs attributes in alphabetical order. (From an XML point of view,
+        2. The SAM parser outputs attributes in alphabetical order. (From an XML point of view,
           the order of attributes does not matter.) Test should be written such
           that the attributes in the `result:` section are in alphabetical
           order. If not, the test will fail even though the XML is semantically
@@ -186,6 +186,31 @@ tests:(!en) SAM Parser Tests
                     </body>
                     </document>
 
+        case: Paragraph with colon in first word
+
+            description:
+                Case related to issue #94.
+
+            source:
+                ```(sam)
+                    article: Foo
+
+                        foo{bar}(http://www.example.com/).
+
+            markup:
+                article: Foo
+
+                    foo{bar}(http://www.example.com/).
+
+            result:
+                ```(xml)
+                    <article>
+                    <title>Foo</title>
+                    <p>foo<phrase><annotation type="link" specifically="http://www.example.com/">bar</annotation></phrase>.</p>
+                    </article>
+
+    # FIXME: Need tests for comments.
+
     test: Fields
         description:
             A field is a block without children. A field value does not
@@ -319,7 +344,7 @@ tests:(!en) SAM Parser Tests
                     0. Two this
                        paragraph wraps.
 
-                     This is another para in the list item.
+                       This is another para in the list item.
                     99999. Three
 
             markup:
@@ -327,7 +352,7 @@ tests:(!en) SAM Parser Tests
                 0. Two this
                    paragraph wraps.
 
-                 This is another para in the list item.
+                   This is another para in the list item.
                 99999. Three
 
             result:
@@ -393,9 +418,9 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     0. One
 
-                    0. Two
+                    0. Two x
 
-                        5. Two and a quarter
+                        5. Two and a quarter x
 
                         6. Two and a half
 
@@ -408,9 +433,9 @@ tests:(!en) SAM Parser Tests
             markup:
                 0. One
 
-                0. Two
+                0. Two x
 
-                    5. Two and a quarter
+                    5. Two and a quarter x
 
                     6. Two and a half
 
@@ -427,10 +452,10 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two x</p>
                     <ol>
                     <li>
-                    <p>Two and a quarter</p>
+                    <p>Two and a quarter x</p>
                     </li>
                     <li>
                     <p>Two and a half</p>
@@ -458,8 +483,8 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     0. One
-                    0. Two
-                        5. Two and a quarter
+                    0. Two z
+                        5. Two and a quarter z
                         6. Two and a half
                         9. Two and three quarters
                     99999. Three
@@ -467,8 +492,8 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 0. One
-                0. Two
-                    5. Two and a quarter
+                0. Two z
+                    5. Two and a quarter z
                     6. Two and a half
                     9. Two and three quarters
                 99999. Three
@@ -481,10 +506,10 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two z</p>
                     <ol>
                     <li>
-                    <p>Two and a quarter</p>
+                    <p>Two and a quarter z</p>
                     </li>
                     <li>
                     <p>Two and a half</p>
@@ -510,8 +535,8 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     0. One
-                    0. Two
-                        5. Two and a quarter
+                    0. Two r
+                        5. Two and a quarter r
 
                         6. Two and a half
                         9. Two and three quarters
@@ -522,8 +547,8 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 0. One
-                0. Two
-                    5. Two and a quarter
+                0. Two r
+                    5. Two and a quarter r
 
                     6. Two and a half
                     9. Two and three quarters
@@ -539,10 +564,10 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two r</p>
                     <ol>
                     <li>
-                    <p>Two and a quarter</p>
+                    <p>Two and a quarter r</p>
                     </li>
                     <li>
                     <p>Two and a half</p>
@@ -575,7 +600,7 @@ tests:(!en) SAM Parser Tests
 
                     * One
 
-                    * Two
+                    * Two t
 
                     * Three
 
@@ -583,7 +608,7 @@ tests:(!en) SAM Parser Tests
 
                 * One
 
-                * Two
+                * Two t
 
                 * Three
 
@@ -594,7 +619,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two t</p>
                     </li>
                     <li>
                     <p>Three</p>
@@ -610,13 +635,13 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
 
                     * One
-                    * Two
+                    * Two y
                     * Three
 
             markup:
 
                 * One
-                * Two
+                * Two y
                 * Three
 
             result:
@@ -626,7 +651,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two y</p>
                     </li>
                     <li>
                     <p>Three</p>
@@ -642,7 +667,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
 
                     * One
-                    * Two
+                    * Two u
 
                     * Three
                     * Four
@@ -650,7 +675,7 @@ tests:(!en) SAM Parser Tests
             markup:
 
                 * One
-                * Two
+                * Two u
 
                 * Three
                 * Four
@@ -662,7 +687,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two u</p>
                     </li>
                     <li>
                     <p>Three</p>
@@ -684,7 +709,7 @@ tests:(!en) SAM Parser Tests
 
                     * One
 
-                    * Two
+                    * Two i
 
                         * Two and a quarter
 
@@ -699,7 +724,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 * One
 
-                * Two
+                * Two i
 
                     * Two and a quarter
 
@@ -718,7 +743,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two i</p>
                     <ul>
                     <li>
                     <p>Two and a quarter</p>
@@ -747,10 +772,8 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-
-
                     * One
-                    * Two
+                    * Two k
                         * Two and a quarter
                         * Two and a half
                         * Two and three quarters
@@ -759,7 +782,7 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 * One
-                * Two
+                * Two k
                     * Two and a quarter
                     * Two and a half
                     * Two and three quarters
@@ -773,7 +796,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two k</p>
                     <ul>
                     <li>
                     <p>Two and a quarter</p>
@@ -801,11 +824,9 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-
-
                     * One
-                    * Two
-                        * Two and a quarter
+                    * Two p
+                        * Two and a quarter p
 
                         * Two and a half
                         * Two and three quarters
@@ -815,8 +836,8 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 * One
-                * Two
-                    * Two and a quarter
+                * Two p
+                    * Two and a quarter p
 
                     * Two and a half
                     * Two and three quarters
@@ -831,10 +852,10 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two p</p>
                     <ul>
                     <li>
-                    <p>Two and a quarter</p>
+                    <p>Two and a quarter p</p>
                     </li>
                     <li>
                     <p>Two and a half</p>
@@ -870,7 +891,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     0. One
 
-                    0. Two
+                    0. Two a
 
                         * Two and a quarter
 
@@ -885,7 +906,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 0. One
 
-                0. Two
+                0. Two a
 
                     * Two and a quarter
 
@@ -905,7 +926,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two a</p>
                     <ul>
                     <li>
                     <p>Two and a quarter</p>
@@ -936,7 +957,7 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     0. One
-                    0. Two
+                    0. Two s
                         * Two and a quarter
                         * Two and a half
                         * Two and three quarters
@@ -945,7 +966,7 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 0. One
-                0. Two
+                0. Two s
                     * Two and a quarter
                     * Two and a half
                     * Two and three quarters
@@ -960,7 +981,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two s</p>
                     <ul>
                     <li>
                     <p>Two and a quarter</p>
@@ -991,24 +1012,35 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     0. One
 
-                    0. Two
+                    0. Two d
                         * Two and a quarter
 
                         * Two and a half
                         * Two and three quarters
-                    99999. Three
+                    99999. Three times
+                           three is nine.
+
+                           Four times four is sixteen.
+
+                           Five time five is twenty five.
+
 
                     7. Four
 
             markup:
                 0. One
 
-                0. Two
+                0. Two d
                     * Two and a quarter
 
                     * Two and a half
                     * Two and three quarters
-                99999. Three
+                99999. Three times
+                       three is nine.
+
+                       Four times four is sixteen.
+
+                       Five time five is twenty five.
 
                 7. Four
 
@@ -1020,7 +1052,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two d</p>
                     <ul>
                     <li>
                     <p>Two and a quarter</p>
@@ -1034,7 +1066,9 @@ tests:(!en) SAM Parser Tests
                     </ul>
                     </li>
                     <li>
-                    <p>Three</p>
+                    <p>Three times three is nine.</p>
+                    <p>Four times four is sixteen.</p>
+                    <p>Five time five is twenty five.</p>
                     </li>
                     <li>
                     <p>Four</p>
@@ -1051,20 +1085,20 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     * One
-                    * Two
+                    * Two f
                     * Three
 
                     1. One
-                    2. Two
+                    2. Two g
                     3. Three
 
             markup:
                 * One
-                * Two
+                * Two f
                 * Three
 
                 1. One
-                2. Two
+                2. Two g
                 3. Three
 
             result:
@@ -1075,7 +1109,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two f</p>
                     </li>
                     <li>
                     <p>Three</p>
@@ -1086,7 +1120,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two g</p>
                     </li>
                     <li>
                     <p>Three</p>
@@ -1102,18 +1136,18 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     * One
-                    * Two
+                    * Two h
                     * Three
                     1. One
-                    2. Two
+                    2. Two j
                     3. Three
 
             markup:
                 * One
-                * Two
+                * Two h
                 * Three
                 1. One
-                2. Two
+                2. Two j
                 3. Three
 
             result:
@@ -1124,7 +1158,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two h</p>
                     </li>
                     <li>
                     <p>Three</p>
@@ -1135,7 +1169,7 @@ tests:(!en) SAM Parser Tests
                     <p>One</p>
                     </li>
                     <li>
-                    <p>Two</p>
+                    <p>Two j</p>
                     </li>
                     <li>
                     <p>Three</p>
@@ -1225,8 +1259,12 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    |Do| a deer, a female deer
-                    |Re| a drop of golden sun
+                    |Do| a deer,
+                    a female deer
+                    |Re| a drop of
+                         golden sun
+
+                         Is it a particle or a wave?
                     |Me| a name I call myself
                     |Fa| a long long way to run
                     |So| a needle pulling thread
@@ -1234,35 +1272,40 @@ tests:(!en) SAM Parser Tests
                     |Te| a drink with jam and bread
 
             markup:
-                |Doe| a deer, a female deer
-                |Ray| a drop of golden sun
+                |Do| a deer,
+                a female deer
+                |Re| a drop of
+                     golden sun
+
+                     Is it a particle or a wave?
                 |Me| a name I call myself
-                |Far| a long long way to run
-                |Sew| a needle pulling thread
+                |Fa| a long long way to run
+                |So| a needle pulling thread
                 |La| a note to follow so
-                |Tea| a drink with jam and bread
+                |Te| a drink with jam and bread
 
             result:
                 ```(xml)
                     <ll>
                     <li>
-                    <label>Doe</label>
+                    <label>Do</label>
                     <p>a deer, a female deer</p>
                     </li>
                     <li>
-                    <label>Ray</label>
+                    <label>Re</label>
                     <p>a drop of golden sun</p>
+                    <p>Is it a particle or a wave?</p>
                     </li>
                     <li>
                     <label>Me</label>
                     <p>a name I call myself</p>
                     </li>
                     <li>
-                    <label>Far</label>
+                    <label>Fa</label>
                     <p>a long long way to run</p>
                     </li>
                     <li>
-                    <label>Sew</label>
+                    <label>So</label>
                     <p>a needle pulling thread</p>
                     </li>
                     <li>
@@ -1270,7 +1313,7 @@ tests:(!en) SAM Parser Tests
                     <p>a note to follow so</p>
                     </li>
                     <li>
-                    <label>Tea</label>
+                    <label>Te</label>
                     <p>a drink with jam and bread</p>
                     </li>
                     </ll>
@@ -1656,7 +1699,7 @@ tests:(!en) SAM Parser Tests
             annotation. The first word of an annotation on a codeblock is
             the language of the code.
 
-        case:Simple codeblock
+        case: Simple codeblock
 
             description:
                 A simple codeblock.
@@ -1736,6 +1779,40 @@ tests:(!en) SAM Parser Tests
 
                             Pay close attention. You could really hurt yourself.
                     </codeblock>
+
+        case: Invalid blockstart in codeblock
+            description:
+                This is an construct that raise an error in an actual document. Curious because
+                lots of valid block starts in other codeblocks did not cause a problem. But this
+                one raised an invalid block name error. Turns out this was caused by tabs instead
+                of spaces used to indent the line, which promoted it to a higher level of the
+                document hierarchy and thus outside the codeblock. But the test is worth keeping
+                to make sure that the contents of codeblocks are not being interpreted as SAM markup.
+
+            source:
+                ```(sam)
+                    ```
+                        first-ordered-list-item =
+                            {fontx: 12pt "Century Schoolbook"}<count=1>.[tab]
+                        ordered-list-item =
+                            {fonty: 12pt "Century Schoolbook"}<++count>.[tab]
+
+            markup:
+                ```
+                    first-ordered-list-item =
+                        {fontx: 12pt "Century Schoolbook"}<count=1>.[tab]
+                    ordered-list-item =
+                        {fonty: 12pt "Century Schoolbook"}<++count>.[tab]
+
+            result:
+                ```(xml)
+                    <codeblock>
+                    first-ordered-list-item =
+                        {fontx: 12pt "Century Schoolbook"}&lt;count=1&gt;.[tab]
+                    ordered-list-item =
+                        {fonty: 12pt "Century Schoolbook"}&lt;++count&gt;.[tab]
+                    </codeblock>
+
 
 
     test: Lines
@@ -2097,7 +2174,7 @@ tests:(!en) SAM Parser Tests
                     <p><phrase id="id11" conditions="a,b" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type="idref" value="cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
 
 
-        case:Attributes on a codeblock
+        case: Attributes on a codeblock
 
             description:
                 Attributes on a codeblock.
@@ -2131,7 +2208,7 @@ tests:(!en) SAM Parser Tests
                             return s
                     </codeblock>
 
-        case:Attributes on an embed
+        case: Attributes on an embed
 
             description:
                 Attributes on a embed.
@@ -2274,7 +2351,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don’t involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation type="nameref" value="single_source">single sourcing chapter</citation></phrase>.</p>
+                    <p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation type="nameref" value="single_source">single sourcing chapter</citation></phrase>.</p>
 
         case: Annotation with language metadata
             description:
@@ -2501,7 +2578,7 @@ tests:(!en) SAM Parser Tests
                 escape the opening square bracket with a backslash.
 
             source:
-                ```(xml)
+                ```(sam)
                     Press \[Enter].
 
             markup:
@@ -2511,6 +2588,21 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>Press [Enter].</p>
 
+        case: Multiple citations is a paragraph
+
+            description:
+                 Making sure that when there are multiple citations in a paragraph they are all detected separately.
+
+            source:
+                 ```(sam)
+                    Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in [#chapter.linking] and the subject-based composition and architecture algorithms described in [#chapter.composition] and [#chapter.architecture], including bottom-up information architecture.
+
+            markup:
+                Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in [#chapter.linking] and the subject-based composition and architecture algorithms described in [#chapter.composition] and [#chapter.architecture], including bottom-up information architecture.
+
+            result:
+                ```(xml)
+                    <p>Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in <citation type="nameref" value="chapter.linking"/> and the subject-based composition and architecture algorithms described in <citation type="nameref" value="chapter.composition"/> and <citation type="nameref" value="chapter.architecture"/>, including bottom-up information architecture.</p>
 
 
     test: Characters
@@ -3243,4 +3335,36 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <p>This para uses "dumb" quotes. Don't get them "mixed up".</p>
+
+        case: Em and en dashes
+            description:
+                The smart quote feature will also transform double hyphens surrounded
+                by spaces and triple hyphens surrounded by letters into en and em
+                dashes respectively.
+
+            source:
+                ```(sam)
+                    This para contains -- an en dash and an---em dash.
+
+            markup:
+                This para contains -- an en dash and an---em dash.
+
+                This para contains -- {an}(word) en dash and an---{em}(word) dash.
+
+                This para {contains}(word) -- an en dash and {an}(word)---em dash.
+
+                This para *contains* -- an en dash and _an_---em dash.
+
+                This para `contains` -- an en dash and "an"---em dash.
+
+                This para 'contains' -- an en dash and `an`---em dash.
+
+            result:
+                ```(xml)
+                    <p>This para contains – an en dash and an—em dash.</p>
+                    <p>This para contains – <phrase><annotation type="word">an</annotation></phrase> en dash and an—<phrase><annotation type="word">em</annotation></phrase> dash.</p>
+                    <p>This para <phrase><annotation type="word">contains</annotation></phrase> – an en dash and <phrase><annotation type="word">an</annotation></phrase>—em dash.</p>
+                    <p>This para <phrase><annotation type="bold">contains</annotation></phrase> – an en dash and <phrase><annotation type="italic">an</annotation></phrase>—em dash.</p>
+                    <p>This para <phrase><annotation type="code">contains</annotation></phrase> – an en dash and “an”—em dash.</p>
+                    <p>This para ‘contains’ – an en dash and <phrase><annotation type="code">an</annotation></phrase>—em dash.</p>
 

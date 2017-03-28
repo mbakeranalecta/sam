@@ -8,6 +8,7 @@ import urllib.request
 import pathlib
 import codecs
 import os
+from abc import ABC, abstractmethod
 
 from urllib.parse import urlparse
 
@@ -26,7 +27,7 @@ re_ol_marker = r'(?P<marker>[0-9]+\.)'
 re_ll_marker = r'\|(?P<label>\S.*?)(?<!\\)\|'
 re_spaces = r'\s+'
 re_one_space = r'\s'
-re_comment = r'#.*'
+re_comment = r'#(?P<comment>.*)'
 
 
 class SamParser:
@@ -64,7 +65,7 @@ class SamParser:
         self.patterns = {
             'comment': re.compile(re_indent + re_comment, re.U),
             'declaration': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
-            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + re_content + r'?', re.U),
+            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + '\s' + re_content + r'?', re.U),
             'codeblock-start': re.compile(
                 re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
                 re.U),
@@ -107,23 +108,23 @@ class SamParser:
 
     def _block(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         block_name = match.group("name").strip()
         attributes = parse_attributes(match.group("attributes"))
         content = match.group("content").strip()
         parsed_content = None if content == '' else para_parser.parse(content, self.doc)
-        self.doc.new_block(block_name, attributes, parsed_content, indent)
+        self.doc.new_block(block_name, indent, attributes, parsed_content)
         return "SAM", context
 
     def _codeblock_start(self, context):
         source, match = context
         if match.group("unexpected"):
             raise SAMParserError("Unexpected characters in codeblock header. Found: " + match.group("unexpected"))
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
 
         attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
-        self.doc.new_block('codeblock', attributes, None, indent)
+        self.doc.new_block('codeblock', indent, attributes, None)
         self.current_text_block = TextBlock()
         return "CODEBLOCK", context
 
@@ -140,7 +141,7 @@ class SamParser:
         if self.patterns['blank-line'].match(line):
             self.current_text_block.append(line)
             return "CODEBLOCK", context
-        if indent <= self.doc.current_block.indent:
+        if indent <= self.doc.ancestor_or_self('codeblock').indent:
             source.return_line()
             self.doc.new_flow(Pre(self.current_text_block.strip()))
             self.current_text_block = None
@@ -153,11 +154,11 @@ class SamParser:
         source, match = context
         if match.group("unexpected"):
             raise SAMParserError("Unexpected characters in embed header. Found: " + match.group("unexpected"))
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
 
         attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
-        self.doc.new_block('embed', attributes, None, indent)
+        self.doc.new_block('embed', indent, attributes, None)
         self.current_text_block = TextBlock()
         return "EMBED", context
 
@@ -174,7 +175,7 @@ class SamParser:
         if self.patterns['blank-line'].match(line):
             self.current_text_block.append(line)
             return "EMBED", context
-        if indent <= self.doc.current_block.indent:
+        if indent <= self.doc.ancestor_or_self('embed').indent:
             source.return_line()
             self.doc.new_flow(Pre(self.current_text_block.strip()))
             self.current_text_block = None
@@ -185,7 +186,7 @@ class SamParser:
 
     def _blockquote_start(self, context):
         source, match = context
-        indent = len(match.group('indent'))
+        indent = match.end("indent")
 
         # TODO: Refactor this with the paraparser version
 
@@ -196,7 +197,7 @@ class SamParser:
 
         attributes = parse_attributes(match.group("attributes"))
 
-        b = self.doc.new_block('blockquote', attributes, None, indent)
+        b = self.doc.new_block('blockquote', indent, attributes, None)
 
         # see if there is a citation
         try:
@@ -228,13 +229,13 @@ class SamParser:
 
         if citation_type:
             cit = (Citation(citation_type, citation_value, extra))
-            b.add_child(cit)
+            b._add_child(cit)
 
         return "SAM", context
 
     def _fragment_start(self, context):
         source, match = context
-        indent = len(match.group('indent'))
+        indent = match.end("indent")
 
         attributes = {}
 
@@ -242,14 +243,14 @@ class SamParser:
         if attributes_string is not None:
             attributes.update(parse_attributes(attributes_string))
 
-        self.doc.new_block('fragment', attributes, None, indent)
+        self.doc.new_block('fragment', indent, attributes, None)
         return "SAM", context
 
     def _paragraph_start(self, context):
         source, match = context
         line = source.current_line
         local_indent = len(line) - len(line.lstrip())
-        self.doc.new_paragraph(None, '', local_indent)
+        self.doc.new_paragraph(local_indent, None )
         self.current_text_block = TextBlock(line)
         return "PARAGRAPH", context
 
@@ -293,26 +294,29 @@ class SamParser:
 
     def _list_item(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
+        content_start=match.start("content")+1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_unordered_list_item(attributes, indent)
+        self.doc.new_unordered_list_item(indent, attributes, content_start)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
     def _num_list_item(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
+        content_start=match.start("content")+1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_ordered_list_item(attributes, indent)
+        self.doc.new_ordered_list_item(indent, attributes, content_start)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
     def _labeled_list_item(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         label = match.group("label")
+        content_start = match.start("content") + 1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_labeled_list_item(attributes, indent, label)
+        self.doc.new_labeled_list_item(indent, label, attributes, content_start)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -320,39 +324,39 @@ class SamParser:
         source, match = context
         if match.group("unexpected"):
             raise SAMParserError("Unexpected characters in block insert. Found: " + match.group("unexpected"))
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         attributes = parse_insert(match.group("insert"))
         attributes.update(parse_attributes(match.group("attributes"), flagged="*#?"))
-        self.doc.new_block("insert", attributes=attributes, text=None, indent=indent)
+        self.doc.new_block("insert", indent=indent, attributes=attributes, text=None)
         return "SAM", context
 
     def _include(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         # FIXME: Should validate attributes.
         self.doc.new_include(href=match.group("attributes")[1:-1], indent=indent)
         return "SAM", context
 
     def _string_def(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         self.doc.new_string_def(match.group('name'), para_parser.parse(match.group('content'), self.doc), indent=indent)
         return "SAM", context
 
     def _line_start(self, context):
         source, match = context
-        indent = len(match.group("indent"))
-        self.doc.new_block('line', parse_attributes(match.group("attributes")),
-                           para_parser.parse(match.group('content'), self.doc, strip=False), indent=indent)
+        indent = match.end("indent")
+        self.doc.new_block('line', indent, parse_attributes(match.group("attributes")),
+                           para_parser.parse(match.group('content'), self.doc, strip=False))
         return "SAM", context
 
     def _record_start(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         record_name = match.group("name").strip()
         attributes = parse_attributes(match.group('attributes'))
         field_names = [x.strip() for x in match.group("field_names").split(',')]
-        self.doc.new_record_set(record_name, attributes, field_names, indent)
+        self.doc.new_record_set(record_name, field_names, indent, attributes)
         return "RECORD", context
 
     def _record(self, context):
@@ -368,16 +372,14 @@ class SamParser:
             source.return_line()
             return "SAM", context
         else:
-            field_values = [x.strip() for x in re.split(r'(?<!\\),', line)]
-            if len(field_values) != len(self.doc.fields):
-                raise SAMParserError("Record length does not match record set header. At:\n\n " + line)
-            record = list(zip(self.doc.fields, field_values))
-            self.doc.new_record(record, indent)
+            #FIXME: splitting field values belongs to record object
+            field_values = [para_parser.parse(x.strip(), self.doc) for x in re.split(r'(?<!\\),', line)]
+            self.doc.new_record(field_values, indent)
             return "RECORD", context
 
     def _grid_start(self, context):
         source, match = context
-        indent = len(match.group('indent'))
+        indent = match.end("indent")
 
         attributes = {}
 
@@ -385,7 +387,7 @@ class SamParser:
         if attributes_string is not None:
             attributes.update(parse_attributes(attributes_string))
 
-        self.doc.new_block('grid', attributes, None, indent)
+        self.doc.new_block('grid', indent, attributes, None)
         return "GRID", context
 
     def _grid(self, context):
@@ -397,7 +399,7 @@ class SamParser:
         indent = len(line) - len(line.lstrip())
         if self.patterns['blank-line'].match(line):
             return "GRID", context
-        elif indent < self.doc.current_block.indent:
+        elif indent <= self.doc.ancestor_or_self('grid').indent:
             source.return_line()
             return "SAM", context
         else:
@@ -405,9 +407,9 @@ class SamParser:
             if self.doc.current_block.name == 'row':
                 if len(self.doc.current_block.children) != len(cell_values):
                     raise SAMParserError('Uneven number of cells in grid row at: "' + line + '"')
-            self.doc.new_block('row', None, None, indent)
+            self.doc.new_block('row', indent, None, None)
             for content in cell_values:
-                self.doc.new_block('cell', None, None, indent + 1)
+                self.doc.new_block('cell', indent + 1, None, None)
                 self.doc.new_flow(para_parser.parse(content, self.doc))
             # Test for consistency with previous rows?
 
@@ -415,7 +417,7 @@ class SamParser:
 
     def _embedded_xml(self, context):
         source, match = context
-        indent = len(match.group("indent"))
+        indent = match.end("indent")
         embedded_xml_parser = xml.parsers.expat.ParserCreate()
         embedded_xml_parser.XmlDeclHandler = self._embedded_xml_declaration_check
         embedded_xml_parser.Parse(source.current_line.strip())
@@ -454,7 +456,7 @@ class SamParser:
 
         match = self.patterns['comment'].match(line)
         if match is not None:
-            self.doc.new_comment(Comment(line.strip()[1:]))
+            self.doc.new_comment(match.group('comment'), match.end('indent'))
             return "SAM", (source, match)
 
         match = self.patterns['record-start'].match(line)
@@ -532,8 +534,8 @@ class SamParser:
 
 
 
-class Block:
-    def __init__(self, name, attributes=None, content=None, namespace=None, indent=0):
+class Block(ABC):
+    def __init__(self, name, indent, attributes=None, content=None, namespace=None ):
 
         # Test for a valid block name. Must be valid XML name.
         try:
@@ -551,18 +553,48 @@ class Block:
         self.parent = None
         self.children = []
 
-    def add_child(self, b):
+    def add(self, b):
+        """
+        Add a block to the the current block or hand it off to the parent block.
+        If the block is more indented than self, add it as a child.
+        Otherwise call add on the parent block of self. This will recurse until
+        the block finds it rightful home in the hierarchy.
+
+        Return the block you added so that the document structure can update
+        the current_record variable. This way any additional blocks created
+        :param b: The block to add.
+
+        """
+        if b.indent <= self.indent:
+            self.parent.add(b)
+        else:
+            if type(b) is OrderedListItem:
+                ol = OrderedList(indent=b.indent)
+                self.add(ol)
+                ol.add(b)
+            elif type(b) is UnorderedListItem:
+                ul = UnorderedList(indent=b.indent)
+                self.add(ul)
+                ul.add(b)
+            elif type(b) is LabeledListItem:
+                ll = LabeledList(indent=b.indent)
+                self.add(ll)
+                ll.add(b)
+            else:
+                self._add_child(b)
+
+    def _add_child(self, b):
+        """
+        Adds a child block to the current block.
+        The main reason for this being separated from the add method is so that
+        block types that override add can sill inherit add_child, ensuring that
+        they do not forget to update the block's parent attribute.
+        :param b: The block to add.
+        :return: None
+        """
         b.parent = self
         self.children.append(b)
 
-    def add_sibling(self, b):
-        b.parent = self.parent
-        self.parent.add_child(b)
-
-    def add_at_indent(self, b, indent):
-        x = self.ancestor_at_indent(indent)
-        b.parent = x
-        x.children.append(b)
 
     def ancestor_at_indent(self, indent):
         x = self.parent
@@ -574,8 +606,10 @@ class Block:
         return ''.join(self._output_block())
 
     def _output_block(self):
-        yield " " * self.indent
-        yield "[%s:'%s'" % (self.name, self.content)
+        yield " " * int(self.indent)
+        yield "[%s:" % (self.name)
+        if self.content:
+            yield "['%s'" % (self.content)
         for x in self.children:
             yield "\n"
             yield str(x)
@@ -613,27 +647,213 @@ class Block:
                 yield from self.content.serialize_xml()
                 yield "</{0}>\n".format(self.name)
 
+class RecordSet(Block):
+    def __init__(self, name, field_names, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name=name, indent=indent, attributes=attributes, content=content, namespace=namespace)
+        self.field_names = field_names
+
+    def add(self, b):
+        if b.indent <= self.indent:
+            self.parent.add(b)
+        elif not type(b) is Record:
+            raise SAMParserError('A RecordSet can only have Record children. At \"{0}\".'.format(
+                    str(self)))
+        elif len(b.field_values) != len(self.field_names):
+            raise SAMParserError('Record length does not match record set header. At: \n{0}\n'.format(
+                    str(self)))
+        else:
+            b.record = list(zip(self.field_names, b.field_values))
+            b.parent = self
+            self.children.append(b)
+
+class Record(Block):
+    def __init__(self, field_values, attributes=None, content=None, namespace=None, indent=0):
+        self.field_values = field_values
+        self.attributes = attributes
+        self.content = content
+        self.namespace = namespace
+        self.indent = indent
+        self.record=None
+
+    def _output_block(self):
+        yield " " * int(self.indent)
+        yield "[row:'%s'" % (self.content) + '\n'
+        for x in self.record:
+            yield " " * int(self.indent + 4) + x[0] + ' = ' + x[1] + "\n"
+        yield "]"
+
+    def serialize_xml(self):
+        yield '<row'
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+
+        if self.attributes:
+            for key, value in sorted(self.attributes.items()):
+                yield " {0}=\"{1}\"".format(key, value)
+        yield ">\n"
+
+        for x in self.record:
+            yield "<{0}>".format(x[0])
+            yield from x[1].serialize_xml()
+            yield "</{0}>\n".format(x[0])
+        yield "</row>\n"
+
+
+class List(Block):
+    @abstractmethod
+    def __init__(self,*args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def add_sibling(self, b):
+        if type(b) is Comment:
+            self._add_child(b)
+        if b.name == 'li':
+            self._add_child(b)
+        else:
+            self.parent._add_child(b)
+
+
+class UnorderedList(List):
+    def __init__(self, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name='ul', indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+    def add(self, b):
+        """
+        Override the Block add method to:
+        * Accept UnorderedListItems as children
+        * Raise error is asked to add anything else
+
+        :param b: The block to add.
+
+        """
+        if b.indent < self.indent:
+            self.parent.add(b)
+        else:
+            if type(b) is UnorderedListItem:
+                self._add_child(b)
+            else:
+                self.parent.add(b)
+
+class OrderedList(List):
+    def __init__(self, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name='ol', indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+    def add(self, b):
+        """
+        Override the Block add method to:
+        * Accept OrderedListItems as children
+        * Raise error is asked to add anything else
+
+        :param b: The block to add.
+
+        """
+        if b.indent < self.indent:
+            self.parent.add(b)
+        else:
+            if type(b) is OrderedListItem:
+                self._add_child(b)
+            elif type(b) is Comment:
+                self._add_child(b)
+            else:
+                self.parent.add(b)
+
+class ListItem(Block):
+    @abstractmethod
+    def __init__(self, name, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name=name, indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+
+class OrderedListItem(ListItem):
+    def __init__(self, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name = "li", indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+
+class UnorderedListItem(ListItem):
+    def __init__(self, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name =  "li", indent = indent, attributes = attributes, content = None, namespace = namespace)
+
+
+class LabeledListItem(ListItem):
+    def __init__(self, indent, label, attributes=None, content=None, namespace=None):
+        super().__init__(name = "li", indent = indent, attributes = attributes, content = None, namespace = namespace)
+        self.label = label
+
+    def serialize_xml(self):
+        yield "<{0}>\n".format(self.name)
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+
+        if self.attributes:
+            for key, value in sorted(self.attributes.items()):
+                yield " {0}=\"{1}\"".format(key, value)
+
+        yield "<label>" + self.label + "</label>\n"
+        for x in self.children:
+            if x is not None:
+                yield from x.serialize_xml()
+        yield "</{0}>\n".format(self.name)
+
+
+class LabeledList(List):
+    def __init__(self, indent, attributes=None, content=None, namespace=None):
+        super().__init__(name='ll', indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+    def add(self, b):
+        """
+        Override the Block add method to:
+        * Accept LabeledListItems as children
+        * Raise error is asked to add anything else
+
+        :param b: The block to add.
+
+        """
+        if b.indent < self.indent:
+            self.parent.add(b)
+        else:
+            if type(b) is LabeledListItem:
+                self._add_child(b)
+            else:
+                self.parent.add(b)
 
 class Paragraph(Block):
-    def __init__(self, attributes=None, content=None, namespace=None, indent=0):
-        super().__init__(name='p', attributes=attributes, content=content, namespace=namespace, indent=indent)
+    def __init__(self, indent, attributes=None,  namespace=None):
+        super().__init__(name='p', indent=indent, attributes=attributes, content=None, namespace=namespace)
 
-    def add_child(self, b):
-        if not type(b) is Flow:
+    def _add_child(self, b):
+        if type(b) is Flow:
+            b.parent = self
+            self.children.append(b)
+        elif self.parent.name == 'li' and b.name in ['ol', 'ul', '#comment']:
+            b.parent = self.parent
+            self.parent.children.append(b)
+        else:
             raise SAMParserError(
-                'A paragraph cannot have block children. At \"{0}\".'.format(
+                'A paragraph cannot have block children. Following \"{0}\".'.format(
                     str(self)))
-        b.parent = self
-        self.children.append(b)
 
 
-class Comment:
+class Comment(Block):
     def __init__(self, content='', indent=0):
         self.content=content
         self.indent=indent
+        self.name='#comment'
+        self.namespace=None
+
+    def _add_child(self, b):
+        if self.parent.name == 'li' and b.name in ['ol', 'ul', '#comment']:
+            b.parent = self.parent
+            self.parent.children.append(b)
+        else:
+            raise SAMParserError(
+                'A comment cannot have block children. Following \"{0}\".'.format(
+                    str(self)))
 
     def __str__(self):
-        return u"[#comment:'{1:s}']".format(self.content)
+        return u"[#{0}]".format(self.content)
 
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
@@ -666,13 +886,13 @@ class Root(Block):
         for x in self.children:
             yield from x.serialize_xml()
 
-    def add_child(self, b):
+    def _add_child(self, b):
         # This is a hack to catch the creation of a second root-level block.
         # It is not good because people can add to the children list without
         # calling this function. Not sure what the options are. Could detect
         # the error at the XML output stage, I suppose, but would rather
         # catch it earlier and give feedback.
-        if any( issubclass(type(x), Block) for x in self.children):
+        if any( type(x) is not Comment for x in self.children):
             raise SAMParserError("A SAM document can only have one root. Found: "+ str(b))
         b.parent = self
         self.children.append(b)
@@ -782,12 +1002,14 @@ class Pre(Flow):
 
 class EmbeddedXML(Block):
     def __init__(self, text, indent):
-        self.text = text
+        self.content = text
         self.indent = indent
         self.namespace = None
+        self.name = "<?xml?>"
+        self.children = []
 
     def serialize_xml(self):
-        yield self.text
+        yield self.content
 
 
 class DocStructure:
@@ -800,6 +1022,16 @@ class DocStructure:
         self.ids = []
         self.indent=0
         self.source = None
+
+    def cur_blk(self):
+        cur = self.doc
+        try:
+            while True:
+                cur = cur.children[-1]
+        except(IndexError):
+            return cur
+        except(AttributeError):
+            return cur
 
     def new_declaration(self, match):
         name=match.group('name').strip()
@@ -841,6 +1073,29 @@ class DocStructure:
         except AttributeError:
             raise SAMParserError("Indentation error found at " + str(self.current_block))
 
+    def ancestor_or_self(self,ancestor_name, block=None):
+        if block is None:
+            block = self.current_block
+        try:
+            while True:
+                if block.name == ancestor_name:
+                    return block
+                block = block.parent
+        except(AttributeError):
+            return None
+
+    def ancestor_or_self_type(self,ancestor_type, block=None):
+        if block is None:
+            block = self.current_block
+        try:
+            while True:
+                if type(block) is ancestor_type:
+                    return block
+                block = block.parent
+        except(AttributeError):
+            return None
+
+
     def new_root(self):
         # if match.group('schema') is not None:
         #     pass
@@ -867,7 +1122,7 @@ class DocStructure:
             includeparser = SamParser()
             with urllib.request.urlopen(fullhref) as response:
                 includeparser.parse(reader(response))
-            include = Include(includeparser.doc, indent)
+            include = Include(includeparser.doc, fullhref, indent)
             self.add_block(include)
             SAM_parser_info("Finished parsing include " + href)
         except SAMParserError as e:
@@ -917,66 +1172,43 @@ class DocStructure:
 
         if self.doc is None:
             raise SAMParserError('No root element found.')
-        elif self.current_block.indent < block.indent:
-            self.current_block.add_child(block)
-        elif self.current_block.indent == block.indent:
-            self.current_block.add_sibling(block)
-        else:
-            self.current_block.add_at_indent(block, block.indent)
+
+        # Every verion of add should return the last block it adds to update current_block
+        self.current_block.add(block)
         self.current_block = block
+
+        #print(self.cur_blk(), '|', self.current_block)
+        #pass
         # Useful lines for debugging the build of the tree
         # print(self.doc)
         # print('-----------------------------------------------------')
 
-    def new_block(self, block_type, attributes, text, indent):
-        b = Block(block_type, attributes, text, None, indent)
+    def new_block(self, block_type, indent, attributes, text):
+        b = Block(block_type, indent, attributes, text, None)
         self.add_block(b)
         return b
 
-    def new_paragraph(self, attributes, text, indent):
-        b = Paragraph(attributes, text, None, indent)
+    def new_paragraph(self, indent, attributes):
+        b = Paragraph(indent, attributes, None)
         self.add_block(b)
-        return b
 
-    def new_unordered_list_item(self, attributes, indent):
-        uli = Block('li', attributes, '', None, indent + .1)
-        if self.context_at_indent(indent + .1)[:2] == ['li', 'ul']:
-            self.add_block(uli)
-        else:
-            ul = Block('ul', None, '', None, indent)
-            self.add_block(ul)
-            self.add_block(uli)
-        p = Paragraph(None, '', None, indent + .2)
+    def new_unordered_list_item(self, indent, attributes, content_start):
+        uli = UnorderedListItem(indent, attributes)
+        self.add_block(uli)
+        p = Paragraph(content_start, None, None)
         self.add_block(p)
 
-    def new_ordered_list_item(self, attributes, indent):
-        oli = Block('li', attributes, '', None, indent + .1)
-        if self.context_at_indent(indent + .1)[:2] == ['li', 'ol']:
-            self.add_block(oli)
-        else:
-            ol = Block('ol', None, '', None, indent)
-            self.add_block(ol)
-            self.add_block(oli)
-        p = Paragraph(None, '', None, indent + .2)
+    def new_ordered_list_item(self, indent, attributes, content_start):
+        oli = OrderedListItem(indent, attributes)
+        self.add_block(oli)
+        p = Paragraph(content_start)
         self.add_block(p)
 
-    def new_labeled_list_item(self, attributes, indent, label):
-        lli = Block('li', attributes, '', None, indent + .2)
-        lli.add_child(Block('label', None, para_parser.parse(label, self.doc), None, indent))
-        if self.current_block.name == 'li':
-            self.current_block.add_sibling(lli)
-        else:
-            ll = Block('ll', None, '', None, indent)
-            self.add_block(ll)
-            ll.add_child(lli)
-
-        # Assign the paragraph a fractional indent so that any following
-        # element that is not an ll we be at same indent as ll, causing
-        # ll to end. Because indent is fractional, and block child will
-        # be more indented, which is illegal and will trigger an error.
-        p = Paragraph(None, '', None, indent + .5)
-        lli.add_child(p)
-        self.current_block = p
+    def new_labeled_list_item(self, indent, label, attributes, content_start):
+        lli = LabeledListItem(indent, label, attributes, para_parser.parse(label, self.doc))
+        self.add_block(lli)
+        p = Paragraph(content_start)
+        self.add_block(p)
 
     def new_flow(self, flow):
         ids=[f._id for f in flow if type(f) is Phrase and f._id is not None]
@@ -984,11 +1216,11 @@ class DocStructure:
             if id in self.ids:
                 raise SAMParserError("Duplicate ID found: " + ids[0])
             self.ids.append(id)
-        self.current_block.add_child(flow)
-        self.current_block = self.current_block.parent
+        self.current_block._add_child(flow)
 
-    def new_comment(self, comment):
-        self.current_block.add_child(comment)
+    def new_comment(self, comment, indent):
+        c = Comment(comment,indent)
+        self.add_block(c)
 
     def new_embedded_xml(self, text, indent):
         b = EmbeddedXML(text=text, indent=indent)
@@ -998,23 +1230,17 @@ class DocStructure:
         s = StringDef(string_name, value, indent)
         self.add_block(s)
 
-    def new_record_set(self, name, attributes, field_names, indent):
-        b = Block(name, attributes, None, None, indent)
-        self.add_block(b)
-        self.current_record = {'local_element': name, 'local_indent': indent}
-        self.fields = field_names
+    def new_record_set(self, name, field_names, indent, attributes):
+        rs = RecordSet(name, field_names, indent, attributes, None, None)
+        self.add_block(rs)
 
-    def new_record(self, record, indent):
-        b = Block('row', None, '', None, indent)
-        if self.current_block.indent == b.indent:
-            self.current_block.add_sibling(b)
-        else:
-            self.current_block.add_child(b)
-
-        self.current_block = b
-        for name, content in record:
-            b = Block(name, None, para_parser.parse(content, self.doc), None, self.current_block.indent + 4)
-            self.current_block.add_child(b)
+    def new_record(self, field_values, indent):
+        record_set = self.ancestor_or_self_type(RecordSet)
+        if record_set is None:
+            raise SAMParserError('Attempted to add record where no record set is present.')
+        r = Record(field_values=field_values, indent=indent)
+        record_set.add(r)
+        self.current_block = r
 
     def find_last_annotation(self, text, node=None):
         if node is None:
@@ -1041,11 +1267,13 @@ class DocStructure:
 
 
 class Include(Block):
-    def __init__(self, doc, indent):
+    def __init__(self, doc, href, indent):
         self.children=doc.doc.children
         self.indent = indent
         self.namespace = None
         self.ids = doc.ids
+        self.name = "<<<"
+        self.content = href
 
     def serialize_xml(self):
         for x in self.children:
@@ -1081,17 +1309,21 @@ class StringSource:
 
 
 # Flow regex component expressions
-re_single_quote_close = '(?<=[\w\.\,\"\)}\?])\'((?=[\.\s"},\?!:;\[])|$)'
-re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{])'
-re_double_quote_close = '(?<=[\w\.\,\'\)\}\?])"((?=[\.\s\'\)},\?!:;\[])|$)'
-re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{])'
+re_single_quote_close = '(?<=[\w\.\,\"\)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
+re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{-])'
+re_double_quote_close = '(?<=[\w\.\,\'\)\}\?-])\"((?=[\.\s\'\)},\?!:;\[-])|$)'
+re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{-])'
 re_apostrophe = "(?<=[\w`\*_\}\)])'(?=\w)"
+re_en_dash = "(?<=[\w\*_`\"\'\)\}]\s)--(?=\s[\w\*_`\"\'\{\(])"
+re_em_dash = "(?<=[\w\*_`\"\'\)\}])---(?=[\w\*_`\"\'\{\(])"
 
 smart_quote_subs = {re_double_quote_close:'”',
                     re_double_quote_open: '“',
                     re_single_quote_close:'’',
                     re_single_quote_open: '‘',
-                    re_apostrophe: '’'}
+                    re_apostrophe: '’',
+                    re_en_dash: '–',
+                    re_em_dash: '—'}
 
 class SamParaParser:
     def __init__(self):
@@ -1114,6 +1346,7 @@ class SamParaParser:
         self.stateMachine.add_state("CODE-START", self._code_start)
         self.stateMachine.add_state("DOUBLE_QUOTE", self._double_quote)
         self.stateMachine.add_state("SINGLE_QUOTE", self._single_quote)
+        self.stateMachine.add_state("DASH-START", self._dash_start)
         self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
         self.stateMachine.add_state("CHARACTER-ENTITY", self._character_entity)
         self.stateMachine.set_start("PARA")
@@ -1133,10 +1366,11 @@ class SamParaParser:
             'double_quote_close': re.compile(re_double_quote_close, re.U),
             'double_quote_open': re.compile(re_double_quote_open, re.U),
             'inline-insert': re.compile(r'>(?P<insert>\((.*?(?<!\\))\))' + re_attributes, re.U),
-
+            'en-dash': re.compile(re_en_dash, re.U),
+            'em-dash': re.compile(re_em_dash, re.U),
             'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
             'citation': re.compile(
-                r'((\[\s*\*(?P<id>\S+)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
+                r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
                 re.U)
         }
 
@@ -1177,6 +1411,8 @@ class SamParaParser:
             return "INLINE-INSERT", para
         elif char == "&":
             return "CHARACTER-ENTITY", para
+        elif char == "-":
+            return "DASH-START", para
         else:
             self.current_string += char
             return "PARA", para
@@ -1188,8 +1424,7 @@ class SamParaParser:
             self.current_string = ''
             text = self._unescape(match.group("text"))
             if self.smart_quotes:
-                text=multi_replace(text, smart_quote_subs)
-            # FIXME: Scan text for smart quotes
+                text = multi_replace(text, smart_quote_subs)
             self.flow.append(Phrase(text))
             para.advance(len(match.group(0)))
 
@@ -1339,6 +1574,23 @@ class SamParaParser:
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '`'
+        return "PARA", para
+
+    def _dash_start(self, para):
+        if self.smart_quotes:
+            if self.patterns['en-dash'].search(para.para, para.currentCharNumber,
+                                                          para.currentCharNumber + 5):
+                self.current_string += '–'
+                self.para.advance(1)
+
+            elif self.patterns['em-dash'].search(para.para, para.currentCharNumber,
+                                                           para.currentCharNumber + 5):
+                self.current_string += '—'
+                self.para.advance(2)
+            else:
+                self.current_string += '-'
+        else:
+            self.current_string += '-'
         return "PARA", para
 
     def _double_quote(self, para):
@@ -1802,6 +2054,7 @@ if __name__ == "__main__":
     if args.infile == args.outfile:
         raise SAMParserError('Input and output files cannot have the same name.')
 
+    error_count = 0
     for inputfile in glob.glob(args.infile):
         try:
             with open(inputfile, "r", encoding="utf-8-sig") as inf:
@@ -1829,7 +2082,10 @@ if __name__ == "__main__":
                         raise SAMParserError(e.strerror + ' ' + e.filename)
 
                     xml_input = etree.parse(open(intermediatefile, 'r', encoding="utf-8-sig"))
-                    transformed = transform(xml_input)
+                    try:
+                        transformed = transform(xml_input)
+                    except etree.XSLTApplyError as e:
+                        raise SAMParserError("XSLT processor reported error: " + str(e))
 
                 if args.outdir:
                     outputfile=os.path.join(args.outdir, os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension)
@@ -1882,5 +2138,9 @@ if __name__ == "__main__":
 
         except SAMParserError as e:
             sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
-            #sys.exit(1)
+            error_count += 1
             continue
+
+    print('Process completed with %d errors.' % error_count, file=sys.stderr)
+    if error_count > 0:
+        sys.exit(1)
