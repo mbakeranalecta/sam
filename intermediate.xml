@@ -3534,10 +3534,11 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 </source>
 <markup>
 <fragment conditions="gruz-natz" name="foo3">
-<p>$a=apple $b=banana</p>
+<string name="a">apple</string>
+<string name="b">banana</string>
 <p>This is a sentence inside a fragment.</p>
 <fragment name="gruznatz">
-<p>$p=peach</p>
+<string name="p">peach</string>
 <p>This is a nested fragment.</p>
 </fragment>
 </fragment>
@@ -3570,7 +3571,8 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 </source>
 <markup>
 <insert item="foobar" type="fragment">
-<p>$a=apricot $b=breadfruit</p>
+<string name="a">apricot</string>
+<string name="b">breadfruit</string>
 </insert>
 </markup>
 <result>

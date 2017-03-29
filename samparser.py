@@ -21,7 +21,7 @@ except ImportError:
 re_indent = r'(?P<indent>\s*)'
 re_attributes = r'(?P<attributes>(\((.*?(?<!\\))\))*)'
 re_content = r'(?P<content>.*)'
-re_name = r'(?P<name>\w\S+?)'
+re_name = r'(?P<name>\w[^\s`]*?)'
 re_ul_marker = r'(?P<marker>\*)'
 re_ol_marker = r'(?P<marker>[0-9]+\.)'
 re_ll_marker = r'\|(?P<label>\S.*?)(?<!\\)\|'
