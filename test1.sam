@@ -197,16 +197,21 @@ tests:(!en) SAM Parser Tests
 
                         foo{bar}(http://www.example.com/).
 
+                        `foo::bar` baz.
+
             markup:
                 article: Foo
 
                     foo{bar}(http://www.example.com/).
+
+                    `foo::bar` baz.
 
             result:
                 ```(xml)
                     <article>
                     <title>Foo</title>
                     <p>foo<phrase><annotation type="link" specifically="http://www.example.com/">bar</annotation></phrase>.</p>
+                    <p><phrase><annotation type="code">foo::bar</annotation></phrase> baz.</p>
                     </article>
 
     # FIXME: Need tests for comments.

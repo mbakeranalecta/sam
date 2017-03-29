@@ -6,23 +6,11 @@
 <tests xml:lang="en">
 <title>SAM Parser Tests</title>
 <description>
-<ol>
-<li>
-<p>One and a bit.</p>
-<p>A bit more.</p>
-<p>Too much</p>
-</li>
-<li>
-<p>Two</p>
-</li>
-</ol>
 <p>This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <phrase><annotation type="code">markup:</annotation></phrase> heading and comparing it to the text of the expected result as shown under the <phrase><annotation type="code">result:</annotation></phrase> heading in the test file. This is not a perfect test. Two issues are known:</p>
-<!-- This should cause an error if indented below the para above. -->
 <ol>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
 </li>
-<!-- Will this work? -->
 <li>
 <p>The SAM parser outputs attributes in alphabetical order. (From an XML point of view, the order of attributes does not matter.) Test should be written such that the attributes in the <phrase><annotation type="code">result:</annotation></phrase> section are in alphabetical order. If not, the test will fail even though the XML is semantically identical.</p>
 </li>
@@ -249,12 +237,15 @@ document:
 article: Foo
 
     foo{bar}(http://www.example.com/).
+
+    `foo::bar` baz.
 </codeblock>
 </source>
 <markup>
 <article>
 <title>Foo</title>
 <p>foo<phrase><annotation type="link" specifically="http://www.example.com/">bar</annotation></phrase>.</p>
+<p><phrase><annotation type="code">foo::bar</annotation></phrase> baz.</p>
 </article>
 </markup>
 <result>
@@ -262,6 +253,7 @@ article: Foo
 &lt;article&gt;
 &lt;title&gt;Foo&lt;/title&gt;
 &lt;p&gt;foo&lt;phrase&gt;&lt;annotation type="link" specifically="http://www.example.com/"&gt;bar&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;phrase&gt;&lt;annotation type="code"&gt;foo::bar&lt;/annotation&gt;&lt;/phrase&gt; baz.&lt;/p&gt;
 &lt;/article&gt;
 </codeblock>
 </result>
@@ -1617,6 +1609,53 @@ a female deer
 &lt;li&gt;
 &lt;label&gt;Te&lt;/label&gt;
 &lt;p&gt;a drink with jam and bread&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ll&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>XML markup characters in list labels</title>
+<description>
+<p>Making sure that the contents of a list label are properly escaped when generating XML.</p>
+</description>
+<source>
+<codeblock language="sam">
+|foo1 &amp; bar1| foobar1
+|foo2 &amp; bar2| foobar2
+|foo3 &amp; bar3| foobar3
+</codeblock>
+</source>
+<markup>
+<ll>
+<li>
+<label>foo1 &amp; bar1</label>
+<p>foobar1</p>
+</li>
+<li>
+<label>foo2 &amp; bar2</label>
+<p>foobar2</p>
+</li>
+<li>
+<label>foo3 &amp; bar3</label>
+<p>foobar3</p>
+</li>
+</ll>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;ll&gt;
+&lt;li&gt;
+&lt;label&gt;foo1 &amp;amp; bar1&lt;/label&gt;
+&lt;p&gt;foobar1&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;label&gt;foo2 &amp;amp; bar2&lt;/label&gt;
+&lt;p&gt;foobar2&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;label&gt;foo3 &amp;amp; bar3&lt;/label&gt;
+&lt;p&gt;foobar3&lt;/p&gt;
 &lt;/li&gt;
 &lt;/ll&gt;
 </codeblock>
@@ -3495,11 +3534,10 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 </source>
 <markup>
 <fragment conditions="gruz-natz" name="foo3">
-<string name="a">apple</string>
-<string name="b">banana</string>
+<p>$a=apple $b=banana</p>
 <p>This is a sentence inside a fragment.</p>
 <fragment name="gruznatz">
-<string name="p">peach</string>
+<p>$p=peach</p>
 <p>This is a nested fragment.</p>
 </fragment>
 </fragment>
@@ -3532,8 +3570,7 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 </source>
 <markup>
 <insert item="foobar" type="fragment">
-<string name="a">apricot</string>
-<string name="b">breadfruit</string>
+<p>$a=apricot $b=breadfruit</p>
 </insert>
 </markup>
 <result>
