@@ -8,7 +8,7 @@ tests:(!en) SAM Parser Tests
 
     description:
 
-        This document is the output of the test document processed by test.xslt.
+        This document is the {output}(foo of the test document processed by test.xslt.
         That stylesheet attempt to validate the outcome of tests by generating a string
         version of the markup under the `markup:` heading and comparing it to the
         text of the expected result as shown under the `result:` heading in the
@@ -109,6 +109,21 @@ tests:(!en) SAM Parser Tests
                     <section xml:lang="sp">
                         <p>Feliz Navidad</p>
                     </section>
+
+        case: Escaping block syntax
+
+            description:
+                Escape colon to prevent single word followed by colon being recognized as a block.
+
+            source:
+                ```(sam)
+                    and\:
+            markup:
+                and\:
+
+            result:
+                ```(xml)
+                    <p>and:</p>
 
 
 

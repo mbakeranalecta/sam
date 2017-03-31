@@ -5,7 +5,7 @@
 </head>
 <body>
 <a name="top"></a><h1>SAM Parser Tests</h1>
-<p>This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <span style="color: green"><tt>markup:</tt></span> heading and comparing it to the text of the expected result as shown under the <span style="color: green"><tt>result:</tt></span> heading in the test file. This is not a perfect test. Two issues are known:</p>
+<p>This document is the <span style="color: green">output</span>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <span style="color: green"><tt>markup:</tt></span> heading and comparing it to the text of the expected result as shown under the <span style="color: green"><tt>result:</tt></span> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <ol>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
@@ -22,217 +22,218 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 <h2>Contents</h2>
 <ul>
 <li>
-<a href="#idm2108250544">Includes</a><ul>
-<li><a href="#idm2108252208">Simple include</a></li>
-<li><a href="#idm2108246832">Nested includes</a></li>
+<a href="#idp584635972">Includes</a><ul>
+<li><a href="#idp584632900">Simple include</a></li>
+<li><a href="#idp584643396">Nested includes</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2108239152">Blocks</a><ul>
-<li><a href="#idm2108238640">Language metadata</a></li>
-<li><a href="#idm2108234160">Complex block structure</a></li>
-<li><a href="#idm2108215344">Paragraph with colon in first word</a></li>
+<a href="#idp584648132">Blocks</a><ul>
+<li><a href="#idp584652612">Language metadata</a></li>
+<li><a href="#idp584660548">Escaping block syntax</a></li>
+<li><a href="#idp584663748">Complex block structure</a></li>
+<li><a href="#idp584676164">Paragraph with colon in first word</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2108214448">Fields</a><ul><li><a href="#idm2108211760">Nested fields</a></li></ul>
+<a href="#idp584687556">Fields</a><ul><li><a href="#idp584684996">Nested fields</a></li></ul>
 </li>
 <li>
-<a href="#idm2108199472">Paragraphs</a><ul>
-<li><a href="#idm2108199728">Paragraph</a></li>
-<li><a href="#idm2108194864">With annotated phrase</a></li>
+<a href="#idp584562500">Paragraphs</a><ul>
+<li><a href="#idp584558148">Paragraph</a></li>
+<li><a href="#idp584560836">With annotated phrase</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2108192944">Ordered lists</a><ul>
-<li><a href="#idm2108197680">Ordered list with spaces</a></li>
-<li><a href="#idm2108189616">Ordered list no spaces</a></li>
-<li><a href="#idm2110385904">Ordered list mixed spacing</a></li>
-<li><a href="#idm2110377712">Nested ordered list with spaces</a></li>
-<li><a href="#idm2110372848">Nested ordered lists with no spaces</a></li>
-<li><a href="#idm2110355440">Nested ordered list with mixed spacing</a></li>
+<a href="#idp584567108">Ordered lists</a><ul>
+<li><a href="#idp584573508">Ordered list with spaces</a></li>
+<li><a href="#idp584090788">Ordered list no spaces</a></li>
+<li><a href="#idp584098084">Ordered list mixed spacing</a></li>
+<li><a href="#idp584110756">Nested ordered list with spaces</a></li>
+<li><a href="#idp584119076">Nested ordered lists with no spaces</a></li>
+<li><a href="#idp584133796">Nested ordered list with mixed spacing</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2110343920">Unordered lists</a><ul>
-<li><a href="#idm2110342384">Unordered list with spaces</a></li>
-<li><a href="#idm2110332144">Unordered list no spaces</a></li>
-<li><a href="#idm2110324080">Unordered list mixed spacing</a></li>
-<li><a href="#idm2110326896">Nested list with spaces</a></li>
-<li><a href="#idm2108369648">Nested unordered list with no spaces</a></li>
-<li><a href="#idm2108355952">Nested unordered list with mixed spacing</a></li>
+<a href="#idp584012708">Unordered lists</a><ul>
+<li><a href="#idp584011300">Unordered list with spaces</a></li>
+<li><a href="#idp584018084">Unordered list no spaces</a></li>
+<li><a href="#idp584028196">Unordered list mixed spacing</a></li>
+<li><a href="#idp584517732">Nested list with spaces</a></li>
+<li><a href="#idp584522596">Nested unordered list with no spaces</a></li>
+<li><a href="#idp584543844">Nested unordered list with mixed spacing</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2108331248">Mixed lists</a><ul>
-<li><a href="#idm2108326896">Nested mixed lists with spaces</a></li>
-<li><a href="#idm2108301680">Nested mixed lists with no spaces</a></li>
-<li><a href="#idm2108375792">Nested numbered lists with mixed spacing</a></li>
-<li><a href="#idm2107848320">Space between lists</a></li>
-<li><a href="#idm2107839360">No space between lists</a></li>
+<a href="#idp584442980">Mixed lists</a><ul>
+<li><a href="#idp584444004">Nested mixed lists with spaces</a></li>
+<li><a href="#idp584504420">Nested mixed lists with no spaces</a></li>
+<li><a href="#idp585131604">Nested numbered lists with mixed spacing</a></li>
+<li><a href="#idp585141460">Space between lists</a></li>
+<li><a href="#idp585143636">No space between lists</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107823616">Literal lists</a><ul>
-<li><a href="#idm2107822464">Literal numbered list using \ to escape .</a></li>
-<li><a href="#idm2107821184">Literal unordered list using * to escape *</a></li>
+<a href="#idp585153364">Literal lists</a><ul>
+<li><a href="#idp585158100">Literal numbered list using \ to escape .</a></li>
+<li><a href="#idp585164116">Literal unordered list using * to escape *</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107810816">Labeled lists</a><ul>
-<li><a href="#idm2107818368">Simple labeled list</a></li>
-<li><a href="#idm2107794560">XML markup characters in list labels</a></li>
+<a href="#idp585169748">Labeled lists</a><ul>
+<li><a href="#idp585172948">Simple labeled list</a></li>
+<li><a href="#idp584915284">XML markup characters in list labels</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107786624">Record sets</a><ul>
-<li><a href="#idm2107791616">Recordset</a></li>
-<li><a href="#idm2107779456">Recordset with only one field name</a></li>
+<a href="#idp584925908">Record sets</a><ul>
+<li><a href="#idp584923732">Recordset</a></li>
+<li><a href="#idp584934612">Recordset with only one field name</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107774208">Grids</a><ul>
-<li><a href="#idm2107775872">Grid with heads</a></li>
-<li><a href="#idm2107761536">Grid with management domain attributes</a></li>
-<li><a href="#idm2107758208">Grid with bold row</a></li>
-<li><a href="#idm2107738368">Grid with side heads</a></li>
+<a href="#idp584938708">Grids</a><ul>
+<li><a href="#idp584942164">Grid with heads</a></li>
+<li><a href="#idp584954708">Grid with management domain attributes</a></li>
+<li><a href="#idp584966740">Grid with bold row</a></li>
+<li><a href="#idp584971220">Grid with side heads</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107730432">Blockquotes</a><ul>
-<li><a href="#idm2107731584">Blockquote</a></li>
-<li><a href="#idm2107720704">Explicit blockquote</a></li>
-<li><a href="#idm2107713152">Alternate block quote</a></li>
+<a href="#idp584980948">Blockquotes</a><ul>
+<li><a href="#idp584993108">Blockquote</a></li>
+<li><a href="#idp584986196">Explicit blockquote</a></li>
+<li><a href="#idp585000276">Alternate block quote</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107715840">Codeblocks</a><ul>
-<li><a href="#idm2107707392">Simple codeblock</a></li>
-<li><a href="#idm2107708672">Blank lines in codeblock</a></li>
-<li><a href="#idm2107700992">Invalid blockstart in codeblock</a></li>
+<a href="#idp585003860">Codeblocks</a><ul>
+<li><a href="#idp585010388">Simple codeblock</a></li>
+<li><a href="#idp585016788">Blank lines in codeblock</a></li>
+<li><a href="#idp585017556">Invalid blockstart in codeblock</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107700352">Lines</a><ul>
-<li><a href="#idm2107696640">Lines</a></li>
-<li><a href="#idm2107688448">Lines inside a blockquote</a></li>
+<a href="#idp585019092">Lines</a><ul>
+<li><a href="#idp585026644">Lines</a></li>
+<li><a href="#idp585034452">Lines inside a blockquote</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107683328">Attributes</a><ul>
-<li><a href="#idm2107676288">Attributes on block</a></li>
-<li><a href="#idm2107928320">Attributes on field</a></li>
-<li><a href="#idm2107925504">Attributes on fragment</a></li>
-<li><a href="#idm2107919104">attributes on grid</a></li>
-<li><a href="#idm2107920640">attributes on record set</a></li>
-<li><a href="#idm2107913984">Attributes on unordered list</a></li>
-<li><a href="#idm2107907712">Attributes on ordered list</a></li>
-<li><a href="#idm2107892736">Attributes on lines</a></li>
-<li><a href="#idm2107884160">Attributes on blockquote</a></li>
-<li><a href="#idm2107876736">Attributes on a phrase</a></li>
-<li><a href="#idm2107882368">Attributes on a codeblock</a></li>
-<li><a href="#idm2107867776">Attributes on an embed</a></li>
-<li><a href="#idm2107874176">Attributes on inserts</a></li>
+<a href="#idp585040980">Attributes</a><ul>
+<li><a href="#idp585046996">Attributes on block</a></li>
+<li><a href="#idp585048916">Attributes on field</a></li>
+<li><a href="#idp585055316">Attributes on fragment</a></li>
+<li><a href="#idp585053908">attributes on grid</a></li>
+<li><a href="#idp585064916">attributes on record set</a></li>
+<li><a href="#idp585075796">Attributes on unordered list</a></li>
+<li><a href="#idp585081556">Attributes on ordered list</a></li>
+<li><a href="#idp585090644">Attributes on lines</a></li>
+<li><a href="#idp585086420">Attributes on blockquote</a></li>
+<li><a href="#idp585094868">Attributes on a phrase</a></li>
+<li><a href="#idp585106516">Attributes on a codeblock</a></li>
+<li><a href="#idp585113300">Attributes on an embed</a></li>
+<li><a href="#idp585114452">Attributes on inserts</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107865216">Annotations</a><ul>
-<li><a href="#idm2107860736">Multiple annotations</a></li>
-<li><a href="#idm2107856768">Consecutive Annotations</a></li>
-<li><a href="#idm2107381120">Annotation followed by citation</a></li>
-<li><a href="#idm2107373568">Annotation with language metadata</a></li>
-<li><a href="#idm2107375360">Annotation with a condition</a></li>
-<li><a href="#idm2107371136">Prior annotation lookup</a></li>
-<li><a href="#idm2107372160">Prior annotation lookup in included file</a></li>
-<li><a href="#idm2107361024">Earlier para</a></li>
-<li><a href="#idm2107354112">Failure</a></li>
+<a href="#idp585118932">Annotations</a><ul>
+<li><a href="#idp585122132">Multiple annotations</a></li>
+<li><a href="#idp585483716">Consecutive Annotations</a></li>
+<li><a href="#idp585498180">Annotation followed by citation</a></li>
+<li><a href="#idp585499076">Annotation with language metadata</a></li>
+<li><a href="#idp585500612">Annotation with a condition</a></li>
+<li><a href="#idp585502020">Prior annotation lookup</a></li>
+<li><a href="#idp585513668">Prior annotation lookup in included file</a></li>
+<li><a href="#idp585254980">Earlier para</a></li>
+<li><a href="#idp585253700">Failure</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107348352">Links</a><ul>
-<li><a href="#idm2107347712">Parens not escaped</a></li>
-<li><a href="#idm2107347200">Parens escaped with backslashes</a></li>
-<li><a href="#idm2107336320">Using explicit link annotation instead of shortcut</a></li>
+<a href="#idp585268676">Links</a><ul>
+<li><a href="#idp585261764">Parens not escaped</a></li>
+<li><a href="#idp585277124">Parens escaped with backslashes</a></li>
+<li><a href="#idp585276228">Using explicit link annotation instead of shortcut</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107336192">Citations</a><ul>
-<li><a href="#idm2107324416">Citation on phrase</a></li>
-<li><a href="#idm2107331072">Literal square brackets</a></li>
-<li><a href="#idm2107322112">Multiple citations is a paragraph</a></li>
+<a href="#idp585280580">Citations</a><ul>
+<li><a href="#idp585278276">Citation on phrase</a></li>
+<li><a href="#idp585290564">Literal square brackets</a></li>
+<li><a href="#idp585289540">Multiple citations is a paragraph</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107583360">Characters</a><ul>
-<li><a href="#idm2107583104">HTML named entities</a></li>
-<li><a href="#idm2107577088">Numeric entities</a></li>
-<li><a href="#idm2107574016">Hexadecimal entity</a></li>
-<li><a href="#idm2107566848">Character entities inside phrases and decorations</a></li>
-<li><a href="#idm2107558272">In code annotation shortcut:</a></li>
-<li><a href="#idm2107556608">In bold decoration escaped:</a></li>
-<li><a href="#idm2107546624">Ampersand in a sentence, escaped with \ and not escaped.</a></li>
+<a href="#idp585302212">Characters</a><ul>
+<li><a href="#idp585299012">HTML named entities</a></li>
+<li><a href="#idp585310532">Numeric entities</a></li>
+<li><a href="#idp585310660">Hexadecimal entity</a></li>
+<li><a href="#idp585318596">Character entities inside phrases and decorations</a></li>
+<li><a href="#idp585311812">In code annotation shortcut:</a></li>
+<li><a href="#idp585324356">In bold decoration escaped:</a></li>
+<li><a href="#idp585333700">Ampersand in a sentence, escaped with \ and not escaped.</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107551104">Character escapes</a><ul>
-<li><a href="#idm2107544576">Escapes in explicit annotations</a></li>
-<li><a href="#idm2107540352">Escapes in code decorations</a></li>
-<li><a href="#idm2107531264">Escapes in decorations</a></li>
-<li><a href="#idm2107528192">XML reserved characters in citation specifically attribute</a></li>
+<a href="#idp585334724">Character escapes</a><ul>
+<li><a href="#idp585333444">Escapes in explicit annotations</a></li>
+<li><a href="#idp585336132">Escapes in code decorations</a></li>
+<li><a href="#idp585350084">Escapes in decorations</a></li>
+<li><a href="#idp585359428">XML reserved characters in citation specifically attribute</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107523456">Conditions</a><ul>
-<li><a href="#idm2107513600">Conditions on unordered list shortcut</a></li>
-<li><a href="#idm2107519360">Conditions on ordered list shortcut</a></li>
+<a href="#idp585353668">Conditions</a><ul>
+<li><a href="#idp585366596">Conditions on unordered list shortcut</a></li>
+<li><a href="#idp585360452">Conditions on ordered list shortcut</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107507840">Block inserts</a><ul>
-<li><a href="#idm2107506304">Image insert</a></li>
-<li><a href="#idm2107503872">Key insert</a></li>
+<a href="#idp585373380">Block inserts</a><ul>
+<li><a href="#idp585369924">Image insert</a></li>
+<li><a href="#idp585381316">Key insert</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107492480">Inline inserts</a><ul>
-<li><a href="#idm2107494272">Inline inserts</a></li>
-<li><a href="#idm2107487232">Paragraph that is just an inline insert</a></li>
+<a href="#idp585384260">Inline inserts</a><ul>
+<li><a href="#idp585388868">Inline inserts</a></li>
+<li><a href="#idp585389252">Paragraph that is just an inline insert</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107479936">Strings</a><ul>
-<li><a href="#idm2107487360">String definition</a></li>
-<li><a href="#idm2107474688">String references</a></li>
+<a href="#idp585394244">Strings</a><ul>
+<li><a href="#idp585397188">String definition</a></li>
+<li><a href="#idp585403332">String references</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107472512">Fragments</a><ul>
-<li><a href="#idm2107468032">Fragment</a></li>
-<li><a href="#idm2107465856">Insert a fragment</a></li>
+<a href="#idp585406916">Fragments</a><ul>
+<li><a href="#idp585403972">Fragment</a></li>
+<li><a href="#idp585411524">Insert a fragment</a></li>
 </ul>
 </li>
 <li>
-<a href="#idm2107462912">XML fragments</a><ul><li><a href="#idm2107458688">XML fragment</a></li></ul>
+<a href="#idp585420996">XML fragments</a><ul><li><a href="#idp585418564">XML fragment</a></li></ul>
 </li>
 <li>
-<a href="#idm2107454080">Smart quotes</a><ul>
-<li><a href="#idm2107447808">Smart quotes</a></li>
-<li><a href="#idm2107444480">Following an annotation</a></li>
-<li><a href="#idm2107430400">Smart quotes with annotations</a></li>
-<li><a href="#idm2107435904">Adjacent to parentheses</a></li>
-<li><a href="#idm2107422720">Close quote followed by citation.</a></li>
-<li><a href="#idm2107426176">Miscellaneous cases</a></li>
-<li><a href="#idm2107414016">Escaped dumb quotes</a></li>
-<li><a href="#idm2107406976">Em and en dashes</a></li>
+<a href="#idp585425476">Smart quotes</a><ul>
+<li><a href="#idp585431364">Smart quotes</a></li>
+<li><a href="#idp585438532">Following an annotation</a></li>
+<li><a href="#idp585437252">Smart quotes with annotations</a></li>
+<li><a href="#idp585445700">Adjacent to parentheses</a></li>
+<li><a href="#idp585455428">Close quote followed by citation.</a></li>
+<li><a href="#idp585454916">Miscellaneous cases</a></li>
+<li><a href="#idp585458500">Escaped dumb quotes</a></li>
+<li><a href="#idp585471172">Em and en dashes</a></li>
 </ul>
 </li>
 </ul>
-<h2 id="idm2108250544">Test: Includes</h2>
+<h2 id="idp584635972">Test: Includes</h2>
 
 <p>Include content from another SAM file.</p>
 
 
-<h3 id="idm2108252208">Case: Simple include</h3>
+<h3 id="idp584632900">Case: Simple include</h3>
 
 <p>An include statement.</p>
 
@@ -266,7 +267,7 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2108246832">Case: Nested includes</h3>
+<h3 id="idp584643396">Case: Nested includes</h3>
 
 <p>Including a file that itself includes a file.</p>
 
@@ -289,12 +290,12 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2108239152">Test: Blocks</h2>
+<h2 id="idp584648132">Test: Blocks</h2>
 
 <p>Blocks are the basic building block of a SAM file. This whole document is a test case for blocks.</p>
 
 
-<h3 id="idm2108238640">Case: Language metadata</h3>
+<h3 id="idp584652612">Case: Language metadata</h3>
 
 <p>A block with language metadata.</p>
 
@@ -317,7 +318,27 @@ section:(!sp)
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2108234160">Case: Complex block structure</h3>
+<h3 id="idp584660548">Case: Escaping block syntax</h3>
+
+<p>Escape colon to prevent single word followed by colon being recognized as a block.</p>
+
+<h4>Source</h4>
+<pre>
+and\:
+</pre>
+
+<h4>Formatted output (not necessarily supported for all tests)</h4>
+<p>and:</p>
+
+<h4>Intended output (space normalized)</h4>
+<pre>&lt;p&gt;and:&lt;/p&gt;</pre>
+<h4>Actual output  (space normalized)</h4>
+<pre>&lt;p&gt;and:&lt;/p&gt;</pre>
+<h4>Test result</h4>
+<p style="color: green; font-weight: bold">PASS</p>
+
+
+<h3 id="idp584663748">Case: Complex block structure</h3>
 
 <p>A complex block with various structures inside.</p>
 
@@ -383,7 +404,7 @@ document:
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2108215344">Case: Paragraph with colon in first word</h3>
+<h3 id="idp584676164">Case: Paragraph with colon in first word</h3>
 
 <p>Case related to issue #94.</p>
 
@@ -411,12 +432,12 @@ article: Foo
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2108214448">Test: Fields</h2>
+<h2 id="idp584687556">Test: Fields</h2>
 
 <p>A field is a block without children. A field value does not get wrapped in a title element. It is simple the value of the field.</p>
 
 
-<h3 id="idm2108211760">Case: Nested fields</h3>
+<h3 id="idp584684996">Case: Nested fields</h3>
 
 <p>Nested fields. Anything with a child, of course, is a block, not a field.</p>
 
@@ -443,12 +464,12 @@ address:
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2108199472">Test: Paragraphs</h2>
+<h2 id="idp584562500">Test: Paragraphs</h2>
 
 <p>A paragraph is a block of text over consecutive lines.</p>
 
 
-<h3 id="idm2108199728">Case: Paragraph</h3>
+<h3 id="idp584558148">Case: Paragraph</h3>
 
 <p>A simple multi-line paragraph ending with a blank space.</p>
 
@@ -470,7 +491,7 @@ Jumbo.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2108194864">Case: With annotated phrase</h3>
+<h3 id="idp584560836">Case: With annotated phrase</h3>
 
 <p>A paragraph over multiple lines with an annotated phrase.</p>
 
@@ -492,12 +513,12 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2108192944">Test: Ordered lists</h2>
+<h2 id="idp584567108">Test: Ordered lists</h2>
 
 <p>Ordered lists are created by starting a line with a number followed by a period. Exact numbers are not retained.</p>
 
 
-<h3 id="idm2108197680">Case: Ordered list with spaces</h3>
+<h3 id="idp584573508">Case: Ordered list with spaces</h3>
 
 <p>Ordered lists can have blank lines between the items.</p>
 
@@ -531,7 +552,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2108189616">Case: Ordered list no spaces</h3>
+<h3 id="idp584090788">Case: Ordered list no spaces</h3>
 
 <p>List are also recognized without space between items. List items can wrap to another line if more indented than the number. Additional paragraphs can be included if more indented than the number.</p>
 
@@ -567,7 +588,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2110385904">Case: Ordered list mixed spacing</h3>
+<h3 id="idp584098084">Case: Ordered list mixed spacing</h3>
 
 <p>Ordered list with inconsistent spacing.</p>
 
@@ -605,7 +626,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2110377712">Case: Nested ordered list with spaces</h3>
+<h3 id="idp584110756">Case: Nested ordered list with spaces</h3>
 
 <p>Ordered lists at different indents, with spaces between lines.</p>
 
@@ -661,7 +682,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2110372848">Case: Nested ordered lists with no spaces</h3>
+<h3 id="idp584119076">Case: Nested ordered lists with no spaces</h3>
 
 <p>Ordered lists at different indents, with no spaces between lines.</p>
 
@@ -711,7 +732,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2110355440">Case: Nested ordered list with mixed spacing</h3>
+<h3 id="idp584133796">Case: Nested ordered list with mixed spacing</h3>
 
 <p>Ordered lists at different indents, with some spaces between lines.</p>
 
@@ -764,12 +785,12 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2110343920">Test: Unordered lists</h2>
+<h2 id="idp584012708">Test: Unordered lists</h2>
 
 <p>Unordered lists are indicated by starting a line with <span style="color: green"><tt>*</tt></span>.</p>
 
 
-<h3 id="idm2110342384">Case: Unordered list with spaces</h3>
+<h3 id="idp584011300">Case: Unordered list with spaces</h3>
 
 <p>A list with spaces between the lines.</p>
 
@@ -803,7 +824,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2110332144">Case: Unordered list no spaces</h3>
+<h3 id="idp584018084">Case: Unordered list no spaces</h3>
 
 <p>A list with no spaces between the lines.</p>
 
@@ -835,7 +856,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2110324080">Case: Unordered list mixed spacing</h3>
+<h3 id="idp584028196">Case: Unordered list mixed spacing</h3>
 
 <p>A list with mixed spacing between the lines.</p>
 
@@ -872,7 +893,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2110326896">Case: Nested list with spaces</h3>
+<h3 id="idp584517732">Case: Nested list with spaces</h3>
 
 <p>Nested lists separated by spaces.</p>
 
@@ -928,7 +949,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2108369648">Case: Nested unordered list with no spaces</h3>
+<h3 id="idp584522596">Case: Nested unordered list with no spaces</h3>
 
 <p>Nested lists not separated by spaces.</p>
 
@@ -978,7 +999,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2108355952">Case: Nested unordered list with mixed spacing</h3>
+<h3 id="idp584543844">Case: Nested unordered list with mixed spacing</h3>
 
 <p>Nested lists separated by some spaces.</p>
 
@@ -1030,12 +1051,12 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2108331248">Test: Mixed lists</h2>
+<h2 id="idp584442980">Test: Mixed lists</h2>
 
 <p>You can nest ordered and unordered lists inside each other or follow a list of one type with a list of another type.</p>
 
 
-<h3 id="idm2108326896">Case: Nested mixed lists with spaces</h3>
+<h3 id="idp584444004">Case: Nested mixed lists with spaces</h3>
 
 <p>Unordered inside ordered list, spaces between lines.</p>
 
@@ -1091,7 +1112,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2108301680">Case: Nested mixed lists with no spaces</h3>
+<h3 id="idp584504420">Case: Nested mixed lists with no spaces</h3>
 
 <p>Unordered inside ordered list, no spaces between lines.</p>
 
@@ -1141,7 +1162,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2108375792">Case: Nested numbered lists with mixed spacing</h3>
+<h3 id="idp585131604">Case: Nested numbered lists with mixed spacing</h3>
 
 <p>Unordered inside ordered list, some spaces between lines.</p>
 
@@ -1202,7 +1223,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107848320">Case: Space between lists</h3>
+<h3 id="idp585141460">Case: Space between lists</h3>
 
 <p>An ordered list can follow an unordered list directly and vice versa.</p>
 
@@ -1249,7 +1270,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107839360">Case: No space between lists</h3>
+<h3 id="idp585143636">Case: No space between lists</h3>
 
 <p>An unordered list followed by an ordered list with no space between them.</p>
 
@@ -1295,12 +1316,12 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107823616">Test: Literal lists</h2>
+<h2 id="idp585153364">Test: Literal lists</h2>
 
 <p>Ordered lists have the number stripped away and are renumbered on output. Unordered list have their <span style="color: green"><tt>*</tt></span> stripped away and replaced with the style of bullet specified on output processing. If you want to preserve actual numbers and bullets in your lists, you need to escape them so that the lines are not recognized as lists items.</p>
 
 
-<h3 id="idm2107822464">Case: Literal numbered list using \ to escape .</h3>
+<h3 id="idp585158100">Case: Literal numbered list using \ to escape .</h3>
 
 <p>To have a list number recognized as a literal, escape the period following the number (not the number itself). Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.</p>
 
@@ -1326,7 +1347,7 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107821184">Case: Literal unordered list using * to escape *</h3>
+<h3 id="idp585164116">Case: Literal unordered list using * to escape *</h3>
 
 <p>To have a list number recognized as a literal, escape the <span style="color: green"><tt>*</tt></span>. Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.</p>
 
@@ -1352,12 +1373,12 @@ multiple lines.
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107810816">Test: Labeled lists</h2>
+<h2 id="idp585169748">Test: Labeled lists</h2>
 
 <p>You can create lists with labels rather than bullets. The label is contained between two pipe characters. There must be no space between the opening pipe and the first character of the label (otherwise it will be parsed as a line).</p>
 
 
-<h3 id="idm2107818368">Case: Simple labeled list</h3>
+<h3 id="idp585172948">Case: Simple labeled list</h3>
 
 <p>A labeled list.</p>
 
@@ -1417,7 +1438,7 @@ a female deer
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107794560">Case: XML markup characters in list labels</h3>
+<h3 id="idp584915284">Case: XML markup characters in list labels</h3>
 
 <p>Making sure that the contents of a list label are properly escaped when generating XML.</p>
 
@@ -1452,12 +1473,12 @@ a female deer
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107786624">Test: Record sets</h2>
+<h2 id="idp584925908">Test: Record sets</h2>
 
 <p>Record sets are a structure similar to a database table. They record data in rows with identical column names. Column names are specified in the records set header.</p>
 
 
-<h3 id="idm2107791616">Case: Recordset</h3>
+<h3 id="idp584923732">Case: Recordset</h3>
 
 <p>Test that recordsets are recognized correctly. Includes a test that character escapes are recognized in records and commas can be escaped.</p>
 
@@ -1492,7 +1513,7 @@ history:: date, author, comment, status
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107779456">Case: Recordset with only one field name</h3>
+<h3 id="idp584934612">Case: Recordset with only one field name</h3>
 
 <p>Test that a recordset works correctly with only one field.</p>
 
@@ -1521,12 +1542,12 @@ filmography:: film
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107774208">Test: Grids</h2>
+<h2 id="idp584938708">Test: Grids</h2>
 
 <p>Grids are a simple form of table. They are purely a layout device with no semantic value. They have no table heads or row or column spanning. More complex tables can be modeled using explicit blocks. Labeled lists can be modeled using the labeled list structure. Database-like tables can be modeled using record sets.</p>
 
 
-<h3 id="idm2107775872">Case: Grid with heads</h3>
+<h3 id="idp584942164">Case: Grid with heads</h3>
 
 <p>Table heads are simulated using bold in the top row of the grid.</p>
 
@@ -1565,7 +1586,7 @@ filmography:: film
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107761536">Case: Grid with management domain attributes</h3>
+<h3 id="idp584954708">Case: Grid with management domain attributes</h3>
 
 <p>The same grid only with management domain attributes attached to the grid header.</p>
 <p>Note that SAM Parser sorts block attributes alphabetically for output, which makes it possible to test them with a simple string comparison (such as that performed by test.xslt). However, this is behavior of this parser, not a SAM language requirement.</p>
@@ -1607,7 +1628,7 @@ filmography:: film
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107758208">Case: Grid with bold row</h3>
+<h3 id="idp584966740">Case: Grid with bold row</h3>
 
 <p>Make an lower row bold.</p>
 
@@ -1646,7 +1667,7 @@ filmography:: film
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107738368">Case: Grid with side heads</h3>
+<h3 id="idp584971220">Case: Grid with side heads</h3>
 
 <p>Grid with row headings rather than column headings.</p>
 
@@ -1685,12 +1706,12 @@ filmography:: film
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107730432">Test: Blockquotes</h2>
+<h2 id="idp584980948">Test: Blockquotes</h2>
 
 <p>Blockquotes are introduced by three quotations marke (single or double). The content of a blockquote is normal SAM markup.</p>
 
 
-<h3 id="idm2107731584">Case: Blockquote</h3>
+<h3 id="idp584993108">Case: Blockquote</h3>
 
 <p>A blockquote with management domain metadata.</p>
 
@@ -1719,7 +1740,7 @@ After this paragraph, there is a blockquote:
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107720704">Case: Explicit blockquote</h3>
+<h3 id="idp584986196">Case: Explicit blockquote</h3>
 
 <p>Blockquote with an explicit <span style="color: green"><tt>blockquote</tt></span> block tag.</p>
 
@@ -1745,7 +1766,7 @@ blockquote:[http://example.com/page]
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107713152">Case: Alternate block quote</h3>
+<h3 id="idp585000276">Case: Alternate block quote</h3>
 
 <p>Blockquote with single quotes.</p>
 
@@ -1777,12 +1798,12 @@ This is another paragraph. Then there is an alternate blockquote:
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107715840">Test: Codeblocks</h2>
+<h2 id="idp585003860">Test: Codeblocks</h2>
 
 <p>A codeblock is a block of program code. A codeblock is treated as plain text and is not parsed as SAM markup. It will be copied to output exactly as it occurs in the source. Codeblocks are denoted by three backtick at the start of a line. Codeblocks have a special annotation. The first word of an annotation on a codeblock is the language of the code.</p>
 
 
-<h3 id="idm2107707392">Case: Simple codeblock</h3>
+<h3 id="idp585010388">Case: Simple codeblock</h3>
 
 <p>A simple codeblock.</p>
 
@@ -1815,7 +1836,7 @@ def escape_for_xml(s):
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107708672">Case: Blank lines in codeblock</h3>
+<h3 id="idp585016788">Case: Blank lines in codeblock</h3>
 
 <p>Blank lines in a code block. The display of the result will be confusing here because the result is whitespace normalized for ease of comparison with the generated XML.</p>
 
@@ -1856,7 +1877,7 @@ warnings:
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107700992">Case: Invalid blockstart in codeblock</h3>
+<h3 id="idp585017556">Case: Invalid blockstart in codeblock</h3>
 
 <p>This is an construct that raise an error in an actual document. Curious because lots of valid block starts in other codeblocks did not cause a problem. But this one raised an invalid block name error. Turns out this was caused by tabs instead of spaces used to indent the line, which promoted it to a higher level of the document hierarchy and thus outside the codeblock. But the test is worth keeping to make sure that the contents of codeblocks are not being interpreted as SAM markup.</p>
 
@@ -1885,12 +1906,12 @@ ordered-list-item =
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107700352">Test: Lines</h2>
+<h2 id="idp585019092">Test: Lines</h2>
 
 <p>Lines allows you to create text with specific line breaks. Lines are created by beginning each line on a new line and starting with a <span style="color: green"><tt>|</tt></span> character. There must be one space after the <span style="color: green"><tt>|</tt></span>, which is discarded. All other spaces after <span style="color: green"><tt>|</tt></span> are retained. (Retained spaces are not tested for in text.xslt because the test normalize space.)</p>
 
 
-<h3 id="idm2107696640">Case: Lines</h3>
+<h3 id="idp585026644">Case: Lines</h3>
 
 <p>Lines with various annotations:</p>
 
@@ -1916,7 +1937,7 @@ Nobody here can walk it for you,<br>
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107688448">Case: Lines inside a blockquote</h3>
+<h3 id="idp585034452">Case: Lines inside a blockquote</h3>
 
 <p>Lines should work inside a block quote.</p>
 
@@ -1945,7 +1966,7 @@ Nobody here can walk it for you,<br>
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107683328">Test: Attributes</h2>
+<h2 id="idp585040980">Test: Attributes</h2>
 
 <p>SAM supports four explicit attributes: ids, names, conditions, and language. There is no general attribute mechanism such as that in XML. You can generally encode the same data in SAM using fields or annotations.</p>
 <p>Attributes can be applied to blocks, phrases, and inserts. You cannot apply attributes to a paragraph, but you can wrap a paragraph in a fragment and apply attributes to the fragment.</p>
@@ -1967,7 +1988,7 @@ Nobody here can walk it for you,<br>
 <p>You can only apply one id, name, or language attribute to a block or phrase. You can apply more than one condition attribute. On output to XML, the condition attributes will be converted to a single <span style="color: green"><tt>conditions</tt></span> attribute with the individual conditions separated by commas. (For which reason, condition statements can’t include commas.)</p>
 
 
-<h3 id="idm2107676288">Case: Attributes on block</h3>
+<h3 id="idp585046996">Case: Attributes on block</h3>
 Attributes on a block
 <h4>Source</h4>
 <pre>
@@ -1990,7 +2011,7 @@ block:(!en-CA)(*id2)(#name)(?a)(?b) Title
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107928320">Case: Attributes on field</h3>
+<h3 id="idp585048916">Case: Attributes on field</h3>
 Attributes on a field
 <h4>Source</h4>
 <pre>
@@ -2008,7 +2029,7 @@ field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107925504">Case: Attributes on fragment</h3>
+<h3 id="idp585055316">Case: Attributes on fragment</h3>
 Attributes on a fragment
 <h4>Source</h4>
 <pre>
@@ -2030,7 +2051,7 @@ Attributes on a fragment
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107919104">Case: attributes on grid</h3>
+<h3 id="idp585053908">Case: attributes on grid</h3>
 Attributes on a grid
 <h4>Source</h4>
 <pre>
@@ -2060,7 +2081,7 @@ Attributes on a grid
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107920640">Case: attributes on record set</h3>
+<h3 id="idp585064916">Case: attributes on record set</h3>
 Attributes on a record set
 <h4>Source</h4>
 <pre>
@@ -2090,7 +2111,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107913984">Case: Attributes on unordered list</h3>
+<h3 id="idp585075796">Case: Attributes on unordered list</h3>
 
 <p>Attributes on an unordered list item.</p>
 
@@ -2126,7 +2147,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107907712">Case: Attributes on ordered list</h3>
+<h3 id="idp585081556">Case: Attributes on ordered list</h3>
 
 <p>Attributes on an ordered list item.</p>
 
@@ -2160,7 +2181,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107892736">Case: Attributes on lines</h3>
+<h3 id="idp585090644">Case: Attributes on lines</h3>
 
 <p>Lines with annotations:</p>
 
@@ -2186,7 +2207,7 @@ Nobody here can walk it for you,<br>
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107884160">Case: Attributes on blockquote</h3>
+<h3 id="idp585086420">Case: Attributes on blockquote</h3>
 
 <p>A blockquote with attributes and a citation.</p>
 
@@ -2215,7 +2236,7 @@ After this paragraph, there is a blockquote:
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107876736">Case: Attributes on a phrase</h3>
+<h3 id="idp585094868">Case: Attributes on a phrase</h3>
 
 <p>Attributes on a phrase.</p>
 
@@ -2235,7 +2256,7 @@ After this paragraph, there is a blockquote:
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107882368">Case: Attributes on a codeblock</h3>
+<h3 id="idp585106516">Case: Attributes on a codeblock</h3>
 
 <p>Attributes on a codeblock.</p>
 
@@ -2268,7 +2289,7 @@ def escape_for_xml(s):
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107867776">Case: Attributes on an embed</h3>
+<h3 id="idp585113300">Case: Attributes on an embed</h3>
 
 <p>Attributes on a embed.</p>
 
@@ -2291,7 +2312,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107874176">Case: Attributes on inserts</h3>
+<h3 id="idp585114452">Case: Attributes on inserts</h3>
 
 <p>Attributes on inserts.</p>
 
@@ -2311,12 +2332,12 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107865216">Test: Annotations</h2>
+<h2 id="idp585118932">Test: Annotations</h2>
 
 <p>A phrase can have one or more annotations or citations attached to it. On output, the text of the phrase is wrapped in the annotations and citations in the order they were specified in source.</p>
 
 
-<h3 id="idm2107860736">Case: Multiple annotations</h3>
+<h3 id="idp585122132">Case: Multiple annotations</h3>
 
 <p>Phrases with more than one attribute in a chain.</p>
 
@@ -2344,7 +2365,7 @@ This `foo`(bar) baz.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107856768">Case: Consecutive Annotations</h3>
+<h3 id="idp585483716">Case: Consecutive Annotations</h3>
 
 <p>Two separate annotations with no space between them.</p>
 
@@ -2368,7 +2389,7 @@ This `foo`(bar) baz.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107381120">Case: Annotation followed by citation</h3>
+<h3 id="idp585498180">Case: Annotation followed by citation</h3>
 
 <p>Observed in the wild: When an annotated phrase was followed by a phrase with a citation, the end of the annotation was not found and the two structures were recognized as one long citation.</p>
 
@@ -2405,7 +2426,7 @@ chapter}[#single_source].
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107373568">Case: Annotation with language metadata</h3>
+<h3 id="idp585499076">Case: Annotation with language metadata</h3>
 
 <p>You can add language metadata to a phrase.</p>
 
@@ -2425,7 +2446,7 @@ Press {Enter}(key)(!fr-CA)
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107375360">Case: Annotation with a condition</h3>
+<h3 id="idp585500612">Case: Annotation with a condition</h3>
 
 <p>You can add condition metadata to a phrase.</p>
 
@@ -2445,7 +2466,7 @@ Press {Enter}(key)(?foo)
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107371136">Case: Prior annotation lookup</h3>
+<h3 id="idp585502020">Case: Prior annotation lookup</h3>
 
 <p>If a phrase has no annotation or citation attached to it, the parser will attempt to find a suitable annotation by searching back up the document for the most recent case of the same phrase. If it finds one, it will copy the annotations and citations from that phrase to the current one. This prevents writers from having to write the same annotation out over and over again. If not prior phrase is found, a warning is issued.</p>
 
@@ -2465,7 +2486,7 @@ This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotat
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107372160">Case: Prior annotation lookup in included file</h3>
+<h3 id="idp585513668">Case: Prior annotation lookup in included file</h3>
 
 <p>Look up annotations in included files.</p>
 
@@ -2485,7 +2506,7 @@ Annotation lookup test: {test phrase}.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107361024">Case: Earlier para</h3>
+<h3 id="idp585254980">Case: Earlier para</h3>
 
 <p>The marching annotation is in an earlier paragraph in the document. (In this case, in the preceding test case).</p>
 
@@ -2505,7 +2526,7 @@ This {annotation} occurs previously.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107354112">Case: Failure</h3>
+<h3 id="idp585253700">Case: Failure</h3>
 
 <p>There is no previous phrase. This should generate a warning when the test is run.</p>
 
@@ -2525,7 +2546,7 @@ This {should be reported}.
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107348352">Test: Links</h2>
+<h2 id="idp585268676">Test: Links</h2>
 
 <p>Links are created with an annotation.</p>
 <p>You can specify a link as a <span style="color: green"><tt>link</tt></span> annotation.</p>
@@ -2539,7 +2560,7 @@ foo {bar}(http://example.com/bar) baz
 <p>However, use of the shortcut means you need to escape any parens that occur in the URL.</p>
 
 
-<h3 id="idm2107347712">Case: Parens not escaped</h3>
+<h3 id="idp585261764">Case: Parens not escaped</h3>
 
 <p>The parens are not escaped, causing misreading of markup. This example should be interpreted incorrectly.</p>
 
@@ -2562,7 +2583,7 @@ Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107347200">Case: Parens escaped with backslashes</h3>
+<h3 id="idp585277124">Case: Parens escaped with backslashes</h3>
 
 <p>The parens in the URL are escaped with blackslashes. This example should be interpreted correctly.</p>
 
@@ -2585,7 +2606,7 @@ Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107336320">Case: Using explicit link annotation instead of shortcut</h3>
+<h3 id="idp585276228">Case: Using explicit link annotation instead of shortcut</h3>
 
 <p>The link is specified using a specific link annotation so the URL is not in parens itself. This example should be interpreted correctly.</p>
 
@@ -2608,12 +2629,12 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107336192">Test: Citations</h2>
+<h2 id="idp585280580">Test: Citations</h2>
 
 <p>A citation is a reference to a source of information. You can cite with a phrase or by reference to an ID or a name.</p>
 
 
-<h3 id="idm2107324416">Case: Citation on phrase</h3>
+<h3 id="idp585278276">Case: Citation on phrase</h3>
 
 <p>A citation on a phrase</p>
 
@@ -2633,7 +2654,7 @@ You can {call me Ishmael}[Melville, 1851].
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107331072">Case: Literal square brackets</h3>
+<h3 id="idp585290564">Case: Literal square brackets</h3>
 
 <p>If you want to enter literal square brackets, rather than create a citation, escape the opening square bracket with a backslash.</p>
 
@@ -2653,7 +2674,7 @@ Press \[Enter].
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107322112">Case: Multiple citations is a paragraph</h3>
+<h3 id="idp585289540">Case: Multiple citations is a paragraph</h3>
 
 <p>Making sure that when there are multiple citations in a paragraph they are all detected separately.</p>
 
@@ -2673,12 +2694,12 @@ Among its default processing steps, the SPFE process includes the subject-based 
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107583360">Test: Characters</h2>
+<h2 id="idp585302212">Test: Characters</h2>
 
 <p>All SAM documents are UTF-8 unicode documents. Therefore you should be able to enter any character directly. However, typing extended characters is not easy, so SAM supports character entities for entering characters that are not easy to type.</p>
 
 
-<h3 id="idm2107583104">Case: HTML named entities</h3>
+<h3 id="idp585299012">Case: HTML named entities</h3>
 
 <p>All of the HTML named character entities are supported.</p>
 
@@ -2698,7 +2719,7 @@ The doggy in the window costs &amp;pound;5.00.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107577088">Case: Numeric entities</h3>
+<h3 id="idp585310532">Case: Numeric entities</h3>
 
 <p>XML-style decimal numeric character entities are supported.</p>
 
@@ -2718,7 +2739,7 @@ The doggy in the window costs &amp;#163;5.00.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107574016">Case: Hexadecimal entity</h3>
+<h3 id="idp585310660">Case: Hexadecimal entity</h3>
 
 <p>XML-style hexadecimal numeric character entities are supported.</p>
 
@@ -2738,7 +2759,7 @@ The doggy in the window costs &amp;#xA3;5.00.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107566848">Case: Character entities inside phrases and decorations</h3>
+<h3 id="idp585318596">Case: Character entities inside phrases and decorations</h3>
 
 <p>Make sure entities are recognized in phrases and decorations.</p>
 
@@ -2761,7 +2782,7 @@ The doggy in the window costs {&amp;#xA3;5.00}(money).
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107558272">Case: In code annotation shortcut:</h3>
+<h3 id="idp585311812">Case: In code annotation shortcut:</h3>
 
 <p>In a code decoration, character entities are not expanded.</p>
 
@@ -2781,7 +2802,7 @@ The doggy in the window costs `&amp;#xA3;`5.00.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107556608">Case: In bold decoration escaped:</h3>
+<h3 id="idp585324356">Case: In bold decoration escaped:</h3>
 
 <p>Escaped version inside a bold decoration.</p>
 
@@ -2801,7 +2822,7 @@ The doggy in the window costs *\&amp;#xA3;*5.00.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107546624">Case: Ampersand in a sentence, escaped with \ and not escaped.</h3>
+<h3 id="idp585333700">Case: Ampersand in a sentence, escaped with \ and not escaped.</h3>
 
 <p>Unlike XML, SAM does not require that an ampersand be escaped if it is not part of a character entity. You can escape it if you want to using a backslash. Both should output in XML as <span style="color: green"><tt>&amp;amp;</tt></span></p>
 
@@ -2824,12 +2845,12 @@ The cat \&amp; the dog.
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107551104">Test: Character escapes</h2>
+<h2 id="idp585334724">Test: Character escapes</h2>
 
 <p>Character escaping</p>
 
 
-<h3 id="idm2107544576">Case: Escapes in explicit annotations</h3>
+<h3 id="idp585333444">Case: Escapes in explicit annotations</h3>
 
 <p>Escaping curly braces and backslashes inside a phrase.</p>
 
@@ -2849,7 +2870,7 @@ There is a curly brace and two backslashes in {this \\\\\{ phrase}(bold).
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107540352">Case: Escapes in code decorations</h3>
+<h3 id="idp585336132">Case: Escapes in code decorations</h3>
 
 <p>Code decorations have different escaping rules. All characters are literal except that the backtick character can be escaped with a double back tick. Character entities are not translated in a code decoration. Smart quote transformations are not applied.</p>
 
@@ -2875,7 +2896,7 @@ There is a backslash and a curly brace in `this \{ code` decoration.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107531264">Case: Escapes in decorations</h3>
+<h3 id="idp585350084">Case: Escapes in decorations</h3>
 
 <p>Escape sequences are recognized inside decorations.</p>
 
@@ -2898,7 +2919,7 @@ There is a `_` in _this \_ italic_ decoration.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107528192">Case: XML reserved characters in citation specifically attribute</h3>
+<h3 id="idp585359428">Case: XML reserved characters in citation specifically attribute</h3>
 
 <p>XML reserved characters occurring within the text of a “specifically” attribute.</p>
 
@@ -2918,12 +2939,12 @@ There is a `_` in _this \_ italic_ decoration.
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107523456">Test: Conditions</h2>
+<h2 id="idp585353668">Test: Conditions</h2>
 
 <p>You can add conditions to block metadata using condition tokens. Condition tokens start with <span style="color: green"><tt>?</tt></span> and must not contain spaces. The application of conditions to text is up to the application layer. SAM just provided a mechanism for recording conditions.</p>
 
 
-<h3 id="idm2107513600">Case: Conditions on unordered list shortcut</h3>
+<h3 id="idp585366596">Case: Conditions on unordered list shortcut</h3>
 
 <p>A condition on an unordered list item.</p>
 
@@ -2959,7 +2980,7 @@ There is a `_` in _this \_ italic_ decoration.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107519360">Case: Conditions on ordered list shortcut</h3>
+<h3 id="idp585360452">Case: Conditions on ordered list shortcut</h3>
 
 <p>Condition on an ordered list item.</p>
 
@@ -2993,12 +3014,12 @@ There is a `_` in _this \_ italic_ decoration.
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107507840">Test: Block inserts</h2>
+<h2 id="idp585373380">Test: Block inserts</h2>
 
 <p>An insert creates an instruction to insert something into the document.</p>
 
 
-<h3 id="idm2107506304">Case: Image insert</h3>
+<h3 id="idp585369924">Case: Image insert</h3>
 
 <p>Insert an image.</p>
 
@@ -3018,7 +3039,7 @@ There is a `_` in _this \_ italic_ decoration.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107503872">Case: Key insert</h3>
+<h3 id="idp585381316">Case: Key insert</h3>
 
 <p>Insert the value of a key. Syntax for creating keys is left to the language designer. Key resolution belongs to the application layer.</p>
 
@@ -3038,12 +3059,12 @@ There is a `_` in _this \_ italic_ decoration.
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107492480">Test: Inline inserts</h2>
+<h2 id="idp585384260">Test: Inline inserts</h2>
 
 <p>Inline inserts are an instructions to insert something into the middle of a paragraph.</p>
 
 
-<h3 id="idm2107494272">Case: Inline inserts</h3>
+<h3 id="idp585388868">Case: Inline inserts</h3>
 
 <p>Inline inserts.</p>
 
@@ -3068,7 +3089,7 @@ that you can define string substitutions whenever you insert a fragment into you
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107487232">Case: Paragraph that is just an inline insert</h3>
+<h3 id="idp585389252">Case: Paragraph that is just an inline insert</h3>
 
 <p>An inline insert on a line by itself creates a paragraph containing an insert, rather than a standalone insert instruction.</p>
 
@@ -3088,12 +3109,12 @@ that you can define string substitutions whenever you insert a fragment into you
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107479936">Test: Strings</h2>
+<h2 id="idp585394244">Test: Strings</h2>
 
 <p>A string is a variable that can contain text, including annotations and citations.</p>
 
 
-<h3 id="idm2107487360">Case: String definition</h3>
+<h3 id="idp585397188">Case: String definition</h3>
 
 <p>A string definition.</p>
 
@@ -3113,7 +3134,7 @@ $foo = bar bar black sheep
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107474688">Case: String references</h3>
+<h3 id="idp585403332">Case: String references</h3>
 
 <p>Inserting the value of a string.</p>
 
@@ -3133,12 +3154,12 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107472512">Test: Fragments</h2>
+<h2 id="idp585406916">Test: Fragments</h2>
 
 <p>Fragments are sequences of paragraphs that can have management metadata applied to them and that can be inserted in other places.</p>
 
 
-<h3 id="idm2107468032">Case: Fragment</h3>
+<h3 id="idp585403972">Case: Fragment</h3>
 
 <p>A fragment definition.</p>
 
@@ -3175,7 +3196,7 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107465856">Case: Insert a fragment</h3>
+<h3 id="idp585411524">Case: Insert a fragment</h3>
 
 <p>An instruction to insert a fragment. Note that actually resolving an inserting the fragment is a job for the application layer.</p>
 
@@ -3200,12 +3221,12 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107462912">Test: XML fragments</h2>
+<h2 id="idp585420996">Test: XML fragments</h2>
 
 <p>You can insert a fragment of XML. It must be well formed and must start with an XML header. It must be UTF-8. It will be copied to output verbatim, minus the XML header.</p>
 
 
-<h3 id="idm2107458688">Case: XML fragment</h3>
+<h3 id="idp585418564">Case: XML fragment</h3>
 
 <p>A chunk of XML.</p>
 
@@ -3233,7 +3254,7 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 <p style="color: green; font-weight: bold">PASS</p>
 
 <a href="#top">^top</a>
-<h2 id="idm2107454080">Test: Smart quotes</h2>
+<h2 id="idp585425476">Test: Smart quotes</h2>
 
 <p>Smart quotes is an optional feature of the parser, not a feature of the SAM language. It turns straight quotes into curly quotes. It raises a warning when it can’t figure out how to handle a case. The algorithm could be improved in the future to handle more cases correctly.</p>
 <p>The canonical way to handle quotes in SAM is to use real curly quotes to begin with. All SAM documents are UTF-8.</p>
@@ -3241,7 +3262,7 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 <p>using the <span style="color: green"><tt>-q</tt></span> option of the parser command line or by setting the <span style="color: green"><tt>smart_quotes</tt></span> attribute of the SamParser object to <span style="color: green"><tt>True</tt></span>.</p>
 
 
-<h3 id="idm2107447808">Case: Smart quotes</h3>
+<h3 id="idp585431364">Case: Smart quotes</h3>
 
 <p>Paragraphs illustrating most of the cases where smart quotes should be recognized in ordinary English.</p>
 
@@ -3270,7 +3291,7 @@ For "the Duke", perhaps?
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107444480">Case: Following an annotation</h3>
+<h3 id="idp585438532">Case: Following an annotation</h3>
 
 <p>Smart quotes also need to be recognized when they follow SAM markup.</p>
 
@@ -3290,7 +3311,7 @@ interpretations of the `xref`'s instruction
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107430400">Case: Smart quotes with annotations</h3>
+<h3 id="idp585437252">Case: Smart quotes with annotations</h3>
 
 <p>Smart quotes surrounding annotated phrases.</p>
 
@@ -3316,7 +3337,7 @@ know what you mean by "glory,"' Alice said."
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107435904">Case: Adjacent to parentheses</h3>
+<h3 id="idp585445700">Case: Adjacent to parentheses</h3>
 
 <p>Quotes inside parentheses.</p>
 
@@ -3339,7 +3360,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107422720">Case: Close quote followed by citation.</h3>
+<h3 id="idp585455428">Case: Close quote followed by citation.</h3>
 
 <p>Close quote followed by citation.</p>
 
@@ -3359,7 +3380,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107426176">Case: Miscellaneous cases</h3>
+<h3 id="idp585454916">Case: Miscellaneous cases</h3>
 
 <p>A bunch of miscellaneous cases.</p>
 
@@ -3385,7 +3406,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107414016">Case: Escaped dumb quotes</h3>
+<h3 id="idp585458500">Case: Escaped dumb quotes</h3>
 
 <p>If you want to enter straight quotes and have them stay straight when smart quotes are applied, you have to escape them with <span style="color: green"><tt>\</tt></span> or use the <span style="color: green"><tt>&amp;quot;</tt></span> character entity.</p>
 
@@ -3405,7 +3426,7 @@ This para uses \"dumb\" quotes. Don\'t get them &amp;quot;mixed up&amp;quot;.
 <p style="color: green; font-weight: bold">PASS</p>
 
 
-<h3 id="idm2107406976">Case: Em and en dashes</h3>
+<h3 id="idp585471172">Case: Em and en dashes</h3>
 
 <p>The smart quote feature will also transform double hyphens surrounded by spaces and triple hyphens surrounded by letters into en and em dashes respectively.</p>
 

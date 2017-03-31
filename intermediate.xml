@@ -6,7 +6,7 @@
 <tests xml:lang="en">
 <title>SAM Parser Tests</title>
 <description>
-<p>This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <phrase><annotation type="code">markup:</annotation></phrase> heading and comparing it to the text of the expected result as shown under the <phrase><annotation type="code">result:</annotation></phrase> heading in the test file. This is not a perfect test. Two issues are known:</p>
+<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <phrase><annotation type="code">markup:</annotation></phrase> heading and comparing it to the text of the expected result as shown under the <phrase><annotation type="code">result:</annotation></phrase> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <ol>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
@@ -125,6 +125,25 @@ section:(!sp)
 &lt;section xml:lang="sp"&gt;
     &lt;p&gt;Feliz Navidad&lt;/p&gt;
 &lt;/section&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Escaping block syntax</title>
+<description>
+<p>Escape colon to prevent single word followed by colon being recognized as a block.</p>
+</description>
+<source>
+<codeblock language="sam">
+and\:
+</codeblock>
+</source>
+<markup>
+<p>and:</p>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;p&gt;and:&lt;/p&gt;
 </codeblock>
 </result>
 </case>
