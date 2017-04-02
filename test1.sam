@@ -1205,7 +1205,7 @@ tests:(!en) SAM Parser Tests
             numbers and bullets in your lists, you need to escape them so that the
             lines are not recognized as lists items.
 
-        case: Literal numbered list using \\ to escape .
+        case: Literal numbered list using `\` to escape `.`
 
             description:
                 To have a list number recognized as a literal, escape the period
@@ -1236,7 +1236,7 @@ tests:(!en) SAM Parser Tests
                     <p>9. This is just a paragraph</p>
 
 
-        case: Literal unordered list using \* to escape *
+        case: Literal unordered list using `\` to escape `*`
 
             description:
                 To have a list number recognized as a literal, escape the `*`. Because these are

@@ -1485,7 +1485,7 @@ multiple lines.
 <p>Ordered lists have the number stripped away and are renumbered on output. Unordered list have their <phrase><annotation type="code">*</annotation></phrase> stripped away and replaced with the style of bullet specified on output processing. If you want to preserve actual numbers and bullets in your lists, you need to escape them so that the lines are not recognized as lists items.</p>
 </description>
 <case>
-<title>Literal numbered list using \ to escape .</title>
+<title>Literal numbered list using <phrase><annotation type="code">\</annotation></phrase> to escape <phrase><annotation type="code">.</annotation></phrase></title>
 <description>
 <p>To have a list number recognized as a literal, escape the period following the number (not the number itself). Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.</p>
 </description>
@@ -1512,7 +1512,7 @@ multiple lines.
 </result>
 </case>
 <case>
-<title>Literal unordered list using * to escape *</title>
+<title>Literal unordered list using <phrase><annotation type="code">\</annotation></phrase> to escape <phrase><annotation type="code">*</annotation></phrase></title>
 <description>
 <p>To have a list number recognized as a literal, escape the <phrase><annotation type="code">*</annotation></phrase>. Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.</p>
 </description>
