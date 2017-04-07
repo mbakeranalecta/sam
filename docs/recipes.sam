@@ -203,3 +203,9 @@ article: SAM Recipes
             callouts:
                 callout:(*c1) This prints "Hello World".
                 callout:(*c2) This prints "Goodbye, cruel World".
+
+    recipe: Markdown style deferred links
+        ```(sam)
+            Look it up in {Wikipedia}[*wikipedia]
+
+            link(*wikipedia): http://wikipedia.org
