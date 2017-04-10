@@ -327,7 +327,7 @@ class SamParser:
         indent = match.end("indent")
         attributes = parse_insert(match.group("insert"))
         attributes.update(parse_attributes(match.group("attributes"), flagged="*#?"))
-        self.doc.new_block("insert", indent=indent, attributes=attributes, text=None)
+        self.doc.new_block_insert(indent=indent, attributes=attributes)
         return "SAM", context
 
     def _include(self, context):
@@ -646,6 +646,11 @@ class Block(ABC):
                 yield '>'
                 yield from self.content.serialize_xml()
                 yield "</{0}>\n".format(self.name)
+
+
+class BlockInsert(Block):
+    def __init__(self, indent, attributes=None, namespace=None):
+        super().__init__(name='insert', indent=indent, attributes=attributes, content=None, namespace=namespace)
 
 class RecordSet(Block):
     def __init__(self, name, field_names, indent, attributes=None, content=None, namespace=None):
@@ -1187,6 +1192,11 @@ class DocStructure:
 
     def new_block(self, block_type, indent, attributes, text):
         b = Block(block_type, indent, attributes, text, None)
+        self.add_block(b)
+        return b
+
+    def new_block_insert(self, indent, attributes):
+        b = BlockInsert(indent, attributes)
         self.add_block(b)
         return b
 
