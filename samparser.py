@@ -197,7 +197,7 @@ class SamParser:
 
         attributes = parse_attributes(match.group("attributes"))
 
-        b = self.doc.new_block('blockquote', indent, attributes, None)
+        b = self.doc.new_blockquote(indent, attributes)
 
         # see if there is a citation
         try:
@@ -651,6 +651,11 @@ class Block(ABC):
 class BlockInsert(Block):
     def __init__(self, indent, attributes=None, namespace=None):
         super().__init__(name='insert', indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+class Blockquote(Block):
+    def __init__(self, indent, attributes=None, namespace=None):
+        super().__init__(name='blockquote', indent=indent, attributes=attributes, content=None, namespace=namespace)
+
 
 class RecordSet(Block):
     def __init__(self, name, field_names, indent, attributes=None, content=None, namespace=None):
@@ -1197,6 +1202,11 @@ class DocStructure:
 
     def new_block_insert(self, indent, attributes):
         b = BlockInsert(indent, attributes)
+        self.add_block(b)
+        return b
+
+    def new_blockquote(self, indent, attributes):
+        b = Blockquote(indent, attributes)
         self.add_block(b)
         return b
 
