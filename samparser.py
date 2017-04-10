@@ -197,8 +197,6 @@ class SamParser:
 
         attributes = parse_attributes(match.group("attributes"))
 
-        b = self.doc.new_blockquote(indent, attributes)
-
         # see if there is a citation
         try:
             idref = match.group('id')
@@ -227,9 +225,14 @@ class SamParser:
         else:
             citation_type = None
 
+
         if citation_type:
             cit = (Citation(citation_type, citation_value, extra))
-            b._add_child(cit)
+        else:
+            cit = None
+
+        b = self.doc.new_blockquote(indent, attributes, cit)
+
 
         return "SAM", context
 
@@ -653,8 +656,29 @@ class BlockInsert(Block):
         super().__init__(name='insert', indent=indent, attributes=attributes, content=None, namespace=namespace)
 
 class Blockquote(Block):
-    def __init__(self, indent, attributes=None, namespace=None):
+    def __init__(self, indent, attributes=None, citation=None, namespace=None):
         super().__init__(name='blockquote', indent=indent, attributes=attributes, content=None, namespace=namespace)
+        self.citation = citation
+
+    def serialize_xml(self):
+        yield '<blockquote'
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+
+        if self.attributes:
+            for key, value in sorted(self.attributes.items()):
+                yield " {0}=\"{1}\"".format(key, value)
+        yield ">\n"
+
+        if self.citation is not None:
+            yield from self.citation.serialize_xml()
+
+        for x in self.children:
+            if x is not None:
+                yield from x.serialize_xml()
+        yield "</blockquote>\n"
 
 
 class RecordSet(Block):
@@ -1205,8 +1229,8 @@ class DocStructure:
         self.add_block(b)
         return b
 
-    def new_blockquote(self, indent, attributes):
-        b = Blockquote(indent, attributes)
+    def new_blockquote(self, indent, attributes, citation):
+        b = Blockquote(indent, attributes, citation)
         self.add_block(b)
         return b
 

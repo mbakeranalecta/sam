@@ -2038,7 +2038,7 @@ After this paragraph, there is a blockquote:
 </description>
 <source>
 <codeblock language="sam">
-blockquote:[http://example.com/page]
+blockquote:[http://example.com/jumbo]
     Wafting zyphers quickly vexed jumbo.
 
     Far and few are the lands where the jumblies live.
@@ -2046,14 +2046,14 @@ blockquote:[http://example.com/page]
 </source>
 <markup>
 <blockquote>
-<citation type="citation" value="http://example.com/page"/><p>Wafting zyphers quickly vexed jumbo.</p>
+<citation type="citation" value="http://example.com/jumbo"/><p>Wafting zyphers quickly vexed jumbo.</p>
 <p>Far and few are the lands where the jumblies live.</p>
 </blockquote>
 </markup>
 <result>
 <codeblock language="xml">
 &lt;blockquote&gt;
-&lt;citation type="citation" value="http://example.com/page"/&gt;&lt;p&gt;Wafting zyphers quickly vexed jumbo.&lt;/p&gt;
+&lt;citation type="citation" value="http://example.com/jumbo"/&gt;&lt;p&gt;Wafting zyphers quickly vexed jumbo.&lt;/p&gt;
 &lt;p&gt;Far and few are the lands where the jumblies live.&lt;/p&gt;
 &lt;/blockquote&gt;
 </codeblock>

@@ -1657,13 +1657,13 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    blockquote:[http://example.com/page]
+                    blockquote:[http://example.com/jumbo]
                         Wafting zyphers quickly vexed jumbo.
 
                         Far and few are the lands where the jumblies live.
 
             markup:
-                blockquote:[http://example.com/page]
+                blockquote:[http://example.com/jumbo]
                     Wafting zyphers quickly vexed jumbo.
 
                     Far and few are the lands where the jumblies live.
@@ -1671,7 +1671,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <blockquote>
-                    <citation type="citation" value="http://example.com/page"/><p>Wafting zyphers quickly vexed jumbo.</p>
+                    <citation type="citation" value="http://example.com/jumbo"/><p>Wafting zyphers quickly vexed jumbo.</p>
                     <p>Far and few are the lands where the jumblies live.</p>
                     </blockquote>
 
