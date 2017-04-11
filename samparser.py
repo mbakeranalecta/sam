@@ -511,7 +511,15 @@ class SamParser:
 
         match = self.patterns['declaration'].match(line)
         if match is not None:
-            self.doc.new_declaration(match)
+            name = match.group('name').strip()
+            content = match.group('content').strip()
+            if self.doc.root.children:
+                raise SAMParserError("Declarations must come before all other content. Found:" + match.group(0))
+            if name == 'namespace':
+                self.doc.default_namespace = content
+            else:
+                raise SAMParserError("Unknown declaration: " + match.group(0))
+
             return "SAM", (source, match)
 
         match = self.patterns['comment'].match(line)
@@ -1146,7 +1154,7 @@ class EmbeddedXML(Block):
 
 class DocStructure:
     def __init__(self):
-        self.doc = None
+        self.root = None
         self.fields = None
         self.current_record = None
         self.current_block = None
@@ -1155,11 +1163,11 @@ class DocStructure:
         self.indent=0
 
         r = Root()
-        self.doc = r
+        self.root = r
         self.current_block = r
 
     def cur_blk(self):
-        cur = self.doc
+        cur = self.root
         try:
             while True:
                 cur = cur.children[-1]
@@ -1171,7 +1179,7 @@ class DocStructure:
     def new_declaration(self, match):
         name=match.group('name').strip()
         content=match.group('content').strip()
-        if self.doc.children:
+        if self.root.children:
             raise SAMParserError ("Declarations must come before all other content. Found:" + match.group(0))
         if name == 'namespace':
             self.default_namespace = content
@@ -1267,7 +1275,7 @@ class DocStructure:
         if block.namespace is None and self.default_namespace is not None:
             block.namespace = self.default_namespace
 
-        if self.doc is None:
+        if self.root is None:
             raise SAMParserError('No root element found.')
 
         # Every version of add should return the last block it adds to update current_block
@@ -1288,7 +1296,7 @@ class DocStructure:
 
     def find_last_annotation(self, text, node=None):
         if node is None:
-            node = self.doc
+            node = self.root
         if type(node) is Flow:
             result = node.find_last_annotation(text)
             if result is not None:
@@ -1305,14 +1313,14 @@ class DocStructure:
 
     def serialize(self, serialize_format):
         if serialize_format.upper() == 'XML':
-            yield from self.doc.serialize_xml()
+            yield from self.root.serialize_xml()
         else:
             raise SAMParserError("Unknown serialization protocol {0}".format(serialize_format))
 
 
 class Include(Block):
     def __init__(self, doc, href, indent):
-        self.children=doc.doc.children
+        self.children=doc.root.children
         self.indent = indent
         self.namespace = None
         self.ids = doc.ids
