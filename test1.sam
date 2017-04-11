@@ -1651,30 +1651,6 @@ tests:(!en) SAM Parser Tests
                     <p>And the <phrase><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
                     </blockquote>
 
-        case: Explicit blockquote
-            description:
-                Blockquote with an explicit `blockquote` block tag.
-
-            source:
-                ```(sam)
-                    blockquote:[http://example.com/jumbo]
-                        Wafting zyphers quickly vexed jumbo.
-
-                        Far and few are the lands where the jumblies live.
-
-            markup:
-                blockquote:[http://example.com/jumbo]
-                    Wafting zyphers quickly vexed jumbo.
-
-                    Far and few are the lands where the jumblies live.
-
-            result:
-                ```(xml)
-                    <blockquote>
-                    <citation type="citation" value="http://example.com/jumbo"/><p>Wafting zyphers quickly vexed jumbo.</p>
-                    <p>Far and few are the lands where the jumblies live.</p>
-                    </blockquote>
-
         case: Alternate block quote
             description:
                 Blockquote with single quotes.

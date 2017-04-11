@@ -74,7 +74,7 @@ class SamParser:
                 re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(
-                re_indent + r'("""|\'\'\'|blockquote:)' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.*?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.*?)\])|(\[\s*(?P<citation>.*?)\]))?',
+                re_indent + r'("""|\'\'\')' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.*?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.*?)\])|(\[\s*(?P<citation>.*?)\]))?',
                 re.U),
             'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
             'paragraph-start': re.compile(r'\w*', re.U),

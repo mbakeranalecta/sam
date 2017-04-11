@@ -2032,34 +2032,6 @@ After this paragraph, there is a blockquote:
 </result>
 </case>
 <case>
-<title>Explicit blockquote</title>
-<description>
-<p>Blockquote with an explicit <phrase><annotation type="code">blockquote</annotation></phrase> block tag.</p>
-</description>
-<source>
-<codeblock language="sam">
-blockquote:[http://example.com/jumbo]
-    Wafting zyphers quickly vexed jumbo.
-
-    Far and few are the lands where the jumblies live.
-</codeblock>
-</source>
-<markup>
-<blockquote>
-<citation type="citation" value="http://example.com/jumbo"/><p>Wafting zyphers quickly vexed jumbo.</p>
-<p>Far and few are the lands where the jumblies live.</p>
-</blockquote>
-</markup>
-<result>
-<codeblock language="xml">
-&lt;blockquote&gt;
-&lt;citation type="citation" value="http://example.com/jumbo"/&gt;&lt;p&gt;Wafting zyphers quickly vexed jumbo.&lt;/p&gt;
-&lt;p&gt;Far and few are the lands where the jumblies live.&lt;/p&gt;
-&lt;/blockquote&gt;
-</codeblock>
-</result>
-</case>
-<case>
 <title>Alternate block quote</title>
 <description>
 <p>Blockquote with single quotes.</p>

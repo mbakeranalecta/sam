@@ -451,7 +451,8 @@ specification: Semantic Authoring Markdown (SAM)
             You can achieve the same effect by using the literal name blockquote (which is then just like any other block element):
 
             ```(sam) 
-                blockquote:[citation]
+                blockquote:
+                    citation:
                     Quoted
 
 
@@ -683,11 +684,11 @@ specification: Semantic Authoring Markdown (SAM)
                 codeblock         | encoding  | #name | ?condition| *id |             |
                 embed             | encoding  | #name | ?condition| *id |             |
 
-                string-def        | #none     |       |           |     |             |
+                string-def        |           |       |           |     |             |
 
-                paragraph         | #none     |       |           |     |             |
-                record            | #none     |       |           |     |             |
-                XML               | #none     |       |           |     |             |
+                paragraph         |           |       |           |     |             |
+                record            |           |       |           |     |             |
+                XML               |           |       |           |     |             |
 
                 block insert      |           | #name | ?condition| *id | type        | item
                 inline insert     |           | #name | ?condition| *id | type        | item
