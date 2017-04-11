@@ -1176,16 +1176,6 @@ class DocStructure:
         except(AttributeError):
             return cur
 
-    def new_declaration(self, match):
-        name=match.group('name').strip()
-        content=match.group('content').strip()
-        if self.root.children:
-            raise SAMParserError ("Declarations must come before all other content. Found:" + match.group(0))
-        if name == 'namespace':
-            self.default_namespace = content
-        else:
-            raise SAMParserError("Unknown declaration: " + match.group(0))
-
     def context(self, context_block=None):
         context = []
         if context_block is None:
@@ -1293,6 +1283,7 @@ class DocStructure:
             self.ids.append(id)
 
         self.current_block._add_child(flow)
+
 
     def find_last_annotation(self, text, node=None):
         if node is None:
