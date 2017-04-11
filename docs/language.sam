@@ -458,11 +458,6 @@ specification: Semantic Authoring Markdown (SAM)
 
         section: Alternate blockquotes
 
-            # Do we still need to treat explicit "blockquote:" differently now we have separated
-            # annotation and citation. Don't think so.
-
-            Standard blockquotes may conflict with embedding in other languages such as Python docstrings. 
-
             ```(sam) 
                 '''[citation]
                     Quoted

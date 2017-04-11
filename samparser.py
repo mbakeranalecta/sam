@@ -124,7 +124,7 @@ class SamParser:
 
         attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
-        self.doc.new_block('codeblock', indent, attributes, None)
+        self.doc.new_codeblock(indent, attributes)
         self.current_text_block = TextBlock()
         return "CODEBLOCK", context
 
@@ -654,6 +654,13 @@ class Block(ABC):
 class BlockInsert(Block):
     def __init__(self, indent, attributes=None, namespace=None):
         super().__init__(name='insert', indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+
+class Codeblock(Block):
+    def __init__(self, indent, attributes=None, citation=None, namespace=None):
+        super().__init__(name='codeblock', indent=indent, attributes=attributes, content=None, namespace=namespace)
+        self.citation = citation
+
 
 class Blockquote(Block):
     def __init__(self, indent, attributes=None, citation=None, namespace=None):
@@ -1231,6 +1238,11 @@ class DocStructure:
 
     def new_blockquote(self, indent, attributes, citation):
         b = Blockquote(indent, attributes, citation)
+        self.add_block(b)
+        return b
+
+    def new_codeblock(self, indent, attributes):
+        b = Codeblock(indent, attributes)
         self.add_block(b)
         return b
 
