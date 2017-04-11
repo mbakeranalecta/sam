@@ -246,7 +246,7 @@ class SamParser:
         if attributes_string is not None:
             attributes.update(parse_attributes(attributes_string))
 
-        self.doc.new_block('fragment', indent, attributes, None)
+        self.doc.new_fragment(indent, attributes)
         return "SAM", context
 
     def _paragraph_start(self, context):
@@ -390,7 +390,7 @@ class SamParser:
         if attributes_string is not None:
             attributes.update(parse_attributes(attributes_string))
 
-        self.doc.new_block('grid', indent, attributes, None)
+        self.doc.new_grid(indent, attributes)
         return "GRID", context
 
     def _grid(self, context):
@@ -410,9 +410,9 @@ class SamParser:
             if self.doc.current_block.name == 'row':
                 if len(self.doc.current_block.children) != len(cell_values):
                     raise SAMParserError('Uneven number of cells in grid row at: "' + line + '"')
-            self.doc.new_block('row', indent, None, None)
+            self.doc.new_row( indent)
             for content in cell_values:
-                self.doc.new_block('cell', indent + 1, None, None)
+                self.doc.new_cell(indent + 1)
                 self.doc.new_flow(para_parser.parse(content, self.doc))
             # Test for consistency with previous rows?
 
@@ -666,6 +666,25 @@ class Embed(Block):
     def __init__(self, indent, attributes=None, namespace=None):
         super().__init__(name='embed', indent=indent, attributes=attributes, content=None, namespace=namespace)
 
+
+class Grid(Block):
+    def __init__(self, indent, attributes=None, namespace=None):
+        super().__init__(name='grid', indent=indent, attributes=attributes, content=None, namespace=namespace)
+
+
+class Row(Block):
+    def __init__(self, indent,  namespace=None):
+        super().__init__(name='row', indent=indent, attributes=None, content=None, namespace=namespace)
+
+
+class Cell(Block):
+    def __init__(self, indent, namespace=None):
+        super().__init__(name='cell', indent=indent, attributes=None, content=None, namespace=namespace)
+
+
+class Fragment(Block):
+    def __init__(self, indent, attributes=None, namespace=None):
+        super().__init__(name='fragment', indent=indent, attributes=attributes, content=None, namespace=namespace)
 
 
 class Blockquote(Block):
@@ -1244,6 +1263,26 @@ class DocStructure:
 
     def new_blockquote(self, indent, attributes, citation):
         b = Blockquote(indent, attributes, citation)
+        self.add_block(b)
+        return b
+
+    def new_fragment(self, indent, attributes):
+        b = Fragment(indent, attributes)
+        self.add_block(b)
+        return b
+
+    def new_grid(self, indent, attributes):
+        b = Grid(indent, attributes)
+        self.add_block(b)
+        return b
+
+    def new_row(self, indent):
+        b = Row(indent)
+        self.add_block(b)
+        return b
+
+    def new_cell(self, indent):
+        b = Cell(indent)
         self.add_block(b)
         return b
 
