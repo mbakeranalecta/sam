@@ -398,7 +398,9 @@ class SamParser:
         else:
             #FIXME: splitting field values belongs to record object
             field_values = [para_parser.parse(x.strip(), self.doc) for x in re.split(r'(?<!\\),', line)]
-            self.doc.new_record(field_values, indent)
+            r = Record(field_values, indent)
+            self.doc.add_block(r)
+
             return "RECORD", context
 
     def _grid_start(self, context):
@@ -768,7 +770,7 @@ class RecordSet(Block):
             self.children.append(b)
 
 class Record(Block):
-    def __init__(self, field_values, attributes=None, content=None, namespace=None, indent=0):
+    def __init__(self, field_values, indent, attributes=None, content=None, namespace=None):
         self.field_values = field_values
         self.attributes = attributes
         self.content = content
@@ -1281,14 +1283,6 @@ class DocStructure:
                 raise SAMParserError("Duplicate ID found: " + ids[0])
             self.ids.append(id)
         self.current_block._add_child(flow)
-
-    def new_record(self, field_values, indent):
-        record_set = self.ancestor_or_self_type(RecordSet)
-        if record_set is None:
-            raise SAMParserError('Attempted to add record where no record set is present.')
-        r = Record(field_values=field_values, indent=indent)
-        record_set.add(r)
-        self.current_block = r
 
     def find_last_annotation(self, text, node=None):
         if node is None:
