@@ -61,6 +61,7 @@ class SamParser:
         self.current_text_block = None
         self.doc = None
         self.source = None
+        self.sourceurl = None
         self.smart_quotes = False
         self.patterns = {
             'comment': re.compile(re_indent + re_comment, re.U),
@@ -94,12 +95,12 @@ class SamParser:
         self.source = StringSource(source)
         self.doc = DocStructure()
         try:
-            self.doc.source = source.geturl()
+            self.sourceurl = source.geturl()
         except AttributeError:
             try:
-                self.doc.source = pathlib.Path(os.path.abspath(source.name)).as_uri()
+                self.sourceurl = pathlib.Path(os.path.abspath(source.name)).as_uri()
             except AttributeError:
-                self.doc.source = None
+                self.sourceurl = None
         try:
             self.stateMachine.run((self.source, None))
         except EOFError:
@@ -353,8 +354,34 @@ class SamParser:
     def _include(self, context):
         source, match = context
         indent = match.end("indent")
+        href=match.group("attributes")[1:-1]
         # FIXME: Should validate attributes.
-        self.doc.new_include(href=match.group("attributes")[1:-1], indent=indent)
+        if bool(urllib.parse.urlparse(href).netloc):  # An absolute URL
+            fullhref = href
+        elif os.path.isabs(href):  # An absolute file path
+            fullhref = pathlib.Path(href).as_uri()
+        elif self.sourceurl:
+            fullhref = urllib.parse.urljoin(self.sourceurl, href)
+        else:
+            SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known.")
+            return
+
+        reader = codecs.getreader("utf-8")
+        SAM_parser_info("Parsing include " + href)
+        try:
+            includeparser = SamParser()
+            with urllib.request.urlopen(fullhref) as response:
+                includeparser.parse(reader(response))
+            include = Include(includeparser.doc, fullhref, indent)
+            self.doc.add_block(include)
+            SAM_parser_info("Finished parsing include " + href)
+        except SAMParserError as e:
+            SAM_parser_warning("Unable to parse " + href + " because " + str(e))
+        except FileNotFoundError as e:
+            SAM_parser_warning(str(e))
+        except urllib.error.URLError as e:
+            SAM_parser_warning(str(e))
+
         return "SAM", context
 
     def _string_def(self, context):
@@ -1126,7 +1153,6 @@ class DocStructure:
         self.default_namespace = None
         self.ids = []
         self.indent=0
-        self.source = None
 
         r = Root()
         self.doc = r
@@ -1204,34 +1230,6 @@ class DocStructure:
         except(AttributeError):
             return None
 
-    def new_include(self, href, indent):
-        if bool(urllib.parse.urlparse(href).netloc):  # An absolute URL
-            fullhref = href
-        elif os.path.isabs(href):  # An absolute file path
-            fullhref = pathlib.Path(href).as_uri()
-        elif self.source:
-            fullhref = urllib.parse.urljoin(self.source, href)
-        else:
-            SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known.")
-            return
-
-        reader = codecs.getreader("utf-8")
-        SAM_parser_info("Parsing include " + href)
-        try:
-            includeparser = SamParser()
-            with urllib.request.urlopen(fullhref) as response:
-                includeparser.parse(reader(response))
-            include = Include(includeparser.doc, fullhref, indent)
-            self.add_block(include)
-            SAM_parser_info("Finished parsing include " + href)
-        except SAMParserError as e:
-            SAM_parser_warning("Unable to parse " + href + " because " + str(e))
-        except FileNotFoundError as e:
-            SAM_parser_warning(str(e))
-        except urllib.error.URLError as e:
-            SAM_parser_warning(str(e))
-
-
 
     def add_block(self, block):
         """
@@ -1277,11 +1275,15 @@ class DocStructure:
         self.current_block = block
 
     def new_flow(self, flow):
+
+        # Check for duplicate IDs in the flow
+        # Add any ids found to list of ids
         ids=[f._id for f in flow if type(f) is Phrase and f._id is not None]
         for id in ids:
             if id in self.ids:
                 raise SAMParserError("Duplicate ID found: " + ids[0])
             self.ids.append(id)
+
         self.current_block._add_child(flow)
 
     def find_last_annotation(self, text, node=None):
