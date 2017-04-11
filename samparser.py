@@ -113,7 +113,8 @@ class SamParser:
         attributes = parse_attributes(match.group("attributes"))
         content = match.group("content").strip()
         parsed_content = None if content == '' else para_parser.parse(content, self.doc)
-        self.doc.new_block(block_name, indent, attributes, parsed_content)
+        b = Block(block_name, indent, attributes, parsed_content)
+        self.doc.add_block(b)
         return "SAM", context
 
     def _codeblock_start(self, context):
@@ -124,7 +125,8 @@ class SamParser:
 
         attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
-        self.doc.new_codeblock(indent, attributes)
+        b = Codeblock(indent, attributes)
+        self.doc.add_block(b)
         self.current_text_block = TextBlock()
         return "CODEBLOCK", context
 
@@ -158,7 +160,8 @@ class SamParser:
 
         attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
-        self.doc.new_embed(indent, attributes)
+        b = Embed(indent, attributes)
+        self.doc.add_block(b)
         self.current_text_block = TextBlock()
         return "EMBED", context
 
@@ -231,7 +234,8 @@ class SamParser:
         else:
             cit = None
 
-        b = self.doc.new_blockquote(indent, attributes, cit)
+        b = Blockquote(indent, attributes, cit)
+        self.doc.add_block(b)
 
 
         return "SAM", context
@@ -246,14 +250,17 @@ class SamParser:
         if attributes_string is not None:
             attributes.update(parse_attributes(attributes_string))
 
-        self.doc.new_fragment(indent, attributes)
+        b = Fragment(indent, attributes)
+        self.doc.add_block(b)
+
         return "SAM", context
 
     def _paragraph_start(self, context):
         source, match = context
         line = source.current_line
         local_indent = len(line) - len(line.lstrip())
-        self.doc.new_paragraph(local_indent, None )
+        b = Paragraph(local_indent)
+        self.doc.add_block(b)
         self.current_text_block = TextBlock(line)
         return "PARAGRAPH", context
 
@@ -300,7 +307,10 @@ class SamParser:
         indent = match.end("indent")
         content_start=match.start("content")+1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_unordered_list_item(indent, attributes, content_start)
+        uli = UnorderedListItem(indent, attributes)
+        self.doc.add_block(uli)
+        p = Paragraph(content_start)
+        self.doc.add_block(p)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -309,7 +319,11 @@ class SamParser:
         indent = match.end("indent")
         content_start=match.start("content")+1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_ordered_list_item(indent, attributes, content_start)
+        oli = OrderedListItem(indent, attributes)
+        self.doc.add_block(oli)
+        p = Paragraph(content_start)
+        self.doc.add_block(p)
+
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -319,7 +333,10 @@ class SamParser:
         label = match.group("label")
         content_start = match.start("content") + 1
         attributes = parse_attributes(match.group("attributes"))
-        self.doc.new_labeled_list_item(indent, para_parser.parse(label, self.doc), attributes, content_start)
+        lli = LabeledListItem(indent, para_parser.parse(label, self.doc), attributes)
+        self.doc.add_block(lli)
+        p = Paragraph(content_start)
+        self.doc.add_block(p)
         self.current_text_block = TextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
@@ -330,7 +347,8 @@ class SamParser:
         indent = match.end("indent")
         attributes = parse_insert(match.group("insert"))
         attributes.update(parse_attributes(match.group("attributes"), flagged="*#?"))
-        self.doc.new_block_insert(indent=indent, attributes=attributes)
+        b = BlockInsert(indent, attributes)
+        self.doc.add_block(b)
         return "SAM", context
 
     def _include(self, context):
@@ -343,14 +361,16 @@ class SamParser:
     def _string_def(self, context):
         source, match = context
         indent = match.end("indent")
-        self.doc.new_string_def(match.group('name'), para_parser.parse(match.group('content'), self.doc), indent=indent)
+        s = StringDef(match.group('name'), para_parser.parse(match.group('content'), self.doc), indent=indent)
+        self.doc.add_block(s)
         return "SAM", context
 
     def _line_start(self, context):
         source, match = context
         indent = match.end("indent")
-        self.doc.new_block('line', indent, parse_attributes(match.group("attributes")),
+        b=Line(indent, parse_attributes(match.group("attributes")),
                            para_parser.parse(match.group('content'), self.doc, strip=False))
+        self.doc.add_block(b)
         return "SAM", context
 
     def _record_start(self, context):
@@ -359,7 +379,9 @@ class SamParser:
         record_name = match.group("name").strip()
         attributes = parse_attributes(match.group('attributes'))
         field_names = [x.strip() for x in match.group("field_names").split(',')]
-        self.doc.new_record_set(record_name, field_names, indent, attributes)
+        rs = RecordSet(record_name, field_names, indent, attributes)
+        self.doc.add_block(rs)
+
         return "RECORD", context
 
     def _record(self, context):
@@ -390,7 +412,9 @@ class SamParser:
         if attributes_string is not None:
             attributes.update(parse_attributes(attributes_string))
 
-        self.doc.new_grid(indent, attributes)
+        b = Grid(indent, attributes)
+        self.doc.add_block(b)
+
         return "GRID", context
 
     def _grid(self, context):
@@ -410,9 +434,13 @@ class SamParser:
             if self.doc.current_block.name == 'row':
                 if len(self.doc.current_block.children) != len(cell_values):
                     raise SAMParserError('Uneven number of cells in grid row at: "' + line + '"')
-            self.doc.new_row( indent)
+            b = Row(indent)
+            self.doc.add_block(b)
+
             for content in cell_values:
-                self.doc.new_cell(indent + 1)
+                b = Cell(indent+1)
+                self.doc.add_block(b)
+
                 self.doc.new_flow(para_parser.parse(content, self.doc))
             # Test for consistency with previous rows?
 
@@ -434,7 +462,8 @@ class SamParser:
             if err.code == 9:  # junk after document element
                 source.return_line()
                 xml_text = ''.join(xml_lines[:-1])
-                self.doc.new_embedded_xml(xml_text, indent)
+                b = EmbeddedXML(xml_text, indent)
+                self.doc.add_block(b)
                 return "SAM", context
             else:
                 raise
@@ -459,7 +488,9 @@ class SamParser:
 
         match = self.patterns['comment'].match(line)
         if match is not None:
-            self.doc.new_comment(match.group('comment'), match.end('indent'))
+            c = Comment(match.group('comment'), match.end('indent'))
+            self.doc.add_block(c)
+
             return "SAM", (source, match)
 
         match = self.patterns['record-start'].match(line)
@@ -680,6 +711,11 @@ class Row(Block):
 class Cell(Block):
     def __init__(self, indent, namespace=None):
         super().__init__(name='cell', indent=indent, attributes=None, content=None, namespace=namespace)
+
+
+class Line(Block):
+    def __init__(self, indent, attributes, content, namespace=None):
+        super().__init__(name='line', indent=indent, attributes=attributes, content=content, namespace=namespace)
 
 
 class Fragment(Block):
@@ -1165,10 +1201,6 @@ class DocStructure:
 
 
     def new_root(self):
-        # if match.group('schema') is not None:
-        #     pass
-        # elif match.group('namespace') is not None:
-        #     self.default_namespace = match.group('namespace')
         r = Root()
         self.doc = r
         self.current_block = r
@@ -1241,82 +1273,9 @@ class DocStructure:
         if self.doc is None:
             raise SAMParserError('No root element found.')
 
-        # Every verion of add should return the last block it adds to update current_block
+        # Every version of add should return the last block it adds to update current_block
         self.current_block.add(block)
         self.current_block = block
-
-        #print(self.cur_blk(), '|', self.current_block)
-        #pass
-        # Useful lines for debugging the build of the tree
-        # print(self.doc)
-        # print('-----------------------------------------------------')
-
-    def new_block(self, block_type, indent, attributes, text):
-        b = Block(block_type, indent, attributes, text, None)
-        self.add_block(b)
-        return b
-
-    def new_block_insert(self, indent, attributes):
-        b = BlockInsert(indent, attributes)
-        self.add_block(b)
-        return b
-
-    def new_blockquote(self, indent, attributes, citation):
-        b = Blockquote(indent, attributes, citation)
-        self.add_block(b)
-        return b
-
-    def new_fragment(self, indent, attributes):
-        b = Fragment(indent, attributes)
-        self.add_block(b)
-        return b
-
-    def new_grid(self, indent, attributes):
-        b = Grid(indent, attributes)
-        self.add_block(b)
-        return b
-
-    def new_row(self, indent):
-        b = Row(indent)
-        self.add_block(b)
-        return b
-
-    def new_cell(self, indent):
-        b = Cell(indent)
-        self.add_block(b)
-        return b
-
-    def new_embed(self, indent, attributes):
-        b = Embed(indent, attributes)
-        self.add_block(b)
-        return b
-
-    def new_codeblock(self, indent, attributes):
-        b = Codeblock(indent, attributes)
-        self.add_block(b)
-        return b
-
-    def new_paragraph(self, indent, attributes):
-        b = Paragraph(indent, attributes, None)
-        self.add_block(b)
-
-    def new_unordered_list_item(self, indent, attributes, content_start):
-        uli = UnorderedListItem(indent, attributes)
-        self.add_block(uli)
-        p = Paragraph(content_start, None, None)
-        self.add_block(p)
-
-    def new_ordered_list_item(self, indent, attributes, content_start):
-        oli = OrderedListItem(indent, attributes)
-        self.add_block(oli)
-        p = Paragraph(content_start)
-        self.add_block(p)
-
-    def new_labeled_list_item(self, indent, label, attributes, content_start):
-        lli = LabeledListItem(indent, label, attributes)
-        self.add_block(lli)
-        p = Paragraph(content_start)
-        self.add_block(p)
 
     def new_flow(self, flow):
         ids=[f._id for f in flow if type(f) is Phrase and f._id is not None]
@@ -1325,22 +1284,6 @@ class DocStructure:
                 raise SAMParserError("Duplicate ID found: " + ids[0])
             self.ids.append(id)
         self.current_block._add_child(flow)
-
-    def new_comment(self, comment, indent):
-        c = Comment(comment,indent)
-        self.add_block(c)
-
-    def new_embedded_xml(self, text, indent):
-        b = EmbeddedXML(text=text, indent=indent)
-        self.add_block(b)
-
-    def new_string_def(self, string_name, value, indent):
-        s = StringDef(string_name, value, indent)
-        self.add_block(s)
-
-    def new_record_set(self, name, field_names, indent, attributes):
-        rs = RecordSet(name, field_names, indent, attributes, None, None)
-        self.add_block(rs)
 
     def new_record(self, field_values, indent):
         record_set = self.ancestor_or_self_type(RecordSet)
