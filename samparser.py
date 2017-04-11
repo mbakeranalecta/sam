@@ -101,7 +101,6 @@ class SamParser:
             except AttributeError:
                 self.doc.source = None
         try:
-            self.doc.new_root()
             self.stateMachine.run((self.source, None))
         except EOFError:
             raise SAMParserError("Document ended before structure was complete.")
@@ -1127,6 +1126,10 @@ class DocStructure:
         self.indent=0
         self.source = None
 
+        r = Root()
+        self.doc = r
+        self.current_block = r
+
     def cur_blk(self):
         cur = self.doc
         try:
@@ -1198,12 +1201,6 @@ class DocStructure:
                 block = block.parent
         except(AttributeError):
             return None
-
-
-    def new_root(self):
-        r = Root()
-        self.doc = r
-        self.current_block = r
 
     def new_include(self, href, indent):
         if bool(urllib.parse.urlparse(href).netloc):  # An absolute URL
