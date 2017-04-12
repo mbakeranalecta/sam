@@ -105,6 +105,7 @@ class SamParser:
             self.stateMachine.run((self.source, None))
         except EOFError:
             raise SAMParserError("Document ended before structure was complete.")
+        return self.doc
 
     def _block(self, context):
         source, match = context
@@ -112,7 +113,7 @@ class SamParser:
         block_name = match.group("name").strip()
         attributes = parse_attributes(match.group("attributes"))
         content = match.group("content").strip()
-        parsed_content = None if content == '' else para_parser.parse(content, self.doc)
+        parsed_content = None if content == '' else flow_parser.parse(content, self.doc)
         b = Block(block_name, indent, attributes, parsed_content)
         self.doc.add_block(b)
         return "SAM", context
@@ -127,7 +128,7 @@ class SamParser:
 
         b = Codeblock(indent, attributes)
         self.doc.add_block(b)
-        self.current_text_block = TextBlock()
+        self.current_text_block = UnparsedTextBlock()
         return "CODEBLOCK", context
 
     def _codeblock(self, context):
@@ -162,7 +163,7 @@ class SamParser:
 
         b = Embed(indent, attributes)
         self.doc.add_block(b)
-        self.current_text_block = TextBlock()
+        self.current_text_block = UnparsedTextBlock()
         return "EMBED", context
 
     def _embed(self, context):
@@ -261,7 +262,7 @@ class SamParser:
         local_indent = len(line) - len(line.lstrip())
         b = Paragraph(local_indent)
         self.doc.add_block(b)
-        self.current_text_block = TextBlock(line)
+        self.current_text_block = UnparsedTextBlock(line)
         return "PARAGRAPH", context
 
     def _paragraph(self, context):
@@ -269,7 +270,7 @@ class SamParser:
         try:
             line = source.next_line
         except EOFError:
-            f = para_parser.parse(self.current_text_block.text, self.doc)
+            f = flow_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
             self.doc.add_flow(f)
             return "END", context
@@ -278,13 +279,13 @@ class SamParser:
         this_line_indent = len(line) - len(line.lstrip())
 
         if self.patterns['blank-line'].match(line):
-            f = para_parser.parse(self.current_text_block.text, self.doc)
+            f = flow_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
             self.doc.add_flow(f)
             return "SAM", context
 
         if this_line_indent < first_line_indent:
-            f = para_parser.parse(self.current_text_block.text, self.doc)
+            f = flow_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
             self.doc.add_flow(f)
             source.return_line()
@@ -293,7 +294,7 @@ class SamParser:
         if self.doc.in_context(['p', 'li']):
             if self.patterns['list-item'].match(line) or self.patterns['num-list-item'].match(line) or self.patterns[
                 'labeled-list-item'].match(line):
-                f = para_parser.parse(self.current_text_block.text, self.doc)
+                f = flow_parser.parse(self.current_text_block.text, self.doc)
                 self.current_text_block = None
                 self.doc.add_flow(f)
                 source.return_line()
@@ -311,7 +312,7 @@ class SamParser:
         self.doc.add_block(uli)
         p = Paragraph(content_start)
         self.doc.add_block(p)
-        self.current_text_block = TextBlock(str(match.group("content")).strip())
+        self.current_text_block = UnparsedTextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
     def _num_list_item(self, context):
@@ -324,7 +325,7 @@ class SamParser:
         p = Paragraph(content_start)
         self.doc.add_block(p)
 
-        self.current_text_block = TextBlock(str(match.group("content")).strip())
+        self.current_text_block = UnparsedTextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
     def _labeled_list_item(self, context):
@@ -333,11 +334,11 @@ class SamParser:
         label = match.group("label")
         content_start = match.start("content") + 1
         attributes = parse_attributes(match.group("attributes"))
-        lli = LabeledListItem(indent, para_parser.parse(label, self.doc), attributes)
+        lli = LabeledListItem(indent, flow_parser.parse(label, self.doc), attributes)
         self.doc.add_block(lli)
         p = Paragraph(content_start)
         self.doc.add_block(p)
-        self.current_text_block = TextBlock(str(match.group("content")).strip())
+        self.current_text_block = UnparsedTextBlock(str(match.group("content")).strip())
         return "PARAGRAPH", context
 
     def _block_insert(self, context):
@@ -387,7 +388,7 @@ class SamParser:
     def _string_def(self, context):
         source, match = context
         indent = match.end("indent")
-        s = StringDef(match.group('name'), para_parser.parse(match.group('content'), self.doc), indent=indent)
+        s = StringDef(match.group('name'), flow_parser.parse(match.group('content'), self.doc), indent=indent)
         self.doc.add_block(s)
         return "SAM", context
 
@@ -395,7 +396,7 @@ class SamParser:
         source, match = context
         indent = match.end("indent")
         b=Line(indent, parse_attributes(match.group("attributes")),
-                           para_parser.parse(match.group('content'), self.doc, strip=False))
+               flow_parser.parse(match.group('content'), self.doc, strip=False))
         self.doc.add_block(b)
         return "SAM", context
 
@@ -424,7 +425,7 @@ class SamParser:
             return "SAM", context
         else:
             #FIXME: splitting field values belongs to record object
-            field_values = [para_parser.parse(x.strip(), self.doc) for x in re.split(r'(?<!\\),', line)]
+            field_values = [flow_parser.parse(x.strip(), self.doc) for x in re.split(r'(?<!\\),', line)]
             r = Record(field_values, indent)
             self.doc.add_block(r)
 
@@ -469,7 +470,7 @@ class SamParser:
                 b = Cell(indent+1)
                 self.doc.add_block(b)
 
-                self.doc.add_flow(para_parser.parse(content, self.doc))
+                self.doc.add_flow(flow_parser.parse(content, self.doc))
             # Test for consistency with previous rows?
 
             return "GRID", context
@@ -1038,7 +1039,15 @@ class Root(Block):
         self.children.append(b)
 
 
-class TextBlock:
+class UnparsedTextBlock:
+    """
+    A class for creating text block objects for accumulating blocks of text
+    that span multiple lines in the SAM source document, such as paragraphs 
+    and codeblocks. This is simply a container that we can add lines to one
+    at a time until we have a complete block of text that we can hand off to
+    the flow parser (in the case of a paragraph) or turn into a Pre object 
+    in the case of a codeblock. 
+    """
     def __init__(self, line=None):
         self.lines = []
         if line:
@@ -1375,11 +1384,12 @@ smart_quote_subs = {re_double_quote_close:'”',
                     re_en_dash: '–',
                     re_em_dash: '—'}
 
-class SamParaParser:
+
+class FlowParser:
     def __init__(self):
         # These attributes are set by the parse method
         self.doc = None
-        self.para = None
+        self.flow_source = None
         self.current_string = None
         self.flow = None
         self.smart_quotes = False
@@ -1424,14 +1434,14 @@ class SamParaParser:
                 re.U)
         }
 
-    def parse(self, para, doc, strip=True):
-        if para is None:
+    def parse(self, flow_source, doc, strip=True):
+        if flow_source is None:
             return None
         self.doc = doc
-        self.para = Para(para, strip)
+        self.flow_source = FlowSource(flow_source, strip)
         self.current_string = ''
         self.flow = Flow()
-        self.stateMachine.run(self.para)
+        self.stateMachine.run(self.flow_source)
         return self.flow
 
     def _para(self, para):
@@ -1631,12 +1641,12 @@ class SamParaParser:
             if self.patterns['en-dash'].search(para.para, para.currentCharNumber,
                                                           para.currentCharNumber + 5):
                 self.current_string += '–'
-                self.para.advance(1)
+                self.flow_source.advance(1)
 
             elif self.patterns['em-dash'].search(para.para, para.currentCharNumber,
                                                            para.currentCharNumber + 5):
                 self.current_string += '—'
-                self.para.advance(2)
+                self.flow_source.advance(2)
             else:
                 self.current_string += '-'
         else:
@@ -1830,7 +1840,7 @@ class Phrase:
             self.child.append(thing)
 
 
-class Para:
+class FlowSource:
     def __init__(self, para, strip=True):
         self.para = para.strip() if strip else para
         self.currentCharNumber = -1
@@ -2064,7 +2074,7 @@ def SAM_parser_info(info):
     print("SAM parser information: " + info, file=sys.stderr)
 
 
-para_parser = SamParaParser()
+flow_parser = FlowParser()
 
 if __name__ == "__main__":
 
@@ -2093,7 +2103,7 @@ if __name__ == "__main__":
     samParser = SamParser()
 
     if args.smartquotes:
-        para_parser.smart_quotes = True
+        flow_parser.smart_quotes = True
 
     if (args.intermediatefile or args.intermediatedir) and not args.xslt:
         raise SAMParserError("Do not specify an intermediate file or directory if an XSLT file is not specified.")
