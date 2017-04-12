@@ -135,7 +135,7 @@ class SamParser:
         try:
             line = source.next_line
         except EOFError:
-            self.doc.new_flow(Pre(self.current_text_block))
+            self.doc.add_flow(Pre(self.current_text_block))
             self.current_text_block = None
             return "END", context
 
@@ -145,7 +145,7 @@ class SamParser:
             return "CODEBLOCK", context
         if indent <= self.doc.ancestor_or_self('codeblock').indent:
             source.return_line()
-            self.doc.new_flow(Pre(self.current_text_block.strip()))
+            self.doc.add_flow(Pre(self.current_text_block.strip()))
             self.current_text_block = None
             return "SAM", context
         else:
@@ -170,7 +170,7 @@ class SamParser:
         try:
             line = source.next_line
         except EOFError:
-            self.doc.new_flow(Pre(self.current_text_block))
+            self.doc.add_flow(Pre(self.current_text_block))
             self.current_text_block = None
             return "END", context
 
@@ -180,7 +180,7 @@ class SamParser:
             return "EMBED", context
         if indent <= self.doc.ancestor_or_self('embed').indent:
             source.return_line()
-            self.doc.new_flow(Pre(self.current_text_block.strip()))
+            self.doc.add_flow(Pre(self.current_text_block.strip()))
             self.current_text_block = None
             return "SAM", context
         else:
@@ -271,7 +271,7 @@ class SamParser:
         except EOFError:
             f = para_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
-            self.doc.new_flow(f)
+            self.doc.add_flow(f)
             return "END", context
 
         first_line_indent = len(match.string) - len(match.string.lstrip())
@@ -280,13 +280,13 @@ class SamParser:
         if self.patterns['blank-line'].match(line):
             f = para_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
-            self.doc.new_flow(f)
+            self.doc.add_flow(f)
             return "SAM", context
 
         if this_line_indent < first_line_indent:
             f = para_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
-            self.doc.new_flow(f)
+            self.doc.add_flow(f)
             source.return_line()
             return "SAM", context
 
@@ -295,7 +295,7 @@ class SamParser:
                 'labeled-list-item'].match(line):
                 f = para_parser.parse(self.current_text_block.text, self.doc)
                 self.current_text_block = None
-                self.doc.new_flow(f)
+                self.doc.add_flow(f)
                 source.return_line()
                 return "SAM", context
 
@@ -469,7 +469,7 @@ class SamParser:
                 b = Cell(indent+1)
                 self.doc.add_block(b)
 
-                self.doc.new_flow(para_parser.parse(content, self.doc))
+                self.doc.add_flow(para_parser.parse(content, self.doc))
             # Test for consistency with previous rows?
 
             return "GRID", context
@@ -1166,7 +1166,15 @@ class DocStructure:
         self.root = r
         self.current_block = r
 
-    def cur_blk(self):
+    def _cur_blk(self):
+        """
+        Calculates the current block by recursing the doc structure to find the last node.
+        
+        Should not be needed as the self.current_block should be updated whenever a block is 
+        added. 
+        
+        :return: The current block. That is, the last node of the doc structure. 
+        """
         cur = self.root
         try:
             while True:
@@ -1268,14 +1276,10 @@ class DocStructure:
         if block.namespace is None and self.default_namespace is not None:
             block.namespace = self.default_namespace
 
-        if self.root is None:
-            raise SAMParserError('No root element found.')
-
-        # Every version of add should return the last block it adds to update current_block
         self.current_block.add(block)
         self.current_block = block
 
-    def new_flow(self, flow):
+    def add_flow(self, flow):
 
         # Check for duplicate IDs in the flow
         # Add any ids found to list of ids

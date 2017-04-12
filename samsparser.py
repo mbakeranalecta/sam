@@ -109,7 +109,7 @@ class SamParser:
     def _codeblock(self, source):
         line = source.next_line
         if self.patterns['codeblock-end'].match(line):
-            self.doc.new_flow(Pre(self.current_paragraph))
+            self.doc.add_flow(Pre(self.current_paragraph))
             return "SAM", source
         else:
             self.pre_append(line)
