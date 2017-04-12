@@ -1089,18 +1089,18 @@ class Flow(list):
             if type(self[-1]) is Phrase:
                 self[-1].append(thing)
             else:
-                super(Flow, self).append(thing)
+                super().append(thing)
         elif type(thing) is Citation:
             try:
                 if type(self[-1]) is Phrase:
                     self[-1].append(thing)
                 else:
-                    super(Flow, self).append(thing)
+                    super().append(thing)
             except IndexError:
-                super(Flow, self).append(thing)
+                super().append(thing)
 
         elif not thing == '':
-            super(Flow, self).append(thing)
+            super().append(thing)
 
     def find_last_annotation(self, text):
         for i in reversed(self):
@@ -1245,7 +1245,10 @@ class DocStructure:
         :param block: The Block object to be added.
         :return: None
         """
+
+        # ID check
         try:
+
             if 'id' in block.attributes:
                 if block.attributes['id'] in self.ids:
                     raise SAMParserError("Duplicate ID found: " + block.attributes['id'])
@@ -1253,7 +1256,7 @@ class DocStructure:
         except (TypeError, AttributeError):
             pass
 
-        # IDs from included files
+        # Check IDs from included files
         try:
             overlapping_ids = set(block.ids) & set(self.ids)
             if overlapping_ids:
