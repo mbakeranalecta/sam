@@ -144,7 +144,7 @@ class SamParser:
         if self.patterns['blank-line'].match(line):
             self.current_text_block.append(line)
             return "CODEBLOCK", context
-        if indent <= self.doc.ancestor_or_self('codeblock').indent:
+        if indent <= self.doc.ancestor_or_self_type(Codeblock).indent:
             source.return_line()
             self.doc.add_flow(Pre(self.current_text_block.strip()))
             self.current_text_block = None
@@ -179,7 +179,7 @@ class SamParser:
         if self.patterns['blank-line'].match(line):
             self.current_text_block.append(line)
             return "EMBED", context
-        if indent <= self.doc.ancestor_or_self('embed').indent:
+        if indent <= self.doc.ancestor_or_self_type(Embed).indent:
             source.return_line()
             self.doc.add_flow(Pre(self.current_text_block.strip()))
             self.current_text_block = None
@@ -455,7 +455,7 @@ class SamParser:
         indent = len(line) - len(line.lstrip())
         if self.patterns['blank-line'].match(line):
             return "GRID", context
-        elif indent <= self.doc.ancestor_or_self('grid').indent:
+        elif indent <= self.doc.ancestor_or_self_type(Grid).indent:
             source.return_line()
             return "SAM", context
         else:
@@ -631,8 +631,6 @@ class Block(ABC):
         Otherwise call add on the parent block of self. This will recurse until
         the block finds it rightful home in the hierarchy.
 
-        Return the block you added so that the document structure can update
-        the current_record variable. This way any additional blocks created
         :param b: The block to add.
 
         """
@@ -1162,18 +1160,22 @@ class EmbeddedXML(Block):
 
 
 class DocStructure:
+    """
+    Class to define a document structure object. The SAM source document is parsed 
+    to create a document structure object. The document structured object can then
+    be queried directly by programs or can output an XML representation of the 
+    SAM document. 
+    
+    The document structure object is a tree of objects starting with a Root object. 
+    Each part of the SAM concrete syntax, such as Grids, RecordSets, and Lines has
+    its own object type. Names blocks are represented by a generic Block object. 
+    """
     def __init__(self):
-        self.root = None
-        self.fields = None
-        self.current_record = None
-        self.current_block = None
+        self.root = Root()
+        self.current_block = self.root
         self.default_namespace = None
         self.ids = []
-        self.indent=0
 
-        r = Root()
-        self.root = r
-        self.current_block = r
 
     def _cur_blk(self):
         """
@@ -1194,6 +1196,13 @@ class DocStructure:
             return cur
 
     def context(self, context_block=None):
+        """
+        Calculate the context of a given block in the document hierarchy. 
+        :param context_block: The block to start from as an instance of a Block object. 
+        If not given, the current block is used.
+        :return: Returns a list containing the names of the specified block and its ancestors 
+        back to the root, with the name of the given node first.
+        """
         context = []
         if context_block is None:
             context_block = self.current_block
@@ -1205,23 +1214,23 @@ class DocStructure:
             return context
 
     def in_context(self, context_query):
+        """
+        Determines if the current context matches a context query. The context query is a list
+        of block names consisting of the current block and as many of its parents as are of 
+        interest. For example::
+        
+            self.doc.in_context(['p', 'li'])
+            
+         would determine if the current block is a 'p' inside an 'li'.   
+        :param context_query: The context to query as a list of block names from the leaf node 
+        backwards through as many parent blocks as desired. 
+        :return: True is the context_query matches the current context; False otherwise.
+        """
         c = self.context()
         for i, cq in enumerate(context_query):
             if c[i] != cq:
                 return False
         return True
-
-    def context_at_indent(self, indent):
-        c = self.current_block
-        if c.indent < indent:
-            return []
-        try:
-            while True:
-                if c.indent == indent:
-                    return self.context(c)
-                c = c.parent
-        except AttributeError:
-            raise SAMParserError("Indentation error found at " + str(self.current_block))
 
     def ancestor_or_self(self,ancestor_name, block=None):
         if block is None:
