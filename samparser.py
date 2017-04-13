@@ -1233,6 +1233,16 @@ class DocStructure:
         return True
 
     def ancestor_or_self(self,ancestor_name, block=None):
+        """
+        Returns a block that is the reference block or it ancestor based on its name.
+        
+        For SAM's concrete types is it better to use ancestor_or_self_type as
+        the names of concrete types could be changed in the schema. 
+        
+        :param ancestor_name: The name of the block to return.
+        :param block: The reference block. If not specified, the current block is used.
+        :return: The block requested, nor None if no block matches.
+        """
         if block is None:
             block = self.current_block
         try:
@@ -1244,6 +1254,16 @@ class DocStructure:
             return None
 
     def ancestor_or_self_type(self,ancestor_type, block=None):
+        """
+        Returns a block that is the reference block or it ancestor based on its type.
+
+        For named blocks is it better to use ancestor_or_self as
+        all named blocks are of type Block. 
+
+        :param ancestor_name: The type of the block to return.
+        :param block: The reference block. If not specified, the current block is used.
+        :return: The block requested, nor None if no block matches.
+        """
         if block is None:
             block = self.current_block
         try:
@@ -1298,6 +1318,15 @@ class DocStructure:
         self.current_block = block
 
     def add_flow(self, flow):
+        """
+        Add a flow object as a child of the current object.
+        
+        The method checks the IDs declared in the flow against the list of 
+        declared IDs for the document and raises a SAMParserError "Duplicate ID found" 
+        if there is a duplicate. 
+        :param flow: The Flow object to add.
+        :return: None.
+        """
 
         # Check for duplicate IDs in the flow
         # Add any ids found to list of ids
@@ -1311,6 +1340,18 @@ class DocStructure:
 
 
     def find_last_annotation(self, text, node=None):
+        """
+        Finds the last annotation in the current document with the specified text. 
+        In this case, "last" means the most recent instance of that annotation text 
+        in document order. In other words, the method searches backwards through the 
+        document and stops at the first occurrence of an annotation with that text that
+        it encounters. 
+        
+        :param text: The annotation text to search for. 
+        :param node: The node in the document tree to start the search from. If not specified, 
+        the seach defaults to self.root, meaning the entire document is searched.
+        :return: The last matching annotation object, or None. 
+        """
         if node is None:
             node = self.root
         if type(node) is Flow:
@@ -1328,6 +1369,12 @@ class DocStructure:
         return None
 
     def serialize(self, serialize_format):
+        """
+        Creates an serialization of the document structure in the specified format. At present, 
+        the only serialization format supported is XML.
+        :param serialize_format: Must be "XML"
+        :return: A generator that generates the serialized output. 
+        """
         if serialize_format.upper() == 'XML':
             yield from self.root.serialize_xml()
         else:
