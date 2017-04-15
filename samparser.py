@@ -467,7 +467,7 @@ class SamParser:
             self.doc.add_block(b)
 
             for content in cell_values:
-                b = Cell(indent+1)
+                b = Cell(indent)
                 self.doc.add_block(b)
 
                 self.doc.add_flow(flow_parser.parse(content, self.doc))
@@ -742,6 +742,22 @@ class Row(Block):
     def __init__(self, indent,  namespace=None):
         super().__init__(name='row', indent=indent, attributes=None, content=None, namespace=namespace)
 
+    def add(self, b):
+        """
+        Override the Block add method to:
+        * Accept Cell blocks as children
+        * Raise error is asked to add anything else
+
+        :param b: The block to add.
+
+        """
+        if b.indent < self.indent:
+            self.parent.add(b)
+        else:
+            if type(b) is Cell:
+                self._add_child(b)
+            else:
+                self.parent.add(b)
 
 class Cell(Block):
     def __init__(self, indent, namespace=None):
