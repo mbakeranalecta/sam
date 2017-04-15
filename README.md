@@ -61,3 +61,9 @@ To run SAM Parser on Windows, use the `samparser` batch file:
 To run SAM Parser on Xnix or Mac, invoke Python 3 as appropriate on your system. For example:
 
     python3 samparser.py foo.sam -o foo.html -x foo2html.xslt -i foo.xml
+
+### NOTE
+
+Revision 227cb3dd7bb322f5579858806071c1ff8456c0b6 introduced a change in the 
+way the XML representation of a record is generate. A record
+used to output as "row". It is now output as "record".
