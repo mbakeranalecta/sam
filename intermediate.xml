@@ -176,28 +176,28 @@ document:
 <baz>bat</baz>
 <string name="name">fred <phrase><annotation type="conjunction">and</annotation></phrase> wilma</string>
 <history>
-<row>
+<record>
 <date>2014-06-23</date>
 <author>mbaker</author>
 <comment>New, Topic</comment>
 <status>In progress</status>
-</row>
-<row>
+</record>
+<record>
 <date>2016-07-01</date>
 <author>mbaker</author>
 <comment>Revision</comment>
 <status>In progress</status>
-</row>
+</record>
 </history>
 <index>
-<row>
+<record>
 <type>feature</type>
 <term>fragment</term>
-</row>
-<row>
+</record>
+<record>
 <type>feature</type>
 <term>fragments</term>
-</row>
+</record>
 </index>
 </head>
 <body>
@@ -214,28 +214,28 @@ document:
 &lt;baz&gt;bat&lt;/baz&gt;
 &lt;string name="name"&gt;fred &lt;phrase&gt;&lt;annotation type="conjunction"&gt;and&lt;/annotation&gt;&lt;/phrase&gt; wilma&lt;/string&gt;
 &lt;history&gt;
-&lt;row&gt;
+&lt;record&gt;
 &lt;date&gt;2014-06-23&lt;/date&gt;
 &lt;author&gt;mbaker&lt;/author&gt;
 &lt;comment&gt;New, Topic&lt;/comment&gt;
 &lt;status&gt;In progress&lt;/status&gt;
-&lt;/row&gt;
-&lt;row&gt;
+&lt;/record&gt;
+&lt;record&gt;
 &lt;date&gt;2016-07-01&lt;/date&gt;
 &lt;author&gt;mbaker&lt;/author&gt;
 &lt;comment&gt;Revision&lt;/comment&gt;
 &lt;status&gt;In progress&lt;/status&gt;
-&lt;/row&gt;
+&lt;/record&gt;
 &lt;/history&gt;
 &lt;index&gt;
-&lt;row&gt;
+&lt;record&gt;
 &lt;type&gt;feature&lt;/type&gt;
 &lt;term&gt;fragment&lt;/term&gt;
-&lt;/row&gt;
-&lt;row&gt;
+&lt;/record&gt;
+&lt;record&gt;
 &lt;type&gt;feature&lt;/type&gt;
 &lt;term&gt;fragments&lt;/term&gt;
-&lt;/row&gt;
+&lt;/record&gt;
 &lt;/index&gt;
 &lt;/head&gt;
 &lt;body&gt;
@@ -1700,35 +1700,35 @@ history:: date, author, comment, status
 </source>
 <markup>
 <history>
-<row>
+<record>
 <date>2014-06-23</date>
 <author>mbaker</author>
 <comment>New, Topic</comment>
 <status>In progress</status>
-</row>
-<row>
+</record>
+<record>
 <date>2016-07-01</date>
 <author>mbaker</author>
 <comment>Revision</comment>
 <status>In progress</status>
-</row>
+</record>
 </history>
 </markup>
 <result>
 <codeblock language="xml">
 &lt;history&gt;
-&lt;row&gt;
+&lt;record&gt;
 &lt;date&gt;2014-06-23&lt;/date&gt;
 &lt;author&gt;mbaker&lt;/author&gt;
 &lt;comment&gt;New, Topic&lt;/comment&gt;
 &lt;status&gt;In progress&lt;/status&gt;
-&lt;/row&gt;
-&lt;row&gt;
+&lt;/record&gt;
+&lt;record&gt;
 &lt;date&gt;2016-07-01&lt;/date&gt;
 &lt;author&gt;mbaker&lt;/author&gt;
 &lt;comment&gt;Revision&lt;/comment&gt;
 &lt;status&gt;In progress&lt;/status&gt;
-&lt;/row&gt;
+&lt;/record&gt;
 &lt;/history&gt;
 </codeblock>
 </result>
@@ -1747,23 +1747,23 @@ filmography:: film
 </source>
 <markup>
 <filmography>
-<row>
+<record>
 <film>Rio Bravo</film>
-</row>
-<row>
+</record>
+<record>
 <film>The Shootish</film>
-</row>
+</record>
 </filmography>
 </markup>
 <result>
 <codeblock language="xml">
 &lt;filmography&gt;
-&lt;row&gt;
+&lt;record&gt;
 &lt;film&gt;Rio Bravo&lt;/film&gt;
-&lt;/row&gt;
-&lt;row&gt;
+&lt;/record&gt;
+&lt;record&gt;
 &lt;film&gt;The Shootish&lt;/film&gt;
-&lt;/row&gt;
+&lt;/record&gt;
 &lt;/filmography&gt;
 </codeblock>
 </result>
@@ -2403,27 +2403,27 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </source>
 <markup>
 <recordset conditions="a,b" id="id6" name="name" xml:lang="en-CA">
-<row>
+<record>
 <foo>a</foo>
 <bar>b</bar>
-</row>
-<row>
+</record>
+<record>
 <foo>c</foo>
 <bar>d</bar>
-</row>
+</record>
 </recordset>
 </markup>
 <result>
 <codeblock language="xml">
 &lt;recordset conditions="a,b" id="id6" name="name" xml:lang="en-CA"&gt;
-&lt;row&gt;
+&lt;record&gt;
 &lt;foo&gt;a&lt;/foo&gt;
 &lt;bar&gt;b&lt;/bar&gt;
-&lt;/row&gt;
-&lt;row&gt;
+&lt;/record&gt;
+&lt;record&gt;
 &lt;foo&gt;c&lt;/foo&gt;
 &lt;bar&gt;d&lt;/bar&gt;
-&lt;/row&gt;
+&lt;/record&gt;
 &lt;/recordset&gt;
 </codeblock>
 </result>

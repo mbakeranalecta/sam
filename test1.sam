@@ -171,28 +171,28 @@ tests:(!en) SAM Parser Tests
                     <baz>bat</baz>
                     <string name="name">fred <phrase><annotation type="conjunction">and</annotation></phrase> wilma</string>
                     <history>
-                    <row>
+                    <record>
                     <date>2014-06-23</date>
                     <author>mbaker</author>
                     <comment>New, Topic</comment>
                     <status>In progress</status>
-                    </row>
-                    <row>
+                    </record>
+                    <record>
                     <date>2016-07-01</date>
                     <author>mbaker</author>
                     <comment>Revision</comment>
                     <status>In progress</status>
-                    </row>
+                    </record>
                     </history>
                     <index>
-                    <row>
+                    <record>
                     <type>feature</type>
                     <term>fragment</term>
-                    </row>
-                    <row>
+                    </record>
+                    <record>
                     <type>feature</type>
                     <term>fragments</term>
-                    </row>
+                    </record>
                     </index>
                     </head>
                     <body>
@@ -1399,18 +1399,18 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <history>
-                    <row>
+                    <record>
                     <date>2014-06-23</date>
                     <author>mbaker</author>
                     <comment>New, Topic</comment>
                     <status>In progress</status>
-                    </row>
-                    <row>
+                    </record>
+                    <record>
                     <date>2016-07-01</date>
                     <author>mbaker</author>
                     <comment>Revision</comment>
                     <status>In progress</status>
-                    </row>
+                    </record>
                     </history>
 
         case: Recordset with only one field name
@@ -1432,12 +1432,12 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <filmography>
-                    <row>
+                    <record>
                     <film>Rio Bravo</film>
-                    </row>
-                    <row>
+                    </record>
+                    <record>
                     <film>The Shootish</film>
-                    </row>
+                    </record>
                     </filmography>
 
 
@@ -2012,14 +2012,14 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <recordset conditions="a,b" id="id6" name="name" xml:lang="en-CA">
-                    <row>
+                    <record>
                     <foo>a</foo>
                     <bar>b</bar>
-                    </row>
-                    <row>
+                    </record>
+                    <record>
                     <foo>c</foo>
                     <bar>d</bar>
-                    </row>
+                    </record>
                     </recordset>
 
 

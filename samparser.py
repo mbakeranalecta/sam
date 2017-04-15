@@ -821,6 +821,7 @@ class RecordSet(Block):
 
 class Record(Block):
     def __init__(self, field_values, indent, attributes=None, content=None, namespace=None):
+        self.name='record'
         self.field_values = field_values
         self.attributes = attributes
         self.content = content
@@ -830,13 +831,13 @@ class Record(Block):
 
     def _output_block(self):
         yield " " * int(self.indent)
-        yield "[row:'%s'" % (self.content) + '\n'
+        yield "[record:'%s'" % (self.content) + '\n'
         for x in self.record:
             yield " " * int(self.indent + 4) + x[0] + ' = ' + x[1] + "\n"
         yield "]"
 
     def serialize_xml(self):
-        yield '<row'
+        yield '<record'
 
         if self.namespace is not None:
             if type(self.parent) is Root or self.namespace != self.parent.namespace:
@@ -851,7 +852,7 @@ class Record(Block):
             yield "<{0}>".format(x[0])
             yield from x[1].serialize_xml()
             yield "</{0}>\n".format(x[0])
-        yield "</row>\n"
+        yield "</record>\n"
 
 
 class List(Block):
