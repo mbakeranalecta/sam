@@ -28,6 +28,7 @@ re_ll_marker = r'\|(?P<label>\S.*?)(?<!\\)\|'
 re_spaces = r'\s+'
 re_one_space = r'\s'
 re_comment = r'#(?P<comment>.*)'
+re_remark = r'(#\((?P<author>.*?)\)\s+(?P<comment>.*))'
 
 
 class SamParser:
@@ -65,6 +66,7 @@ class SamParser:
         self.smart_quotes = False
         self.patterns = {
             'comment': re.compile(re_indent + re_comment, re.U),
+            'remark': re.compile(re_indent + re_remark, re.U),
             'declaration': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
             'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + '\s' + re_content + r'?', re.U),
             'codeblock-start': re.compile(
@@ -520,6 +522,13 @@ class SamParser:
                 self.doc.default_namespace = content
             else:
                 raise SAMParserError("Unknown declaration: " + match.group(0))
+
+            return "SAM", (source, match)
+
+        match = self.patterns['remark'].match(line)
+        if match is not None:
+            b = Remark(match.group('comment'), match.group('author'), match.end('indent'))
+            self.doc.add_block(b)
 
             return "SAM", (source, match)
 
@@ -993,7 +1002,7 @@ class Paragraph(Block):
 
 
 class Comment(Block):
-    def __init__(self, content='', indent=0):
+    def __init__(self, content, indent):
         self.content=content
         self.indent=indent
         self.name='#comment'
@@ -1013,6 +1022,19 @@ class Comment(Block):
 
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
+
+
+class Remark(Comment):
+    def __init__(self, content, author, indent=0):
+        super().__init__(content, indent)
+        self.author = author
+
+    def __str__(self):
+        return u"[#({0}) {1}]".format(self.author, self.content)
+
+    def serialize_xml(self):
+        yield '<remark author="{0}">{1}</remark>\n'.format(escape_for_xml_attribute(self.author),
+                                                           escape_for_xml(self.content))
 
 
 class StringDef(Block):

@@ -280,6 +280,50 @@ article: Foo
 </test>
 <!--  FIXME: Need tests for comments. -->
 <test>
+<title>Remarks</title>
+<description>
+<p>Remarks are a type of comment that is attributed to an author and is used for commenting editorially on the document.</p>
+</description>
+<case>
+<title>Simple remark</title>
+<description>
+<p>Just a simple remark. Nothing fancy.</p>
+</description>
+<source>
+<codeblock language="sam">
+#(mbaker) This is a remark.
+</codeblock>
+</source>
+<markup>
+<remark author="mbaker">This is a remark.</remark>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;remark author="mbaker"&gt;This is a remark.&lt;/remark&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Complex remark</title>
+<description>
+<p>A little bit more complex.</p>
+</description>
+<source>
+<codeblock language="sam">
+#(Charles André Joseph Marie de Gaulle !@#$%^&amp;*(((({}":&lt;&gt;) This is a remark.
+</codeblock>
+</source>
+<markup>
+<remark author="Charles André Joseph Marie de Gaulle !@#$%^&amp;*(((({}&quot;:&lt;&gt;">This is a remark.</remark>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;remark author="Charles André Joseph Marie de Gaulle !@#$%^&amp;amp;*(((({}&amp;quot;:&amp;lt;&amp;gt;"&gt;This is a remark.&lt;/remark&gt;
+</codeblock>
+</result>
+</case>
+</test>
+<test>
 <title>Fields</title>
 <description>
 <p>A field is a block without children. A field value does not get wrapped in a title element. It is simple the value of the field.</p>

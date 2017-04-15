@@ -89,7 +89,9 @@ specification: Semantic Authoring Markdown (SAM)
 
             |fragment| Fragments are sections of a documents (potentially larger than a single paragraph) that can be included by reference in other parts of a document or in other documents. Strings used in a fragment can be redefined when a fragment is reused, allowing you to vary the text of the fragment when it is used in different places. (Note that this is describes the {presumed semantics} of fragments. Implementation of these semantics is up to the application layer.
 
-            |title| The title of a block.
+            |comment| A comment on the sam markup file itself, as opposed to a comment on the document. For comments on the document, use remark
+
+            |remarks| A remark is a comment on the text of the document, intended for editorial purposes. It must be attributed to a specific author.
 
 
 
@@ -112,7 +114,7 @@ specification: Semantic Authoring Markdown (SAM)
                     !schema: http://spfeopentoolkit.org/schemas/think-plan-do-topic.sams
 
 
-        feature:(#block) Blocks
+        structure:(#block) Blocks
 
             Blocks are indicated by a {name token}(feature) followed by a colon at the start of a line.
 
@@ -142,7 +144,7 @@ specification: Semantic Authoring Markdown (SAM)
             presumed-semantics:
                 The title of a a block is presumed to be the title of a the entire content of a block. 
 
-        feature:(#field) Fields
+        structure:(#field) Fields
         
             A field is a {block}(feature) with no children. Fields take the same annotations as blocks, however, the text is treated as the value of the field rather than as a title.
             
@@ -159,7 +161,7 @@ specification: Semantic Authoring Markdown (SAM)
                 <era>BC</era>
 
         
-        feature:(#paragraph) Paragraphs 
+        structure:(#paragraph) Paragraphs 
 
             A paragraph is sequence of lines ending with a blank line.
 
@@ -185,7 +187,7 @@ specification: Semantic Authoring Markdown (SAM)
             presumed-semantics:
                 A paragraph is assumed to be a document paragraph.
 
-        feature:(#annotation) Annotations
+        structure:(#annotation) Annotations
 
             Annotations clarify what a piece of text is about.  
 
@@ -201,14 +203,30 @@ specification: Semantic Authoring Markdown (SAM)
 
             |namespace| In some cases, it is necessary to specify the namespace to which the annotated term belongs. In the sample above, the name of the actor "John Wayne" is part of a set of names managed by the Screen Actors Guild which makes sure two actors don't use the same stage name. (In most cases, the namespace is implied by the type, so you will not usually need to specify it.) 
 
-        feature:(#annotation-lookup) Annotation lookup
+            section: Conditions 
 
-            If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use square brackets around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase.
+                Conditions are indicated using the {condition attribute}.
 
-            ```(sam) 
-                {foo}(bar "baz") gruznatz {foo}
+                SAM itself does not execute conditions, it merely encodes them for later processing. Therefore it has no idea what the tokens mean or how they will be interpreted. However, using simple tokens is recommended as a best practice. 
 
-        feature:(#insert) Inserts
+
+            section: Names and IDs 
+            
+                Blocks can be assigned names and IDs. Both are used to reference the block from elsewhere in the content. The difference is that ids are local to the current document and must be unique within the current document. If a duplicate ID is found, the parser will raise an error. 
+
+                Names are merely assigned to the block by the parser. No namespace or uniqueness constraints are enforced. It is up to the application to decide how names are used. However, it is considered a SPFE idiom that names are scoped to the type of objects they apply to. In other words, fragment names are in a different namespace from string names.
+
+                This implies that string references are distinct from fragment references.
+
+
+            section:(#annotation-lookup) Annotation lookup
+
+                If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use square brackets around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase.
+
+                ```(sam) 
+                    {foo}(bar "baz") gruznatz {foo}
+
+        structure:(#insert) Inserts
 
             An insert is an instruction to the {application layer} to insert a resource into the document output.
 
@@ -237,7 +255,7 @@ specification: Semantic Authoring Markdown (SAM)
 
             Remember that it is up to the application layer to implement such inserts.
 
-        section: Includes
+        structure:(#include) Includes
 
             You can include one SAM file in another. The included file must be a complete SAM file, with SAM
             declaration. Its structured is included in the structure of the included file at the indent level
@@ -270,7 +288,7 @@ specification: Semantic Authoring Markdown (SAM)
             result in the included content being wrapped in that block or fragment in the output
             where the application layer can deal with it appropriately.
 
-        section: Citations 
+        structure:(#citation) Citations 
 
             Citations are any reference to another resource. This includes internal references to other structures within the file, such as to a graphic,procedure, or footnote, as well as references to external works.
 
@@ -325,22 +343,8 @@ specification: Semantic Authoring Markdown (SAM)
              The application layer is responsible for all processing of references.
 
 
-        section: Conditions 
 
-            Conditions are indicated using the {condition attribute}.
-
-            SAM itself does not execute conditions, it merely encodes them for later processing. Therefore it has no idea what the tokens mean or how they will be interpreted. However, using simple tokens is recommended as a best practice. 
-
-
-        section: Names and IDs 
-        
-            Blocks can be assigned names and IDs. Both are used to reference the block from elsewhere in the content. The difference is that ids are local to the current document and must be unique within the current document. If a duplicate ID is found, the parser will raise an error. 
-
-            Names are merely assigned to the block by the parser. No namespace or uniqueness constraints are enforced. It is up to the application to decide how names are used. However, it is considered a SPFE idiom that names are scoped to the type of objects they apply to. In other words, fragment names are in a different namespace from string names.
-
-            This implies that string references are distinct from fragment references.
-
-        section: Strings
+        structure: Strings
 
             You can define a string:
 
@@ -362,7 +366,7 @@ specification: Semantic Authoring Markdown (SAM)
                 ~~~(?foo)
                     $foo = bar
 
-        section: Fragments 
+        structure: Fragments 
 
             Fragments are created by a token followed by an open curly brace at the start of a line: 
 
@@ -374,32 +378,32 @@ specification: Semantic Authoring Markdown (SAM)
 
             The content of the fragment must be indented, and the closing brace must be at the same indentation level as the opening one. 
 
-        section: Insert a fragment 
+            section: Insert a fragment 
 
-            To insert a fragment: 
+                To insert a fragment: 
 
-            ```(sam) 
-                >>>(~my-fragment)
+                ```(sam) 
+                    >>>(~my-fragment)
 
-            
-            Any strings defined within a fragment are scoped to that fragment. You can override these strings when you insert the fragment. In fact, you can override any in-scope strings in a fragment insert. String definitions must each be on a line by themselves. 
+                
+                Any strings defined within a fragment are scoped to that fragment. You can override these strings when you insert the fragment. In fact, you can override any in-scope strings in a fragment insert. String definitions must each be on a line by themselves. 
 
-            ```(sam)
-                >>>(~my-fragment)
-                    $color=white
+                ```(sam)
+                    >>>(~my-fragment)
+                        $color=white
 
-            Note that the SAM syntax is designed to bear these semantics, but that the SAM parser does not implement them. It simply passes them on to whatever processor you are using, which is free to implement different rules for string handling. 
+                Note that the SAM syntax is designed to bear these semantics, but that the SAM parser does not implement them. It simply passes them on to whatever processor you are using, which is free to implement different rules for string handling. 
 
-        section: Shortcuts for inserts
+            section: Shortcuts for inserts
 
-            ```(sam)
-                # string
-                >>>($this.string)
-                >>>(string this.string)
+                ```(sam)
+                    # string
+                    >>>($this.string)
+                    >>>(string this.string)
 
-                # reference >(#this.ref) >(ref this.ref)
+                    # reference >(#this.ref) >(ref this.ref)
 
-        section: Codeblocks
+        structure: Codeblocks
 
             Codeblocks begin with three back ticks followed by an optional {annotation} and or {citation}.
 
@@ -425,7 +429,7 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam)
                     ```(python)(?lang=python)
 
-        section: Embedded markup
+        structure: Embedded markup
             You can embed markup in other markup languages. Unlike a codeblock, the intended semantics of
             an embed are that the markup will be processed in the application layer. For example, a piece
             of latex math markup might be processed in the application layer to display an equation.
@@ -439,7 +443,7 @@ specification: Semantic Authoring Markdown (SAM)
                 ===(latexmathml)(*id13)(#name)(?a)(?b)
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
-        section: Blockquotes 
+        structure: Blockquotes 
 
             Three quotation marks in a row are a shortcut for the {implicit structure} "blockquote".
 
@@ -456,18 +460,18 @@ specification: Semantic Authoring Markdown (SAM)
                     Quoted
 
 
-        section: Alternate blockquotes
+            section: Alternate blockquotes
 
-            ```(sam) 
-                '''[citation]
-                    Quoted
+                ```(sam) 
+                    '''[citation]
+                        Quoted
 
-            
-            The difference between code {```}(code) and quote `"""` is that code signals a different encoding. The content of the code block is not processed as SAM markup.
+                
+                The difference between code {```}(code) and quote `"""` is that code signals a different encoding. The content of the code block is not processed as SAM markup.
 
-            In a blockquote, however, the material inside the quote block is still SAM markup and is processed as such.
+                In a blockquote, however, the material inside the quote block is still SAM markup and is processed as such.
 
-        section: Lines 
+        structure: Lines 
         
             Lines are pieces of text with fixed line endings, such as poems. To create a set of lines, precede each one with a pipe character followed by a space. 
 
@@ -490,7 +494,7 @@ specification: Semantic Authoring Markdown (SAM)
 
             All spaces after the first space following the pipe are considered significant and are retained on output.
 
-        section: Lists 
+        structure: Lists 
 
             You can create any kind of list you like by using nested blocks. 
 
@@ -544,27 +548,15 @@ specification: Semantic Authoring Markdown (SAM)
             * The next para at the same indent that starts with a list marker. 
             * The end of the list.
 
-        section: Grids
+        structure: Grids
 
-            Grids are an very simple table-like construct. They are not full tables
-            which are complex {document domain} beasts with potentially elaborate
-            syntax. There are many ways to do {tables} or semantically represent
-            data that may be displayed in tables in SAM. Grids are meant for the
-            simplest cases that have no document domain or subject domain semantics.
-            They are just a tick tack toe board.
+            Grids are an very simple table-like construct. They are not full tables which are complex {document domain} beasts with potentially elaborate syntax. There are many ways to do {tables} or semantically represent data that may be displayed in tables in SAM. Grids are meant for the simplest cases that have no document domain or subject domain semantics. They are just a tick tack toe board.
 
-            A grid is created by starting a line with three `+` signs. These may be followed
-            by {block annotations}.
+            A grid is created by starting a line with three `+` signs. These may be followed by {block annotations}.
 
-            Each row of the grid is on a separate line. Cells are separated by pipes.
-            There is no pipe before the first cell or after the last. All rows must have
-            the same number of cells.
+            Each row of the grid is on a separate line. Cells are separated by pipes. There is no pipe before the first cell or after the last. All rows must have the same number of cells.
 
-            There is no concept of a header, no row or column spanning. A grid consists
-            of rows and cells. Each cell contains a single {flow}. Each row must be on
-            one line of the source files. Cell contents are trimmed of leading and trailing
-            whitespace. This allows you to align the pipes if you wish (though this is
-            not required).
+            There is no concept of a header, no row or column spanning. A grid consists of rows and cells. Each cell contains a single {flow}. Each row must be on one line of the source files. Cell contents are trimmed of leading and trailing whitespace. This allows you to align the pipes if you wish (though this is not required).
 
             ```(SAM)
                 +++
@@ -586,12 +578,53 @@ specification: Semantic Authoring Markdown (SAM)
                     feature | fragments | bang
 
 
+        structure:(#comment) Comment
+
+            A comment is a extra-textual comment on the markup of the document
+            similar to a comment in code or in XML. 
+
+
+            syntax:
+
+                A comment is created by starting a line with a `#`. There 
+                is no support for multi-line comments or for comments within
+                running text. 
+
+                ```(sam)
+                    # This is a comment.
+
+            XML:
+
+                A comment is represented in XML as an XML comment.
+
+                ```(xml)
+                    <!-- This is a comment -->
+
+        structure:(#remark) Remark
+
+            A remark is an editorial comment on the document text. It may be displayed in a draft form or the document or while reviewing and revising the document. Remarks are similar to the comment features found in PDF files or WordProcessors.
+
+            A remark is distinguished from a comment by the requirement that the author of the remark be identified in the remark.
+
+            syntax:
+                A remark looks like a {comment} with an annotation identifying the author:
+
+                ```(sam)
+                    #(Mark Baker) This is a remark.
+
+                There must be no space between the `#` and the `(`.
+
+            xml:
+                The XML representation of a {remark} is as follows:
+
+                ```(xml)
+                    <remark author="Mark Baker">This is a remark.</remark>
+
+
 
         section: Reserved insert types 
 
-            You can use any name you like for the insert type, however the following types
-            are reserved so that editors can act on them to provide enhanced views of the
-            document while editing:
+            You can use any name you like for the insert type, however the following types are reserved so that editors can act on them to provide enhanced views of the document while editing:
 
             *ref
             *string
@@ -655,10 +688,12 @@ specification: Semantic Authoring Markdown (SAM)
              ```
                 test
                 
-        feature(#name-token) Name tokens
+        feature:(#name-token) Name tokens
         
             A name token is a string that represents the name of a {structure} in a SAM document. It follows the same rules as a XML local name. (This means it cannot contain a colon or a namespace prefix. Namespace prefixes are not used in SAM. {Namespaces are assigned to elements in the schema.}(future)  
             
+
+
         appendix: Annotation and attribute rules
 
             This is the list of the annotations and attributes allowed on each structure:
