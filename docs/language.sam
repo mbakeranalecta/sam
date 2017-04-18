@@ -96,16 +96,82 @@ specification: Semantic Authoring Markdown (SAM)
 
 
     structures:
+
+        SAM is a hybrid markup language. That is, it combines the concrete structures of a typical lightweight markup language like MarkDown with the extensibility of an abstract language like XML. A concrete structure is one that has both fixed syntax and fixed semantics. For example, the use of asterisks at the beginning of lines to indicate an unordered list, which is common to most lightweight markup languages has both fixed syntax -- the markup for an unordered list is always lines starting with asterisks -- and fixed semantics -- this markup always means unordered list. An abstract structure is one that can be assigned different semantics. An abstract structure can have fixed syntax (as in both XML and SAM) or variable syntax (as in SGML). 
+
+        The abstract structures in SAM are the {block}(structure), the {field}(structure) and the {annotation}(structure). Abstract structures with fixed semantics must be given names so that you can associate different semantics with different names. 
+
+        section:(#name) Names
+
+            A name in a SAM document must be a valid XML local name. 
+
+        section:(#name-like-string) Name-like string
+
+            A name like string is a string that looks like a name. Name-like strings are used in parsing SAM files to detect the intention of the author to create a name. Not all name-like-strings are valid names. If the parser sees a name-like-string that is not a valid name, it reports an error. 
+
+            The reason for recognizing name-like-strings rather than only recognizing valid names that otherwise, what the writer intended as a name might not be recognized as such and would therefore be treated as plain text, without any error or warning being raised. 
+
+            By recognizing name-like-strings the parser is able to report an errors on these dubious cases, which reduce the likelihood or misinterpreting the author's intent. In the case where the name-like-string is indeed intended to be interpreted as plain text, the writer can ensure it is interpreted as such by escaping the concluding colon with a backslash. 
+
+        section:(#syntax) Syntax
+
+            A {block} in SAM is formed by starting a line with a name followed by a colon:
+
+            ```(sam)
+                description:
+                    This is the content of a block named "description".
+
+            Structures in SAM can contain other structures. The hierarchy of structures in SAM is defined by indentation. In the example above, the paragraph structure is inside the block named description because it is indented under it. 
+
+        section:(#SOM) SAM Object Model
+
+            The SAM Object Model is a way of representing the structure of a SAM document as a data structure to a computer program. The SAM object model is a way for program to access a SAM document in a standard way. Unless you are concerned with writing programs to access the SAM Object Model you can ignore all references to it in this document. The SAM Object model is the model implemented by the current SAM parser, which is written in Python. However, SAM parsers are not required to implement the SAM Object Model. 
+
+            The other way for applications to access the structure of is by serializing it to XML. This is the only require access method for parsers to implement.
         
-        structure:(#declaration) Declarations
+        section:(#parser) Parsing
 
-            A SAM file may start with one or more declarations. Declarations must come before all other content. A declarations gives the SAM parser information it needs to correctly parse the file. Declarations do not become part of the output.
+            A SAM document may be interpreted by a SAM parser to form an object tree in memory, which can include the {SAM object model} or any standardized XML representation such as SAX or DOM. A SAM parser must offer the option of serializing the document as XML. A SAM parser may offer various methods of serializing XML, but it must default to the serialization described in this document. 
 
-            ```(sam) 
-                !namespace: http://spfeopentoolkit.org/sam/ns/tests
 
-            Currently the only declaration supported is the namespace declaration which sets the namespace for
-            the entire SAM document. (You cannot assign namespaces to individual elements in a SAM document.)
+        structure:(#root) Root
+            Every SAM document has a single root block which contains all other blocks. 
+
+            syntax:
+                The root structure is the first structure declared in the document after any {declaration}s or {string definition}s.
+
+                The root structure is not indented. All other structures in the document must be children of the root structure, and therefore must be indented under it. 
+
+                Any SAM structure other than a {declaration} or a {string definition} can be the root structure. However, choosing a structure other than a {block} as the root structure will be extremely limiting, as most other structure allow for little of no nesting of other structures. For instance, nothing can be nested under a {paragraph} so while a paragraph can be the root structure of a SAM document, it would also be the only structure in the document. 
+
+            semantics:
+
+                The root block determines the type of the SAM document (just as the root element name in XML forms the type of an XML document). In every other respect, the semantics of the root structure are no different from the semantics of that structure type. 
+
+            serialization:
+
+                None. Only the children of the root are serialized.
+
+            SOM:
+                The SAM Object Model starts with a {Root}(SOM_object). All {declarations}, {comments}, {remarks}, and {string definitions} prior to the root structure, and the root structure itself, are children of the {Root} object. 
+
+                Note that the SOM Root object is not the same thing as the root structure. The Root object is a container for all the structured declared at column zero in the SAM document. The root structure of the document itself is the only {block structure} permitted as a direct child of the Root object. 
+
+        
+        structure:(#declaration) Declaration
+
+            A SAM file may start with one or more declarations. A declarations gives the SAM parser information it needs to correctly parse the file. Declarations do not become part of the output.
+
+            syntax:
+                Declarations must come before all other content. A {declaration}(structure) is created by a line beginning with  an exclamation mark followed by an declaration type followed by a colon.
+
+                ```(sam) 
+                    !namespace: http://spfeopentoolkit.org/sam/ns/tests
+
+            semantics:
+                A declaration is a and instruction to the parser on how to interpret the SAM document. Declarations are not part of the content of the document described by the SAM markup. Rather, they describe the markup itself.    
+
+                Currently the only declaration supported is the namespace declaration which sets the namespace for the entire SAM document. You cannot assign namespaces to individual structures in the text of a SAM document like you can in XML.
 
             future:
                 The schema declaration specifies the location of a schema file. The location will be processed through an XML catalog if one is specified to the parser. If a schema is specified, the namespace declaration is ignored and namespaces are assigned per the schema. A schema may assign different elements to different namespaces.
@@ -113,52 +179,95 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam) 
                     !schema: http://spfeopentoolkit.org/schemas/think-plan-do-topic.sams
 
+            serialization:
+                The namespace declaration causes the namespace of a document to be set to the specified namespace. This will result in the appropriate namespace declaration in the serialized XML file. A parser may handle namespace prefixes in any way it sees fit. 
 
-        structure:(#block) Blocks
-
-            Blocks are indicated by a {name token}(feature) followed by a colon at the start of a line.
-
-            Blocks can have {attributes}(feature) in parens that follow the colon with no space:
-
-            ```(sam) 
-                section:(?ultra) The ultra feature is really cool!
+            SOM:
+                The namespace declaration is used to update the namespace property of all blocks. In future, the namespace property of blocks may be set by the schema. 
 
 
-            There are four types of block attributes:
+        structure:(#field) Field
+        
+            A field is named structure with a single value. Fields take the same annotations as {block}s.
 
-            * {Conditions}(feature), which start with a `?`
-            * {Names}(feature), which start with `#`
-            * {IDs}(feature), which start with `*`
-            * {Language tags}(feature), which start with `!`
+            syntax:
             
-            If there is any content after the colon and the attributes, it is considered a title for the block and generates a title structure. There must be a space between the colon or the closing parens and the content.
-            
-            Thus the SAM markup above would create the following XML output:
-            
-            ```(xml)
-                <section conditions="ultra">
-                    <title>The ultra feature is really cool!</title>
-                    ...
-                </section>
+                A field is indicated by the appropriate indent followed by a {name-like string}, followed by a colon:
+
+                ```(sam)
+                    name: Fred Flintstone
+                    address: Bedrock
+                    era: BC
+
+            serialization:
+                    
+                A field is serialized as an XML element. The field content is the data content of the XML element. The name of the XML element matches the name of the field. Thus the example above would be serialized as:
                 
-            presumed-semantics:
+                ```(xml)
+                    <name>Fred Flintstone</name>
+                    <address>Bedrock</address>
+                    <era>BC</era>
+
+            SOM:
+                A field is represented by a {Block} object. A field is distinguished from a block by determining if the block has children. If it has children, it is a block. If not, it is a field. 
+
+                This design is mostly to make parsing easier. When we see a field definition in a file we can't tell without looking ahead whether it is going to have children or not. Therefore we treat it as a block. The difference between a field and a block really only occurs on serialization, where the content of a field is simply its text value, whereas the content of a block is treated as a title and output as a `<title>` element. 
+
+                The content of a field is contained in a {Flow} object.
+
+        structure:(#block) Block
+
+            A block is an abstract structure which allows you to extend SAM to express many different document structures. Each block must be assigned a name. 
+
+            syntax:
+
+                Blocks are indicated by the appropriate indent to indicate their nesting level, followed by a {name token}(feature) followed by a colon at the start of a line.
+
+                ```(sam)
+                    section:
+
+                Blocks can have {attributes}(feature). Attributes are contained in parentheses that follow the colon with no space:
+
+                ```(sam) 
+                    section:(?foo) 
+
+                A block can have multiple attributes, one after another, with no spaces between:
+
+                ```(sam) 
+                    section:(?foo)(#bar) 
+
+                There are four types of block attributes:
+
+                * {Conditions}(feature), which start with a `?`
+                * {Names}(feature), which start with `#`
+                * {IDs}(feature), which start with `*`
+                * {Language tags}(feature), which start with `!`
+
+                A block can also have a title:
+
+                ```(sam) 
+                    section:(?ultra)(#ultra) The ultra feature is really cool!
+                
+                If there is any content after the colon and the attributes, it is considered a title for the block and generates a title structure. There must be a space between the colon or the closing parenthesis and the content.
+
+                Blocks have children. To be considered a block, a structure must have children. That is, it must have other structures indented underneath it. If it has no children, it is interpreted as a {field}.
+
+
+            semantics:
                 The title of a a block is presumed to be the title of a the entire content of a block. 
 
-        structure:(#field) Fields
-        
-            A field is a {block}(feature) with no children. Fields take the same annotations as blocks, however, the text is treated as the value of the field rather than as a title.
+                Structurally, the title of a block is its content, in just the same way that the content of a field is its content. 
+
+            serialization:
             
-            ```(sam)
-                name: Fred Flintstone
-                address: Bedrock
-                era: BC
+                Thus the SAM markup above would create the following XML output:
                 
-            This would produce the following:
-            
-            ```(xml)
-                <name>Fred Flintstone</name>
-                <address>Bedrock</address>
-                <era>BC</era>
+                ```(xml)
+                    <section conditions="ultra">
+                        <title>The ultra feature is really cool!</title>
+                        ...
+                    </section>
+                
 
         
         structure:(#paragraph) Paragraphs 
