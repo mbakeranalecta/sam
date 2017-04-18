@@ -2,6 +2,9 @@ specification: Semantic Authoring Markdown (SAM)
 
     introduction:
 
+        note:
+            This document is a formal description of the SAM language. It describes the formalisms behind the syntax and it may make SAM sound a lot more complex to work with than it really is. If you just want to learn how to write in SAM, see the {SAM Quick Start}(document).
+
         Semantic Authoring Markdown (SAM) is a simplified markup for semantic authoring. Semantic authoring means writing texts that identify some part of their semantics thought embedded markup. Semantic authoring also places constraints on the author, making sure they create the content that is required. Semantic authoring allows for sophisticated validation and manipulation of content, supporting increased quality and improving the efficiency of the publishing process.
         
         section: Why SAM?
@@ -28,8 +31,8 @@ specification: Semantic Authoring Markdown (SAM)
 
             A SAM parser may make the structure of a SAM document available to the applications layer in different ways. It can expose the structure via an API and/or it may output an XML representation of the structure of the SAM document.
             
-        section: Presumptive semantics
-            While the SAM parser does not act on the semantics of the document, deferring that to the application layer, it contains concrete markup which the writer is entitled to expect will be processed in a particular way. These are the presumptive semantics of SAM. The application layer is expected to honor and implement the presumptive semantics of SAM markup.
+        section: Semantics
+            While the SAM parser does not act on the semantics of the document, deferring that to the application layer, it contains concrete markup which the writer is entitled to expect will be processed in a particular way. These are the intended semantics of SAM structures. The application layer is expected to honor and implement the semantics of SAM markup.
 
             A lot of SAM's concrete markup is simply shortcuts for common writing structures like lists. The exact same structures could be created using blocks, fields, and paragraphs, and you can create variant structures (other types of lists, for example) using these standard components. However, some of SAM's concrete markup expresses a particular view about markup language design. For example, it use of annotations and citations expresses a particular view about how text inside paragraphs should be marked up. Since SAM does not provide other facilities to create markup in paragraphs, it may not be suitable for expressing all types of markup language design. SAM is not, and is not intended to be, a full replacement for XML.
 
@@ -46,6 +49,11 @@ specification: Semantic Authoring Markdown (SAM)
             Document-oriented markup languages such as reStructuredText and Markdown tend to be very flat in structure. One things follows another. There is rarely a case where one thing is inside another. For example, these languages use heading levels, but don't delineate sections of the document. More semantically rich languages tend to be more hierarchical, with one structure inside another. For example, a document might be divided into sections with title and paragraph elements inside a section. This means that you need to show which structures are inside others and where the containing structure ends. 
 
             XML does this by having an explicit end tag for every element. A large part of the verbosity of XML comes from its requirement to close every element tag. Many programming languages, which similarly have to express nested structures, use some form of brackets to delineate each structure. Python is an exception to this. It uses indentation to express the relationship between structures. This is a far more natural way for writers to express the subordination of elements -- one that is sometimes also used in published works. SAM uses this approach and avoids the use of end tags entirely.
+
+
+            # FIXME: Need to distinguish between blocks generically and named blocks. Named block and field are types of blocks. So are paragraphs and lists. A SAM document essentially consists of blocks, and their contents, metadata, and children. 
+
+
 
             SAM syntax defines the following structures:
 
@@ -89,9 +97,9 @@ specification: Semantic Authoring Markdown (SAM)
 
             |fragment| Fragments are sections of a documents (potentially larger than a single paragraph) that can be included by reference in other parts of a document or in other documents. Strings used in a fragment can be redefined when a fragment is reused, allowing you to vary the text of the fragment when it is used in different places. (Note that this is describes the {presumed semantics} of fragments. Implementation of these semantics is up to the application layer.
 
-            |comment| A comment on the sam markup file itself, as opposed to a comment on the document. For comments on the document, use remark
+            |comment| A comment on the SAM markup file itself, as opposed to a comment on the document. For comments on the document, use remark
 
-            |remarks| A remark is a comment on the text of the document, intended for editorial purposes. It must be attributed to a specific author.
+            |remark| A remark is a comment on the text of the document, intended for editorial purposes. It must be attributed to a specific author.
 
 
 
@@ -131,7 +139,7 @@ specification: Semantic Authoring Markdown (SAM)
         
         section:(#parser) Parsing
 
-            A SAM document may be interpreted by a SAM parser to form an object tree in memory, which can include the {SAM object model} or any standardized XML representation such as SAX or DOM. A SAM parser must offer the option of serializing the document as XML. A SAM parser may offer various methods of serializing XML, but it must default to the serialization described in this document. 
+            A SAM document may be interpreted by a SAM parser to form an object tree in memory, which can include the {SAM object model} or any standardized XML representation such as SAX or DOM. In these cases, the DOM or SAX interface should represent the standard XML serialization, or an optional variant of that serialization, not the SOM. A SAM parser must offer the option of serializing the document as XML. A SAM parser may offer various methods of serializing XML, but it must default to the serialization described in this document. 
 
 
         structure:(#root) Root
@@ -188,7 +196,7 @@ specification: Semantic Authoring Markdown (SAM)
 
         structure:(#field) Field
         
-            A field is named structure with a single value. Fields take the same annotations as {block}s.
+            A field is named structure with a single value. Fields take the same annotations as {block}s. Field can have {attributes}(feature). 
 
             syntax:
             
@@ -198,6 +206,27 @@ specification: Semantic Authoring Markdown (SAM)
                     name: Fred Flintstone
                     address: Bedrock
                     era: BC
+
+                Attributes are contained in parentheses that follow the colon with no space:
+
+                ```(sam) 
+                    name:(?BC) Fred Flintstone
+
+                A block can have multiple attributes, one after another, with no spaces between:
+
+                ```(sam) 
+                    name:(?BC)(#fred) Fred Flintstone 
+
+                There are four types of field/{block} attributes:
+
+                * {Conditions}(feature), which start with a `?`
+                * {Names}(feature), which start with `#`
+                * {IDs}(feature), which start with `*`
+                * {Language tags}(feature), which start with `!`
+
+            semantics:
+
+                A {field} is essentially a way of creating a key value pair in a document. 
 
             serialization:
                     
@@ -209,54 +238,40 @@ specification: Semantic Authoring Markdown (SAM)
                     <era>BC</era>
 
             SOM:
-                A field is represented by a {Block} object. A field is distinguished from a block by determining if the block has children. If it has children, it is a block. If not, it is a field. 
+                A field is represented by a {Block} object. The only difference between a {block} and a field is whether it has children. If it has children, it is a {block}. If not, it is a field. 
 
-                This design is mostly to make parsing easier. When we see a field definition in a file we can't tell without looking ahead whether it is going to have children or not. Therefore we treat it as a block. The difference between a field and a block really only occurs on serialization, where the content of a field is simply its text value, whereas the content of a block is treated as a title and output as a `<title>` element. 
+                This design is mostly to make parsing easier. When we see a field definition in a file we can't tell without looking ahead whether it is going to have children or not. Therefore we treat it as a {block}. The difference between a field and a {block} really only occurs on serialization, where the content of a field is simply its text value, whereas the content of a {block} is treated as a title and output as a `<title>` element. 
 
-                The content of a field is contained in a {Flow} object.
+                Programs accessing the {SOM} directly should note that the value of a {block} should be treated as the title of that {block}.
+
+                The value of a field is contained in a {Flow} object.
 
         structure:(#block) Block
 
-            A block is an abstract structure which allows you to extend SAM to express many different document structures. Each block must be assigned a name. 
+            A {block} is an abstract structure which allows you to extend SAM to express many different document structures. Each {block} must be assigned a name. The name must be a valid SAM name.
 
             syntax:
 
-                Blocks are indicated by the appropriate indent to indicate their nesting level, followed by a {name token}(feature) followed by a colon at the start of a line.
+                Blocks are syntactically identical to {fields}. A practical difference is that blocks will often not have a value:
 
                 ```(sam)
                     section:
 
-                Blocks can have {attributes}(feature). Attributes are contained in parentheses that follow the colon with no space:
-
-                ```(sam) 
-                    section:(?foo) 
-
-                A block can have multiple attributes, one after another, with no spaces between:
-
-                ```(sam) 
-                    section:(?foo)(#bar) 
-
-                There are four types of block attributes:
-
-                * {Conditions}(feature), which start with a `?`
-                * {Names}(feature), which start with `#`
-                * {IDs}(feature), which start with `*`
-                * {Language tags}(feature), which start with `!`
 
                 A block can also have a title:
 
                 ```(sam) 
                     section:(?ultra)(#ultra) The ultra feature is really cool!
                 
-                If there is any content after the colon and the attributes, it is considered a title for the block and generates a title structure. There must be a space between the colon or the closing parenthesis and the content.
+                If there is any value after the colon and the attributes, it is considered a title for the {block} and generates a title structure. There must be a space between the colon or the closing parenthesis and the value.
 
-                Blocks have children. To be considered a block, a structure must have children. That is, it must have other structures indented underneath it. If it has no children, it is interpreted as a {field}.
+                Blocks have children. To be considered a {block}, a structure must have children. That is, it must have other structures indented underneath it. If it has no children, it is interpreted as a {field}.
 
 
             semantics:
-                The title of a a block is presumed to be the title of a the entire content of a block. 
+                The title of a a {block} is presumed to be the title of a the entire content of a {block}. 
 
-                Structurally, the title of a block is its content, in just the same way that the content of a field is its content. 
+                Structurally, the title of a {block} is its value, in just the same way that the content of a field is its value. 
 
             serialization:
             
@@ -268,35 +283,98 @@ specification: Semantic Authoring Markdown (SAM)
                         ...
                     </section>
                 
-
+            SOM:
+                The representation of a block in the {SOM} is identical to the representation of a field. A block is distinguished from a field in the SOM by whether or not it has children. 
         
-        structure:(#paragraph) Paragraphs 
+        structure:(#flow) Flow
 
-            A paragraph is sequence of lines ending with a blank line.
+            A {flow} is an internal representation of a value in a SAM document. A {flow} can contain sub-textual structures like {annotation}s, {decorations}, and {inline insert}s. Thus while there is no special markup to create a {flow}, you do need to know when a value is a {flow} and when it is plain text. 
 
-            ```(sam)
-                Now is the time
-                for all good men
-                to come to the aid
-                of the party.
+            syntax: 
+                There is no special syntax to define a flows. Flows are defined by their relationship to other structures. 
+
+            semantics:
+                The text in a {flow} is simply text, along with any sub-textual structures it contains. 
+
+            serialization:
+                The flow object is not represented as an object in XML. Its content becomes the content of whatever element is created to represent the structure that contains the flow.
+
+            SOM: 
+                A {flow} is contained in a {Flow} object.
+
+        structure:(#paragraph) Paragraph 
+
+            A paragraph is a block of text. (SAM) has no opinion on whether the block of text would be considered a paragraph in grammatical or literary terms. As far as SAM is concerned, it is simply a block of text set off from other blocks of text and other structures. (This is identical to the meaning of paragraph in most markup languages.)
+
+            syntax:
+
+                A paragraph is indicated as sequence of lines ending with a blank line.
+
+                ```(sam)
+                    Now is the time
+                    for all good men
+                    to come to the aid
+                    of the party.
+                    
+                    It was the best of 
+                    times, it was the 
+                    worst of times.
+
+                Any line that in the source that is not identified as a different structure, or an attempt to create a different structure, is identified as a paragraph. 
+
+                In some cases a paragraph may begin with a sequence that looks like an attempt to create a different structure. For instance, if there is a colon before the first space in a paragraph, and if the string before the colon is a name-like-value, then the writer can prevent the sequence being recognized as a {block} or {field} by escaping the colon with a backslash or a {character escape}.
+
+                Once the first line of a paragraph has been identified, the parser simply accumulates subsequent lines, without looking for other structures, until one of the following is encountered:
+
+                * A blank line.
+                * A line whose indent is less than the indent of the first line of the paragraph.
+
+                A paragraph cannot have block children. Is is an error is any structure is indented under a paragraph. 
+
+
+            semantics:
+                A paragraph is block of text.
+
+            serialization:
+                    
+                A paragraph is serialized as a XML `p` element. Thus the example above would be serialized as the following XML:
                 
-                It was the best of 
-                times, it was the 
-                worst of times.
-                
-            This produces the following XML:
-            
-            ```(xml)
-                <p>Now is the time for all good men to come to the aid of the party.</p>
-                
-                <p>It was the best of times, it was the worst of times.</p>
+                ```(xml)
+                    <p>Now is the time for all good men to come to the aid of the party.</p>
+                    
+                    <p>It was the best of times, it was the worst of times.</p>
 
-            A paragraph cannot have block children. It is a syntax error to have anything indented under a paragraph.  
-            
-            presumed-semantics:
-                A paragraph is assumed to be a document paragraph.
+                A paragraph cannot have block children. It is a syntax error to have anything indented under a paragraph.  
+                
 
-        structure:(#annotation) Annotations
+        structure:(#phrase) Phrase
+
+            A phrase structure is a delineated string of text within a {flow}. You cerate a phrase in order to add an {annotation} or {citation} to a word or phrase in the text.
+
+            syntax:
+                A phrase is indicated by surrounding the phrase with curly braces:
+
+                ```(sam) 
+                    In {Rio Bravo}, {the Duke} plays a union colonel.
+
+                It is not an error to have a phrase with no {annotation}s or {citation}s attached. When such as phrase is found, the parser must:
+
+                * First, look backward through the document to find out if the same phrase has been annotated before. If it finds the same phrase, with an annotation, it copies the entire phrase and all attached {annotation}s and {citation}s to the current phrase. The search proceeds in reverse document order and stops at the first instance found. 
+
+                * Second, if no matching phrase is found, the parser must issue a warning. 
+
+            semantics:
+                A phrase has no semantics of its own. Its semantics are determined by any {annotation}s attached to it. 
+
+            serialization:
+                A phrase is serialized as an `phrase` element in XML.
+
+            SOM:
+                A phrase is represented by a {Phrase} object.
+
+
+
+        structure:(#annotation) Annotation
 
             Annotations clarify what a piece of text is about.  
 
@@ -312,28 +390,6 @@ specification: Semantic Authoring Markdown (SAM)
 
             |namespace| In some cases, it is necessary to specify the namespace to which the annotated term belongs. In the sample above, the name of the actor "John Wayne" is part of a set of names managed by the Screen Actors Guild which makes sure two actors don't use the same stage name. (In most cases, the namespace is implied by the type, so you will not usually need to specify it.) 
 
-            section: Conditions 
-
-                Conditions are indicated using the {condition attribute}.
-
-                SAM itself does not execute conditions, it merely encodes them for later processing. Therefore it has no idea what the tokens mean or how they will be interpreted. However, using simple tokens is recommended as a best practice. 
-
-
-            section: Names and IDs 
-            
-                Blocks can be assigned names and IDs. Both are used to reference the block from elsewhere in the content. The difference is that ids are local to the current document and must be unique within the current document. If a duplicate ID is found, the parser will raise an error. 
-
-                Names are merely assigned to the block by the parser. No namespace or uniqueness constraints are enforced. It is up to the application to decide how names are used. However, it is considered a SPFE idiom that names are scoped to the type of objects they apply to. In other words, fragment names are in a different namespace from string names.
-
-                This implies that string references are distinct from fragment references.
-
-
-            section:(#annotation-lookup) Annotation lookup
-
-                If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use square brackets around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase.
-
-                ```(sam) 
-                    {foo}(bar "baz") gruznatz {foo}
 
         structure:(#insert) Inserts
 
@@ -801,6 +857,28 @@ specification: Semantic Authoring Markdown (SAM)
         
             A name token is a string that represents the name of a {structure} in a SAM document. It follows the same rules as a XML local name. (This means it cannot contain a colon or a namespace prefix. Namespace prefixes are not used in SAM. {Namespaces are assigned to elements in the schema.}(future)  
             
+        section: Conditions 
+
+            Conditions are indicated using the {condition attribute}.
+
+            SAM itself does not execute conditions, it merely encodes them for later processing. Therefore it has no idea what the tokens mean or how they will be interpreted. However, using simple tokens is recommended as a best practice. 
+
+
+        section: Names and IDs 
+        
+            Blocks can be assigned names and IDs. Both are used to reference the block from elsewhere in the content. The difference is that ids are local to the current document and must be unique within the current document. If a duplicate ID is found, the parser will raise an error. 
+
+            Names are merely assigned to the block by the parser. No namespace or uniqueness constraints are enforced. It is up to the application to decide how names are used. However, it is considered a SPFE idiom that names are scoped to the type of objects they apply to. In other words, fragment names are in a different namespace from string names.
+
+            This implies that string references are distinct from fragment references.
+
+
+        section:(#annotation-lookup) Annotation lookup
+
+            If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use square brackets around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase.
+
+            ```(sam) 
+                {foo}(bar "baz") gruznatz {foo}
 
 
         appendix: Annotation and attribute rules
