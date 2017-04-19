@@ -6,6 +6,8 @@ specification: Semantic Authoring Markdown (SAM)
             This document is a formal description of the SAM language. It describes the formalisms behind the syntax and it may make SAM sound a lot more complex to work with than it really is. If you just want to learn how to write in SAM, see the {SAM Quick Start}(document).
 
         Semantic Authoring Markdown (SAM) is a simplified markup for semantic authoring. Semantic authoring means writing texts that identify some part of their semantics thought embedded markup. Semantic authoring also places constraints on the author, making sure they create the content that is required. Semantic authoring allows for sophisticated validation and manipulation of content, supporting increased quality and improving the efficiency of the publishing process.
+
+        SAM is a tale that grew in the telling. It was designed from the bottom up, not the top down, and so formalizing the language description comes after the fact. This document is a step along the way to a fully formal definition. There is not yet a full formal grammar for SAM. It is possible that the development of such a grammar could reveal ambiguities in the language definition that might require design changes in the future. 
         
         section: Why SAM?
         
@@ -21,7 +23,7 @@ specification: Semantic Authoring Markdown (SAM)
             
             Most lightweight markup languages provide a fixed set of document structures with little or no extensibility. XML provides no document structures by default and makes you specify everything in a schema. SAM defines a limited set of core text structures such as paragraph and lists and then leaves it to you to specify the semantic structures that contain the text.
 
-            It is important to note that SAM is not designed as a language for text representation. That is, it is not a language designed for taking an existing text, and, without violence to that text, adding metadata to explicate its meaning or structure. For that you need a form of markup with the ability to clearly delineate in-band and ut-of-band data. XML provides this by consigning in-band data (the text of the document) to the textual content of elements, and out-of-band (metadata describing the document) to attributes. SAM defines a few preset management attributes but provided no facility for creating new ones. Any additional metadata you want to add to a block, for instance, has to take the form or fields. This muddies the distinction between in-band and out-of-band information. For content creation, this is entirely appropriate, and the whole element/attribute distinction is tedious and confusing. If you are looking for a markup language that is designed so that you can simply remove the markup and be left with the original document, SAM is not the right choice.
+            It is important to note that SAM is not designed as a language for text representation. That is, it is not a language designed for taking an existing text, and, without violence to that text, adding metadata to explicate its meaning or structure. For that you need a form of markup with the ability to clearly delineate in-band and out-of-band data. XML provides this by consigning in-band data (the text of the document) to the textual content of elements, and out-of-band (metadata describing the document) to attributes. SAM defines a few preset management attributes but provided no facility for creating new ones. Any additional metadata you want to add to a block, for instance, has to take the form or fields. This muddies the distinction between in-band and out-of-band information. For content creation, this is entirely appropriate, and the whole element/attribute distinction is tedious and confusing. If you are looking for a markup language that is designed so that you can simply remove the markup and be left with the original document, SAM is not the right choice.
 
         section: Processing model
         
@@ -32,9 +34,27 @@ specification: Semantic Authoring Markdown (SAM)
             A SAM parser may make the structure of a SAM document available to the applications layer in different ways. It can expose the structure via an API and/or it may output an XML representation of the structure of the SAM document.
             
         section: Semantics
+
             While the SAM parser does not act on the semantics of the document, deferring that to the application layer, it contains concrete markup which the writer is entitled to expect will be processed in a particular way. These are the intended semantics of SAM structures. The application layer is expected to honor and implement the semantics of SAM markup.
 
             A lot of SAM's concrete markup is simply shortcuts for common writing structures like lists. The exact same structures could be created using blocks, fields, and paragraphs, and you can create variant structures (other types of lists, for example) using these standard components. However, some of SAM's concrete markup expresses a particular view about markup language design. For example, it use of annotations and citations expresses a particular view about how text inside paragraphs should be marked up. Since SAM does not provide other facilities to create markup in paragraphs, it may not be suitable for expressing all types of markup language design. SAM is not, and is not intended to be, a full replacement for XML.
+
+        section: SAM Structure
+
+            Like all other markup languages, a SAM document is essentially a set a set of nested blocks of various types. In concrete markup languages like markdown there are a fixed set of block types, each with a specific meaning, and each with a corresponding piece of syntax that allows the parser to identify them. In an abstract markup language like XML, there are a few abstract block types that have no inherent meaning, but can be named so that a processing application can attach meaning to the name in specific markup languages. Thus a paragraph is represented with a `<p>` element in HTML but by a `<para>` element in DocBook. 
+
+            As a hybrid language, SAM has a set of concrete block types, each with its own semantics and syntax, and a set of abstract nameable block types that can be used to define additional semantics for specific SAM-based markup languages. Thus in SAM a {paragraph} is always created as a block of text, but you can create named blocks to capture things like `author-name:`.  
+
+            Blocks may contain flows. A flow is a data value, the contents of a block, but a flow can also contain other structures. This is also a common feature of document markup languages. In HTML, for instance, you can have an `<a>` element in the middle of a paragraph to create a link. XML-based languages, including HTML, use elements for structures within a flow (creating something called mixed content). In SAM, structures within a flow are distinct from blocks and have a different syntax.
+
+            Four kinds of structures can exist in a flow, a {phrase}, an {insert}, and a {citation}. However, a {phrase} can be annotated to indicate its semantics, which makes {phrase}s an extensible feature of SAM. 
+
+            The following example shows a {paragraph} with two annotated {phrase}s.
+
+            ```(sam) 
+                In {Rio Bravo}(movie), {the Duke}(actor "John Wayne" (SAG)) plays a union colonel.
+
+
 
         section: SAM Syntax
             
@@ -50,16 +70,11 @@ specification: Semantic Authoring Markdown (SAM)
 
             XML does this by having an explicit end tag for every element. A large part of the verbosity of XML comes from its requirement to close every element tag. Many programming languages, which similarly have to express nested structures, use some form of brackets to delineate each structure. Python is an exception to this. It uses indentation to express the relationship between structures. This is a far more natural way for writers to express the subordination of elements -- one that is sometimes also used in published works. SAM uses this approach and avoids the use of end tags entirely.
 
-
-            # FIXME: Need to distinguish between blocks generically and named blocks. Named block and field are types of blocks. So are paragraphs and lists. A SAM document essentially consists of blocks, and their contents, metadata, and children. 
-
-
-
             SAM syntax defines the following structures:
 
-            |block| Blocks are structures that contain other structures. For instance, a section is a block. Blocks must have names. Names blocks (and named fields) are how you introduce new structures into a SAM document.
+            |named block| Named blocks are structures that contain other structures. For instance, a section is a block. Blocks must have names. Named blocks (and named fields) are how you introduce new structures into a SAM document. Named blocks may be referred to a "blocks" in this document, but all of SAMs concrete block types are also blocks.
 
-            |field| Fields are structures that contain individual values. For instance, the date a document  is usually a field.
+            |field| Fields are named blocks that contain individual values. For instance, the date a document  is usually a field.
 
             |flow| A flow is a string of text. All text content in a SAM document constitutes a flow. A {paragraph} is a flow. The {value} of a field is a flow. A {title} is a flow. Etc. Flows can contain {phrases}, {citations}, and {inserts}.
 
@@ -101,14 +116,6 @@ specification: Semantic Authoring Markdown (SAM)
 
             |remark| A remark is a comment on the text of the document, intended for editorial purposes. It must be attributed to a specific author.
 
-
-
-    structures:
-
-        SAM is a hybrid markup language. That is, it combines the concrete structures of a typical lightweight markup language like MarkDown with the extensibility of an abstract language like XML. A concrete structure is one that has both fixed syntax and fixed semantics. For example, the use of asterisks at the beginning of lines to indicate an unordered list, which is common to most lightweight markup languages has both fixed syntax -- the markup for an unordered list is always lines starting with asterisks -- and fixed semantics -- this markup always means unordered list. An abstract structure is one that can be assigned different semantics. An abstract structure can have fixed syntax (as in both XML and SAM) or variable syntax (as in SGML). 
-
-        The abstract structures in SAM are the {block}(structure), the {field}(structure) and the {annotation}(structure). Abstract structures with fixed semantics must be given names so that you can associate different semantics with different names. 
-
         section:(#name) Names
 
             A name in a SAM document must be a valid XML local name. 
@@ -136,34 +143,64 @@ specification: Semantic Authoring Markdown (SAM)
             The SAM Object Model is a way of representing the structure of a SAM document as a data structure to a computer program. The SAM object model is a way for program to access a SAM document in a standard way. Unless you are concerned with writing programs to access the SAM Object Model you can ignore all references to it in this document. The SAM Object model is the model implemented by the current SAM parser, which is written in Python. However, SAM parsers are not required to implement the SAM Object Model. 
 
             The other way for applications to access the structure of is by serializing it to XML. This is the only require access method for parsers to implement.
+
+            Like the language itself, the SOM is a tale that grew in the telling. In the absence of a full formal grammar for SAM, the object model must be considered provisional. It should be considered a less stable interface to a SAM document than the canonical XML serialization. 
         
         section:(#parser) Parsing
 
             A SAM document may be interpreted by a SAM parser to form an object tree in memory, which can include the {SAM object model} or any standardized XML representation such as SAX or DOM. In these cases, the DOM or SAX interface should represent the standard XML serialization, or an optional variant of that serialization, not the SOM. A SAM parser must offer the option of serializing the document as XML. A SAM parser may offer various methods of serializing XML, but it must default to the serialization described in this document. 
 
+    structures:
+        The following is a list of the structures of a SAM document.
 
         structure:(#root) Root
-            Every SAM document has a single root block which contains all other blocks. 
+            Every SAM document has a root which contains the entire content of the document. The root can contain a single block which is the parent of all other blocks in the document. This block is called the {root block}.  
 
             syntax:
-                The root structure is the first structure declared in the document after any {declaration}s or {string definition}s.
-
-                The root structure is not indented. All other structures in the document must be children of the root structure, and therefore must be indented under it. 
-
-                Any SAM structure other than a {declaration} or a {string definition} can be the root structure. However, choosing a structure other than a {block} as the root structure will be extremely limiting, as most other structure allow for little of no nesting of other structures. For instance, nothing can be nested under a {paragraph} so while a paragraph can be the root structure of a SAM document, it would also be the only structure in the document. 
+                The {root} had no syntax of its own. It is an implicit container for the contents of the file. 
 
             semantics:
+                None. The root is just a container.
 
-                The root block determines the type of the SAM document (just as the root element name in XML forms the type of an XML document). In every other respect, the semantics of the root structure are no different from the semantics of that structure type. 
+            model:
+                The {root} can contain the following, in order:
+
+                * One or more {declaratiom}s.
+                * One of more {comment}s, {remark}s, or {string definition}s.
+                * The {root} block.
+                * One of more {comment}s, or {remark}s.
 
             serialization:
 
                 None. Only the children of the root are serialized.
 
             SOM:
-                The SAM Object Model starts with a {Root}(SOM_object). All {declarations}, {comments}, {remarks}, and {string definitions} prior to the root structure, and the root structure itself, are children of the {Root} object. 
+                The {root} is represented by a {Root}(SOM_object) object that is created automatically by the parser when parsing starts. 
+            
+                All {declarations}, {comments}, {remarks}, and {string definitions} prior to the root block, and the root block itself, are children of the {Root} object. 
 
-                Note that the SOM Root object is not the same thing as the root structure. The Root object is a container for all the structured declared at column zero in the SAM document. The root structure of the document itself is the only {block structure} permitted as a direct child of the Root object. 
+                Note that the SOM {Root} object is not the same thing as the root block. The {Root} object is a container for all the structures declared at column zero in the SAM document. The {root block} of the document itself is the only {block structure} permitted as a direct child of the {Root} object. 
+
+        structure:(#root-block) Root block
+
+            The {root block} is the first structure declared in the document after any {declaration}s, {comment}s, {remark}s or {string definition}s. It is the container for all other blocks in the document. 
+
+            Any type of {block} can be the {root block}. However, choosing a structure other than a {named block} as the root block will be extremely limiting, as most {concrete block} types allow for little of no nesting of other blocks. For instance, nothing can be nested under a {paragraph} so while a paragraph can be the root block of a SAM document, it would also be the only structure in the document. 
+
+            syntax:
+                The {root block} is not indented. All other structures in the document must be children of the {root block}, and therefore must be indented under it. In all other respects, the syntax of the root block are the syntax of it root type. 
+
+            semantics:
+
+                The {root block} determines the type of the SAM document (just as the root element name in XML forms the type of an XML document). In all other respects, the semantics of the {root block} are no different from the semantics of that structure type. 
+
+            serialization:
+
+                The {root block} is serialized according to its block type. In addition, however, if a namespace is declared for the document, the appropriate namespace declaration will be added to the root element generated. 
+
+            SOM:
+                The root block is the only block child of the {Root} object. In every other respect, it is represented as its normal block type.
+
 
         
         structure:(#declaration) Declaration

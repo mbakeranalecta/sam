@@ -3851,9 +3851,9 @@ This para contains -- an en dash and an---em dash.
 &lt;p&gt;This para &lt;phrase&gt;&lt;annotation type="bold"&gt;contains&lt;/annotation&gt;&lt;/phrase&gt; – an en dash and &lt;phrase&gt;&lt;annotation type="italic"&gt;an&lt;/annotation&gt;&lt;/phrase&gt;—em dash.&lt;/p&gt;
 &lt;p&gt;This para &lt;phrase&gt;&lt;annotation type="code"&gt;contains&lt;/annotation&gt;&lt;/phrase&gt; – an en dash and “an”—em dash.&lt;/p&gt;
 &lt;p&gt;This para ‘contains’ – an en dash and &lt;phrase&gt;&lt;annotation type="code"&gt;an&lt;/annotation&gt;&lt;/phrase&gt;—em dash.&lt;/p&gt;
-
 </codeblock>
 </result>
 </case>
 </test>
+<!--  Can we have comments after the end of the document? -->
 </tests>
