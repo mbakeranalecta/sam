@@ -3043,6 +3043,25 @@ You can {call me Ishmael}[Melville, 1851].
 </result>
 </case>
 <case>
+<title>Citation and annotation on one phrase</title>
+<description>
+<p>A citation on a phrase that also has an annotation.</p>
+</description>
+<source>
+<codeblock language="SAM">
+You can {call me Ishmael}(quote)[Melville, 1851].
+</codeblock>
+</source>
+<markup>
+<p>You can <phrase><annotation type="quote"><citation type="citation" value="Melville, 1851">call me Ishmael</citation></annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language="XML">
+&lt;p&gt;You can &lt;phrase&gt;&lt;annotation type="quote"&gt;&lt;citation type="citation" value="Melville, 1851"&gt;call me Ishmael&lt;/citation&gt;&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
 <title>Literal square brackets</title>
 <description>
 <p>If you want to enter literal square brackets, rather than create a citation, escape the opening square bracket with a backslash.</p>
