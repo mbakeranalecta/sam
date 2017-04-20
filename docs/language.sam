@@ -231,20 +231,35 @@ specification: Semantic Authoring Markdown (SAM)
                 The namespace declaration is used to update the namespace property of all blocks. In future, the namespace property of blocks may be set by the schema. 
 
 
-        structure:(#field) Field
-        
-            A field is named structure with a single value. Fields take the same annotations as {block}s. Field can have {attributes}(feature). 
+        structure:(#block) Named Block
+
+            A {named block} is an abstract structure which allows you to extend SAM to express many different document structures. The name of a {named block} must be a valid {SAM name}.
 
             syntax:
-            
-                A field is indicated by the appropriate indent followed by a {name-like string}, followed by a colon:
+
+                A named block is indicated by the appropriate indent followed by a {name-like string}, followed by a colon:
 
                 ```(sam)
-                    name: Fred Flintstone
-                    address: Bedrock
-                    era: BC
+                    movie-review:
 
-                Attributes are contained in parentheses that follow the colon with no space:
+                To be considered a block, rather than a {field}, a {block} must have children. Children can be any other block types:
+
+                ```(sam)
+                    movie-review:
+                        movie: Rio Bravo
+                        stars:
+                            star: John Wayne
+
+                The example above contains two blocks (`movie-review` and `stars`) and two {fields} (`movie`) and (`star`).
+
+                A named block can have a value:
+
+                ```(sam)
+                    movie-review: Rio Bravo is Classic Western
+
+                Here the string "Rio Bravo" is the value of the block. The value of a block is regarded as the title of document section formed by a block, and is serialized as such. 
+
+                A named block can have attributes. Attributes are metadata on the block. Attributes are contained in parentheses that follow the colon with no space:
 
                 ```(sam) 
                     name:(?BC) Fred Flintstone
@@ -254,46 +269,14 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam) 
                     name:(?BC)(#fred) Fred Flintstone 
 
-                There are four types of field/{block} attributes:
+                Unlike XML, SAM does not support arbitrarily named attributes. Only a fixed set of attributes are supported. Each type is indicated by a different prefix character. 
+
+                There are four types of block attributes:
 
                 * {Conditions}(feature), which start with a `?`
-                * {Names}(feature), which start with `#`
-                * {IDs}(feature), which start with `*`
-                * {Language tags}(feature), which start with `!`
-
-            semantics:
-
-                A {field} is essentially a way of creating a key value pair in a document. 
-
-            serialization:
-                    
-                A field is serialized as an XML element. The field content is the data content of the XML element. The name of the XML element matches the name of the field. Thus the example above would be serialized as:
-                
-                ```(xml)
-                    <name>Fred Flintstone</name>
-                    <address>Bedrock</address>
-                    <era>BC</era>
-
-            SOM:
-                A field is represented by a {Block} object. The only difference between a {block} and a field is whether it has children. If it has children, it is a {block}. If not, it is a field. 
-
-                This design is mostly to make parsing easier. When we see a field definition in a file we can't tell without looking ahead whether it is going to have children or not. Therefore we treat it as a {block}. The difference between a field and a {block} really only occurs on serialization, where the content of a field is simply its text value, whereas the content of a {block} is treated as a title and output as a `<title>` element. 
-
-                Programs accessing the {SOM} directly should note that the value of a {block} should be treated as the title of that {block}.
-
-                The value of a field is contained in a {Flow} object.
-
-        structure:(#block) Block
-
-            A {block} is an abstract structure which allows you to extend SAM to express many different document structures. Each {block} must be assigned a name. The name must be a valid SAM name.
-
-            syntax:
-
-                Blocks are syntactically identical to {fields}. A practical difference is that blocks will often not have a value:
-
-                ```(sam)
-                    section:
-
+                * {Name}(feature), which start with `#`
+                * {ID}(feature), which start with `*`
+                * {Language}(feature), which start with `!`
 
                 A block can also have a title:
 
@@ -302,13 +285,16 @@ specification: Semantic Authoring Markdown (SAM)
                 
                 If there is any value after the colon and the attributes, it is considered a title for the {block} and generates a title structure. There must be a space between the colon or the closing parenthesis and the value.
 
+
                 Blocks have children. To be considered a {block}, a structure must have children. That is, it must have other structures indented underneath it. If it has no children, it is interpreted as a {field}.
 
 
             semantics:
-                The title of a a {block} is presumed to be the title of a the entire content of a {block}. 
+                The title of a a {block} is treated as the title of a the entire content of a {block}, and will be serialized as such. 
 
                 Structurally, the title of a {block} is its value, in just the same way that the content of a field is its value. 
+
+                It should be noted that the lack of arbitrary named attributes does not reduce the semantic flexibility of SAM as compared to XML. Any metadata that can be expressed by an attribute on a block can also be expressed by a field that is a child of that block. The reason for using attributes in XML is to preserve a pure distinction between text and metadata, but that is not a design consideration in SAM, which is meant for the creation of new text through structured writing, not for the annotation of existing texts for study.
 
             serialization:
             
@@ -323,15 +309,50 @@ specification: Semantic Authoring Markdown (SAM)
             SOM:
                 The representation of a block in the {SOM} is identical to the representation of a field. A block is distinguished from a field in the SOM by whether or not it has children. 
         
+        structure:(#field) Field
+        
+            A field is named structure with a single value. Fields take the same attributes as {block}s.  
+
+            syntax:
+            
+                A field is syntactically identical to a {block}. It is simply a block with no children:
+
+                ```(sam)
+                    name: Fred Flintstone
+                    address: Bedrock
+                    era: BC
+
+            semantics:
+
+                A {field} is essentially a way of creating a key-value pair in a document. 
+
+            serialization:
+                    
+                A field is serialized as an XML element. The field content is the data content of the XML element. The name of the XML element matches the name of the field. Thus the example above would be serialized as:
+                
+                ```(xml)
+                    <name>Fred Flintstone</name>
+                    <address>Bedrock</address>
+                    <era>BC</era>
+
+            SOM:
+                A {field} is represented by a {Block} object. The only difference between a {block} and a {field} is whether it has children. If it has children, it is a {block}. If not, it is a {field}. 
+
+                This design is mostly to make parsing easier. When we see a {field} definition in a file we can't tell without looking ahead whether it is going to have children or not. Therefore we treat it as a {block}. The difference between a {field} and a {block} really only occurs on serialization, where the content of a {field} is simply its text value, whereas the content of a {block} is treated as a title and output as a `<title>` element. 
+
+                Programs accessing the {SOM} directly should note that the value of a {block} should be treated as the title of that {block}.
+
+                The value of a {field} is contained in a {Flow} object.
+
         structure:(#flow) Flow
 
-            A {flow} is an internal representation of a value in a SAM document. A {flow} can contain sub-textual structures like {annotation}s, {decorations}, and {inline insert}s. Thus while there is no special markup to create a {flow}, you do need to know when a value is a {flow} and when it is plain text. 
+            A {flow} is a section of document text in a SAM document. A {flow} can contain intra-textual structures like {annotation}s, {decorations}, and {inline insert}s.  
 
             syntax: 
                 There is no special syntax to define a flows. Flows are defined by their relationship to other structures. 
 
             semantics:
-                The text in a {flow} is simply text, along with any sub-textual structures it contains. 
+                The text in a {flow} is simply text, along with any intra-textual structures it contains. 
 
             serialization:
                 The flow object is not represented as an object in XML. Its content becomes the content of whatever element is created to represent the structure that contains the flow.
@@ -342,6 +363,8 @@ specification: Semantic Authoring Markdown (SAM)
         structure:(#paragraph) Paragraph 
 
             A paragraph is a block of text. (SAM) has no opinion on whether the block of text would be considered a paragraph in grammatical or literary terms. As far as SAM is concerned, it is simply a block of text set off from other blocks of text and other structures. (This is identical to the meaning of paragraph in most markup languages.)
+
+            The entire content of a paragraph is a single {flow}.
 
             syntax:
 
@@ -365,8 +388,12 @@ specification: Semantic Authoring Markdown (SAM)
 
                 * A blank line.
                 * A line whose indent is less than the indent of the first line of the paragraph.
+                * If the paragraph is the child of a list item, the start of a new list item.
 
                 A paragraph cannot have block children. Is is an error is any structure is indented under a paragraph. 
+
+                note: 
+                    Some writers may instinctively indent a list under the paragraph it follows. This is an error in SAM. A list is always the peer of the preceding paragraph is SAM and as such the list items must start at the same indent level as the preceding paragraph. The output formatter may, of course, choose to indent lists relative to their sibling paragraphs.  
 
 
             semantics:
@@ -382,11 +409,14 @@ specification: Semantic Authoring Markdown (SAM)
                     <p>It was the best of times, it was the worst of times.</p>
 
                 A paragraph cannot have block children. It is a syntax error to have anything indented under a paragraph.  
+
+            SOM: 
+                A paragraph is represented by a {Paragraph} object with a single child {Flow} object.
                 
 
         structure:(#phrase) Phrase
 
-            A phrase structure is a delineated string of text within a {flow}. You cerate a phrase in order to add an {annotation} or {citation} to a word or phrase in the text.
+            A phrase structure is a delineated string of text within a {flow}. You create a phrase in order to add an {annotation} or {citation} to a word or phrase in the text. 
 
             syntax:
                 A phrase is indicated by surrounding the phrase with curly braces:
@@ -398,13 +428,18 @@ specification: Semantic Authoring Markdown (SAM)
 
                 * First, look backward through the document to find out if the same phrase has been annotated before. If it finds the same phrase, with an annotation, it copies the entire phrase and all attached {annotation}s and {citation}s to the current phrase. The search proceeds in reverse document order and stops at the first instance found. 
 
-                * Second, if no matching phrase is found, the parser must issue a warning. 
+                * Second, if no matching phrase is found, the parser must issue a warning for the unannotated phrase.
+
+                The search is conducted on a strict literal string basis, and is case sensitive.  
 
             semantics:
                 A phrase has no semantics of its own. Its semantics are determined by any {annotation}s attached to it. 
 
             serialization:
                 A phrase is serialized as an `phrase` element in XML.
+
+                ```(xml) 
+                    <p>In <phrase>Rio Bravo</phrase>, <phrase>the Duke</phrase> plays a union colonel.</p>
 
             SOM:
                 A phrase is represented by a {Phrase} object.
@@ -415,134 +450,222 @@ specification: Semantic Authoring Markdown (SAM)
 
             Annotations clarify what a piece of text is about.  
 
-            ```(sam) 
-                In {Rio Bravo}(movie), {the Duke}(actor "John Wayne" (SAG)) plays a union colonel.
+            syntax:
+
+                ```(sam) 
+                    In {Rio Bravo}(movie), {the Duke}(actor "John Wayne" (SAG)) plays a union colonel.
 
 
-            There are three parts to an annotation: 
+                There are three parts to an annotation: 
 
-            |type| The first word immediately following the opening parentheses is the type of the subject being annotated. In the sample above, "Rio Bravo" is a movie and "the Duke" is an actor. 
+                |type| The first word immediately following the opening parentheses is the type of the subject being annotated. In the sample above, "Rio Bravo" is a movie and "the Duke" is an actor. 
 
-            |specifically| In some cases, the annotated text may not specify the subject clearly. In this case, the specifically attribute is use to clarify what is meant. In the sample above, "the Duke" means, specifically, "John Wayne". 
+                |specifically| In some cases, the annotated text may not specify the subject clearly. In this case, the specifically attribute is use to clarify what is meant. In the sample above, "the Duke" means, specifically, "John Wayne". The specifically attribute is optional.
 
-            |namespace| In some cases, it is necessary to specify the namespace to which the annotated term belongs. In the sample above, the name of the actor "John Wayne" is part of a set of names managed by the Screen Actors Guild which makes sure two actors don't use the same stage name. (In most cases, the namespace is implied by the type, so you will not usually need to specify it.) 
+                |namespace| In some cases, it is necessary to specify the namespace to which the annotated term belongs. In the sample above, the name of the actor "John Wayne" is part of a set of names managed by the Screen Actors Guild which makes sure two actors don't use the same stage name. (In most cases, the namespace is implied by the type, so you will not usually need to specify it.) The namespace attribute is optional.
+
+            serialization:
+
+                An annotation is serialized as an `<annotation>` element. The type, specifically, and namespace attributes become attributes with those names in XML. 
+
+                The `<annotation>` element is wrapped inside the `<phrase>` element that it annotation, with the content of the phrase on the inside.
+
+                ```(xml) 
+                    <p>In <phrase><annotation type="movie">Rio Bravo</annotation></phrase>, <phrase><annotation type="actor" specifically="John Wayne" namespace="SAG>the Duke</annotation></phrase> plays a union colonel.
+
+                When a phrase has one or more annotations, those annotations are wrapped inside the `<phrase>` element in the order in which they occur in the source document. Thus the following:
+
+                ```(sam)
+                    The film starred {John Wayne}(actor)(director), who also directed.
+
+                would be serialized as:
+
+                ```(xml)
+                    <p>The film starred <phrase><annotation type="actor"><annotation type="director">John Wayne</annotation></annotation></phrase>, who also directed.
+
+
 
 
         structure:(#insert) Inserts
 
             An insert is an instruction to the {application layer} to insert a resource into the document output.
 
-            Inserts may be created at the {block} level or inside a {flow}. At the block level, and insert is placed
-            on a line by itself and is indicated by three greater-than signs:
+            Inserts may be created at the {block} level or inside a {flow}. 
 
-            ```(sam)
-                >>>(image foo.png)
+            syntax:
 
-            Inside a flow, an insert is indicated by a single greater-than followed the the identification of the
-            resource in parentheses:
+                At the block level, an insert is placed
+                on a line by itself and is indicated by three greater-than signs:
 
-            ```(sam)
-                My favorite flavor of ice cream is >($favorite-flavor).
+                ```(sam)
+                    >>>(image foo.png)
+
+                Inside a {flow}, an insert is indicated by a single greater-than followed the the identification of the
+                resource in parentheses:
+
+                ```(sam)
+                    My favorite flavor of ice cream is >($favorite-flavor).
 
 
-            The resource to be inserted may be identified either by type and url as in the block example above or by
-            referece to an id, name, fragment, string, or key as in the flow example.
+                The resource to be inserted may be identified either by type and URL as in the block example above or by
+                reference to an {id}, {name}, {fragment}, {string}, or {key} as in the flow example.
 
 
-            You can also assign names, conditions, or ids to an insert. For example, to insert a fragment containing
-            the introduction to the deluxe version of a product, you could do this:
+                You can also assign {name}s, {condition}s, or {id}s to an insert. For example, to insert a fragment containing
+                the introduction to the deluxe version of a product, you could do this:
 
-            ```(sam)
-                >>>(~deluxe-intro)(?model=deluxe)
+                ```(sam)
+                    >>>(~deluxe-intro)(?model=deluxe)
 
-            Remember that it is up to the application layer to implement such inserts.
+                Remember that it is up to the application layer to implement such inserts.
+
+                You can use any name you like for the insert type, however the following types are reserved so that editors can act on them to provide enhanced views of the document while editing:
+
+                * image
+                * video
+                * audio
+                * feed
+                * app
+
+                They should be used only with their natural semantics.
+
+
+            semantics:
+
+                The insert is an instruction to the application layer to insert the specified resource. While implementation is entirely up to the applications layer, SAM specifies the semantics of the reserved insert types as follows:
+
+                |"image"| Insert the graphic image into the output.
+                |"video"| Insert the video into the output.
+                |"audio"| Insert a playable audio clip into the output.
+                |"feed"| Insert the result of a feed into the output.
+                |"app"| Insert an embedded app into the output. 
+                |a SAM {ID}| Insert the resource pointed to by the {ID} in a manner appropriate to its type.
+                |a SAM {name}| Insert the resource pointed to by the {name} in a manner appropriate to its type. 
+                |a SAM {fragment}| Insert the content of the {fragment} into this location in the document, and process any structures it contains. 
+                |a SAM {string}| Insert the value of the string variable into the document, and process any structures it contains.
+                |a SAM {key}| Insert the resource pointed to by the {key} in a manner appropriate to its type.
+
+                Note that you are not obliged to use any of these types in order to do their assigned functions. You can devise any insert types you like, since responsibility for implementing them rests entirely with the application layer. The constraint is that you should not assign other semantics to these names. Having a standard set simply allows for editors to presume the semantics of the basic types and act on them if they wish.
+
 
         structure:(#include) Includes
 
-            You can include one SAM file in another. The included file must be a complete SAM file, with SAM
-            declaration. Its structured is included in the structure of the included file at the indent level
-            of the include statement.
+            You can include one SAM file in another. The included file must be a complete SAM file. Its structure is included in the structure of the included file at the indent level
+            of the include statement. That is to say, the structures of the included file are treated as if they had their own indent plus the indent of the include statement. 
 
-            ```(sam)
-                <<<(foo.sam)
+            syntax:
 
-            Unlike inserts, which are simply parsed by the parser and passed on to the application layer
-            for processing, includes are executed by the parser. The result of the include is presented
-            to the application layer as part of the parsed document.
+                An include is indicated by the appropriate indent, followed by three less-than signs, followed by the path to a SAM file in parentheses.
 
-            The ID uniqueness constraint that applies to individual SAM document also applies to included
-            files. The IDs must be unique across the entire document parsed from the source file and
-            any included files.
+                ```(sam)
+                    <<<(foo.sam)
 
-            Includes cannot be
-            made conditional, since conditions are parsed by the application layer. If you want a conditional
-            include in your tagging language, add a field for this purpose to your tagging language.
+            semantics:
 
-            ```(sam)
-                my-include:(?bar) foo.sam
+                Unlike inserts, which are simply passed on to the application layer for processing, the file pointed to by the include is parsed by the parser. The result of the include is presented to the application layer as part of the parsed document.
 
-            Naturally, this include must be processed by the application layer.
+                The ID uniqueness constraint that applies to individual SAM document also applies to included files. The IDs must be unique across the entire document parsed from the source file and any included files.
 
-            For similar reasons, an include cannot have a {name}, {id}, or {language} attribute, since it
-            does not produce a artifact in the output. If you need to
-            apply any of these things to the included content, you can wrap the include statement
-            in another structure such as a {block} or a {fragment} and apply the attributes to that. This will
-            result in the included content being wrapped in that block or fragment in the output
-            where the application layer can deal with it appropriately.
+                Includes cannot be made conditional, since conditions are parsed by the application layer and includes are processed by the parser. 
+
+                If you need to apply a condition to an include, place the include in a fragment and make the fragment conditional. This will result in the file being parsed and included in the output, but its content will be inside the fragment, making the whole thing conditional. 
+
+                For similar reasons, an include cannot have a {name}, {id}, or {language} attribute, since the include instruction itself is not present in the output. If you need to apply any of these things to the included content, you can wrap the include statement in another structure such as a {block} or a {fragment} and apply the attributes to that. This will
+                result in the included content being wrapped in that block or fragment in the output where the application layer can deal with it appropriately.
+
+            serialization:
+                Include instructions are not serialized on output. Their content resulting from processing the include is serialized as it would have been if it were entered inline. 
+
+            SOM:
+                The {include} is represented in the {SOM} by an {Include} object. Thus it is possible when accessing the {SOM} to tell whether or not the content was part of an included file. It is not possible to tell this in the serialized XML output.
 
         structure:(#citation) Citations 
 
-            Citations are any reference to another resource. This includes internal references to other structures within the file, such as to a graphic,procedure, or footnote, as well as references to external works.
+            Citations are any reference to another resource. This includes internal references to other structures within the document, such as to a graphic,procedure, or footnote, as well as references to external works.
 
-            They generate an appropriate reference to that work. This reference is a piece of generated text in the current document. It is not a link, though it may also be linked. For example, you could cite a footnote or a figure.
+            syntax:
 
-            Citations can be applied to:
+                A citation is created using square brackets:
 
-            * a point in a flow
+                ```(sam) 
+                    Moby Dick[Melville, 1851] is about a big fish.
 
-            * a phrase
+                They can also be applied to a phrase, rather then floating in the text. 
 
-            * a blockquote
+                ```(sam) 
+                    {Moby Dick}[Melville, 1851] is about a big fish.
 
-            To cite a resource that has an id within the current SAM document, reference the id like this: 
+                Citations can be chained with annotations:
 
-            ```(sam) 
-                Moby Dick is about a big fish[*moby]. See [*whale].
+                ```(sam) 
+                    {Moby Dick}(novel)[Melville, 1851] is about a big fish.
 
-                fig:(*whale)
-                    >>(image whale.png)
+                Citations can also be added to {blockquotes}:
 
-                footnote:(*moby)
-                    Actually, Moby Dick is a whale, not a fish.
+                ```(sam)
+                    """[Melville, 1851] 
+                        Call me Ishmael.
+
+                SAM has no opinion about the citation format used in documents. That is entirely up to the application layer to decipher. 
+
+                YOu can also use citations to reference other parts of the current document or other documents. To cite a resource that has an id within the current SAM document, reference the id like this: 
+
+                ```(sam) 
+                    Moby Dick is about a big fish[*moby]. See [*whale].
+
+                    fig:(*whale)
+                        >>>(image whale.png)
+
+                    footnote:(*moby)
+                        Actually, Moby Dick is a whale, not a fish.
+
+            semantics:
+
+                The function of a citation is to generate a piece of content in the output that is a reference to the specified resource. Some text should always be generated in the place where the citation is specified. What type of reference that is depends of the type of object that is being referenced. Generating such references is the job of the {application layer}.
+
+                #HERE
+
+                Citations generate an appropriate reference to that work. This reference is a piece of generated text in the current document. It is not a link, though it may also be linked. For example, you could cite a footnote or a figure.
+
+                To cite a resource that has an id within the current SAM document, reference the id like this: 
+
+                ```(sam) 
+                    Moby Dick is about a big fish[*moby]. See [*whale].
+
+                    fig:(*whale)
+                        >>>(image whale.png)
+
+                    footnote:(*moby)
+                        Actually, Moby Dick is a whale, not a fish.
 
 
 
-            To cite a named resource within your content set, reference the name like this: 
+                To cite a named resource within your content set, reference the name like this: 
 
-            ```(sam) 
-                Moby Dick[#MobyDick] is about a big fish.
-
-
-            Or like this:
-
-            ```(sam)
-                {Moby Dick}[#MobyDick] is about a big fish.
+                ```(sam) 
+                    Moby Dick[#MobyDick] is about a big fish.
 
 
-            The advantage of applying the citation to a phrase is that it allows
-            you to turn the citation into a link in online content.
+                Or like this:
 
-            This assumes that there is a bibliographic entry with the named `MobyDick` somewhere in your content set. 
-
-            To cite an external work without referring to another resource in your content set, use a standard reference syntax. 
-
-            ```(sam) 
-                Moby Dick[Melville, 1851] is about a big fish.
+                ```(sam)
+                    {Moby Dick}[#MobyDick] is about a big fish.
 
 
-            SAM does not attempt to decode the format of this style of citation. It just delivers it as a string to the application layer.
+                The advantage of applying the citation to a phrase is that it allows
+                you to turn the citation into a link in online content.
 
-             The application layer is responsible for all processing of references.
+                This assumes that there is a bibliographic entry with the named `MobyDick` somewhere in your content set. 
+
+                To cite an external work without referring to another resource in your content set, use a standard reference syntax. 
+
+                ```(sam) 
+                    Moby Dick[Melville, 1851] is about a big fish.
+
+
+                SAM does not attempt to decode the format of this style of citation. It just delivers it as a string to the application layer.
+
+                 The application layer is responsible for all processing of references.
 
 
 
@@ -824,19 +947,6 @@ specification: Semantic Authoring Markdown (SAM)
 
 
 
-        section: Reserved insert types 
-
-            You can use any name you like for the insert type, however the following types are reserved so that editors can act on them to provide enhanced views of the document while editing:
-
-            *ref
-            *string
-            *image
-            *video
-            *audio
-            *feed
-            *app
-            *sam
-            *file
 
         section: Whitespace handling
 
