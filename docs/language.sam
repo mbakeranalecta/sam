@@ -269,9 +269,9 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam) 
                     name:(?BC)(#fred) Fred Flintstone 
 
-                Unlike XML, SAM does not support arbitrarily named attributes. Only a fixed set of attributes are supported. Each type is indicated by a different prefix character. 
+                Unlike XML, SAM does not support arbitrarily named attributes. Only a fixed set of management attributes are supported. Each type is indicated by a different prefix character. 
 
-                There are four types of block attributes:
+                There are four types of management attributes:
 
                 * {Conditions}(feature), which start with a `?`
                 * {Name}(feature), which start with `#`
@@ -349,7 +349,7 @@ specification: Semantic Authoring Markdown (SAM)
             A {flow} is a section of document text in a SAM document. A {flow} can contain intra-textual structures like {annotation}s, {decorations}, and {inline insert}s.  
 
             syntax: 
-                There is no special syntax to define a flows. Flows are defined by their relationship to other structures. 
+                There is no special syntax to define a {flow}. Flows are defined by their relationship to other structures. 
 
             semantics:
                 The text in a {flow} is simply text, along with any intra-textual structures it contains. 
@@ -451,18 +451,52 @@ specification: Semantic Authoring Markdown (SAM)
             Annotations clarify what a piece of text is about.  
 
             syntax:
+                An {annotation} is attached to a phrase and is expressed as an expression in parentheses following the closing `}` of the phrase with no space in between. 
+
+                An {annotation} consists either of one of four management attribute types (language, id, name, condition) or an {annotation} type expression. 
+
+                An attribute annotation looks like this:
+
+                ```(sam)
+                    In Quebec, a stop sign says {arrêt}(!fr).
+
+
+                An annotation type expression is an expression that specifies the type of a string. Here the type expression says that the string "Rio Bravo" is a reference to a movie: 
 
                 ```(sam) 
                     In {Rio Bravo}(movie), {the Duke}(actor "John Wayne" (SAG)) plays a union colonel.
 
 
-                There are three parts to an annotation: 
+                There are three parts to an annotation type expression: 
 
-                |type| The first word immediately following the opening parentheses is the type of the subject being annotated. In the sample above, "Rio Bravo" is a movie and "the Duke" is an actor. 
+                |type| The first word immediately following the opening parentheses is the type of the subject being annotated. In the sample above, "Rio Bravo" is a movie and "the Duke" is an actor. An annotation type must be a valid SAM {name}. The annotation type is required.
 
-                |specifically| In some cases, the annotated text may not specify the subject clearly. In this case, the specifically attribute is use to clarify what is meant. In the sample above, "the Duke" means, specifically, "John Wayne". The specifically attribute is optional.
+                |specifically| In some cases, the annotated text may not specify its subject clearly. In this case, the specifically attribute is use to clarify what is meant. The specifically attribute is a string in double or single straight quotes. In the sample above, "the Duke" means, specifically, "John Wayne". The specifically attribute is optional.
 
-                |namespace| In some cases, it is necessary to specify the namespace to which the annotated term belongs. In the sample above, the name of the actor "John Wayne" is part of a set of names managed by the Screen Actors Guild which makes sure two actors don't use the same stage name. (In most cases, the namespace is implied by the type, so you will not usually need to specify it.) The namespace attribute is optional.
+                |namespace| In some cases, it is necessary to specify the namespace to which the annotated term belongs. The namespace attribute follows the specifically attribute (if specified) and is contained in parentheses. In the sample above, the name of the actor "John Wayne" is part of a set of names managed by the Screen Actors Guild which makes sure two actors don't use the same stage name. (In most cases, the namespace is implied by the type, so you will not usually need to specify it.) The namespace attribute is optional.
+
+            semantics:
+                The specific semantics of individual annotation depend on the language designer, however, in order to maintain consistency across languages, it is important to use the specifically and namespace attributes for their intended purposes and not to hijack them to express some other semantics. 
+
+                Type annotations may be from any of the structured writing domains (media, document, subject, management). The relationship between the annotation type and the meaning of the specifically attribute changes in each domain. 
+
+                In the media domain, the annotation type refers to some media property to be applied to the text, and the specifically attribute supplies more specific information. For example it could be `{the Duke}(highlight "yellow")` or `{the Duke}(link "http://JohnWayne.com")`.
+
+                In the document domain, the annotation type refer to some document property, and the specifically attribute supplies more specific information. For example, it could be `{the Duke}(index "Wayne, John")`.
+
+                In the subject domain, the annotation type refers to the type of the subject being referred to and the specifically attribute clarifies the intended subject if required. For example `{the Duke}(actor "John Wayne").
+
+                The key to using the annotation attributes correctly is simply to make sure that the attribute names apply in a reasonable fashion to the values they contain. If they don't, a different markup strategy should be used. 
+
+                The semantics of management attribute annotations are as follows:
+
+                * {condition}(attribute) determines if the {phrase} will be included in the output or not.
+                * {Name}(attribute), assigns a {name} to the {phrase} so it can be referred to elsewhere.
+                * {id}(attribute), assigns an {ID} to the {phrase} so it can be referred to elsewhere.
+                * {language}(attribute), specifies the language in which the phrase is written. 
+
+
+
 
             serialization:
 
@@ -483,7 +517,8 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(xml)
                     <p>The film starred <phrase><annotation type="actor"><annotation type="director">John Wayne</annotation></annotation></phrase>, who also directed.
 
-
+            SOM:
+                An annotation is represented in the {SOM} by an Annotation object. 
 
 
         structure:(#insert) Inserts
@@ -889,7 +924,7 @@ specification: Semantic Authoring Markdown (SAM)
                     feature | fragments | bang
 
 
-            Block attributes are permitted on the grid, but not the rows.
+            Management attributes are permitted on the grid, but not the rows.
 
             ```(SAM)
                 +++(*foo #bar ?baz)
