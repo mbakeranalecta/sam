@@ -28,7 +28,6 @@ re_ll_marker = r'\|(?P<label>\S.*?)(?<!\\)\|'
 re_spaces = r'\s+'
 re_one_space = r'\s'
 re_comment = r'#(?P<comment>.*)'
-re_remark = r'(#\((?P<author>.*?)\)\s+(?P<comment>.*))'
 
 
 class SamParser:
@@ -39,6 +38,7 @@ class SamParser:
         self.stateMachine.add_state("BLOCK", self._block)
         self.stateMachine.add_state("CODEBLOCK-START", self._codeblock_start)
         self.stateMachine.add_state("CODEBLOCK", self._codeblock)
+        self.stateMachine.add_state("REMARK-START", self._remark_start)
         self.stateMachine.add_state("EMBED-START", self._embed_start)
         self.stateMachine.add_state("EMBED", self._embed)
         self.stateMachine.add_state("BLOCKQUOTE-START", self._blockquote_start)
@@ -66,7 +66,9 @@ class SamParser:
         self.smart_quotes = False
         self.patterns = {
             'comment': re.compile(re_indent + re_comment, re.U),
-            'remark': re.compile(re_indent + re_remark, re.U),
+            'remark-start': re.compile(
+                re_indent + r'(?P<flag>!!!)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
+                re.U),
             'declaration': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
             'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + '\s' + re_content + r'?', re.U),
             'codeblock-start': re.compile(
@@ -154,6 +156,18 @@ class SamParser:
         else:
             self.current_text_block.append(line)
             return "CODEBLOCK", context
+
+    def _remark_start(self, context):
+        source, match = context
+        if match.group("unexpected"):
+            raise SAMParserError("Unexpected characters in remark header. Found: " + match.group("unexpected"))
+        indent = match.end("indent")
+
+        attributes = parse_attributes(match.group("attributes"), flagged="*!", unflagged="attribution")
+
+        b = Remark(indent, attributes)
+        self.doc.add_block(b)
+        return "SAM", context
 
     def _embed_start(self, context):
         source, match = context
@@ -525,12 +539,9 @@ class SamParser:
 
             return "SAM", (source, match)
 
-        match = self.patterns['remark'].match(line)
+        match = self.patterns['remark-start'].match(line)
         if match is not None:
-            b = Remark(match.group('comment'), match.group('author'), match.end('indent'))
-            self.doc.add_block(b)
-
-            return "SAM", (source, match)
+            return "REMARK-START", (source, match)
 
         match = self.patterns['comment'].match(line)
         if match is not None:
@@ -702,7 +713,7 @@ class Block(ABC):
 
         if self.attributes:
             for key, value in sorted(self.attributes.items()):
-                yield " {0}=\"{1}\"".format(key, value)
+                yield " {0}=\"{1}\"".format(key, escape_for_xml_attribute(value))
         if self.children:
             yield ">"
             if self.content:
@@ -735,6 +746,10 @@ class Codeblock(Block):
     def __init__(self, indent, attributes=None, namespace=None):
         super().__init__(name='codeblock', indent=indent, attributes=attributes, content=None, namespace=namespace)
 
+
+class Remark(Block):
+    def __init__(self, indent, attributes=None, namespace=None):
+        super().__init__(name='remark', indent=indent, attributes=attributes, content=None, namespace=namespace)
 
 
 class Embed(Block):
@@ -1022,19 +1037,6 @@ class Comment(Block):
 
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
-
-
-class Remark(Comment):
-    def __init__(self, content, author, indent=0):
-        super().__init__(content, indent)
-        self.author = author
-
-    def __str__(self):
-        return u"[#({0}) {1}]".format(self.author, self.content)
-
-    def serialize_xml(self):
-        yield '<remark author="{0}">{1}</remark>\n'.format(escape_for_xml_attribute(self.author),
-                                                           escape_for_xml(self.content))
 
 
 class StringDef(Block):
@@ -2219,7 +2221,6 @@ if __name__ == "__main__":
 
 
                 xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
-                xml_doc = etree.fromstring(xml_string)
 
                 if args.intermediatedir:
                     intermediatefile=os.path.join(args.intermediatedir, os.path.splitext(os.path.basename(inputfile))[0] + args.intermediateextension)
@@ -2279,6 +2280,7 @@ if __name__ == "__main__":
                         print(e, file=sys.stderr)
                         exit(1)
                     SAM_parser_info("Validating output using " + args.xsd)
+                    xml_doc = etree.fromstring(xml_string)
                     try:
                         xmlschema.assertValid(xml_doc)
                     except etree.DocumentInvalid as e:

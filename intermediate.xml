@@ -291,15 +291,20 @@ article: Foo
 </description>
 <source>
 <codeblock language="sam">
-#(mbaker) This is a remark.
+!!!(mbaker)
+    This is a remark.
 </codeblock>
 </source>
 <markup>
-<remark author="mbaker">This is a remark.</remark>
+<remark attribution="mbaker">
+<p>This is a remark.</p>
+</remark>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;remark author="mbaker"&gt;This is a remark.&lt;/remark&gt;
+&lt;remark attribution="mbaker"&gt;
+&lt;p&gt;This is a remark.&lt;/p&gt;
+&lt;/remark&gt;
 </codeblock>
 </result>
 </case>
@@ -310,15 +315,20 @@ article: Foo
 </description>
 <source>
 <codeblock language="sam">
-#(Charles André Joseph Marie de Gaulle !@#$%^&amp;*(((({}":&lt;&gt;) This is a remark.
+!!!(Charles André Joseph Marie de Gaulle !@#$%^&amp;*(((({}":&lt;&gt;)(*cdg1)(!fr)
+    This is a remark.
 </codeblock>
 </source>
 <markup>
-<remark author="Charles André Joseph Marie de Gaulle !@#$%^&amp;*(((({}&quot;:&lt;&gt;">This is a remark.</remark>
+<remark attribution="Charles André Joseph Marie de Gaulle !@#$%^&amp;*(((({}&quot;:&lt;&gt;" id="cdg1" xml:lang="fr">
+<p>This is a remark.</p>
+</remark>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;remark author="Charles André Joseph Marie de Gaulle !@#$%^&amp;amp;*(((({}&amp;quot;:&amp;lt;&amp;gt;"&gt;This is a remark.&lt;/remark&gt;
+&lt;remark attribution="Charles André Joseph Marie de Gaulle !@#$%^&amp;amp;*(((({}&amp;quot;:&amp;lt;&amp;gt;" id="cdg1" xml:lang="fr"&gt;
+&lt;p&gt;This is a remark.&lt;/p&gt;
+&lt;/remark&gt;
 </codeblock>
 </result>
 </case>

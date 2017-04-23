@@ -243,14 +243,18 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    #(mbaker) This is a remark.
+                    !!!(mbaker)
+                        This is a remark.
 
             markup:
-                #(mbaker) This is a remark.
+                !!!(mbaker)
+                    This is a remark.
 
             result:
                 ```(xml)
-                    <remark author="mbaker">This is a remark.</remark>
+                    <remark attribution="mbaker">
+                    <p>This is a remark.</p>
+                    </remark>
 
         case: Complex remark
 
@@ -259,14 +263,18 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    #(Charles André Joseph Marie de Gaulle !@#$%^&*(((({}":<>) This is a remark.
+                    !!!(Charles André Joseph Marie de Gaulle !@#$%^&*(((({}":<>)(*cdg1)(!fr)
+                        This is a remark.
 
             markup:
-                #(Charles André Joseph Marie de Gaulle !@#$%^&*(((({}":<>) This is a remark.
+                !!!(Charles André Joseph Marie de Gaulle !@#$%^&*(((({}":<>)(*cdg1)(!fr)
+                    This is a remark.
 
             result:
                 ```(xml)
-                    <remark author="Charles André Joseph Marie de Gaulle !@#$%^&amp;*(((({}&quot;:&lt;&gt;">This is a remark.</remark>
+                    <remark attribution="Charles André Joseph Marie de Gaulle !@#$%^&amp;*(((({}&quot;:&lt;&gt;" id="cdg1" xml:lang="fr">
+                    <p>This is a remark.</p>
+                    </remark>
 
     test: Fields
         description:
