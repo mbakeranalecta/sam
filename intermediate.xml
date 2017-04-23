@@ -3328,15 +3328,15 @@ There is a `_` in _this \_ italic_ decoration.
 </description>
 <source>
 <codeblock language="sam">
-{Skimbleshanks}(animal '"Old  &lt;&gt;&amp;" Possum"'"""''' (Eliott)).
+{Skimbleshanks}(animal '"Old  &lt;&gt;&amp; Possum"' (Eliott)).
 </codeblock>
 </source>
 <markup>
-<p><phrase><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp;&quot; Possum&quot;'&quot;&quot;&quot;''" namespace="Eliott">Skimbleshanks</annotation></phrase>.</p>
+<p><phrase><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp; Possum&quot;" namespace="Eliott">Skimbleshanks</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;&lt;phrase&gt;&lt;annotation type="animal" specifically="&amp;quot;Old  &amp;lt;&amp;gt;&amp;amp;&amp;quot; Possum&amp;quot;" namespace="Eliott"&gt;Skimbleshanks&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;phrase&gt;&lt;annotation type="animal" specifically="&amp;quot;Old  &amp;lt;&amp;gt;&amp;amp; Possum&amp;quot;" namespace="Eliott"&gt;Skimbleshanks&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
