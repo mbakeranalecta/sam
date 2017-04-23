@@ -26,7 +26,8 @@ $RECYCLE.BIN/
 .LSOverride
 
 # Icon must ends with two \r.
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -37,3 +38,4 @@ Icon
 
 *.idea/*
 __pycache__/*
+*.sublime*
