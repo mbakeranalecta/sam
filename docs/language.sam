@@ -1008,7 +1008,7 @@ specification: Semantic Authoring Markdown (SAM)
 
             Decorations cannot be nested, so
 
-             ```(sam)
+            ```(sam)
                 This text is *_important_*.
 
             is not a shortcut for
@@ -1029,7 +1029,7 @@ specification: Semantic Authoring Markdown (SAM)
         
             The embedded XML must begin with an XML declaration on a line by itself (typically `<?xml version="1.0" encoding="UTF-8"?>`). The XML fragment that follows must be well formed and must end on a line by itself. The SAM parser parses the embedded XML block to determine if it is well formed and to find its end. It then outputs the original XML from the SAM document, not the parser output. Therefore there will be no resolution of entities on the embedded XML. 
 
-             ```
+            ```
                 test
                 
         feature:(#name-token) Name tokens
