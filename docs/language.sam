@@ -116,17 +116,24 @@ specification: Semantic Authoring Markdown (SAM)
 
             |remark| A remark is a comment on the text of the document, intended for editorial purposes. It must be attributed to a specific author.
 
-        section:(#name) Names
+        section:(#nametoken) Name tokens
 
-            A name in a SAM document must be a valid XML local name. 
+            Several things in SAM have names. These names must be valid name tokens. A name token in a SAM document must be a valid XML local name. This is to allow ease of integration with XML tools and languages and for a straightforwards serialization of SAM documents to XML.
 
         section:(#name-like-string) Name-like string
 
             A name like string is a string that looks like a name. Name-like strings are used in parsing SAM files to detect the intention of the author to create a name. Not all name-like-strings are valid names. If the parser sees a name-like-string that is not a valid name, it reports an error. 
 
-            The reason for recognizing name-like-strings rather than only recognizing valid names that otherwise, what the writer intended as a name might not be recognized as such and would therefore be treated as plain text, without any error or warning being raised. 
+            The reason for recognizing name-like-strings rather than only recognizing valid names is that it enables the parser to catch cases where the writer probably intended to create a name but failed to create a valid name.  
 
             By recognizing name-like-strings the parser is able to report an errors on these dubious cases, which reduce the likelihood or misinterpreting the author's intent. In the case where the name-like-string is indeed intended to be interpreted as plain text, the writer can ensure it is interpreted as such by escaping the concluding colon with a backslash. 
+
+            However, the definition of a name-like-string can't interfere with the recognition of other SAM structures. Therefore name-like-strings don't include characters that might be mistaken for SAM markup. 
+
+            The current definition of a name-like-string is as follows, but this is subject to change:
+
+            ```(re)
+                (?P<name>\w[^\s`]*?) 
 
         section:(#syntax) Syntax
 
@@ -201,8 +208,6 @@ specification: Semantic Authoring Markdown (SAM)
             SOM:
                 The root block is the only block child of the {Root} object. In every other respect, it is represented as its normal block type.
 
-
-        
         structure:(#declaration) Declaration
 
             A SAM file may start with one or more declarations. A declarations gives the SAM parser information it needs to correctly parse the file. Declarations do not become part of the output.
@@ -229,7 +234,6 @@ specification: Semantic Authoring Markdown (SAM)
 
             SOM:
                 The namespace declaration is used to update the namespace property of all blocks. In future, the namespace property of blocks may be set by the schema. 
-
 
         structure:(#block) Named Block
 
@@ -259,24 +263,7 @@ specification: Semantic Authoring Markdown (SAM)
 
                 Here the string "Rio Bravo" is the value of the block. The value of a block is regarded as the title of document section formed by a block, and is serialized as such. 
 
-                A named block can have attributes. Attributes are metadata on the block. Attributes are contained in parentheses that follow the colon with no space:
-
-                ```(sam) 
-                    name:(?BC) Fred Flintstone
-
-                A block can have multiple attributes, one after another, with no spaces between:
-
-                ```(sam) 
-                    name:(?BC)(#fred) Fred Flintstone 
-
-                Unlike XML, SAM does not support arbitrarily named attributes. Only a fixed set of management attributes are supported. Each type is indicated by a different prefix character. 
-
-                There are four types of management attributes:
-
-                * {Conditions}(feature), which start with a `?`
-                * {Name}(feature), which start with `#`
-                * {ID}(feature), which start with `*`
-                * {Language}(feature), which start with `!`
+                A named block can have {attributes}. 
 
                 A block can also have a title:
 
@@ -284,7 +271,6 @@ specification: Semantic Authoring Markdown (SAM)
                     section:(?ultra)(#ultra) The ultra feature is really cool!
                 
                 If there is any value after the colon and the attributes, it is considered a title for the {block} and generates a title structure. There must be a space between the colon or the closing parenthesis and the value.
-
 
                 Blocks have children. To be considered a {block}, a structure must have children. That is, it must have other structures indented underneath it. If it has no children, it is interpreted as a {field}.
 
@@ -294,7 +280,6 @@ specification: Semantic Authoring Markdown (SAM)
 
                 Structurally, the title of a {block} is its value, in just the same way that the content of a field is its value. 
 
-                It should be noted that the lack of arbitrary named attributes does not reduce the semantic flexibility of SAM as compared to XML. Any metadata that can be expressed by an attribute on a block can also be expressed by a field that is a child of that block. The reason for using attributes in XML is to preserve a pure distinction between text and metadata, but that is not a design consideration in SAM, which is meant for the creation of new text through structured writing, not for the annotation of existing texts for study.
 
             serialization:
             
@@ -308,6 +293,106 @@ specification: Semantic Authoring Markdown (SAM)
                 
             SOM:
                 The representation of a block in the {SOM} is identical to the representation of a field. A block is distinguished from a field in the SOM by whether or not it has children. 
+
+        structure:(#attribute) Attributes
+
+            Attributes are metadata on a block.  
+
+            syntax: 
+
+                Attributes are contained in parentheses that follow the colon of a {block} header with no space:
+
+                ```(sam) 
+                    name:(?BC) Fred Flintstone
+
+                A block can have multiple attributes, one after another, with no spaces between:
+
+                ```(sam) 
+                    name:(?BC)(#fred) Fred Flintstone 
+
+                There are four types of attributes. The type of an attribute it determined by the flag character that precedes it. The four types are:
+
+                * {Conditions}(feature), which start with a `?`
+                * {Name}(feature), which start with `#`
+                * {ID}(feature), which start with `*`
+                * {Language}(feature), which start with `!`
+
+                Condition expressions must not include commas. 
+
+                Names must be SAM {name tokens}.
+
+                IDs must be SAM {name tokens}.
+
+                Languages must be {ISO 639} language codes. 
+
+                Certain block types take additional attributes with meanings specific to those block types. 
+
+
+            semantics: 
+
+                Attributes provide support for basic {management domain} metadata in a SAM file.
+
+                Unlike XML, SAM does not support arbitrarily named attributes. Only a fixed set of management attributes are supported. The semantics of each attribute type is as follows:
+
+                |Condition| A {condition} attribute is used to determine if a block should appear in a particular output or not. If the condition expression evaluates to true, then the block is included. If it evaluates to false, it is not included. 
+
+                            Conditions are evaluated from the outside in, so if a block is conditional excluded, all its contents are excluded, regardless of any conditional expressions that may occur on any of its children. 
+
+                            The syntax, interpretation, and truth values of condition expressions are left entirely to the application layer. Similarly, including or excluding blocks is left entirely to the application layer. 
+
+                            Multiple conditions may be applied to the same block. 
+
+                |ID| An {id} attribute assigns an ID to a block. That id can be referenced by an {idref}. IDs must be unique in a file. IDRefs must refer to an ID in the current file. The action to be taken by the application layer on encountering an IDref is up to the tagging language designer. 
+
+                     Multiple ids are not permitted on the same block. 
+
+                |Name| A {name} attribute assigns a name to a block. A name performs the same function as an ID, allowing the block to be references from elsewhere. However, there are no limits on the scope of names. Uniqueness of names is not enforced. Name references are not required to match a name in the current file. This allows you to use names to reference blocks in other files. (Note the namerefs so not support naming the file in which a name is located. Rather it is left to the application layer to locate names by whatever mechanism seems appropriate.)  
+
+                |Language| A {language} attribute specified the language in which the content of a block is written. It is expected, but not required, that standard {ISO 639} language codes be used to identify languages. 
+
+                Certain block types have additional attributes that are specific to those block types. See the relevant entries for details. 
+
+                This is the list of the standard attributes allowed on each structure. Block types that take special attributes are indicated with an asterisk:
+
+                +++
+                    block             | !language | #name | ?condition| *id | 
+                    field             | !language | #name | ?condition| *id | 
+                    fragment          | !language | #name | ?condition| *id | 
+                    grid              | !language | #name | ?condition| *id | 
+                    recordset         | !language | #name | ?condition| *id | 
+                    ordered-list-ite  | !language | #name | ?condition| *id | 
+                    unorderd-list-item| !language | #name | ?condition| *id | 
+                    line              | !language | #name | ?condition| *id | 
+
+                    blockquote        | !language | #name | ?condition| *id | 
+                    phrase            | !language | #name | ?condition| *id | 
+
+                    codeblock         |           | #name | ?condition| *id | *
+                    embed             |           | #name | ?condition| *id | *
+
+                    string-def        |           |       |           |     | 
+
+                    paragraph         |           |       |           |     | 
+                    record            |           |       |           |     | 
+                    XML               |           |       |           |     | 
+
+                    block insert      |           | #name | ?condition| *id | *
+                    inline insert     |           | #name | ?condition| *id | *
+                    include           |           |       |           |     | *
+
+                note:
+                    It should be noted that the lack of arbitrary named attributes does not reduce the semantic flexibility of SAM as compared to XML. Any metadata that can be expressed by an attribute on a block can also be expressed by a field that is a child of that block. The reason for using attributes in XML is to preserve a pure distinction between text and metadata, but that is not a design consideration in SAM, which is meant for the creation of new text through structured writing, not for the annotation of existing texts for study.
+
+            serialization:
+                Attributes are represented in XML by XML attributes on the block element. 
+
+                * {language} is represented by and `xml:lang` attribute. 
+                * {ID} is represented by an `id` attribute.
+                * {name} is represented by a `name` attribute.
+                * {condition}s are represented by a `conditions` attribute. If multiple condition attributes are applied in SAM, they will be concatenated with commas in the `conditions` attribute value. 
+
+            SOM:
+                Attributes are represented by the attribute field of the {Block} object as dictionary. 
         
         structure:(#field) Field
         
@@ -349,7 +434,7 @@ specification: Semantic Authoring Markdown (SAM)
             A {flow} is a section of document text in a SAM document. A {flow} can contain intra-textual structures like {annotation}s, {decorations}, and {inline insert}s.  
 
             syntax: 
-                There is no special syntax to define a {flow}. Flows are defined by their relationship to other structures. 
+                There is no special syntax to define a {flow}. Flows are defined by their relationship to other structures.  All flows are trimmed of leading and trailing whitespace. In composing a flow from multiple text lines, all spaces and returns are collapsed to a single space.
 
             semantics:
                 The text in a {flow} is simply text, along with any intra-textual structures it contains. 
@@ -413,7 +498,6 @@ specification: Semantic Authoring Markdown (SAM)
             SOM: 
                 A paragraph is represented by a {Paragraph} object with a single child {Flow} object.
                 
-
         structure:(#phrase) Phrase
 
             A phrase structure is a delineated string of text within a {flow}. You create a phrase in order to add an {annotation} or {citation} to a word or phrase in the text. 
@@ -444,8 +528,6 @@ specification: Semantic Authoring Markdown (SAM)
             SOM:
                 A phrase is represented by a {Phrase} object.
 
-
-
         structure:(#annotation) Annotation
 
             Annotations clarify what a piece of text is about.  
@@ -475,6 +557,9 @@ specification: Semantic Authoring Markdown (SAM)
 
                 |namespace| In some cases, it is necessary to specify the namespace to which the annotated term belongs. The namespace attribute follows the specifically attribute (if specified) and is contained in parentheses. In the sample above, the name of the actor "John Wayne" is part of a set of names managed by the Screen Actors Guild which makes sure two actors don't use the same stage name. (In most cases, the namespace is implied by the type, so you will not usually need to specify it.) The namespace attribute is optional.
 
+                If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use curly braces around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase.
+
+
             semantics:
                 The specific semantics of individual annotation depend on the language designer, however, in order to maintain consistency across languages, it is important to use the specifically and namespace attributes for their intended purposes and not to hijack them to express some other semantics. 
 
@@ -494,9 +579,6 @@ specification: Semantic Authoring Markdown (SAM)
                 * {Name}(attribute), assigns a {name} to the {phrase} so it can be referred to elsewhere.
                 * {id}(attribute), assigns an {ID} to the {phrase} so it can be referred to elsewhere.
                 * {language}(attribute), specifies the language in which the phrase is written. 
-
-
-
 
             serialization:
 
@@ -520,8 +602,116 @@ specification: Semantic Authoring Markdown (SAM)
             SOM:
                 An annotation is represented in the {SOM} by an Annotation object. 
 
+        structure:(#citation) Citation 
 
-        structure:(#insert) Inserts
+            Citations are a reference to another resource. This includes internal references to other structures within the document, such as to a graphic,procedure, or footnote, as well as references to external works.
+
+            syntax:
+
+                A citation is created using square brackets:
+
+                ```(sam) 
+                    Moby Dick[Melville, 1851] is about a big fish.
+
+                They can also be applied to a phrase, rather then floating in the text. 
+
+                ```(sam) 
+                    {Moby Dick}[Melville, 1851] is about a big fish.
+
+                Citations can be chained with annotations:
+
+                ```(sam) 
+                    {Moby Dick}(novel)[Melville, 1851] is about a big fish.
+
+                Citations can also be added to {blockquotes}:
+
+                ```(sam)
+                    """[Melville, 1851] 
+                        Call me Ishmael.
+
+                SAM has no opinion about the format of a citation text. That is entirely up to the application layer to decipher. 
+
+                You can also use citations to reference other parts of the current document or other documents. To cite a resource that has an id within the current SAM document, reference the id like this: 
+
+                ```(sam) 
+                    Moby Dick is about a big fish[*moby]. See [*whale].
+
+                    fig:(*whale)
+                        >>>(image whale.png)
+
+                    footnote:(*moby)
+                        Actually, Moby Dick is a whale, not a fish.
+
+                Citation by {idref}, {nameref}, or {keyref} can include additional information. For example, if you have a bibliography where each bibliography entry has a name assigned to it, you could cite the work by reference to the name, and then add additional information for the page number.
+
+                ```(sam)
+                    """[#Moby page 1] 
+                        Call me Ishmael.
+
+                The additional information is anything between the end of the {nameref} and the closing square bracket.
+
+            
+            semantics:
+
+                The function of a citation is to generate a piece of content in the output that is a reference to the specified resource. Some text should always be generated in the place where the citation is specified. What type of reference that is depends of the type of object that is being referenced. Generating such references is the job of the {application layer}.
+
+                The purpose of a citation is not to create a link. Links should be created using {annotation}s. However, the reference generated by a citation may include a link to the resource in question if appropriate. 
+
+                The semantics of a reference by {idref}, {nameref}, or {keyref}, depend on the type of the structure referred to. Thus if the type of a object referred to by an {idref}. This will usually be a reference to a type that is created in the specific tagging language being used, rather than to a SAM concrete block, so the semantics are up to the language designer. For example, if your tagging language includes footnotes, as in the last example above then the presumptive semantics of a {citation} of the footnote ID would be to product a footnote marker in the output. 
+
+                The semantics of a citation of an external work is that it will generate a reference to that work in whatever citation format is appropriate for publication. This means that a citation that is inline in the SAM document necessarily implies that an inline citation format will be used on output. The SAM citation is just capturing the citation information. It is up to the application layer to decide how to present it, including removing the citation to a footnote or endnote if appropriate. The language designer is entitled to specify any citation format they like, and to interpret it in any way they like. 
+
+                Additional information in a citation is simply passed through to the application layer. SAM does not specify any semantics for it. 
+
+            serialization:
+
+                A {citation} is output as a `<citation>` element in XML. 
+
+                The type of the citation is indicated by a `type` attribute. The supported types are:
+
+                |citation| A textual citation. 
+                |id| A SAM ID.
+                |name| A SAM name.
+                |key| A SAM key.
+
+                The value of the citation is indicated by the `value` attribute.
+
+                For example, 
+
+                ```(xml) 
+                    <p>Moby Dick<citation type="citation" value="Melville, 1851"> is about a big fish.
+
+                If the citation is attached to a phrase, then the citation will be wrapped around the text of the phrase and nested inside the `<phrase>` element:
+
+                ```(xml) 
+                    <p><phrase><citation type="citation" value="Melville, 1851"/>Moby Dick</phrase> is about a big fish.
+
+                If a citation and an annotation are attached to the same phrase, then the citation will be nested within the `<phrase>` element and relative to any `<annotation>` elements, just as with {annotation} nesting.
+
+                ```(xml) 
+                    <phrase><annotation type="novel"><citation type="citation" value="Melville, 1851">Moby Dick</citation></annotation></phrase> is about a big fish.
+
+
+                If the citation is attached to a {blockquote}, the citation element will be nested inside the `<blockquote>` element.
+
+                ```(sam)
+                    <blockquote>
+                        <citation type="citation" value="Melville, 1851"/> 
+                        <p>Call me Ishmael.</p>
+                    </blockquote>
+
+                If a citation contains additional information, it is included as an `extra` attribute. 
+
+                ```(sam)
+                    <blockquote>
+                        <citation type="nameref" value="Moby" extra="page 1"/> 
+                        <p>Call me Ishmael.</p>
+                    </blockquote>
+
+            future:
+                If the proposal to allow the definition of patterns in the schema is accepted, it may be possible to define the format of a citation text and to have the parser break it down into its constituent parts. 
+
+        structure:(#insert) Insert
 
             An insert is an instruction to the {application layer} to insert a resource into the document output.
 
@@ -574,6 +764,9 @@ specification: Semantic Authoring Markdown (SAM)
                 |"audio"| Insert a playable audio clip into the output.
                 |"feed"| Insert the result of a feed into the output.
                 |"app"| Insert an embedded app into the output. 
+
+                The semantics of inserting by reference to an {ID}, {name}, {fragment}, or {string}, or {key} are as follows:
+
                 |a SAM {ID}| Insert the resource pointed to by the {ID} in a manner appropriate to its type.
                 |a SAM {name}| Insert the resource pointed to by the {name} in a manner appropriate to its type. 
                 |a SAM {fragment}| Insert the content of the {fragment} into this location in the document, and process any structures it contains. 
@@ -582,11 +775,12 @@ specification: Semantic Authoring Markdown (SAM)
 
                 Note that you are not obliged to use any of these types in order to do their assigned functions. You can devise any insert types you like, since responsibility for implementing them rests entirely with the application layer. The constraint is that you should not assign other semantics to these names. Having a standard set simply allows for editors to presume the semantics of the basic types and act on them if they wish.
 
+            future: 
+                It is currently possible to nest any structure as a child of an insert. This is to support the redefinition of {strings} in when inserting {fragments}. There does not seem to be any other use case for this, so it should probably be constrained at some level. Issue {120}(issue) tracks this.
 
-        structure:(#include) Includes
+        structure:(#include) Include
 
-            You can include one SAM file in another. The included file must be a complete SAM file. Its structure is included in the structure of the included file at the indent level
-            of the include statement. That is to say, the structures of the included file are treated as if they had their own indent plus the indent of the include statement. 
+            You can include one SAM file in another. The included file must be a complete SAM file. Its structure is included in the structure of the included file at the indent level of the include statement. That is to say, the structures of the included file are treated as if they had their own indent plus the indent of the include statement.
 
             syntax:
 
@@ -597,7 +791,7 @@ specification: Semantic Authoring Markdown (SAM)
 
             semantics:
 
-                Unlike inserts, which are simply passed on to the application layer for processing, the file pointed to by the include is parsed by the parser. The result of the include is presented to the application layer as part of the parsed document.
+                Unlike inserts, which are simply passed on to the application layer for processing, the file pointed to by an {include} is parsed by the parser. The result of the include is presented to the application layer as part of the parsed document.
 
                 The ID uniqueness constraint that applies to individual SAM document also applies to included files. The IDs must be unique across the entire document parsed from the source file and any included files.
 
@@ -614,244 +808,273 @@ specification: Semantic Authoring Markdown (SAM)
             SOM:
                 The {include} is represented in the {SOM} by an {Include} object. Thus it is possible when accessing the {SOM} to tell whether or not the content was part of an included file. It is not possible to tell this in the serialized XML output.
 
-        structure:(#citation) Citations 
+            future: 
+                There is a proposal to decorate the IDs occurring in an included file to ensure they do not overlap those of the including file. See issue {104}(issue). 
 
-            Citations are any reference to another resource. This includes internal references to other structures within the document, such as to a graphic,procedure, or footnote, as well as references to external works.
+        structure:(#string) String
+
+            A string is a way of defining a variable to represent a value. 
 
             syntax:
 
-                A citation is created using square brackets:
-
-                ```(sam) 
-                    Moby Dick[Melville, 1851] is about a big fish.
-
-                They can also be applied to a phrase, rather then floating in the text. 
-
-                ```(sam) 
-                    {Moby Dick}[Melville, 1851] is about a big fish.
-
-                Citations can be chained with annotations:
-
-                ```(sam) 
-                    {Moby Dick}(novel)[Melville, 1851] is about a big fish.
-
-                Citations can also be added to {blockquotes}:
+                A string definition is created by the appropriate indent followed by a `$` and a {name-like-string} followed by an `=` and the value of the string. The string value ends at the end of the current line:
 
                 ```(sam)
-                    """[Melville, 1851] 
-                        Call me Ishmael.
-
-                SAM has no opinion about the citation format used in documents. That is entirely up to the application layer to decipher. 
-
-                YOu can also use citations to reference other parts of the current document or other documents. To cite a resource that has an id within the current SAM document, reference the id like this: 
-
-                ```(sam) 
-                    Moby Dick is about a big fish[*moby]. See [*whale].
-
-                    fig:(*whale)
-                        >>>(image whale.png)
-
-                    footnote:(*moby)
-                        Actually, Moby Dick is a whale, not a fish.
-
-            semantics:
-
-                The function of a citation is to generate a piece of content in the output that is a reference to the specified resource. Some text should always be generated in the place where the citation is specified. What type of reference that is depends of the type of object that is being referenced. Generating such references is the job of the {application layer}.
-
-                The purpose of a citation is not to create a link. Links should be created using {annotation}s. However, the reference generated by a citation may include a link to the resource in question if appropriate. 
-
-                The semantics of a reference by {id}, {name}, or {key}, depend on the type of the structure referred to. Thus if the type of a object referred to by an {id}. This will usually be a reference to a type that is created in the specific tagging language being used, rather than to a SAM concrete block, so the semantics are up to the language designer. For example, if your tagging language includes footnotes, as in the last example above then the presumptive semantics of a {citation} of the footnote ID would be to product a footnote marker in the output. 
-
-                The semantics of a citation of an external work is that it will generate a reference to that work in whatever citation format is appropriate for publication. This means that a citation that is inline in the SAM document necessarily implies that an inline citation format will be used on output. The SAM citation is just capturing the citation information. It is up to the application layer to decide how to present it, including removing the citation to a footnote or endnote if appropriate. The language designer is entitled to specify any citation format they like, and to interpret it in any way they like. 
-
-            serialization:
-
-                A {citation} is output as a `<citation>` element in XML. 
-
-                The type of the citation is indicated by a `type` attribute. The supported types are:
-
-                |citation| A textual citation. 
-                |id| A SAM ID.
-                |name| A SAM name.
-                |key| A SAM key.
-
-                The value of the citation is indicated by the `value` attribute.
-
-                For example, 
-
-                ```(xml) 
-                    <p>Moby Dick<citation type="citation" value="Melville, 1851"> is about a big fish.
-
-                If the citation is attached to a phrase, then the citation will be wrapped around the text of the phrase and nested inside the `<phrase>` element:
-
-                ```(xml) 
-                    <p><phrase><citation type="citation" value="Melville, 1851"/>Moby Dick</phrase> is about a big fish.
-
-                If a citation and an annotation are attached to the same phrase, then the citation will be nested within the `<phrase>` element and relative to any `<annotation>` elements, just as with {annotation} nesting.
-
-                ```(xml) 
-                    <phrase><annotation type="novel"><citation type="citation" value="Melville, 1851">Moby Dick</citation></annotation></phrase> is about a big fish.
-
-
-                If the citation is attached to a {blockquote}, the citation element will be nested inside the `<blockquote>` element.
-
-                ```(sam)
-                    <blockquote>
-                        <citation type="citation" value="Melville, 1851"/> 
-                        <p>Call me Ishmael.</p>
-                    </blockquote>
-
-        structure: String
-
-            You can define a string:
-
-            ```(sam)
-                $foo = bar
-
-            The string can then be inserted using a block or inline insert:
-
-            ```(sam)
-                >($foo)
-                >>>($foo)
-
-            String handling occurs in the application layer.
-
-            String definitions do not take any attributes. The string name is a name. String ids are not supported. If
-            you want to make string definitions conditional, use fragments.
-
-            ```(sam)
-                ~~~(?foo)
                     $foo = bar
 
-        structure: Fragments 
+                The string can then be inserted using a {block insert} or {inline insert}:
 
-            Fragments are created by a token followed by an open curly brace at the start of a line: 
+                ```(sam)
+                    The sentence includes and string insert >($foo).
 
-            ```(sam) 
-                ~~~(#my-fragment ?bar) 
-                    $color=black 
-                    Bar bar >>($color) sheep Have you any wool? 
+                    >>>($foo)
 
 
-            The content of the fragment must be indented, and the closing brace must be at the same indentation level as the opening one. 
 
-            section: Insert a fragment 
+                String definitions do not take any attributes. The string name is a {name token}. String ids are not supported. If
+                you want to make string definitions conditional, use fragments.
+
+                ```(sam)
+                    ~~~(?foo)
+                        $foo = bar
+
+                But remember that the resolution of string is left to the {application layer} so if you do this make sure your {application layer} code handles it correctly.
+
+            semantics:
+            
+                String handling occurs in the {application layer}.
+
+                The semantics of string definitions are: 
+
+                * Within a local file, strings are local to the scope in which they are defined.
+                * Within a local file, a later definition of a string overrides an earlier definition.
+                * Strings defined in a {fragment} insert override the strings defined in the {fragment}.
+                * Within a local file, a local definition of string overrides a more global definition of a string.
+
+                The application layer is entitled to introduce string definitions from outside the local file and to impose its own rules on precedence for such strings.
+
+        structure:(#fragment) Fragment 
+
+            A fragment is a chunk of content that is set off so that it can be managed separately from the rest of the document. Reasons for creating a fragment could include making a chunk of the document conditional or available for reuse. 
+
+            syntax:            
+
+                Fragments are created by a token followed by an open curly brace at the start of a line: 
+
+                ```(sam)
+
+                    This paragraph is outside the fragment.
+
+                    ~~~(?foo)
+
+                        This paragraph is inside the fragment and should only appear if the {condition} `foo` is true.
+
+                    This paragraph is outside the fragment again and will always be included.
+
+                You can define a string inside a fragment and use that string in the definition of the fragment text:
+
+                ```(sam) 
+                    ~~~(#my-fragment) 
+                        $color=black 
+                        Bar bar >>($color) sheep Have you any wool? 
 
                 To insert a fragment: 
 
                 ```(sam) 
                     >>>(~my-fragment)
-
                 
-                Any strings defined within a fragment are scoped to that fragment. You can override these strings when you insert the fragment. In fact, you can override any in-scope strings in a fragment insert. String definitions must each be on a line by themselves. 
+                Any strings defined within a fragment are scoped to that fragment (per normal {string} scoping rules. You can override these strings when you insert the fragment. In fact, you can override any in-scope strings in a fragment insert. String definitions must each be on a line by themselves. 
 
                 ```(sam)
                     >>>(~my-fragment)
                         $color=white
 
-                Note that the SAM syntax is designed to bear these semantics, but that the SAM parser does not implement them. It simply passes them on to whatever processor you are using, which is free to implement different rules for string handling. 
+            semantics:
 
-            section: Shortcuts for inserts
+                The handling of fragments and strings belongs to the {application layer}.
+
+                Semantically, a fragment is just an arbitrary chunk of the document hierarchy. If it is inserted somewhere using an {insert} with a {idref}, {nameref}, or {keyref}, then the fragment is to be inserted at that location. 
+
+                If a fragment is reuse in this way, and if there are {stringref}s in the body of the fragment, any strings defined in the fragment {insert} override those defined in the fragment and any other string definitions of the same name. 
+
+                Fragments can be nested inside other fragments. Fragments can contain {inserts} of other fragments. Circular fragment references are illegal but must be caught at the application layer. 
+
+            serialization:
+
+                A fragment is serialized to XML as follows:
+
+                ```(xml)
+                    <fragment conditions="gruz-natz" name="foo3">
+                    <string name="a">apple</string>
+                    <string name="b">banana</string>
+                    <p>This is a sentence inside a fragment.</p>
+                    </fragment>
+
+                A fragment insert is serialized like this:
+
+                ```(xml)
+                    <insert item="foobar" type="fragment">
+                    <string name="a">apricot</string>
+                    <string name="b">breadfruit</string>
+                    </insert>
+
+            SOM:
+                A {fragment} is represented in the {SOM} by a {Fragment} object.
+
+        structure:(#codeblock) Codeblock
+
+            A codeblock is a block of computer code or data, or any other material with its own syntax that is to be presented as part of the document content. The contents of a codeblock are not interpreted by the SAM parser but are presented as entered in the source. 
+
+            syntax:
+
+                Codeblocks begin with three back ticks followed by optional {attribute}s.
 
                 ```(sam)
-                    # string
-                    >>>($this.string)
-                    >>>(string this.string)
+                    ```(python)
+                        print("Hello World.")
 
-                    # reference >(#this.ref) >(ref this.ref)
+                Code must be indented under the codeblock marker. The codeblock ends at the first line that is less indented than the codeblock marker, or at the end of the file.   
 
-        structure: Codeblocks
+                Codeblocks take the standard {attribute} types.
 
-            Codeblocks begin with three back ticks followed by an optional {annotation} and or {citation}.
+                Because is is delineated by indentation, the contents of a codeblock do not require any character escaping, and no SAM character escapes are recognized in a codeblock. The text is taken literally without modification of any kind. 
 
-            ```(sam)
-                ```(sam)
-                    This is a codeblock example.
+                Thus, for instance, you can show blocks of SAM in a SAM codeblock (as this document does) without any need for escaping any part of the markup. 
 
-                    This is more text in the codeblock.
 
-            The text of the codeblock is not processed as SAM markup. It is recorded as is with
-            no interpretation or escape processing.
+            semantics:
 
-            Code must be indented under the codeblock marker. The codeblock ends at the first line that is less indented than the codeblock, or at the end of the file.
+                The text of the codeblock is not processed as SAM markup. It is recorded as is with no interpretation or escape processing. Line breaks are preserved as in the original.
 
-            section: codeblock annotations
-                Codeblock annotations are different from block annotations. They take the form:
+                Because indentation may be significant in a codeblock, and because the code will be indented under the codeblock header in the SAM source, the SAM parser uses the following algorithm to distinguish SAM indenting from indenting in the code itself: The parser looks at all the lines that are indented under the codeblock header, finds the one with the smallest indent, and treats it as occurring at the first column in the code. This allows for cases where the first line of a code sample may not be the least indented line. (That is, the first line of the code sample may be more indented than some of the lines that follow.) It also means that all codeblocks will be formatted with zero initial indent. 
 
-                ```
-                    ```(language)
-
-                You can add the attributes {id}, {name}, and {condition} to a codeblock:
+                The semantics of the language attribute are slightly different for codeblocks, or at least, the implication of the semantics is. For other blocks, the language attribute denotes the human language of the text. For a codeblock, it denotes the computer or data language of the codeblock. In the unlikely event that you need to apply both languages, you should use a wrapper around the codeblock to capture the human language. For example, you might do this:
 
                 ```(sam)
-                    ```(python)(?lang=python)
+                    code-sample:(fr)
+                        ```(sam)
+                            La Plume de ma Tante.
 
-        structure: Embedded markup
-            You can embed markup in other markup languages. Unlike a codeblock, the intended semantics of
-            an embed are that the markup will be processed in the application layer. For example, a piece
-            of latex math markup might be processed in the application layer to display an equation.
+            serialization:
 
-            Note that SAM knows nothing about the embedded markup and does not processes it in any way.
-            It merely captures it and sends it on to the application layer.
+                A codeblock is serialized like this:
 
-            An embed works just like a codeblock, except with three equals instead of three backticks.
+                ```(xml)
+                    <codeblock conditions="a,b" id="id12" language="python" name="name">
+                    def escape_for_xml(s):
+                        t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
+                        try:
+                            return s.translate(t)
+                        except AttributeError:
+                            return s
+                    </codeblock>
 
-            ```(sam)
-                ===(latexmathml)(*id13)(#name)(?a)(?b)
+                Note that nothing is done to indicate that the contents of the codeblock are to be treated as preformatted. That is up to the {application layer}.
+
+            SOM:
+                A codeblock in represented in the SOM with a {Codeblock}(object) object. The contents of the codeblock are represented as an {Pre}(object) object. 
+
+        structure:(#embed) Embedded markup
+            You can embed markup in other markup languages. Unlike a codeblock, the intended semantics of an embed are that the markup will be processed in the application layer. For example, a piece of latex math markup might be processed in the application layer to display an equation.
+
+
+            syntax:
+
+                An embed works just like a {codeblock}, except with three equals instead of three backticks.
+
+                ```(sam)
+                    ===(latexmathml)(*id13)(#name)(?a)(?b)
+                        n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
+
+            semantics:
+                Embedded markup is intended to be processed by the application layer and the results of that processing to be displayed. 
+
+                Note that SAM knows nothing about the embedded markup and does not processes it in any way. It merely captures it and sends it on to the application layer.
+
+            serialization:
+                An {embed} is serialized as follows:
+
+                ```(xml)
+                    <embed conditions="a,b" id="id13" language="latexmathml" name="name">
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
+                    </embed>
 
-        structure: Blockquotes 
+            SOM:
+                An embed is represented in the SOM as an {Embed}(object) object. The contents are represented as a {Pre} object.
 
-            Three quotation marks in a row are a shortcut for the {implicit structure} "blockquote".
+        structure:(#embed) Blockquote 
 
-            ```(sam) 
-                """[citation]
-                    Quoted
+            A block quote is a quotation presented as a separate block rather than inline in a paragraph.
 
+            syntax:
+                A blockquote is created by and appropriate indent followed by three `"` or `'` characters followed by optional {attributes} and/or a {citation}.
 
-            You can achieve the same effect by using the literal name blockquote (which is then just like any other block element):
+                """[Mother Goose](foo)
+                    The quick brown fox jumps over the lazy dog.
 
-            ```(sam) 
-                blockquote:
-                    citation:
-                    Quoted
+                The contents of a blockquote is regular SAM markup, and thus can contain {phrases} and {annotations}.
 
 
-            section: Alternate blockquotes
+            semantics:
+                A blockquote is just like any other block with the exception that it is allowed to have a citation. The material inside a blockquote is treated as regular SAM markup and is processed as such.
+
+            serialization:
+                A blockquote is serialized as follows:
+
+                ```(xml)
+                    <blockquote conditions="foo">
+                    <citation type="citation" value="Mother Goose"/><p>The quick brown fox jumps over the lazy dog.</p>
+                    </blockquote>
+
+            SOM:
+                A blockquote is represented in the {SOM} by a {Blockquote}(object) object. The content of a blockquote are regular SAM objects which are children of the {Blockquote} object as normal for the children of any object. 
+
+        structure:(#line) Line 
+        
+            A line is piece of text with fixed line endings, such as a poem. Lines are generally used in groups for a piece of text with fixed line endings. 
+
+            syntax:
+                To create a set of lines, precede each one with a pipe character followed by a space. 
 
                 ```(sam) 
-                    '''[citation]
-                        Quoted
-
-                
-                The difference between code {```}(code) and quote `"""` is that code signals a different encoding. The content of the code block is not processed as SAM markup.
-
-                In a blockquote, however, the material inside the quote block is still SAM markup and is processed as such.
-
-        structure: Lines 
-        
-            Lines are pieces of text with fixed line endings, such as poems. To create a set of lines, precede each one with a pipe character followed by a space. 
-
-            ```(sam) 
-                | You gotta walk that lonesome valley,
-                | You gotta walk it by yourself,
-                | Nobody here can walk it for you,
-                | You gotta walk it by yourself.
+                    | You gotta walk that lonesome valley,
+                    | You gotta walk it by yourself,
+                    | Nobody here can walk it for you,
+                    | You gotta walk it by yourself.
 
 
-            You can also add ids or conditions to lines. In this case, the opening parentheses of the annotation must follow the leading pipe character immediately, and the closing parenthesis must be followed by a space: 
+                You can also add {id}s or {condition}s to lines. In this case, the opening parentheses of the annotation must follow the leading pipe character immediately, and the closing parenthesis must be followed by a space: 
 
-            ```(sam) 
-                |(#foo) You gotta walk that lonesome valley,
-                | You gotta walk it by yourself,
-                |(?bar) Nobody here can walk it for you,
-                | You gotta walk it by yourself.
+                ```(sam)
+                    |(#foo2) You gotta walk that lonesome valley,[*bing page 22]
+                    | You gotta walk it by yourself,
+                    |(?bar) Nobody here can walk it for you,
+                    |    You gotta walk it by yourself.
 
-            The entire line must be on one line in the source.
+                The entire line must be on one line in the source.
 
-            All spaces after the first space following the pipe are considered significant and are retained on output.
+                All spaces after the first space following the pipe are considered significant and are retained on output.
 
-        structure: Lists 
+                A line cannot have children. 
+
+                The text of a line is a normal SAM flow and is processed as such. 
+
+            semantics:
+                A line is a line of text with a fixed line break. Unlike a {codeblock}, the contents of a line are a regular SAM {flow}. 
+
+            serialization:
+                A line is serialized as follows.
+
+                ```(xml)
+                    <line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+                    <line>You gotta walk it by yourself,</line>
+                    <line conditions="bar">Nobody here can walk it for you,</line>
+                    <line>   You gotta walk it by yourself.</line>
+
+            SOM:
+                A line is represented in the {SOM} as a {Line}(object) object.
+
+        structure:(#list) List 
 
             You can create any kind of list you like by using nested blocks. 
 
@@ -905,35 +1128,67 @@ specification: Semantic Authoring Markdown (SAM)
             * The next para at the same indent that starts with a list marker. 
             * The end of the list.
 
-        structure: Grids
+        structure:(#grid) Grid
 
-            Grids are an very simple table-like construct. They are not full tables which are complex {document domain} beasts with potentially elaborate syntax. There are many ways to do {tables} or semantically represent data that may be displayed in tables in SAM. Grids are meant for the simplest cases that have no document domain or subject domain semantics. They are just a tick tack toe board.
+            Grids are an very simple table-like construct. They are not full tables which are complex {document domain} beasts with potentially elaborate syntax. There are many ways to do {tables} or semantically represent data that may be displayed in tables in SAM. Grids are meant for the simplest cases that have no {document domain} or {subject domain} semantics. They are just a tick tack toe board.
 
-            A grid is created by starting a line with three `+` signs. These may be followed by {block annotations}.
+            syntax:
 
-            Each row of the grid is on a separate line. Cells are separated by pipes. There is no pipe before the first cell or after the last. All rows must have the same number of cells.
+                A grid is created by starting a line with three `+` signs. These may be followed by {block annotations}.
 
-            There is no concept of a header, no row or column spanning. A grid consists of rows and cells. Each cell contains a single {flow}. Each row must be on one line of the source files. Cell contents are trimmed of leading and trailing whitespace. This allows you to align the pipes if you wish (though this is not required).
+                Each row of the grid is on a separate line. Cells are separated by pipes. There is no pipe before the first cell or after the last. All rows must have the same number of cells.
 
-            ```(SAM)
-                +++
-                    *Type*  | *Term*    | *Notes*
+                There is no concept of a header, no row or column spanning. A grid consists of rows and cells. Each cell contains a single {flow}. Each row must be on one line of the source files. Cell contents are trimmed of leading and trailing whitespace. This allows you to align the pipes if you wish (though this is not required).
 
-                    feature | fragment  | bing
+                ```(SAM)
+                    +++
+                        *Type*  | *Term*    | *Notes*
 
-                    feature | fragments | bang
+                        feature | fragment  | bing
+
+                        feature | fragments | bang
 
 
-            Management attributes are permitted on the grid, but not the rows.
+                Management attributes are permitted on the grid, but not the rows.
 
-            ```(SAM)
-                +++(*foo #bar ?baz)
-                    *Type*  | *Term*    | *Notes*
+                ```(SAM)
+                    +++(*foo #bar ?baz)
+                        *Type*  | *Term*    | *Notes*
 
-                    feature | fragment  | bing
+                        feature | fragment  | bing
 
-                    feature | fragments | bang
+                        feature | fragments | bang
 
+            semantics:
+                A grid is nothing more than a two dimensional grid of cells. If you want any more complex representation of a table, you need to find a different way to mark it up. 
+
+                Note that SAM is primarily intended for creating {subject domain} languages and as such it does not provide native support for complex tables, which are document domain objects. {Record sets} are the SAM-like way to represent real record data. To create document domain tables in SAM, you would need to create a table markup using {blocks} and {fields}. Another alternative would be to use {embedded XML}.
+
+            serialization:
+                Grids are serialized as follows: 
+
+                ```(xml)
+                    <grid>
+                    <row>
+                    <cell><phrase><annotation type="bold">Type</annotation></phrase></cell>
+                    <cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
+                    <cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragment</cell>
+                    <cell>bing</cell>
+                    </row>
+                    <row>
+                    <cell>feature</cell>
+                    <cell>fragments</cell>
+                    <cell>bang</cell>
+                    </row>
+                    </grid>
+
+
+            SOM:
+                Grids are represented in the SOM by a {Grid} object and rows by {Row} objects.
 
         structure:(#comment) Comment
 
@@ -950,12 +1205,18 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam)
                     # This is a comment.
 
-            XML:
+            semantics:
+                A comment is intended as a comment on the source file. To comment on the document as a document, use {remark}s.
+
+            serialiation:
 
                 A comment is represented in XML as an XML comment.
 
                 ```(xml)
                     <!-- This is a comment -->
+
+            SOM: 
+                A comment is represented in the SOM with a {Comment}(object) object.
 
         structure:(#remark) Remark
 
@@ -978,15 +1239,11 @@ specification: Semantic Authoring Markdown (SAM)
                     <remark author="Mark Baker">This is a remark.</remark>
 
 
+        section:(#decoration) Decorations
 
+            A decoration is a shortcut for creating an annotated phrase. They are used for common text formatting features: bold, italic, and code. Decorations 
 
-        section: Whitespace handling
-
-            All flows are trimmed of leading and trailing whitespace. In composing a flow from multiple text lines, all spaces and returns are collapsed to a single space.
-
-        section: Decorations
-
-            A decoration is a shortcut for creating an annotated phrase. For example,
+            For example,
 
             ```(sam)
                 This text is in *important* type.
@@ -1029,65 +1286,20 @@ specification: Semantic Authoring Markdown (SAM)
         
             The embedded XML must begin with an XML declaration on a line by itself (typically `<?xml version="1.0" encoding="UTF-8"?>`). The XML fragment that follows must be well formed and must end on a line by itself. The SAM parser parses the embedded XML block to determine if it is well formed and to find its end. It then outputs the original XML from the SAM document, not the parser output. Therefore there will be no resolution of entities on the embedded XML. 
 
-            ```
-                test
+
                 
-        feature:(#name-token) Name tokens
-        
-            A name token is a string that represents the name of a {structure} in a SAM document. It follows the same rules as a XML local name. (This means it cannot contain a colon or a namespace prefix. Namespace prefixes are not used in SAM. {Namespaces are assigned to elements in the schema.}(future)  
             
-        section: Conditions 
-
-            Conditions are indicated using the {condition attribute}.
-
-            SAM itself does not execute conditions, it merely encodes them for later processing. Therefore it has no idea what the tokens mean or how they will be interpreted. However, using simple tokens is recommended as a best practice. 
 
 
-        section: Names and IDs 
-        
-            Blocks can be assigned names and IDs. Both are used to reference the block from elsewhere in the content. The difference is that ids are local to the current document and must be unique within the current document. If a duplicate ID is found, the parser will raise an error. 
-
-            Names are merely assigned to the block by the parser. No namespace or uniqueness constraints are enforced. It is up to the application to decide how names are used. However, it is considered a SPFE idiom that names are scoped to the type of objects they apply to. In other words, fragment names are in a different namespace from string names.
-
-            This implies that string references are distinct from fragment references.
 
 
-        section:(#annotation-lookup) Annotation lookup
-
-            If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use square brackets around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase.
-
-            ```(sam) 
-                {foo}(bar "baz") gruznatz {foo}
 
 
-        appendix: Annotation and attribute rules
 
-            This is the list of the annotations and attributes allowed on each structure:
 
-            +++
-                block             | !language | #name | ?condition| *id |             |
-                field             | !language | #name | ?condition| *id |             |
-                fragment          | !language | #name | ?condition| *id |             |
-                grid              | !language | #name | ?condition| *id |             |
-                recordset         | !language | #name | ?condition| *id |             |
-                ordered-list-ite  | !language | #name | ?condition| *id |             |
-                unorderd-list-item| !language | #name | ?condition| *id |             |
-                line              | !language | #name | ?condition| *id |             |
 
-                blockquote        | !language | #name | ?condition| *id | \[citation] |
-                phrase            | !language | #name | ?condition| *id | \[citation] | (annotation)
 
-                codeblock         | encoding  | #name | ?condition| *id |             |
-                embed             | encoding  | #name | ?condition| *id |             |
 
-                string-def        |           |       |           |     |             |
 
-                paragraph         |           |       |           |     |             |
-                record            |           |       |           |     |             |
-                XML               |           |       |           |     |             |
-
-                block insert      |           | #name | ?condition| *id | type        | item
-                inline insert     |           | #name | ?condition| *id | type        | item
-                include           | href      |       |           |     |             |
 
 
