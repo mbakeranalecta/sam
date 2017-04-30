@@ -1879,6 +1879,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 |(#foo2) You gotta walk that lonesome valley,[*bing page 22]
                 | You gotta walk it by yourself,
+                        This should break it.
                 |(?bar) Nobody here can walk it for you,
                 |    You gotta walk it by yourself.
 

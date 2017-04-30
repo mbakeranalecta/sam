@@ -1027,7 +1027,7 @@ specification: Semantic Authoring Markdown (SAM)
             syntax:
                 A blockquote is created by and appropriate indent followed by three `"` or `'` characters followed by optional {attributes} and/or a {citation}.
 
-                """[Mother Goose](foo)
+                """[Mother Goose]
                     The quick brown fox jumps over the lazy dog.
 
                 The contents of a blockquote is regular SAM markup, and thus can contain {phrases} and {annotations}.
@@ -1357,7 +1357,7 @@ specification: Semantic Authoring Markdown (SAM)
 
                 The bold and italic decoration are serialized as bold and italic elements respectively.
 
-                 ```(xml)
+                ```(xml)
                     <p>This text is in <bold>bold</bold> type.</p>
 
                     <p>This text is <italic>italic</italic> type.</p>
