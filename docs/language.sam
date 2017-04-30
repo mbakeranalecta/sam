@@ -1393,7 +1393,24 @@ specification: Semantic Authoring Markdown (SAM)
             SOM:
                 Inline code is represented in the SOM as an {Phrase} object with an {annotation} of "code". 
         
+        structure:(#inline-embed) Inline embed
 
+            *Not implemented yet* An inline embed is a piece of embedded code that is intended to be interpreted by the application layer. For example, an inline embed could be used to embed an equation in latexmath.
+
+            syntax:
+                An inline embed looks exactly like {inline code} except that the language attribute is preceded by a `=`:
+
+                ```(sam)
+                    This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
+
+            semantics:
+                The application layer should interpret the inline embed according to its language type and display the result. 
+
+            serialization:
+                *TBD*
+
+            SOM:
+                *TBD*
 
                 
             
