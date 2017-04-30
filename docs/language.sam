@@ -1002,7 +1002,25 @@ specification: Semantic Authoring Markdown (SAM)
             SOM:
                 An embed is represented in the SOM as an {Embed}(object) object. The contents are represented as a {Pre} object.
 
-        structure:(#embed) Blockquote 
+        structure:(#xml) Embedded XML
+            In cases where SAM markup will not suffice to express a structure, you can embed a well formed chunk of XML into the document. 
+
+            syntax:
+        
+                The embedded XML must begin with an XML declaration on a line by itself (typically `<?xml version="1.0" encoding="UTF-8"?>`). The XML fragment that follows must be well formed and must end on a line by itself. The SAM parser parses the embedded XML block to determine if it is well formed and to find its end. It then outputs the original XML from the SAM document, not the parser output. Therefore there will be no resolution of entities on the embedded XML. 
+
+            semantics:
+                Embedded XML is passed through directly to the XML serialization unchanged. 
+
+                Note the differences between including XML in a codeblock, and embed, and an embedded XML: XML in a codeblock is displayed as text in the output. XML in an embed is processed by the application layer according to its declared language to produce some other form of output. (For instance, SVG could be embedded and rendered as a graphic). Embedded XML forms part of the structure of the current document and is interpreted according to its structure in the application layer. The application layer has no way of knowing telling embedded XML from the XML generated from SAM markup. 
+
+            serialization:
+                Embedded XML is passed through to the serialization at the point it was inserted. 
+
+            SOM:
+                Embedded XML is represented in the SOM as an {EmbeddedXML}(object) object.
+
+        structure:(#blockquote) Blockquote 
 
             A block quote is a quotation presented as a separate block rather than inline in a paragraph.
 
@@ -1375,9 +1393,6 @@ specification: Semantic Authoring Markdown (SAM)
             SOM:
                 Inline code is represented in the SOM as an {Phrase} object with an {annotation} of "code". 
         
-        section: Embedded XML
-        
-            The embedded XML must begin with an XML declaration on a line by itself (typically `<?xml version="1.0" encoding="UTF-8"?>`). The XML fragment that follows must be well formed and must end on a line by itself. The SAM parser parses the embedded XML block to determine if it is well formed and to find its end. It then outputs the original XML from the SAM document, not the parser output. Therefore there will be no resolution of entities on the embedded XML. 
 
 
                 
