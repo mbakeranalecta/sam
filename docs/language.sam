@@ -1220,23 +1220,46 @@ specification: Semantic Authoring Markdown (SAM)
 
         structure:(#remark) Remark
 
-            A remark is an editorial comment on the document text. It may be displayed in a draft form or the document or while reviewing and revising the document. Remarks are similar to the comment features found in PDF files or WordProcessors.
-
-            A remark is distinguished from a comment by the requirement that the author of the remark be identified in the remark.
+            A remark is an editorial comment on the document text. 
 
             syntax:
-                A remark looks like a {comment} with an annotation identifying the author:
+                A remark looks like a blockquote except that is is introduced with three `!` characters and takes a attribution attribute:
 
                 ```(sam)
-                    #(Mark Baker) This is a remark.
+                    !!!(Mark Baker) 
+                        This is a remark.
 
-                There must be no space between the `#` and the `(`.
+                The body of a remark is normal SAM so it can contain other SAM structures.
+
+                Remarks can take a {id} or {language} attribute, but not a {name} or {condition} attribute. 
+
+                Remarks are a block structure. There is not provision for including a remark in the middle of a paragraph. Generally, speaking, placing a remark after the paragraph it remarks on should be sufficient, however, if you want to anchor a remark to a specific spot in a paragraph, you can do so by giving the remark an {ID} {attribute} and referring to it using a {citation}:
+
+                ```(sam)
+
+                    This requires a remark[*cdg1], but the paragraph continues.
+
+                    !!!(Charles André Joseph Marie de Gaulle)(*cdg1)(!fr)
+                        La Plume de ma tante.
+
+            semantics:
+                Remarks are intended for communication between authors, editors, and reviewers during the preparation of the document. They may be presented in editors or in draft versions of output. They do not form part of the finished document.
 
             serialization:
                 The XML representation of a {remark} is as follows:
 
                 ```(xml)
-                    <remark author="Mark Baker">This is a remark.</remark>
+                    <remark attribution="mbaker">
+                    <p>This is a remark.</p>
+                    </remark>
+
+                Remarks anchored with a citation are serialized like this:
+
+                ```(xml)
+                    <p>This requires a remark<citation type="id" value="*cdg1"/>, but the paragraph continues.
+                    <remark attribution="Charles André Joseph Marie de Gaulle" id="cdg1" xml:lang="fr">
+                    <p>La Plume de ma tante.</p>
+                    </remark>
 
         structure:(#decoration) Bold and italic decorations
 
@@ -1326,6 +1349,31 @@ specification: Semantic Authoring Markdown (SAM)
                
         structure:(#inline-code) Inline code
 
+            Inline code is used to include code or data samples in the body of a paragraph. 
+
+            syntax:
+                Inline code is indicated by surrounding it in backticks:
+
+                ```(sam)
+                    In Python 3, use `print("Hello World")`. 
+
+                The body of an inline code structure is not parsed for character escapes or other markup, so you can do this:
+
+                ```(sam)
+                    In SAM, and phrase looks like this: `{phrase}`.
+
+                The only character that can be escaped in inline code is the back tick, which is escaped using a double back tick: ````.
+
+                *Not implemented* Inline code can take a language attribute:
+
+                ```(sam)
+                    In Python 3, use `print("Hello World")`(python). 
+
+            semantics:
+                The content of an inline code structure is to presented as code, without interpretation. It may be formatted in accordance with its language. 
+
+            SOM:
+                Inline code is represented in the SOM as an {Phrase} object with an {annotation} of "code". 
         
         section: Embedded XML
         
