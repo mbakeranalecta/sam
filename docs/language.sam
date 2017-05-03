@@ -1092,59 +1092,173 @@ specification: Semantic Authoring Markdown (SAM)
             SOM:
                 A line is represented in the {SOM} as a {Line}(object) object.
 
-        structure:(#list) List 
+        structure:(#unordered-list) Unordered List 
 
-            You can create any kind of list you like by using nested blocks. 
+            An unordered list a piece of shorthand for a fully explicit unordered list structure. 
 
-            ```(SAM) 
-                ul: 
-                    li: Dog 
-                    li: Hen 
-                    li: Spoon 
+            syntax: 
+
+                An unordered list item is created by starting a paragraph with a `*` followed by a space. Note that the space is require. Without it, the `*` will be recognized as the beginning of a bold {decoration}, or as plain text. 
+
+                ```(sam)
+                    * Dog
+                    * Cat
+                    * Monkey
+
+                The text following the `*` is treated as a {paragraph}. This means that the ordered list above is equivalent to this:
+
+                ```(sam)
+                    ul:
+                        li:
+                            Dog
+                        li: 
+                            Cat
+                        li:
+                            Monkey
+
+                and not this:
+
+                ```(SAM) 
+                    ul: 
+                        li: Dog 
+                        li: Cat 
+                        li: Monkey
+
+                The only way to get the latter structure is to enter it as shown above. 
+
+                You can have more than one paragraph in a list item. To add a second paragraph, insert a space followed by a paragraph that is indented to the same level as the first letter following the `*` of the list item:
+
+                ```(sam)
+                    * How much is that doggy in the window.
+
+                      I hope that that fleabag's for sale. 
+
+                    * Hey diddle diddle, the cat and the fiddle
+
+                      The cow jumped over the moon. 
+
+                List can be nested. A nested list means that one list is the child of a list item in the parent list. To create this, indent the second list under an item of the first.
+
+                ```(sam)
+                    * Dogs
+                        * Spot
+                        * Fang
+                    * Cats
+                        * Mittens
+                        * Skimbleshanks
+
+                Note that when an unordered list follows a paragraph, it must be a the same indent level as the preceding paragraph, not indented under it. 
+
+            semantics:
+                Unordered lists using this explicit concrete syntax are more limited than the lists you could create with explicit {blocks} and fields. The only children a list item can have with this syntax are {paragraphs} and nested {unordered list}s or {ordered list}s.  
+
+                Note that when an {unordered list} follows a {paragraph}, it is a sibling of that {paragraph}. A list cannot be the child of a {paragraph} since a paragraphs cannot have children. 
+
+            serialization:
+                An ordered list is serialized as follows. Note that the content of a list item is always wrapped in a `<p>` tag. 
+
+                ```(sam)
+                    <ul>
+                        <li>
+                            <p>Dogs</p>
+                            <ul>
+                                <li>
+                                    <p>Spot</p>
+                                </li>
+                                <li>
+                                    <p>Fang</p>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p>Cats</p>
+                            <ul>
+                                <li>
+                                    <p>Mittens</p>
+                                </li>
+                                <li>
+                                    <p>Skimbleshanks</p>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+            SOM:
+                An {unordered list} is represented by an {UnorderedList}(object) object. Each list item is represented by a {UnorderedListItem}(object) object. 
+
+        structure:(#ordered-list) Ordered list
+
+            An {ordered list} a piece of shorthand for a fully explicit ordered list structure. 
+
+            syntax:
+                The syntax of an ordered list is the same as for an unordered list except that it uses one or more numerical characters followed by a period followed by a space:
+
+                ```(SAM) 
+                    0. Robot
+                    12. Spaceship
+                    7. Ray gun
+
+                The numbers are not retained, nor is their style. The processing application will decide the style and numbering of lists.
+
+                Ordered list items can have multiple {paragraph}s and nested lists just like {unordered lists}, and ordered and unordered list can be nested inside each other. 
+
+            semantics:
+                The semantics of ordered lists are the same as those of {unordered list}, except, of course that the list is ordered.
+
+            SOM:
+                An unordered list is represented by an {OrderedList}(object) object. Each list item is represented by a {OrderedListItem}(object) object. 
+
+        structure:(#labeled-list) Labeled list
+
+            A {labeled list} is a list in which each item has a label rather than a bullet of a number. They are a close analogue of HTML definition lists. The main difference is that definition lists have false semantics. They are not always used for definitions. So SAM labeled lists are named more accurately.
+
+            syntax:
+
+                Labeled lists begin with a label between pipe characters. There must be no space
+                between the opening pipe character and the start of the label text. (Otherwise
+                it will be parsed as a {line}, not a labeled list.
+
+                ```(SAM) 
+                    |fa| A long long way to run.
+                    |so| A needle pulling thread.
+                    |la| A note to follow so.
+
+                As with other lists, the content of a list item is a {paragraph} and you can add other structures after the initial paragraph by adding them at the same indent as the first paragraph. (The start of the paragraph, not the label.)
+
+                ```(sam)
+                    |Do| a deer,
+                    a female deer
+                    |Re| a drop of
+                         golden sun
+
+                         Is it a particle or a wave?
 
 
-
-            Shortcuts for ordered and unordered lists are supported. 
-
-            Unordered lists begin with a line starting with an asterisk. 
-
-            ```(SAM)
-                * Dog
-                * Hen
-                * Spoon
+                    |Me| a name I call myself
 
 
-            Ordered lists begin with a number followed by a period. 
+            semantics:
+                A {labeled list} is simply as list with a label instead of a bullet. There is no restriction built into the language as to what structures you can nest under a definition list item, but prudence would suggest that it would be appropriate to restrict things in the schema. 
 
-            ```(SAM) 
-                0. Robot
-                12. Spaceship
-                7. Ray gun
+            serialization:
 
+                A {labeled list} is serialized as follows:
 
-            The numbers are not retained, nor is their style. The processing application
-            will decide the style and numbering of lists.
+                ```(xml)
+                    <ll>
+                    <li>
+                    <label>Do</label>
+                    <p>a deer, a female deer</p>
+                    </li>
+                    <li>
+                    <label>Re</label>
+                    <p>a drop of golden sun</p>
+                    <p>Is it a particle or a wave?</p>
+                    </li>
+                    </ll>
 
-            Labeled lists begin with a label between pipe characters. There must be no space
-            between the opening pipe character and the start of the label text. (Otherwise
-            it will be parsed as a line, not a labeled list.
-
-            ```(SAM) 
-                |fa| A long long way to run.
-                |so| A needle pulling thread.
-                |la| A note to follow so.
-
-
-            Lists continue until: 
-
-            * The next non-blank line at the same indent that does not start with a list marker. 
-            * The next non-blank line that is less indented. 
-            * The end of the file. 
-
-            List items continue until: 
-
-            * The next para at the same indent that starts with a list marker. 
-            * The end of the list.
+            SOM:
+                A {labeled list} is represented in the SOM by a {LabeledList}(object) object. Each item is represented by a {LabeledListItem}(object) object.
 
         structure:(#grid) Grid
 
@@ -1363,7 +1477,7 @@ specification: Semantic Authoring Markdown (SAM)
                     <p>This text is <italic>italic</italic> type.</p>
 
             SOM:
-                The bold and italic decorations are represented in the SOM as bold and italic annotations. No distinction is made between what were decorations in the source and what were annotations of the same name. 
+                The bold and italic decorations are represented in the SOM as bold and italic annotations using {Annotation} objects. No distinction is made between what were decorations in the source and what were annotations of the same name. 
                
         structure:(#inline-code) Inline code
 
@@ -1382,7 +1496,7 @@ specification: Semantic Authoring Markdown (SAM)
 
                 The only character that can be escaped in inline code is the back tick, which is escaped using a double back tick: ````.
 
-                *Not implemented* Inline code can take a language attribute:
+                *Not implemented yet* Inline code can take a language attribute:
 
                 ```(sam)
                     In Python 3, use `print("Hello World")`(python). 
