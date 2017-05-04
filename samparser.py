@@ -792,6 +792,12 @@ class Line(Block):
     def __init__(self, indent, attributes, content, namespace=None):
         super().__init__(name='line', indent=indent, attributes=attributes, content=content, namespace=namespace)
 
+    def add(self, b):
+        if b.indent > self.indent:
+            raise SAMParserError('A Line cannot have children. At \"{0}\".'.format(
+                str(self)))
+        else:
+            self.parent.add(b)
 
 class Fragment(Block):
     def __init__(self, indent, attributes=None, namespace=None):
