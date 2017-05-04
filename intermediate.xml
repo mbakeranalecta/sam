@@ -2272,10 +2272,7 @@ ordered-list-item =
 </source>
 <markup>
 <line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
-<line>
-<title>You gotta walk it by yourself,</title>
-<p>This should break it.</p>
-</line>
+<line>You gotta walk it by yourself,</line>
 <line conditions="bar">Nobody here can walk it for you,</line>
 <line>   You gotta walk it by yourself.</line>
 </markup>
@@ -3289,11 +3286,7 @@ There is a backslash and a curly brace in `this \{ code` decoration.
 </codeblock>
 </source>
 <markup>
-<ul>
-<li>
-<p>There* is a backtick and two backslashes in <phrase><annotation type="code">th\\is ` code</annotation></phrase> decoration.</p>
-</li>
-</ul>
+<p>There is a backtick and two backslashes in <phrase><annotation type="code">th\\is ` code</annotation></phrase> decoration.</p>
 <p>There is a backslash and a curly brace in <phrase><annotation type="code">this \{ code</annotation></phrase> decoration.</p>
 <p><phrase><annotation type="code">pubwork="book"</annotation></phrase> is an attribute on the element <phrase><annotation type="code">citetitle</annotation></phrase>.</p>
 </markup>
