@@ -21,6 +21,7 @@ except ImportError:
 re_indent = r'(?P<indent>\s*)'
 re_attributes = r'(?P<attributes>(\((.*?(?<!\\))\))*)'
 re_content = r'(?P<content>.*)'
+re_remainder = r'(?P<remainder>.*)'
 re_name = r'(?P<name>\w[^\s`]*?)'
 re_ul_marker = r'(?P<marker>\*)'
 re_ol_marker = r'(?P<marker>[0-9]+\.)'
@@ -28,7 +29,7 @@ re_ll_marker = r'\|(?P<label>\S.*?)(?<!\\)\|'
 re_spaces = r'\s+'
 re_one_space = r'\s'
 re_comment = r'#(?P<comment>.*)'
-
+re_citation = r'(\[\s*\*(?P<id>\S+)(?P<id_extra>.*?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.*?)\])|(\[\s*(?P<citation>.*?)\])'
 
 class SamParser:
     def __init__(self):
@@ -79,7 +80,7 @@ class SamParser:
                 re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(
-                re_indent + r'("""|\'\'\')' + re_attributes + r'((\[\s*\*(?P<id>\S+)(?P<id_extra>.*?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.*?)\])|(\[\s*(?P<citation>.*?)\]))?',
+                re_indent + r'("""|\'\'\')(' + re_remainder + r')?',
                 re.U),
             'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
             'paragraph-start': re.compile(r'\w*', re.U),
@@ -115,7 +116,7 @@ class SamParser:
         source, match = context
         indent = match.end("indent")
         block_name = match.group("name").strip()
-        attributes = parse_attributes(match.group("attributes"))
+        attributes, citations = parse_attributes(match.group("attributes"))
         content = match.group("content").strip()
         parsed_content = None if content == '' else flow_parser.parse(content, self.doc)
         b = Block(block_name, indent, attributes, parsed_content)
@@ -128,7 +129,7 @@ class SamParser:
             raise SAMParserError("Unexpected characters in codeblock header. Found: " + match.group("unexpected"))
         indent = match.end("indent")
 
-        attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
+        attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
         b = Codeblock(indent, attributes)
         self.doc.add_block(b)
@@ -163,7 +164,7 @@ class SamParser:
             raise SAMParserError("Unexpected characters in remark header. Found: " + match.group("unexpected"))
         indent = match.end("indent")
 
-        attributes = parse_attributes(match.group("attributes"), flagged="*!", unflagged="attribution")
+        attributes, citations = parse_attributes(match.group("attributes"), flagged="*!", unflagged="attribution")
 
         b = Remark(indent, attributes)
         self.doc.add_block(b)
@@ -175,7 +176,7 @@ class SamParser:
             raise SAMParserError("Unexpected characters in embed header. Found: " + match.group("unexpected"))
         indent = match.end("indent")
 
-        attributes = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
+        attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
         b = Embed(indent, attributes)
         self.doc.add_block(b)
@@ -215,43 +216,12 @@ class SamParser:
         if extra:
             raise SAMParserError("Extra text found after blockquote start: " + extra)
 
-        attributes = parse_attributes(match.group("attributes"))
+        attributes, citations = parse_attributes(match.group("remainder"))
 
-        # see if there is a citation
-        try:
-            idref = match.group('id')
-        except IndexError:
-            idref = None
-        try:
-            nameref = match.group('name')
-        except IndexError:
-            nameref = None
-        try:
-            citation = match.group('citation')
-        except IndexError:
-            citation = None
-
-        if idref:
-            citation_type = 'idref'
-            citation_value = idref.strip()
-            extra = match.group('id_extra')
-        elif nameref:
-            citation_type = 'nameref'
-            citation_value = nameref.strip()
-            extra = match.group('name_extra')
-        elif citation:
-            citation_type = 'citation'
-            citation_value = citation.strip()
+        if citations:
+            b = Blockquote(indent, attributes, citations[0])
         else:
-            citation_type = None
-
-
-        if citation_type:
-            cit = (Citation(citation_type, citation_value, extra))
-        else:
-            cit = None
-
-        b = Blockquote(indent, attributes, cit)
+            b = Blockquote(indent, attributes, None)
         self.doc.add_block(b)
 
 
@@ -260,16 +230,9 @@ class SamParser:
     def _fragment_start(self, context):
         source, match = context
         indent = match.end("indent")
-
-        attributes = {}
-
-        attributes_string = match.group("attributes")
-        if attributes_string is not None:
-            attributes.update(parse_attributes(attributes_string))
-
+        attributes, citations =  parse_attributes(match.group("attributes"))
         b = Fragment(indent, attributes)
         self.doc.add_block(b)
-
         return "SAM", context
 
     def _paragraph_start(self, context):
@@ -323,7 +286,7 @@ class SamParser:
         source, match = context
         indent = match.end("indent")
         content_start=match.start("content")+1
-        attributes = parse_attributes(match.group("attributes"))
+        attributes, citations = parse_attributes(match.group("attributes"))
         uli = UnorderedListItem(indent, attributes)
         self.doc.add_block(uli)
         p = Paragraph(content_start)
@@ -335,7 +298,7 @@ class SamParser:
         source, match = context
         indent = match.end("indent")
         content_start=match.start("content")+1
-        attributes = parse_attributes(match.group("attributes"))
+        attributes, citations = parse_attributes(match.group("attributes"))
         oli = OrderedListItem(indent, attributes)
         self.doc.add_block(oli)
         p = Paragraph(content_start)
@@ -349,7 +312,7 @@ class SamParser:
         indent = match.end("indent")
         label = match.group("label")
         content_start = match.start("content") + 1
-        attributes = parse_attributes(match.group("attributes"))
+        attributes, citations = parse_attributes(match.group("attributes"))
         lli = LabeledListItem(indent, flow_parser.parse(label, self.doc), attributes)
         self.doc.add_block(lli)
         p = Paragraph(content_start)
@@ -362,8 +325,8 @@ class SamParser:
         if match.group("unexpected"):
             raise SAMParserError("Unexpected characters in block insert. Found: " + match.group("unexpected"))
         indent = match.end("indent")
-        attributes = parse_insert(match.group("insert"))
-        attributes.update(parse_attributes(match.group("attributes"), flagged="*#?"))
+        attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?")
+        attributes.update(parse_insert(match.group("insert")))
         b = BlockInsert(indent, attributes)
         self.doc.add_block(b)
         return "SAM", context
@@ -411,7 +374,8 @@ class SamParser:
     def _line_start(self, context):
         source, match = context
         indent = match.end("indent")
-        b=Line(indent, parse_attributes(match.group("attributes")),
+        attributes, citations = parse_attributes(match.group("attributes"))
+        b=Line(indent, attributes,
                flow_parser.parse(match.group('content'), self.doc, strip=False))
         self.doc.add_block(b)
         return "SAM", context
@@ -420,7 +384,7 @@ class SamParser:
         source, match = context
         indent = match.end("indent")
         record_name = match.group("name").strip()
-        attributes = parse_attributes(match.group('attributes'))
+        attributes, citations = parse_attributes(match.group('attributes'))
         field_names = [x.strip() for x in match.group("field_names").split(',')]
         rs = RecordSet(record_name, field_names, indent, attributes)
         self.doc.add_block(rs)
@@ -450,16 +414,9 @@ class SamParser:
     def _grid_start(self, context):
         source, match = context
         indent = match.end("indent")
-
-        attributes = {}
-
-        attributes_string = match.group("attributes")
-        if attributes_string is not None:
-            attributes.update(parse_attributes(attributes_string))
-
+        attributes, citations = parse_attributes(match.group("attributes"))
         b = Grid(indent, attributes)
         self.doc.add_block(b)
-
         return "GRID", context
 
     def _grid(self, context):
@@ -1797,8 +1754,8 @@ class FlowParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            attributes = parse_insert(match.group("insert"))
-            attributes.update( parse_attributes(match.group("attributes")))
+            attributes, citations = parse_attributes(match.group("attributes"))
+            attributes.update(parse_insert(match.group("insert")) )
 
             self.flow.append(InlineInsert(attributes))
             para.advance(len(match.group(0)) - 1)
@@ -2077,10 +2034,12 @@ class SAMParserError(Exception):
     """
 
 def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
-    result = {}
+    attributes = {}
+    citations =[]
     try:
         #attributes_list = attributes_string.split()
         attributes_list = [x[1:-1].strip() for x in re.findall(r"(\(.*?(?<!\\)\))", attributes_string)]
+        citations_list = [x[1:-1].strip() for x in re.findall(r"(\[.*?(?<!\\)\])", attributes_string)]
     except AttributeError:
         return None
     unflagged_attributes = [x for x in attributes_list if not (x[0] in '?#*!')]
@@ -2090,7 +2049,7 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         elif len(unflagged_attributes) > 1:
             raise SAMParserError("More than one " + unflagged + " attribute specified: {0}".format(', '.join(unflagged_attributes)))
         else:
-            result[unflagged] = " ".join(unflagged_attributes)
+            attributes[unflagged] = " ".join(unflagged_attributes)
     ids = [x[1:] for x in attributes_list if x[0] == '*']
     if ids and not '*' in flagged:
         raise SAMParserError("IDs not allowed in this context. Found: *{0}".format(', *'.join(ids)))
@@ -2108,14 +2067,47 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         raise SAMParserError("More than one language specified: " + ", ".join(language))
     conditions = [x[1:] for x in attributes_list if x[0] == '?']
     if ids:
-        result["id"] = "".join(ids)
+        attributes["id"] = "".join(ids)
     if names:
-        result["name"] = "".join(names)
+        attributes["name"] = "".join(names)
     if language:
-        result["xml:lang"] = "".join(language)
+        attributes["xml:lang"] = "".join(language)
     if conditions:
-        result["conditions"] = ",".join(conditions)
-    return result
+        attributes["conditions"] = ",".join(conditions)
+
+    re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*?))|(\s*\#(?P<name>\S+)(?P<name_extra>.*?))|(\s*(?P<citation>.*?))'
+
+    for c in citations_list:
+        match = re.compile(re_citbody).match(c)
+        try:
+            idref = match.group('id')
+        except IndexError:
+            idref = None
+        try:
+            nameref = match.group('name')
+        except IndexError:
+            nameref = None
+        try:
+            citation = match.group('citation')
+        except IndexError:
+            citation = None
+
+        if idref:
+            citation_type = 'idref'
+            citation_value = idref.strip()
+            extra = match.group('id_extra')
+        elif nameref:
+            citation_type = 'nameref'
+            citation_value = nameref.strip()
+            extra = match.group('name_extra')
+        elif citation:
+            citation_type = 'citation'
+            citation_value = citation.strip()
+        else:
+            citation_type = None
+        if citation_type:
+            citations.append(Citation(citation_type, citation_value, extra))
+    return attributes, citations
 
 
 def parse_insert(annotation_string):
