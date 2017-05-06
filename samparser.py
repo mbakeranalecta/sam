@@ -2087,6 +2087,8 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     if unflagged_attributes:
         if unflagged is None:
             raise SAMParserError("Unexpected attribute(s): {0}".format(', '.join(unflagged_attributes)))
+        elif len(unflagged_attributes) > 1:
+            raise SAMParserError("More than one " + unflagged + " attribute specified: {0}".format(', '.join(unflagged_attributes)))
         else:
             result[unflagged] = " ".join(unflagged_attributes)
     ids = [x[1:] for x in attributes_list if x[0] == '*']
