@@ -1713,7 +1713,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 This is another paragraph. Then there is an alternate blockquote:
 
-                '''( #foo5)(?bar)(?baz)[Mother Goose]
+                '''( #foo5)[Mother Goose](?bar)(?baz)
                     The quick brown fox jumps over the lazy dog.
 
                 '''

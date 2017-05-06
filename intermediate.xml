@@ -2301,7 +2301,7 @@ ordered-list-item =
 </source>
 <markup>
 <blockquote>
-<citation type="idref" value="bing" extra=" page 22"/><line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+<citation type="idref" value="bing"/><line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
 <line>You gotta walk it by yourself,</line>
 <line conditions="bar">Nobody here can walk it for you,</line>
 <line>   You gotta walk it by yourself.</line>

@@ -2036,12 +2036,31 @@ class SAMParserError(Exception):
 def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     attributes = {}
     citations =[]
-    try:
-        #attributes_list = attributes_string.split()
-        attributes_list = [x[1:-1].strip() for x in re.findall(r"(\(.*?(?<!\\)\))", attributes_string)]
-        citations_list = [x[1:-1].strip() for x in re.findall(r"(\[.*?(?<!\\)\])", attributes_string)]
-    except AttributeError:
-        return None
+    attributes_list=[]
+    citations_list=[]
+
+    re_att = re.compile(r"(\(.*?(?<!\\)\))")
+    re_cit = re.compile(r"(\[.*?(?<!\\)\])")
+
+    re_all = re.compile(r'(\((?P<att>.*?(?<!\\))\))|(\[((?P<cit>.*?(?<!\\))\])|(?P<bad>.))')
+
+    for x in re_all.finditer(attributes_string.rstrip()):
+        if x.group('att') is not None:
+            attributes_list.append(x.group('att').strip())
+        elif x.group("cit") is not None:
+            citations_list.append(x.group("cit").strip())
+        else:
+            raise SAMParserError("Unrecognized character '" + x.group('bad') + "' found in attributes list at: " + attributes_string)
+
+
+
+
+    # try:
+    #     #attributes_list = attributes_string.split()
+    #     attributes_list = [x[1:-1].strip() for x in re.findall(r"(\(.*?(?<!\\)\))", attributes_string)]
+    #     citations_list = [x[1:-1].strip() for x in re.findall(r"(\[.*?(?<!\\)\])", attributes_string)]
+    # except AttributeError:
+    #     return None, None
     unflagged_attributes = [x for x in attributes_list if not (x[0] in '?#*!')]
     if unflagged_attributes:
         if unflagged is None:
@@ -2075,7 +2094,7 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     if conditions:
         attributes["conditions"] = ",".join(conditions)
 
-    re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*?))|(\s*\#(?P<name>\S+)(?P<name_extra>.*?))|(\s*(?P<citation>.*?))'
+    re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*?))|(\s*\#(?P<name>\S+)(?P<name_extra>.*?))|(\s*(?P<citation>.*))'
 
     for c in citations_list:
         match = re.compile(re_citbody).match(c)
@@ -2103,6 +2122,7 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         elif citation:
             citation_type = 'citation'
             citation_value = citation.strip()
+            extra=None
         else:
             citation_type = None
         if citation_type:
