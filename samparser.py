@@ -218,6 +218,8 @@ class SamParser:
 
         attributes, citations = parse_attributes(match.group("remainder"))
 
+        if len(citations)> 1:
+            raise SAMParserError("Can't have more than one citation on a blockquote, at " + match.group(0))
         if citations:
             b = Blockquote(indent, attributes, citations[0])
         else:
