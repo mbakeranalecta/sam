@@ -2094,7 +2094,7 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     if conditions:
         attributes["conditions"] = ",".join(conditions)
 
-    re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*?))|(\s*\#(?P<name>\S+)(?P<name_extra>.*?))|(\s*(?P<citation>.*))'
+    re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*))|(\s*\#(?P<name>\S+)(?P<name_extra>.*))|(\s*(?P<citation>.*))'
 
     for c in citations_list:
         match = re.compile(re_citbody).match(c)
