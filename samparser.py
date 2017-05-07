@@ -131,7 +131,7 @@ class SamParser:
 
         attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
-        b = Codeblock(indent, attributes)
+        b = Codeblock(indent, attributes, citations)
         self.doc.add_block(b)
         self.current_text_block = UnparsedTextBlock()
         return "CODEBLOCK", context
@@ -690,8 +690,8 @@ class BlockInsert(Block):
 
 
 class Codeblock(Block):
-    def __init__(self, indent, attributes=None, namespace=None):
-        super().__init__(name='codeblock', indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent, attributes=None, citations=None, namespace=None):
+        super().__init__(name='codeblock', indent=indent, attributes=attributes, content=None, citations=citations,namespace=namespace)
 
 
 class Remark(Block):

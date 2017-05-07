@@ -1842,6 +1842,40 @@ tests:(!en) SAM Parser Tests
                             Pay close attention. You could really hurt yourself.
                     </codeblock>
 
+        case: Codeblock with citation
+
+            description:
+                A codeblock with a citation.
+
+            source:
+                ```(sam)
+                    ```(python)(?foo)[demos/foo.py]
+                        def escape_for_xml(s):
+                            t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
+                            try:
+                                return s.translate(t)
+                            except AttributeError:
+                                return s
+            markup:
+                ```(python)(?foo)[demos/foo.py]
+                    def escape_for_xml(s):
+                        t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
+                        try:
+                            return s.translate(t)
+                        except AttributeError:
+                            return s
+
+            result:
+                ```(xml)
+                    <codeblock conditions="foo" language="python">
+                    <citation type="citation" value="demos/foo.py"/>def escape_for_xml(s):
+                        t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
+                        try:
+                            return s.translate(t)
+                        except AttributeError:
+                            return s
+                    </codeblock>
+
         case: Invalid blockstart in codeblock
             description:
                 This is an construct that raise an error in an actual document. Curious because
