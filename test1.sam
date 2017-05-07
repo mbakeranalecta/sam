@@ -110,6 +110,27 @@ tests:(!en) SAM Parser Tests
                         <p>Feliz Navidad</p>
                     </section>
 
+        case: Citations
+
+            description:
+                A citation on the block.
+
+            source:
+                ```(sam)
+                    section:(!sp)[Mother McCree] Greeting
+                        Feliz Navidad
+
+            markup:
+                section:(!sp)[Mother McCree] Greeting
+                    Feliz Navidad
+
+            result:
+                ```(xml)
+                    <section xml:lang="sp">
+                        <title>Greeting</title>
+                        <citation type="citation" value="Mother McCree"/><p>Feliz Navidad</p>
+                    </section>
+
         case: Escaping block syntax
 
             description:

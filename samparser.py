@@ -19,7 +19,7 @@ except ImportError:
 
 # Block regex component expressions
 re_indent = r'(?P<indent>\s*)'
-re_attributes = r'(?P<attributes>(\((.*?(?<!\\))\))*)'
+re_attributes = r'(?P<attributes>((\((.*?(?<!\\))\))|(\[(.*?(?<!\\])\])))*)'
 re_content = r'(?P<content>.*)'
 re_remainder = r'(?P<remainder>.*)'
 re_name = r'(?P<name>\w[^\s`]*?)'
@@ -119,7 +119,7 @@ class SamParser:
         attributes, citations = parse_attributes(match.group("attributes"))
         content = match.group("content").strip()
         parsed_content = None if content == '' else flow_parser.parse(content, self.doc)
-        b = Block(block_name, indent, attributes, parsed_content)
+        b = Block(block_name, indent, attributes, parsed_content, citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -645,9 +645,6 @@ class Block(ABC):
         if self.content:
             yield "['%s'" % (self.content)
         for x in self.children:
-            yield "\n"
-            yield str(x)
-        for x in self.citation:
             yield "\n"
             yield str(x)
         yield "]"
