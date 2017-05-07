@@ -708,6 +708,18 @@ specification: Semantic Authoring Markdown (SAM)
                         <p>Call me Ishmael.</p>
                     </blockquote>
 
+                note:
+                    Unlike other blocks, the serialization of a {citation} does not include a line feed after the citation tag. This is because a citation can also occur inside a flow, where the addition of a line feed would introduce extra whitespace into the flow. The lack of a linefeed in a block context does not change the semantics of the resulting document, but can make a difference in tests that compare literal XML output to expected output. 
+
+            SOM:
+                A {citation} is represented in the SOM by a {Citation}(object) object.
+
+                When applied to a {block}, the {Citation} object is added as the first child of the block. 
+
+                When applied to a {phrase}, the {Citation} object is chained in sequence with any other citations or annotations. 
+
+                When a {citation} occurs standalone in a flow, the {Citation} object becomes an item in the {Flow} object list. 
+
             future:
                 If the proposal to allow the definition of patterns in the schema is accepted, it may be possible to define the format of a citation text and to have the parser break it down into its constituent parts. 
 

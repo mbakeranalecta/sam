@@ -221,7 +221,7 @@ class SamParser:
         if len(citations)> 1:
             raise SAMParserError("Can't have more than one citation on a blockquote, at " + match.group(0))
         if citations:
-            b = Blockquote(indent, attributes, citations[0])
+            b = Blockquote(indent, attributes, citations)
         else:
             b = Blockquote(indent, attributes, None)
         self.doc.add_block(b)
@@ -585,7 +585,7 @@ class SamParser:
 
 
 class Block(ABC):
-    def __init__(self, name, indent, attributes=None, content=None, citation=None, namespace=None ):
+    def __init__(self, name, indent, attributes=None, content=None, citations=None, namespace=None):
 
         # Test for a valid block name. Must be valid XML name.
         try:
@@ -599,10 +599,11 @@ class Block(ABC):
         self.namespace = namespace
         self.attributes = attributes
         self.content = content
-        self.citation = citation
         self.indent = indent
         self.parent = None
         self.children = []
+        if citations:
+            self.children.extend(citations)
 
     def add(self, b):
         """
@@ -678,12 +679,8 @@ class Block(ABC):
             for key, value in sorted(self.attributes.items()):
                 yield " {0}=\"{1}\"".format(key, escape_for_xml_attribute(value))
 
-        if self.children or self.citation:
+        if self.children:
             yield ">"
-
-            if self.citation:
-                yield "\n"
-                yield from self.citation.serialize_xml()
 
             if self.content:
                 yield "\n<title>"
@@ -774,8 +771,8 @@ class Fragment(Block):
 
 
 class Blockquote(Block):
-    def __init__(self, indent, attributes=None, citation=None, namespace=None):
-        super().__init__(name='blockquote', indent=indent, attributes=attributes, content=None, citation=citation, namespace=namespace)
+    def __init__(self, indent, attributes=None, citations=None, namespace=None):
+        super().__init__(name='blockquote', indent=indent, attributes=attributes, content=None, citations=citations, namespace=namespace)
 
 
 class RecordSet(Block):
