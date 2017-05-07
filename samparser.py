@@ -585,7 +585,7 @@ class SamParser:
 
 
 class Block(ABC):
-    def __init__(self, name, indent, attributes=None, content=None, namespace=None ):
+    def __init__(self, name, indent, attributes=None, content=None, citation=None, namespace=None ):
 
         # Test for a valid block name. Must be valid XML name.
         try:
@@ -599,6 +599,7 @@ class Block(ABC):
         self.namespace = namespace
         self.attributes = attributes
         self.content = content
+        self.citation = citation
         self.indent = indent
         self.parent = None
         self.children = []
@@ -661,6 +662,9 @@ class Block(ABC):
         for x in self.children:
             yield "\n"
             yield str(x)
+        for x in self.citation:
+            yield "\n"
+            yield str(x)
         yield "]"
 
     def serialize_xml(self):
@@ -673,8 +677,14 @@ class Block(ABC):
         if self.attributes:
             for key, value in sorted(self.attributes.items()):
                 yield " {0}=\"{1}\"".format(key, escape_for_xml_attribute(value))
-        if self.children:
+
+        if self.children or self.citation:
             yield ">"
+
+            if self.citation:
+                yield "\n"
+                yield from self.citation.serialize_xml()
+
             if self.content:
                 yield "\n<title>"
                 yield from self.content.serialize_xml()
@@ -765,28 +775,7 @@ class Fragment(Block):
 
 class Blockquote(Block):
     def __init__(self, indent, attributes=None, citation=None, namespace=None):
-        super().__init__(name='blockquote', indent=indent, attributes=attributes, content=None, namespace=namespace)
-        self.citation = citation
-
-    def serialize_xml(self):
-        yield '<blockquote'
-
-        if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
-
-        if self.attributes:
-            for key, value in sorted(self.attributes.items()):
-                yield " {0}=\"{1}\"".format(key, value)
-        yield ">\n"
-
-        if self.citation is not None:
-            yield from self.citation.serialize_xml()
-
-        for x in self.children:
-            if x is not None:
-                yield from x.serialize_xml()
-        yield "</blockquote>\n"
+        super().__init__(name='blockquote', indent=indent, attributes=attributes, content=None, citation=citation, namespace=namespace)
 
 
 class RecordSet(Block):
