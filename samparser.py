@@ -208,25 +208,9 @@ class SamParser:
     def _blockquote_start(self, context):
         source, match = context
         indent = match.end("indent")
-
-        # TODO: Refactor this with the paraparser version
-
-
-        extra = source.current_line.rstrip()[len(match.group(0)):]
-        if extra:
-            raise SAMParserError("Extra text found after blockquote start: " + extra)
-
         attributes, citations = parse_attributes(match.group("remainder"))
-
-        if len(citations)> 1:
-            raise SAMParserError("Can't have more than one citation on a blockquote, at " + match.group(0))
-        if citations:
-            b = Blockquote(indent, attributes, citations)
-        else:
-            b = Blockquote(indent, attributes, None)
+        b = Blockquote(indent, attributes, citations)
         self.doc.add_block(b)
-
-
         return "SAM", context
 
     def _fragment_start(self, context):
