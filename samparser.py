@@ -166,7 +166,7 @@ class SamParser:
 
         attributes, citations = parse_attributes(match.group("attributes"), flagged="*!", unflagged="attribution")
 
-        b = Remark(indent, attributes)
+        b = Remark(indent, attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -178,7 +178,7 @@ class SamParser:
 
         attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
 
-        b = Embed(indent, attributes)
+        b = Embed(indent, attributes, citations)
         self.doc.add_block(b)
         self.current_text_block = UnparsedTextBlock()
         return "EMBED", context
@@ -217,7 +217,7 @@ class SamParser:
         source, match = context
         indent = match.end("indent")
         attributes, citations =  parse_attributes(match.group("attributes"))
-        b = Fragment(indent, attributes)
+        b = Fragment(indent, attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -273,7 +273,7 @@ class SamParser:
         indent = match.end("indent")
         content_start=match.start("content")+1
         attributes, citations = parse_attributes(match.group("attributes"))
-        uli = UnorderedListItem(indent, attributes)
+        uli = UnorderedListItem(indent, attributes, citations)
         self.doc.add_block(uli)
         p = Paragraph(content_start)
         self.doc.add_block(p)
@@ -285,7 +285,7 @@ class SamParser:
         indent = match.end("indent")
         content_start=match.start("content")+1
         attributes, citations = parse_attributes(match.group("attributes"))
-        oli = OrderedListItem(indent, attributes)
+        oli = OrderedListItem(indent, attributes, citations)
         self.doc.add_block(oli)
         p = Paragraph(content_start)
         self.doc.add_block(p)
@@ -299,7 +299,7 @@ class SamParser:
         label = match.group("label")
         content_start = match.start("content") + 1
         attributes, citations = parse_attributes(match.group("attributes"))
-        lli = LabeledListItem(indent, flow_parser.parse(label, self.doc), attributes)
+        lli = LabeledListItem(indent, flow_parser.parse(label, self.doc), attributes, citations)
         self.doc.add_block(lli)
         p = Paragraph(content_start)
         self.doc.add_block(p)
@@ -313,7 +313,7 @@ class SamParser:
         indent = match.end("indent")
         attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?")
         attributes.update(parse_insert(match.group("insert")))
-        b = BlockInsert(indent, attributes)
+        b = BlockInsert(indent, attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -362,7 +362,7 @@ class SamParser:
         indent = match.end("indent")
         attributes, citations = parse_attributes(match.group("attributes"))
         b=Line(indent, attributes,
-               flow_parser.parse(match.group('content'), self.doc, strip=False))
+               flow_parser.parse(match.group('content'), self.doc, strip=False), citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -372,7 +372,7 @@ class SamParser:
         record_name = match.group("name").strip()
         attributes, citations = parse_attributes(match.group('attributes'))
         field_names = [x.strip() for x in match.group("field_names").split(',')]
-        rs = RecordSet(record_name, field_names, indent, attributes)
+        rs = RecordSet(record_name, field_names, indent, attributes, citations)
         self.doc.add_block(rs)
 
         return "RECORD", context
@@ -401,7 +401,7 @@ class SamParser:
         source, match = context
         indent = match.end("indent")
         attributes, citations = parse_attributes(match.group("attributes"))
-        b = Grid(indent, attributes)
+        b = Grid(indent, attributes, citations)
         self.doc.add_block(b)
         return "GRID", context
 
@@ -685,33 +685,33 @@ class Block(ABC):
 
 
 class BlockInsert(Block):
-    def __init__(self, indent, attributes=None, namespace=None):
-        super().__init__(name='insert', indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent, attributes=None, citations=None, namespace=None):
+        super().__init__(name='insert', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
 
 class Codeblock(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
-        super().__init__(name='codeblock', indent=indent, attributes=attributes, content=None, citations=citations,namespace=namespace)
+        super().__init__(name='codeblock', indent=indent, attributes=attributes, citations=citations,namespace=namespace)
 
 
 class Remark(Block):
-    def __init__(self, indent, attributes=None, namespace=None):
-        super().__init__(name='remark', indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent, attributes=None, citations=None, namespace=None):
+        super().__init__(name='remark', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
 
 class Embed(Block):
-    def __init__(self, indent, attributes=None, namespace=None):
-        super().__init__(name='embed', indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent, attributes=None, citations=None, namespace=None):
+        super().__init__(name='embed', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
 
 class Grid(Block):
-    def __init__(self, indent, attributes=None, namespace=None):
-        super().__init__(name='grid', indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent, attributes=None, citations=None, namespace=None):
+        super().__init__(name='grid', indent=indent, attributes=attributes,  citations=citations, namespace=namespace)
 
 
 class Row(Block):
     def __init__(self, indent,  namespace=None):
-        super().__init__(name='row', indent=indent, attributes=None, content=None, namespace=namespace)
+        super().__init__(name='row', indent=indent, namespace=namespace)
 
     def add(self, b):
         """
@@ -732,12 +732,12 @@ class Row(Block):
 
 class Cell(Block):
     def __init__(self, indent, namespace=None):
-        super().__init__(name='cell', indent=indent, attributes=None, content=None, namespace=namespace)
+        super().__init__(name='cell', indent=indent, namespace=namespace)
 
 
 class Line(Block):
-    def __init__(self, indent, attributes, content, namespace=None):
-        super().__init__(name='line', indent=indent, attributes=attributes, content=content, namespace=namespace)
+    def __init__(self, indent, attributes, content, citations=None, namespace=None):
+        super().__init__(name='line', indent=indent, attributes=attributes, content=content, citations=citations, namespace=namespace)
 
     def add(self, b):
         if b.indent > self.indent:
@@ -747,18 +747,18 @@ class Line(Block):
             self.parent.add(b)
 
 class Fragment(Block):
-    def __init__(self, indent, attributes=None, namespace=None):
-        super().__init__(name='fragment', indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent, attributes=None, citations=None, namespace=None):
+        super().__init__(name='fragment', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
 
 class Blockquote(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
-        super().__init__(name='blockquote', indent=indent, attributes=attributes, content=None, citations=citations, namespace=namespace)
+        super().__init__(name='blockquote', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
 
 class RecordSet(Block):
-    def __init__(self, name, field_names, indent, attributes=None, content=None, namespace=None):
-        super().__init__(name=name, indent=indent, attributes=attributes, content=content, namespace=namespace)
+    def __init__(self, name, field_names, indent, attributes=None, citations=None, namespace=None):
+        super().__init__(name=name, indent=indent, attributes=attributes,  citations=citations, namespace=namespace)
         self.field_names = field_names
 
     def add(self, b):
@@ -826,8 +826,8 @@ class List(Block):
 
 
 class UnorderedList(List):
-    def __init__(self, indent, attributes=None, content=None, namespace=None):
-        super().__init__(name='ul', indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent, namespace=None):
+        super().__init__(name='ul', indent=indent, content=None, namespace=namespace)
 
     def add(self, b):
         """
@@ -847,8 +847,8 @@ class UnorderedList(List):
                 self.parent.add(b)
 
 class OrderedList(List):
-    def __init__(self, indent, attributes=None, content=None, namespace=None):
-        super().__init__(name='ol', indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent, namespace=None):
+        super().__init__(name='ol', indent=indent, namespace=namespace)
 
     def add(self, b):
         """
@@ -871,23 +871,23 @@ class OrderedList(List):
 
 class ListItem(Block):
     @abstractmethod
-    def __init__(self, name, indent, attributes=None, content=None, namespace=None):
-        super().__init__(name=name, indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, name, indent, attributes=None, citations=None,  namespace=None):
+        super().__init__(name=name, indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
 
 class OrderedListItem(ListItem):
-    def __init__(self, indent, attributes=None, content=None, namespace=None):
-        super().__init__(name = "li", indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent, attributes=None, citations=None,  namespace=None):
+        super().__init__(name = "li", indent=indent, attributes=attributes, citations=citations,  namespace=namespace)
 
 
 class UnorderedListItem(ListItem):
-    def __init__(self, indent, attributes=None, content=None, namespace=None):
-        super().__init__(name =  "li", indent = indent, attributes = attributes, content = None, namespace = namespace)
+    def __init__(self, indent, attributes=None, citations=None,  namespace=None):
+        super().__init__(name =  "li", indent = indent, attributes = attributes,  namespace = namespace)
 
 
 class LabeledListItem(ListItem):
-    def __init__(self, indent, label, attributes=None, content=None, namespace=None):
-        super().__init__(name = "li", indent = indent, attributes = attributes, content = None, namespace = namespace)
+    def __init__(self, indent, label, attributes=None, citations=None,  namespace=None):
+        super().__init__(name = "li", indent = indent, attributes = attributes, citations=citations,  namespace = namespace)
         self.label = label
 
     def serialize_xml(self):
@@ -911,8 +911,8 @@ class LabeledListItem(ListItem):
 
 
 class LabeledList(List):
-    def __init__(self, indent, attributes=None, content=None, namespace=None):
-        super().__init__(name='ll', indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent, attributes=None, citations=None,  namespace=None):
+        super().__init__(name='ll', indent=indent, attributes=attributes,  namespace=namespace)
 
     def add(self, b):
         """
@@ -932,8 +932,8 @@ class LabeledList(List):
                 self.parent.add(b)
 
 class Paragraph(Block):
-    def __init__(self, indent, attributes=None,  namespace=None):
-        super().__init__(name='p', indent=indent, attributes=attributes, content=None, namespace=namespace)
+    def __init__(self, indent,  namespace=None):
+        super().__init__(name='p', indent=indent, namespace=namespace)
 
     def _add_child(self, b):
         if type(b) is Flow:
@@ -1726,7 +1726,7 @@ class FlowParser:
             attributes, citations = parse_attributes(match.group("attributes"))
             attributes.update(parse_insert(match.group("insert")) )
 
-            self.flow.append(InlineInsert(attributes))
+            self.flow.append(InlineInsert(attributes, citations))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '>'
@@ -1984,17 +1984,24 @@ class Citation:
 
 
 class InlineInsert:
-    def __init__(self, attributes):
+    def __init__(self, attributes, citations):
         self.attributes = attributes
+        self.citations = citations
 
     def __str__(self):
-        return "[#insert:'%s']" % self.attributes
+        return "[#insert:'%s' '%s']" % self.attributes, self.citations
 
     def serialize_xml(self):
         yield '<inline-insert'
         for key, value in sorted(self.attributes.items()):
             yield " {0}=\"{1}\"".format(key, escape_for_xml_attribute(value))
-        yield '/>'
+        if self.citations:
+            yield '>'
+            for c in self.citations:
+                yield from c.serialize_xml()
+            yield '</inline-insert>'
+        else:
+            yield '/>'
 
 
 class SAMParserError(Exception):
