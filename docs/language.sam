@@ -360,7 +360,7 @@ specification: Semantic Authoring Markdown (SAM)
                     fragment          | !language | #name | ?condition| *id | 
                     grid              | !language | #name | ?condition| *id | 
                     recordset         | !language | #name | ?condition| *id | 
-                    ordered-list-ite  | !language | #name | ?condition| *id | 
+                    ordered-list-item | !language | #name | ?condition| *id | 
                     unorderd-list-item| !language | #name | ?condition| *id | 
                     line              | !language | #name | ?condition| *id | 
 
@@ -604,7 +604,7 @@ specification: Semantic Authoring Markdown (SAM)
 
         structure:(#citation) Citation 
 
-            Citations are a reference to another resource. This includes internal references to other structures within the document, such as to a graphic,procedure, or footnote, as well as references to external works.
+            Citations are a reference to another resource. This includes internal references to other structures within the document, such as to a graphic,procedure, or footnote, as well as references to external works. Citations are supported wherever {annotations} are supported.
 
             syntax:
 
