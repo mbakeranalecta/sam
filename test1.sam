@@ -1745,7 +1745,7 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>This is another paragraph. Then there is an alternate blockquote:</p>
                     <blockquote conditions="bar,baz" name="foo5">
-                    <citation type="citation" value="Mother Goose"/><citation type="citation" value="Father Time"/><citation type="idref" value="foo" extra=" page 2"/><p>The quick brown fox jumps over the lazy dog.</p>
+                    <citation type="citation" value="Mother Goose"/><citation type="citation" value="Father Time"/><citation extra="page 2" type="idref" value="foo"/><p>The quick brown fox jumps over the lazy dog.</p>
                     </blockquote>
                     <blockquote>
                     <p>This is a blockquote without a citation.</p>
@@ -1939,7 +1939,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+                    <line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" type="idref" value="bing"/></line>
                     <line>You gotta walk it by yourself,</line>
                     <line conditions="bar">Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
@@ -1967,7 +1967,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <blockquote>
-                    <citation type="idref" value="bing" extra=" page 22"/><line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+                    <citation extra="page 22" type="idref" value="bing"/><line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" type="idref" value="bing"/></line>
                     <line>You gotta walk it by yourself,</line>
                     <line conditions="bar">Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
@@ -2215,7 +2215,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <line conditions="a,b" id="id9" name="name" xml:lang="en-CA">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+                    <line conditions="a,b" id="id9" name="name" xml:lang="en-CA">You gotta walk that lonesome valley,<citation extra="page 22" type="idref" value="bing"/></line>
                     <line>You gotta walk it by yourself,</line>
                     <line>Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>

@@ -129,6 +129,32 @@ section:(!sp)
 </result>
 </case>
 <case>
+<title>Citations</title>
+<description>
+<p>A citation on the block.</p>
+</description>
+<source>
+<codeblock language="sam">
+section:(!sp)[Mother McCree] Greeting
+    Feliz Navidad
+</codeblock>
+</source>
+<markup>
+<section xml:lang="sp">
+<title>Greeting</title>
+<citation type = "citation" value = "Mother McCree"/><p>Feliz Navidad</p>
+</section>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;section xml:lang="sp"&gt;
+    &lt;title&gt;Greeting&lt;/title&gt;
+    &lt;citation type="citation" value="Mother McCree"/&gt;&lt;p&gt;Feliz Navidad&lt;/p&gt;
+&lt;/section&gt;
+</codeblock>
+</result>
+</case>
+<case>
 <title>Escaping block syntax</title>
 <description>
 <p>Escape colon to prevent single word followed by colon being recognized as a block.</p>
@@ -2072,7 +2098,7 @@ After this paragraph, there is a blockquote:
 <p>After this paragraph, there is a blockquote:</p>
 <blockquote conditions="baz" id="foo" name="bar">
 <p>The quick brown fox jumps over the lazy dog.</p>
-<p>And the <phrase><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
+<p>And the <phrase><annotation type="beast" specifically="bovine"><citation type = "citation" value = "Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
 </blockquote>
 </markup>
 <result>
@@ -2088,13 +2114,13 @@ After this paragraph, there is a blockquote:
 <case>
 <title>Alternate block quote</title>
 <description>
-<p>Blockquote with single quotes.</p>
+<p>Blockquote with single quotes. Includes multiple citations.</p>
 </description>
 <source>
 <codeblock language="sam">
 This is another paragraph. Then there is an alternate blockquote:
 
-'''( #foo5)(?bar)(?baz)[Mother Goose]
+'''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2]
     The quick brown fox jumps over the lazy dog.
 
 '''
@@ -2104,7 +2130,7 @@ This is another paragraph. Then there is an alternate blockquote:
 <markup>
 <p>This is another paragraph. Then there is an alternate blockquote:</p>
 <blockquote conditions="bar,baz" name="foo5">
-<citation type="citation" value="Mother Goose"/><p>The quick brown fox jumps over the lazy dog.</p>
+<citation type = "citation" value = "Mother Goose"/><citation type = "citation" value = "Father Time"/><citation extra="page 2" type = "idref" value = "foo"/><p>The quick brown fox jumps over the lazy dog.</p>
 </blockquote>
 <blockquote>
 <p>This is a blockquote without a citation.</p>
@@ -2114,7 +2140,7 @@ This is another paragraph. Then there is an alternate blockquote:
 <codeblock language="xml">
 &lt;p&gt;This is another paragraph. Then there is an alternate blockquote:&lt;/p&gt;
 &lt;blockquote conditions="bar,baz" name="foo5"&gt;
-&lt;citation type="citation" value="Mother Goose"/&gt;&lt;p&gt;The quick brown fox jumps over the lazy dog.&lt;/p&gt;
+&lt;citation type="citation" value="Mother Goose"/&gt;&lt;citation type="citation" value="Father Time"/&gt;&lt;citation extra="page 2" type="idref" value="foo"/&gt;&lt;p&gt;The quick brown fox jumps over the lazy dog.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;blockquote&gt;
 &lt;p&gt;This is a blockquote without a citation.&lt;/p&gt;
@@ -2219,6 +2245,45 @@ warnings:
 </result>
 </case>
 <case>
+<title>Codeblock with citation</title>
+<description>
+<p>A codeblock with a citation.</p>
+</description>
+<source>
+<codeblock language="sam">
+```(python)(?foo)[demos/foo.py]
+    def escape_for_xml(s):
+        t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
+        try:
+            return s.translate(t)
+        except AttributeError:
+            return s
+</codeblock>
+</source>
+<markup>
+<codeblock conditions="foo" language="python">
+<citation type = "citation" value = "demos/foo.py"/>def escape_for_xml(s):
+    t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
+    try:
+        return s.translate(t)
+    except AttributeError:
+        return s
+</codeblock>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;codeblock conditions="foo" language="python"&gt;
+&lt;citation type="citation" value="demos/foo.py"/&gt;def escape_for_xml(s):
+    t = dict(zip([ord('&amp;lt;'), ord('&amp;gt;'), ord('&amp;amp;')], ['&amp;amp;lt;', '&amp;amp;gt;', '&amp;amp;amp;']))
+    try:
+        return s.translate(t)
+    except AttributeError:
+        return s
+&lt;/codeblock&gt;
+</codeblock>
+</result>
+</case>
+<case>
 <title>Invalid blockstart in codeblock</title>
 <description>
 <p>This is an construct that raise an error in an actual document. Curious because lots of valid block starts in other codeblocks did not cause a problem. But this one raised an invalid block name error. Turns out this was caused by tabs instead of spaces used to indent the line, which promoted it to a higher level of the document hierarchy and thus outside the codeblock. But the test is worth keeping to make sure that the contents of codeblocks are not being interpreted as SAM markup.</p>
@@ -2271,14 +2336,14 @@ ordered-list-item =
 </codeblock>
 </source>
 <markup>
-<line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+<line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" type = "idref" value = "bing"/></line>
 <line>You gotta walk it by yourself,</line>
 <line conditions="bar">Nobody here can walk it for you,</line>
 <line>   You gotta walk it by yourself.</line>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation type="idref" value="bing" extra="page 22"/&gt;&lt;/line&gt;
+&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" type="idref" value="bing"/&gt;&lt;/line&gt;
 &lt;line&gt;You gotta walk it by yourself,&lt;/line&gt;
 &lt;line conditions="bar"&gt;Nobody here can walk it for you,&lt;/line&gt;
 &lt;line&gt;   You gotta walk it by yourself.&lt;/line&gt;
@@ -2301,7 +2366,7 @@ ordered-list-item =
 </source>
 <markup>
 <blockquote>
-<citation type="idref" value="bing"/><line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+<citation extra="page 22" type = "idref" value = "bing"/><line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" type = "idref" value = "bing"/></line>
 <line>You gotta walk it by yourself,</line>
 <line conditions="bar">Nobody here can walk it for you,</line>
 <line>   You gotta walk it by yourself.</line>
@@ -2310,7 +2375,7 @@ ordered-list-item =
 <result>
 <codeblock language="xml">
 &lt;blockquote&gt;
-&lt;citation type="idref" value="bing" extra=" page 22"/&gt;&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation type="idref" value="bing" extra="page 22"/&gt;&lt;/line&gt;
+&lt;citation extra="page 22" type="idref" value="bing"/&gt;&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" type="idref" value="bing"/&gt;&lt;/line&gt;
 &lt;line&gt;You gotta walk it by yourself,&lt;/line&gt;
 &lt;line conditions="bar"&gt;Nobody here can walk it for you,&lt;/line&gt;
 &lt;line&gt;   You gotta walk it by yourself.&lt;/line&gt;
@@ -2584,14 +2649,14 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </codeblock>
 </source>
 <markup>
-<line conditions="a,b" id="id9" name="name" xml:lang="en-CA">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+<line conditions="a,b" id="id9" name="name" xml:lang="en-CA">You gotta walk that lonesome valley,<citation extra="page 22" type = "idref" value = "bing"/></line>
 <line>You gotta walk it by yourself,</line>
 <line>Nobody here can walk it for you,</line>
 <line>   You gotta walk it by yourself.</line>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;line conditions="a,b" id="id9" name="name" xml:lang="en-CA"&gt;You gotta walk that lonesome valley,&lt;citation type="idref" value="bing" extra="page 22"/&gt;&lt;/line&gt;
+&lt;line conditions="a,b" id="id9" name="name" xml:lang="en-CA"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" type="idref" value="bing"/&gt;&lt;/line&gt;
 &lt;line&gt;You gotta walk it by yourself,&lt;/line&gt;
 &lt;line&gt;Nobody here can walk it for you,&lt;/line&gt;
 &lt;line&gt;   You gotta walk it by yourself.&lt;/line&gt;
@@ -2616,8 +2681,8 @@ After this paragraph, there is a blockquote:
 <markup>
 <p>After this paragraph, there is a blockquote:</p>
 <blockquote conditions="a,b" id="id10" name="name" xml:lang="en-CA">
-<citation type="idref" value="cit"/><p>The quick brown fox jumps over the lazy dog.</p>
-<p>And the <phrase><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
+<citation type = "idref" value = "cit"/><p>The quick brown fox jumps over the lazy dog.</p>
+<p>And the <phrase><annotation type="beast" specifically="bovine"><citation type = "citation" value = "Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
 </blockquote>
 </markup>
 <result>
@@ -2642,7 +2707,7 @@ After this paragraph, there is a blockquote:
 </codeblock>
 </source>
 <markup>
-<p><phrase id="id11" conditions="a,b" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type="idref" value="cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
+<p><phrase id="id11" conditions="a,b" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type = "idref" value = "cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -2814,7 +2879,7 @@ chapter}[#single_source].
 </codeblock>
 </source>
 <markup>
-<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation type="nameref" value="single_source">single sourcing chapter</citation></phrase>.</p>
+<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation type = "nameref" value = "single_source">single sourcing chapter</citation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3030,15 +3095,15 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 </description>
 <source>
 <codeblock language="SAM">
-You can {call me Ishmael}[Melville, 1851].
+You can {call me Ishmael}[Melville, 1851][Daffy, 2017].
 </codeblock>
 </source>
 <markup>
-<p>You can <phrase><citation type="citation" value="Melville, 1851">call me Ishmael</citation></phrase>.</p>
+<p>You can <phrase><citation type = "citation" value = "Melville, 1851"><citation type = "citation" value = "Daffy, 2017">call me Ishmael</citation></citation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="XML">
-&lt;p&gt;You can &lt;phrase&gt;&lt;citation type="citation" value="Melville, 1851"&gt;call me Ishmael&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;You can &lt;phrase&gt;&lt;citation type="citation" value="Melville, 1851"&gt;&lt;citation type="citation" value="Daffy, 2017"&gt;call me Ishmael&lt;/citation&gt;&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3053,7 +3118,7 @@ You can {call me Ishmael}(quote)[Melville, 1851].
 </codeblock>
 </source>
 <markup>
-<p>You can <phrase><annotation type="quote"><citation type="citation" value="Melville, 1851">call me Ishmael</citation></annotation></phrase>.</p>
+<p>You can <phrase><annotation type="quote"><citation type = "citation" value = "Melville, 1851">call me Ishmael</citation></annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="XML">
@@ -3091,7 +3156,7 @@ Among its default processing steps, the SPFE process includes the subject-based 
 </codeblock>
 </source>
 <markup>
-<p>Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in <citation type="nameref" value="chapter.linking"/> and the subject-based composition and architecture algorithms described in <citation type="nameref" value="chapter.composition"/> and <citation type="nameref" value="chapter.architecture"/>, including bottom-up information architecture.</p>
+<p>Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in <citation type = "nameref" value = "chapter.linking"/> and the subject-based composition and architecture algorithms described in <citation type = "nameref" value = "chapter.composition"/> and <citation type = "nameref" value = "chapter.architecture"/>, including bottom-up information architecture.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3800,7 +3865,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 </codeblock>
 </source>
 <markup>
-<p>“What is truth?”<citation type="citation" value="John 18:38"/></p>
+<p>“What is truth?”<citation type = "citation" value = "John 18:38"/></p>
 </markup>
 <result>
 <codeblock language="xml">

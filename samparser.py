@@ -1956,10 +1956,11 @@ class Citation:
                                              cit_extra)
 
     def serialize_xml(self, payload=None):
-        yield '<citation type="{0}" value="{1}"'.format(self.citation_type, escape_for_xml_attribute(self.citation_value))
+        yield '<citation'
         if self.citation_extra is not None:
             if self.citation_extra:
-                yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
+                yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra.strip()))
+        yield ' type = "{0}" value = "{1}"'.format(self.citation_type, escape_for_xml_attribute(self.citation_value))
         if self.child:
             yield '>'
             yield from self.child.serialize_xml(payload)
