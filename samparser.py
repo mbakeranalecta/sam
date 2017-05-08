@@ -1437,7 +1437,6 @@ class FlowParser:
         self.stateMachine.set_start("PARA")
         self.patterns = {
             'escape': re.compile(r'\\', re.U),
-            'escaped-chars': re.compile('[:\\\(\)\{\}\[\]_\*,\.\*`"&\<\>' + "']", re.U),
             'phrase': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
             'annotation': re.compile(
                 r'(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))',
@@ -1453,7 +1452,6 @@ class FlowParser:
             'inline-insert': re.compile(r'>(?P<insert>\((.*?(?<!\\))\))' + re_attributes, re.U),
             'en-dash': re.compile(re_en_dash, re.U),
             'em-dash': re.compile(re_em_dash, re.U),
-            'character-entity': re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);'),
             'citation': re.compile(
                 r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
                 re.U)
@@ -1507,7 +1505,7 @@ class FlowParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            text = self._unescape(match.group("text"))
+            text = unescape(match.group("text"))
             if self.smart_quotes:
                 text = multi_replace(text, smart_quote_subs)
             self.flow.append(Phrase(text))
@@ -1559,15 +1557,15 @@ class FlowParser:
                 specifically = match.group('specifically') if match.group('specifically') is not None else None
             namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
             if annotation_type[0] == '!':
-                self.flow.append(Attribute('language', self._unescape(annotation_type[1:])))
+                self.flow.append(Attribute('language', unescape(annotation_type[1:])))
             elif annotation_type[0] == '*':
-                self.flow.append(Attribute('id', self._unescape(annotation_type[1:])))
+                self.flow.append(Attribute('id', unescape(annotation_type[1:])))
             elif annotation_type[0] == '#':
-                self.flow.append(Attribute('name', self._unescape(annotation_type[1:])))
+                self.flow.append(Attribute('name', unescape(annotation_type[1:])))
             elif annotation_type[0] == '?':
-                self.flow.append(Attribute('condition', self._unescape(annotation_type[1:])))
+                self.flow.append(Attribute('condition', unescape(annotation_type[1:])))
             else:
-                self.flow.append(Annotation(annotation_type, self._unescape(specifically), namespace))
+                self.flow.append(Annotation(annotation_type, unescape(specifically), namespace))
             para.advance(len(match.group(0)))
             if self.patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
@@ -1630,7 +1628,7 @@ class FlowParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Phrase(self._unescape(match.group("text"))))
+            self.flow.append(Phrase(unescape(match.group("text"))))
             self.flow.append(Annotation('bold'))
             para.advance(len(match.group(0)) - 1)
         else:
@@ -1642,7 +1640,7 @@ class FlowParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Phrase(self._unescape(match.group("text"))))
+            self.flow.append(Phrase(unescape(match.group("text"))))
             self.flow.append(Annotation('italic'))
             para.advance(len(match.group(0)) - 1)
         else:
@@ -1739,57 +1737,22 @@ class FlowParser:
             self.current_string += '>'
         return "PARA", para
 
-    def _character_entity(self, para):
-        match = self.patterns['character-entity'].match(para.rest_of_para)
-        if match:
-            self.current_string += self.patterns['character-entity'].sub(self._replace_charref, match.group(0))
-            para.advance(len(match.group(0)) - 1)
-        else:
-            self.current_string += '&'
-        return "PARA", para
-
-    def _replace_charref(self, match):
-        try:
-            charref = match.group(0)
-        except AttributeError:
-            charref = match
-        character = html.unescape(charref)
-        if character == charref:  # Escape not recognized
-            raise SAMParserError("Unrecognized character entity found: " + charref)
-        return character
-
     def _escape(self, para):
         char = para.next_char
-        if self.patterns['escaped-chars'].match(char):
+        if re_escaped_chars.match(char):
             self.current_string += char
         else:
             self.current_string += '\\' + char
         return "PARA", para
 
-    def _unescape(self, string):
-        result = ''
-        try:
-            e = enumerate(string)
-            for pos, char in e:
-                try:
-                    if char == '\\' and self.patterns['escaped-chars'].match(string[pos + 1]):
-                        result += string[pos + 1]
-                        next(e, None)
-                    elif char == '&':
-                        match = self.patterns['character-entity'].match(string[pos:])
-                        if match:
-                            result += self.patterns['character-entity'].sub(self._replace_charref, match.group(0))
-                            for i in range(1, len(match.group(0))):
-                                next(e, None)
-                        else:
-                            result += char
-                    else:
-                        result += char
-                except IndexError:
-                    result += char
-            return result
-        except TypeError:
-            return string
+    def _character_entity(self, para):
+        match = re_character_entity.match(para.rest_of_para)
+        if match:
+            self.current_string += re_character_entity.sub(replace_charref, match.group(0))
+            para.advance(len(match.group(0)) - 1)
+        else:
+            self.current_string += '&'
+        return "PARA", para
 
 
 class Phrase:
@@ -2030,7 +1993,7 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         elif len(unflagged_attributes) > 1:
             raise SAMParserError("More than one " + unflagged + " attribute specified: {0}".format(', '.join(unflagged_attributes)))
         else:
-            attributes.append(Attribute(unflagged, unflagged_attributes[0]))
+            attributes.append(Attribute(unescape(unflagged), unescape(unflagged_attributes[0])))
     ids = [x[1:] for x in attributes_list if x[0] == '*']
     if ids and not '*' in flagged:
         raise SAMParserError("IDs not allowed in this context. Found: *{0}".format(', *'.join(ids)))
@@ -2048,13 +2011,13 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         raise SAMParserError("More than one language specified: " + ", ".join(language))
     conditions = [x[1:] for x in attributes_list if x[0] == '?']
     if ids:
-        attributes.append(Attribute("id", ids[0]))
+        attributes.append(Attribute("id", unescape(ids[0])))
     if names:
-        attributes.append(Attribute("name", names[0]))
+        attributes.append(Attribute("name", unescape(names[0])))
     if language:
-        attributes.append(Attribute("xml:lang", language[0]))
+        attributes.append(Attribute("xml:lang", unescape(language[0])))
     if conditions:
-        attributes.append(Attribute("conditions", ",".join(conditions)))
+        attributes.append(Attribute("conditions", ",".join([unescape(x) for x in conditions])))
 
     re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*))|(\s*\#(?P<name>\S+)(?P<name_extra>.*))|(\s*(?P<citation>.*))'
 
@@ -2115,12 +2078,12 @@ def parse_insert(annotation_string):
         insert_type = 'key'
     else:
         insert_item = attributes_list[2].strip()
-    result.append(Attribute('type', insert_type))
+    result.append(Attribute('type', unescape(insert_type)))
     # strip unnecessary quotes from insert item
     insert_item = re.sub(r'^(["\'])|(["\'])$', '', insert_item)
     if insert_item == '':
         raise SAMParserError ("Insert item not specified in: " + annotation_string)
-    result.append(Attribute('item', insert_item))
+    result.append(Attribute('item', unescape(insert_item)))
     return result
 
 
@@ -2151,6 +2114,45 @@ def SAM_parser_warning(warning):
 
 def SAM_parser_info(info):
     print("SAM parser information: " + info, file=sys.stderr)
+
+
+re_escaped_chars = re.compile('[:\\\(\)\{\}\[\]_\*,\.\*`"&\<\>' + "']", re.U)
+re_character_entity = re.compile(r'&(\#[0-9]+|#[xX][0-9a-fA-F]+|[\w]+);', re.U)
+
+def unescape(string):
+    result = ''
+    try:
+        e = enumerate(string)
+        for pos, char in e:
+            try:
+                if char == '\\' and re_escaped_chars.match(string[pos + 1]):
+                    result += string[pos + 1]
+                    next(e, None)
+                elif char == '&':
+                    match = re_character_entity.match(string[pos:])
+                    if match:
+                        result += re_character_entity.sub(replace_charref, match.group(0))
+                        for i in range(1, len(match.group(0))):
+                            next(e, None)
+                    else:
+                        result += char
+                else:
+                    result += char
+            except IndexError:
+                result += char
+        return result
+    except TypeError:
+        return string
+
+def replace_charref(match):
+    try:
+        charref = match.group(0)
+    except AttributeError:
+        charref = match
+    character = html.unescape(charref)
+    if character == charref:  # Escape not recognized
+        raise SAMParserError("Unrecognized character entity found: " + charref)
+    return character
 
 
 flow_parser = FlowParser()
