@@ -312,7 +312,7 @@ class SamParser:
             raise SAMParserError("Unexpected characters in block insert. Found: " + match.group("unexpected"))
         indent = match.end("indent")
         attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?")
-        attributes.update(parse_insert(match.group("insert")))
+        attributes.extend(parse_insert(match.group("insert")))
         b = BlockInsert(indent, attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
@@ -577,8 +577,6 @@ class Block(ABC):
         except ValueError:
             raise SAMParserError("Invalid block name: " + name)
 
-        assert isinstance(attributes, dict) or attributes is None
-
         self.name = name
         self.namespace = namespace
         self.attributes = attributes
@@ -657,8 +655,10 @@ class Block(ABC):
                 yield ' xmlns="{0}"'.format(self.namespace)
 
         if self.attributes:
-            for key, value in sorted(self.attributes.items()):
-                yield " {0}=\"{1}\"".format(key, escape_for_xml_attribute(value))
+            newlist = sorted(self.attributes, key=lambda x: x.type)
+
+            for a in newlist:
+                yield from a.serialize_xml()
 
         if self.children:
             yield ">"
@@ -893,8 +893,9 @@ class LabeledListItem(ListItem):
                 yield ' xmlns="{0}"'.format(self.namespace)
 
         if self.attributes:
-            for key, value in sorted(self.attributes.items()):
-                yield " {0}=\"{1}\"".format(key, value)
+            newlist = sorted(self.attributes, key=lambda x: x.type, reverse=True)
+            for a in newlist:
+                yield from a.serialize_xml()
 
         yield "<label>"
         yield from self.label.serialize_xml()
@@ -1719,7 +1720,7 @@ class FlowParser:
             self.flow.append(self.current_string)
             self.current_string = ''
             attributes, citations = parse_attributes(match.group("attributes"))
-            attributes.update(parse_insert(match.group("insert")) )
+            attributes.extend(parse_insert(match.group("insert")) )
 
             self.flow.append(InlineInsert(attributes, citations))
             para.advance(len(match.group(0)) - 1)
@@ -1898,10 +1899,7 @@ class Attribute:
         return '%s ="%s" ' % (self.type, self.value)
 
     def serialize_xml(self):
-        if self.type == 'language':
-             yield ' xml:lang ="%s"' % (escape_for_xml_attribute(self.value))
-        else:
-            yield ' %s ="%s"' % (self.type, escape_for_xml_attribute(self.value))
+        yield ' %s ="%s"' % (self.type, escape_for_xml_attribute(self.value))
 
 
 class Annotation:
@@ -1988,9 +1986,10 @@ class InlineInsert:
         return "[#insert:'%s' '%s']" % self.attributes, self.citations
 
     def serialize_xml(self):
+        newlist = sorted(self.attributes, key=lambda x: x.type)
         yield '<inline-insert'
-        for key, value in sorted(self.attributes.items()):
-            yield " {0}=\"{1}\"".format(key, escape_for_xml_attribute(value))
+        for a in newlist:
+            yield from a.serialize_xml()
         if self.citations:
             yield '>'
             for c in self.citations:
@@ -2006,7 +2005,7 @@ class SAMParserError(Exception):
     """
 
 def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
-    attributes = {}
+    attributes = []
     citations =[]
     attributes_list=[]
     citations_list=[]
@@ -2024,15 +2023,6 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         else:
             raise SAMParserError("Unrecognized character '" + x.group('bad') + "' found in attributes list at: " + attributes_string)
 
-
-
-
-    # try:
-    #     #attributes_list = attributes_string.split()
-    #     attributes_list = [x[1:-1].strip() for x in re.findall(r"(\(.*?(?<!\\)\))", attributes_string)]
-    #     citations_list = [x[1:-1].strip() for x in re.findall(r"(\[.*?(?<!\\)\])", attributes_string)]
-    # except AttributeError:
-    #     return None, None
     unflagged_attributes = [x for x in attributes_list if not (x[0] in '?#*!')]
     if unflagged_attributes:
         if unflagged is None:
@@ -2040,7 +2030,7 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         elif len(unflagged_attributes) > 1:
             raise SAMParserError("More than one " + unflagged + " attribute specified: {0}".format(', '.join(unflagged_attributes)))
         else:
-            attributes[unflagged] = " ".join(unflagged_attributes)
+            attributes.append(Attribute(unflagged, unflagged_attributes[0]))
     ids = [x[1:] for x in attributes_list if x[0] == '*']
     if ids and not '*' in flagged:
         raise SAMParserError("IDs not allowed in this context. Found: *{0}".format(', *'.join(ids)))
@@ -2058,13 +2048,13 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         raise SAMParserError("More than one language specified: " + ", ".join(language))
     conditions = [x[1:] for x in attributes_list if x[0] == '?']
     if ids:
-        attributes["id"] = "".join(ids)
+        attributes.append(Attribute("id", ids[0]))
     if names:
-        attributes["name"] = "".join(names)
+        attributes.append(Attribute("name", names[0]))
     if language:
-        attributes["xml:lang"] = "".join(language)
+        attributes.append(Attribute("xml:lang", language[0]))
     if conditions:
-        attributes["conditions"] = ",".join(conditions)
+        attributes.append(Attribute("conditions", ",".join(conditions)))
 
     re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*))|(\s*\#(?P<name>\S+)(?P<name_extra>.*))|(\s*(?P<citation>.*))'
 
@@ -2103,7 +2093,7 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
 
 
 def parse_insert(annotation_string):
-    result = {}
+    result = []
 
     insert_annotation = re.match(r'(\(.*?(?<!\\)\))', annotation_string)
     attributes_list = insert_annotation.group(0)[1:-1].partition(' ')
@@ -2125,12 +2115,12 @@ def parse_insert(annotation_string):
         insert_type = 'key'
     else:
         insert_item = attributes_list[2].strip()
-    result['type'] = insert_type
+    result.append(Attribute('type', insert_type))
     # strip unnecessary quotes from insert item
     insert_item = re.sub(r'^(["\'])|(["\'])$', '', insert_item)
     if insert_item == '':
         raise SAMParserError ("Insert item not specified in: " + annotation_string)
-    result['item'] = insert_item
+    result.append(Attribute('item', insert_item))
     return result
 
 
