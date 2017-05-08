@@ -1346,7 +1346,7 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     |Do| a deer,
-                    a female deer
+                         a female deer
                     |Re| a drop of
                          golden sun
 
@@ -1359,7 +1359,8 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 |Do| a deer,
-                a female deer
+                     a female deer
+
                 |Re| a drop of
                      golden sun
 
@@ -2134,8 +2135,8 @@ tests:(!en) SAM Parser Tests
                     * Fred
 
                     *(!en-CA)(*id7)(#name)(?a)(?b) Barney and
-                      Betty and
-                      Bam Bam.
+                                                   Betty and
+                                                   Bam Bam.
 
                     * Wilma
 
@@ -2144,8 +2145,8 @@ tests:(!en) SAM Parser Tests
                 * Fred
 
                 *(!en-CA)(*id7)(#name)(?a)(?b) Barney and
-                  Betty and
-                  Bam Bam.
+                                               Betty and
+                                               Bam Bam.
 
                 * Wilma
 
@@ -2171,15 +2172,15 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     1. Fred
                     2.(!en-CA)(*id8)(#name)(?a)(?b) Barney and
-                     Betty and
-                     Bam Bam.
+                                                    Betty and
+                                                    Bam Bam.
                     3. Wilma
 
             markup:
                 1. Fred
                 2.(!en-CA)(*id8)(#name)(?a)(?b) Barney and
-                 Betty and
-                 Bam Bam.
+                                                Betty and
+                                                Bam Bam.
                 3. Wilma
 
             result:
@@ -2978,8 +2979,8 @@ tests:(!en) SAM Parser Tests
                     * Fred
 
                     *(?foo) Barney and
-                      Betty and
-                      Bam Bam.
+                            Betty and
+                            Bam Bam.
 
                     * Wilma
 
@@ -2988,8 +2989,8 @@ tests:(!en) SAM Parser Tests
                 * Fred
 
                 *(?foo) Barney and
-                  Betty and
-                  Bam Bam.
+                        Betty and
+                        Bam Bam.
 
                 * Wilma
 
@@ -3015,15 +3016,15 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     1. Fred
                     2.(?foo) Barney and
-                     Betty and
-                     Bam Bam.
+                             Betty and
+                             Bam Bam.
                     3. Wilma
 
             markup:
                 1. Fred
                 2.(?foo) Barney and
-                 Betty and
-                 Bam Bam.
+                         Betty and
+                         Bam Bam.
                 3. Wilma
 
             result:

@@ -240,6 +240,7 @@ class SamParser:
             self.doc.add_flow(f)
             return "END", context
 
+        para_indent = self.doc.current_block.indent
         first_line_indent = len(match.string) - len(match.string.lstrip())
         this_line_indent = len(line) - len(line.lstrip())
 
@@ -249,7 +250,7 @@ class SamParser:
             self.doc.add_flow(f)
             return "SAM", context
 
-        if this_line_indent < first_line_indent:
+        if this_line_indent < para_indent:
             f = flow_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
             self.doc.add_flow(f)
@@ -271,7 +272,7 @@ class SamParser:
     def _list_item(self, context):
         source, match = context
         indent = match.end("indent")
-        content_start=match.start("content")+1
+        content_start=match.start("content")
         attributes, citations = parse_attributes(match.group("attributes"))
         uli = UnorderedListItem(indent, attributes, citations)
         self.doc.add_block(uli)
@@ -283,7 +284,7 @@ class SamParser:
     def _num_list_item(self, context):
         source, match = context
         indent = match.end("indent")
-        content_start=match.start("content")+1
+        content_start=match.start("content")
         attributes, citations = parse_attributes(match.group("attributes"))
         oli = OrderedListItem(indent, attributes, citations)
         self.doc.add_block(oli)
@@ -297,7 +298,7 @@ class SamParser:
         source, match = context
         indent = match.end("indent")
         label = match.group("label")
-        content_start = match.start("content") + 1
+        content_start = match.start("content")
         attributes, citations = parse_attributes(match.group("attributes"))
         lli = LabeledListItem(indent, flow_parser.parse(label, self.doc), attributes, citations)
         self.doc.add_block(lli)
