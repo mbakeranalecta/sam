@@ -776,10 +776,9 @@ class RecordSet(Block):
             self.children.append(b)
 
 class Record(Block):
-    def __init__(self, field_values, indent, attributes=None, content=None, namespace=None):
+    def __init__(self, field_values, indent, content=None, namespace=None):
         self.name='record'
         self.field_values = field_values
-        self.attributes = attributes
         self.content = content
         self.namespace = namespace
         self.indent = indent
@@ -798,10 +797,6 @@ class Record(Block):
         if self.namespace is not None:
             if type(self.parent) is Root or self.namespace != self.parent.namespace:
                 yield ' xmlns="{0}"'.format(self.namespace)
-
-        if self.attributes:
-            for key, value in sorted(self.attributes.items()):
-                yield " {0}=\"{1}\"".format(key, value)
         yield ">\n"
 
         for x in self.record:
