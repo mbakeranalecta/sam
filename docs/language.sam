@@ -604,7 +604,7 @@ specification: Semantic Authoring Markdown (SAM)
 
         structure:(#citation) Citation 
 
-            Citations are a reference to another resource. This includes internal references to other structures within the document, such as to a graphic,procedure, or footnote, as well as references to external works. Citations are supported wherever {annotations} are supported.
+            Citations are a reference to another resource. This includes internal references to other structures within the document, such as to a graphic,procedure, or footnote, as well as references to external works. Citations are supported wherever {attributes} or {annotations} are supported.
 
             syntax:
 
@@ -623,7 +623,7 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam) 
                     {Moby Dick}(novel)[Melville, 1851] is about a big fish.
 
-                Citations can also be added to {blockquotes}:
+                Citations can also be added to {blocks}. The most obvious application of this is {blockquote}s:
 
                 ```(sam)
                     """[Melville, 1851] 
