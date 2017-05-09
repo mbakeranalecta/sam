@@ -2270,7 +2270,7 @@ if __name__ == "__main__":
                         xmlschema.assertValid(xml_doc)
                     except etree.DocumentInvalid as e:
                         print('STRUCTURE ERROR: ' + str(e), file=sys.stderr)
-                        #exit(1)
+                        error_count += 1
                     else:
                         SAM_parser_info("Validation successful.")
 
