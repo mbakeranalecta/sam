@@ -1417,7 +1417,7 @@ specification: Semantic Authoring Markdown (SAM)
             ```(sam)
                 This text is {important}(bold).
 
-            syntax:
+           syntax:
                 Decoration are indicated by charters in the text that bracket phrases. The decorations are as follows:
 
                 * `*` is a decoration for bold.
@@ -1450,9 +1450,14 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam)
                     This text is {_important_}(bold).
 
-                Decorations are not recognized inside of phrases, since annotations cannot be nested. Decoration characters inside annotations are read as plain text. 
+                Decorations are not recognized inside of {phrase}s, since decorations are shorcuts for phrases and phrases cannot be nested. Decoration characters inside annotations are read as plain text. 
 
-                {Annotation}(structure "annotation") chaining is not supported for decorations. If you want to make text both both and italic, use:
+                {Annotation}(structure "annotation") chaining is supported for decorations. Therefore if you want to make text both both and italic, you could use:
+
+                ```(sam)
+                    This text is *important*(italic)
+
+                Although it may be clearer to do this:
 
                 ```(sam)
                     This text is {important}(bold)(italic)
@@ -1513,7 +1518,12 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam)
                     In Python 3, use `print("Hello World")`(python). 
 
-            semantics:
+                Since decorations are just shortcuts for annotated phrases, you can add additional {annotation}s and {citation}s to decorations just as if they were regular phrases. The following 
+
+                ```(sam)
+                    In Python 3, the correct form is `print("Hello World")`(python). 
+
+             semantics:
                 The content of an inline code structure is to presented as code, without interpretation. It may be formatted in accordance with its language. 
 
             SOM:
