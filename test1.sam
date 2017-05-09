@@ -2390,7 +2390,7 @@ tests:(!en) SAM Parser Tests
                     {The Duke}(actor "John Wayne")(if "1969"){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
 
             markup:
-                {The Duke}(actor "John Wayne")(if "1969'){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
+                {The Duke}(actor "John Wayne")(if "1969"){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
 
             result:
                 ```(xml)

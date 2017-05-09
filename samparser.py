@@ -1440,8 +1440,23 @@ class FlowParser:
             'escape': re.compile(r'\\', re.U),
             'phrase': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
             'annotation': re.compile(
-                r'(\(\s*(?P<type>\S*?\s*[^\\"\']?)(["\'](?P<specifically>.*?)["\'])??\s*(\((?P<namespace>\w+)\))?\))',
-                re.U),
+                r'''
+                (
+                    \(                                       #open paren
+                        \s*                                  #any spaces
+                        (?P<type>\S*?)                       #any non-space characters = annotation type
+                        \s*                                  #any spaces
+                        (                                    #specifically attribute
+                            (?P<quote>["\'])                 #open quote
+                            (?P<specifically>.*?)            #any text = specifically
+                            (?<!\\)(?P=quote)                #close matching quote if not preceded by backslash
+                        )??                                  #end specifically attribute
+                        \s*                                  #any spaces
+                        (\((?P<namespace>\w+)\))?            #any text in parens = namespace
+                    (?<!\\)\)                                #closing paren if not preceded by backslash
+                )
+                ''',
+                re.VERBOSE | re.U),
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
             'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
