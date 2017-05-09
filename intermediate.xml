@@ -2854,6 +2854,25 @@ This `foo`(bar) baz.
 </result>
 </case>
 <case>
+<title>Consecutive Annotations on decorations</title>
+<description>
+<p>Two separate annotations with no space between them.</p>
+</description>
+<source>
+<codeblock language ="sam">
+`The Duke`(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
+</codeblock>
+</source>
+<markup>
+<p><phrase><annotation type="code"><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></annotation></phrase><phrase><annotation type="bold"><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></annotation></phrase> plays Rooster Cogburn.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;&lt;phrase&gt;&lt;annotation type="code"&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;&lt;annotation type="if" specifically="1969"&gt;The Duke&lt;/annotation&gt;&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt;&lt;phrase&gt;&lt;annotation type="bold"&gt;&lt;annotation type="actor"&gt;&lt;annotation type="if" specifically="2010"&gt;Jeff Bridges&lt;/annotation&gt;&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
 <title>Annotation followed by citation</title>
 <description>
 <p>Observed in the wild: When an annotated phrase was followed by a phrase with a citation, the end of the annotation was not found and the two structures were recognized as one long citation.</p>
@@ -3000,6 +3019,50 @@ This {should be reported}.
 <result>
 <codeblock language ="xml">
 &lt;p&gt;This &lt;phrase&gt;should be reported&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+</test>
+<test>
+<title>Decorations</title>
+<description>
+<p>A decoration is a shortcut for a <phrase>media domain</phrase> annotation. Three decorations are supported, bold, italic, and code.</p>
+</description>
+<case>
+<title>Bold, italic, and code</title>
+<description>
+<p>One test case for all decorations.</p>
+</description>
+<source>
+<codeblock language ="sam">
+This sentence contains decorations for *bold*, _italic_, and `code`.
+</codeblock>
+</source>
+<markup>
+<p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <phrase><annotation type="code">code</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;This sentence contains decorations for &lt;phrase&gt;&lt;annotation type="bold"&gt;bold&lt;/annotation&gt;&lt;/phrase&gt;, &lt;phrase&gt;&lt;annotation type="italic"&gt;italic&lt;/annotation&gt;&lt;/phrase&gt;, and &lt;phrase&gt;&lt;annotation type="code"&gt;code&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Unbalanced decorations and escapes</title>
+<description>
+<p>Unbalanced decorations and escapes</p>
+</description>
+<source>
+<codeblock language ="sam">
+In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.
+</codeblock>
+</source>
+<markup>
+<p>In Rio Bravo, *the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;In Rio Bravo, *the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.&lt;/p&gt;
 </codeblock>
 </result>
 </case>

@@ -2396,6 +2396,22 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
 
+        case: Consecutive Annotations on decorations
+
+            description:
+                Two separate annotations with no space between them.
+
+            source:
+                ```(sam)
+                    `The Duke`(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
+
+            markup:
+                `The Duke`(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
+
+            result:
+                ```(xml)
+                    <p><phrase><annotation type="code"><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></annotation></phrase><phrase><annotation type="bold"><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></annotation></phrase> plays Rooster Cogburn.</p>
+
 
 
         case: Annotation followed by citation
@@ -2551,6 +2567,39 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>This <phrase>should be reported</phrase>.</p>
 
+    test: Decorations
+        description:
+            A decoration is a shortcut for a {media domain} annotation. Three decorations are supported, bold, italic, and code. 
+
+        case: Bold, italic, and code
+
+            description:
+                One test case for all decorations.
+
+            source:
+                ```(sam)
+                    This sentence contains decorations for *bold*, _italic_, and `code`.
+
+            markup:
+                This sentence contains decorations for *bold*, _italic_, and `code`.
+            
+            result:
+                ```(xml)
+                    <p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <phrase><annotation type="code">code</annotation></phrase>.</p>
+
+        case: Unbalanced decorations and escapes
+            description:
+                Unbalanced decorations and escapes
+            source:
+                ```(sam)
+                    In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.
+
+            markup:
+                In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.
+
+            result:
+                ```(xml)
+                    <p>In Rio Bravo, *the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.</p>
 
 
 

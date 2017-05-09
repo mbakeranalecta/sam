@@ -1646,10 +1646,18 @@ class FlowParser:
             self.current_string = ''
             self.flow.append(Phrase(unescape(match.group("text"))))
             self.flow.append(Annotation('bold'))
-            para.advance(len(match.group(0)) - 1)
+            para.advance(len(match.group(0)))
         else:
             self.current_string += '*'
-        return "PARA", para
+            return "PARA", para
+
+        if self.patterns['annotation'].match(para.rest_of_para):
+            return "ANNOTATION-START", para
+        elif self.patterns['citation'].match(para.rest_of_para):
+            return "CITATION-START", para
+        else:
+            para.retreat(1)
+            return "PARA", para
 
     def _italic_start(self, para):
         match = self.patterns['italic'].match(para.rest_of_para)
@@ -1658,10 +1666,18 @@ class FlowParser:
             self.current_string = ''
             self.flow.append(Phrase(unescape(match.group("text"))))
             self.flow.append(Annotation('italic'))
-            para.advance(len(match.group(0)) - 1)
+            para.advance(len(match.group(0)))
         else:
             self.current_string += '_'
-        return "PARA", para
+            return "PARA", para
+
+        if self.patterns['annotation'].match(para.rest_of_para):
+            return "ANNOTATION-START", para
+        elif self.patterns['citation'].match(para.rest_of_para):
+            return "CITATION-START", para
+        else:
+            para.retreat(1)
+            return "PARA", para
 
     def _code_start(self, para):
         match = self.patterns['code'].match(para.rest_of_para)
@@ -1670,10 +1686,18 @@ class FlowParser:
             self.current_string = ''
             self.flow.append(Phrase((match.group("text")).replace("``", "`")))
             self.flow.append(Annotation('code'))
-            para.advance(len(match.group(0)) - 1)
+            para.advance(len(match.group(0)))
         else:
             self.current_string += '`'
-        return "PARA", para
+            return "PARA", para
+
+        if self.patterns['annotation'].match(para.rest_of_para):
+            return "ANNOTATION-START", para
+        elif self.patterns['citation'].match(para.rest_of_para):
+            return "CITATION-START", para
+        else:
+            para.retreat(1)
+            return "PARA", para
 
     def _dash_start(self, para):
         if self.smart_quotes:
