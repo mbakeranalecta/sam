@@ -3481,4 +3481,4 @@ tests:(!en) SAM Parser Tests
                     <p>This para <phrase><annotation type="code">contains</annotation></phrase> – an en dash and “an”—em dash.</p>
                     <p>This para ‘contains’ – an en dash and <phrase><annotation type="code">an</annotation></phrase>—em dash.</p>
 
-    # Can we have comments after the end of the document?
+# Can we have comments after the end of the document?

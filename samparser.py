@@ -1001,7 +1001,7 @@ class Root(Block):
         # calling this function. Not sure what the options are. Could detect
         # the error at the XML output stage, I suppose, but would rather
         # catch it earlier and give feedback.
-        if any( type(x) is not Comment for x in self.children):
+        if type(b) is not Comment and any( type(x) is not Comment for x in self.children):
             raise SAMParserError("A SAM document can only have one root. Found: "+ str(b))
         b.parent = self
         self.children.append(b)

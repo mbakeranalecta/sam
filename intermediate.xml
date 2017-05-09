@@ -2841,11 +2841,11 @@ This `foo`(bar) baz.
 </description>
 <source>
 <codeblock language ="sam">
-{The Duke}(actor "John Wayne")(if "19\"69"){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
+{The Duke}(actor "John Wayne")(if "1969"){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
 </codeblock>
 </source>
 <markup>
-<p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="19&quot;69">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
+<p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3951,5 +3951,5 @@ This para contains -- an en dash and an---em dash.
 </result>
 </case>
 </test>
-<!--  Can we have comments after the end of the document? -->
 </tests>
+<!--  Can we have comments after the end of the document? -->
