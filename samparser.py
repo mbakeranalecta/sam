@@ -1062,11 +1062,12 @@ class Flow(list):
                     i.add_attribute(thing)
                     break
 
-        elif type(thing) is Annotation:
+        elif isinstance(thing, Annotation):
             if type(self[-1]) is Phrase:
                 self[-1].append(thing)
             else:
                 super().append(thing)
+
         elif type(thing) is Citation:
             try:
                 if type(self[-1]) is Phrase:
@@ -1580,6 +1581,8 @@ class FlowParser:
                 self.flow.append(Attribute('name', unescape(annotation_type[1:])))
             elif annotation_type[0] == '?':
                 self.flow.append(Attribute('condition', unescape(annotation_type[1:])))
+            elif type(self.flow[-1]) is Code:
+                self.flow.append(Attribute('language', unescape(annotation_type)))
             else:
                 self.flow.append(Annotation(annotation_type, unescape(specifically), namespace))
             para.advance(len(match.group(0)))
@@ -1645,7 +1648,7 @@ class FlowParser:
             self.flow.append(self.current_string)
             self.current_string = ''
             self.flow.append(Phrase(unescape(match.group("text"))))
-            self.flow.append(Annotation('bold'))
+            self.flow.append(Decoration('bold'))
             para.advance(len(match.group(0)))
         else:
             self.current_string += '*'
@@ -1665,7 +1668,7 @@ class FlowParser:
             self.flow.append(self.current_string)
             self.current_string = ''
             self.flow.append(Phrase(unescape(match.group("text"))))
-            self.flow.append(Annotation('italic'))
+            self.flow.append(Decoration('italic'))
             para.advance(len(match.group(0)))
         else:
             self.current_string += '_'
@@ -1684,8 +1687,7 @@ class FlowParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            self.flow.append(Phrase((match.group("text")).replace("``", "`")))
-            self.flow.append(Annotation('code'))
+            self.flow.append(Code((match.group("text")).replace("``", "`")))
             para.advance(len(match.group(0)))
         else:
             self.current_string += '`'
@@ -1867,6 +1869,27 @@ class Phrase:
         else:
             self.child.append(thing)
 
+class Code(Phrase):
+
+    def serialize_xml(self):
+        yield '<code'
+        if self._id:
+            yield ' id="' + escape_for_xml_attribute(self._id) + '"'
+        if self._conditions:
+            yield ' conditions="' + ",".join(self._conditions) + '"'
+        if self._name:
+            yield ' name="' + escape_for_xml_attribute(self._name) + '"'
+        if self._language:
+            yield ' language="' + escape_for_xml_attribute(self._language) + '"'
+        yield '>'
+        if self.child:
+            yield from self.child.serialize_xml(escape_for_xml(self.text))
+        else:
+            yield escape_for_xml(self.text)
+        yield '</code>'
+
+    def append(self, thing):
+        raise SAMParserError("Inline code cannot have typed annotations. At: " + str(thing))
 
 class FlowSource:
     def __init__(self, para, strip=True):
@@ -1942,6 +1965,9 @@ class Annotation:
             self.child = thing
         else:
             self.child.append(thing)
+
+class Decoration(Annotation):
+    pass
 
 
 class Citation:

@@ -10,7 +10,7 @@ tests:(!en) SAM Parser Tests
 
         This document is the {output}(foo of the test document processed by test.xslt.
         That stylesheet attempt to validate the outcome of tests by generating a string
-        version of the markup under the `markup:` heading and comparing it to the
+        version of the markup under the `markup:`(sam) heading and comparing it to the
         text of the expected result as shown under the `result:` heading in the
         test file. This is not a perfect test. Two issues are known:
 
@@ -2403,10 +2403,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    `The Duke`(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
+                    {The Duke}(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
 
             markup:
-                `The Duke`(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
+                {The Duke}(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
 
             result:
                 ```(xml)

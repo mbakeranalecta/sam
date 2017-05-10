@@ -6,7 +6,7 @@
 <tests xml:lang ="en">
 <title>SAM Parser Tests</title>
 <description>
-<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <phrase><annotation type="code">markup:</annotation></phrase> heading and comparing it to the text of the expected result as shown under the <phrase><annotation type="code">result:</annotation></phrase> heading in the test file. This is not a perfect test. Two issues are known:</p>
+<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code language="sam">markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <ol>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup</p>
@@ -14,7 +14,7 @@
 </li>
 <li>
 <p>The SAM parser outputs attributes in alphabetical order. (From an XML point of view,</p>
-<p>the order of attributes does not matter.) Test should be written such that the attributes in the <phrase><annotation type="code">result:</annotation></phrase> section are in alphabetical order. If not, the test will fail even though the XML is semantically identical.</p>
+<p>the order of attributes does not matter.) Test should be written such that the attributes in the <code>result:</code> section are in alphabetical order. If not, the test will fail even though the XML is semantically identical.</p>
 </li>
 </ol>
 <p>When running this test you should receive one SAM Parser Warning:</p>
@@ -292,7 +292,7 @@ article: Foo
 <article>
 <title>Foo</title>
 <p>foo<phrase><annotation type="link" specifically="http://www.example.com/">bar</annotation></phrase>.</p>
-<p><phrase><annotation type="code">foo::bar</annotation></phrase> baz.</p>
+<p><code>foo::bar</code> baz.</p>
 </article>
 </markup>
 <result>
@@ -821,7 +821,7 @@ multiple lines.
 <test>
 <title>Unordered lists</title>
 <description>
-<p>Unordered lists are indicated by starting a line with <phrase><annotation type="code">*</annotation></phrase>.</p>
+<p>Unordered lists are indicated by starting a line with <code>*</code>.</p>
 </description>
 <case>
 <title>Unordered list with spaces</title>
@@ -1564,10 +1564,10 @@ multiple lines.
 <test>
 <title>Literal lists</title>
 <description>
-<p>Ordered lists have the number stripped away and are renumbered on output. Unordered list have their <phrase><annotation type="code">*</annotation></phrase> stripped away and replaced with the style of bullet specified on output processing. If you want to preserve actual numbers and bullets in your lists, you need to escape them so that the lines are not recognized as lists items.</p>
+<p>Ordered lists have the number stripped away and are renumbered on output. Unordered list have their <code>*</code> stripped away and replaced with the style of bullet specified on output processing. If you want to preserve actual numbers and bullets in your lists, you need to escape them so that the lines are not recognized as lists items.</p>
 </description>
 <case>
-<title>Literal numbered list using <phrase><annotation type="code">\</annotation></phrase> to escape <phrase><annotation type="code">.</annotation></phrase></title>
+<title>Literal numbered list using <code>\</code> to escape <code>.</code></title>
 <description>
 <p>To have a list number recognized as a literal, escape the period following the number (not the number itself). Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.</p>
 </description>
@@ -1594,9 +1594,9 @@ multiple lines.
 </result>
 </case>
 <case>
-<title>Literal unordered list using <phrase><annotation type="code">\</annotation></phrase> to escape <phrase><annotation type="code">*</annotation></phrase></title>
+<title>Literal unordered list using <code>\</code> to escape <code>*</code></title>
 <description>
-<p>To have a list number recognized as a literal, escape the <phrase><annotation type="code">*</annotation></phrase>. Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.</p>
+<p>To have a list number recognized as a literal, escape the <code>*</code>. Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.</p>
 </description>
 <source>
 <codeblock language ="sam">
@@ -2322,7 +2322,7 @@ ordered-list-item =
 <test>
 <title>Lines</title>
 <description>
-<p>Lines allows you to create text with specific line breaks. Lines are created by beginning each line on a new line and starting with a <phrase><annotation type="code">|</annotation></phrase> character. There must be one space after the <phrase><annotation type="code">|</annotation></phrase>, which is discarded. All other spaces after <phrase><annotation type="code">|</annotation></phrase> are retained. (Retained spaces are not tested for in text.xslt because the test normalize space.)</p>
+<p>Lines allows you to create text with specific line breaks. Lines are created by beginning each line on a new line and starting with a <code>|</code> character. There must be one space after the <code>|</code>, which is discarded. All other spaces after <code>|</code> are retained. (Retained spaces are not tested for in text.xslt because the test normalize space.)</p>
 </description>
 <case>
 <title>Lines</title>
@@ -2394,19 +2394,19 @@ ordered-list-item =
 <p>Attributes are applied using annotation markup, but with a specific initial character to denote each kind of attribute:</p>
 <ul>
 <li>
-<p><phrase><annotation type="code">(*id)</annotation></phrase> creates an ID attribute.</p>
+<p><code>(*id)</code> creates an ID attribute.</p>
 </li>
 <li>
-<p><phrase><annotation type="code">(#name)</annotation></phrase> creates a name attribute.</p>
+<p><code>(#name)</code> creates a name attribute.</p>
 </li>
 <li>
-<p><phrase><annotation type="code">(?condition)</annotation></phrase> creates a condition attribute.</p>
+<p><code>(?condition)</code> creates a condition attribute.</p>
 </li>
 <li>
-<p><phrase><annotation type="code">(!en-CA)</annotation></phrase> creates a language attribute.</p>
+<p><code>(!en-CA)</code> creates a language attribute.</p>
 </li>
 </ul>
-<p>You can only apply one id, name, or language attribute to a block or phrase. You can apply more than one condition attribute. On output to XML, the condition attributes will be converted to a single <phrase><annotation type="code">conditions</annotation></phrase> attribute with the individual conditions separated by commas. (For which reason, condition statements can’t include commas.)</p>
+<p>You can only apply one id, name, or language attribute to a block or phrase. You can apply more than one condition attribute. On output to XML, the condition attributes will be converted to a single <code>conditions</code> attribute with the individual conditions separated by commas. (For which reason, condition statements can’t include commas.)</p>
 </description>
 <case>
 <title>Attributes on block</title>
@@ -2860,11 +2860,11 @@ This `foo`(bar) baz.
 </description>
 <source>
 <codeblock language ="sam">
-`The Duke`(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
+{The Duke}(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
 </codeblock>
 </source>
 <markup>
-<p><phrase><annotation type="code"><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></annotation></phrase><phrase><annotation type="bold"><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></annotation></phrase> plays Rooster Cogburn.</p>
+<p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="bold"><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></annotation></phrase> plays Rooster Cogburn.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3039,7 +3039,7 @@ This sentence contains decorations for *bold*, _italic_, and `code`.
 </codeblock>
 </source>
 <markup>
-<p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <phrase><annotation type="code">code</annotation></phrase>.</p>
+<p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <code>code</code>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3071,7 +3071,7 @@ In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays
 <title>Links</title>
 <description>
 <p>Links are created with an annotation.</p>
-<p>You can specify a link as a <phrase><annotation type="code">link</annotation></phrase> annotation.</p>
+<p>You can specify a link as a <code>link</code> annotation.</p>
 <codeblock>
 foo {bar}(link "http://example.com/bar") baz
 </codeblock>
@@ -3326,7 +3326,7 @@ The doggy in the window costs `&amp;#xA3;`5.00.
 </codeblock>
 </source>
 <markup>
-<p>The doggy in the window costs <phrase><annotation type="code">&amp;#xA3;</annotation></phrase>5.00.</p>
+<p>The doggy in the window costs <code>&amp;#xA3;</code>5.00.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3356,7 +3356,7 @@ The doggy in the window costs *\&amp;#xA3;*5.00.
 <case>
 <title>Ampersand in a sentence, escaped with \ and not escaped.</title>
 <description>
-<p>Unlike XML, SAM does not require that an ampersand be escaped if it is not part of a character entity. You can escape it if you want to using a backslash. Both should output in XML as <phrase><annotation type="code">&amp;amp;</annotation></phrase></p>
+<p>Unlike XML, SAM does not require that an ampersand be escaped if it is not part of a character entity. You can escape it if you want to using a backslash. Both should output in XML as <code>&amp;amp;</code></p>
 </description>
 <source>
 <codeblock language ="sam">
@@ -3416,9 +3416,9 @@ There is a backslash and a curly brace in `this \{ code` decoration.
 </codeblock>
 </source>
 <markup>
-<p>There is a backtick and two backslashes in <phrase><annotation type="code">th\\is ` code</annotation></phrase> decoration.</p>
-<p>There is a backslash and a curly brace in <phrase><annotation type="code">this \{ code</annotation></phrase> decoration.</p>
-<p><phrase><annotation type="code">pubwork="book"</annotation></phrase> is an attribute on the element <phrase><annotation type="code">citetitle</annotation></phrase>.</p>
+<p>There is a backtick and two backslashes in <code>th\\is ` code</code> decoration.</p>
+<p>There is a backslash and a curly brace in <code>this \{ code</code> decoration.</p>
+<p><code>pubwork="book"</code> is an attribute on the element <code>citetitle</code>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3441,8 +3441,8 @@ There is a `_` in _this \_ italic_ decoration.
 </codeblock>
 </source>
 <markup>
-<p>There is a <phrase><annotation type="code">*</annotation></phrase> in <phrase><annotation type="bold">this * bold</annotation></phrase> decoration.</p>
-<p>There is a <phrase><annotation type="code">_</annotation></phrase> in <phrase><annotation type="italic">this _ italic</annotation></phrase> decoration.</p>
+<p>There is a <code>*</code> in <phrase><annotation type="bold">this * bold</annotation></phrase> decoration.</p>
+<p>There is a <code>_</code> in <phrase><annotation type="italic">this _ italic</annotation></phrase> decoration.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3474,7 +3474,7 @@ There is a `_` in _this \_ italic_ decoration.
 <test>
 <title>Conditions</title>
 <description>
-<p>You can add conditions to block metadata using condition tokens. Condition tokens start with <phrase><annotation type="code">?</annotation></phrase> and must not contain spaces. The application of conditions to text is up to the application layer. SAM just provided a mechanism for recording conditions.</p>
+<p>You can add conditions to block metadata using condition tokens. Condition tokens start with <code>?</code> and must not contain spaces. The application of conditions to text is up to the application layer. SAM just provided a mechanism for recording conditions.</p>
 </description>
 <case>
 <title>Conditions on unordered list shortcut</title>
@@ -3821,7 +3821,7 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 <p>Smart quotes is an optional feature of the parser, not a feature of the SAM language. It turns straight quotes into curly quotes. It raises a warning when it can’t figure out how to handle a case. The algorithm could be improved in the future to handle more cases correctly.</p>
 <p>The canonical way to handle quotes in SAM is to use real curly quotes to begin with. All SAM documents are UTF-8.</p>
 <Note>These tests will fail if smart quotes is not selected</Note>
-<p>using the <phrase><annotation type="code">-q</annotation></phrase> option of the parser command line or by setting the <phrase><annotation type="code">smart_quotes</annotation></phrase> attribute of the SamParser object to <phrase><annotation type="code">True</annotation></phrase>.</p>
+<p>using the <code>-q</code> option of the parser command line or by setting the <code>smart_quotes</code> attribute of the SamParser object to <code>True</code>.</p>
 </description>
 <case>
 <title>Smart quotes</title>
@@ -3863,7 +3863,7 @@ interpretations of the `xref`'s instruction
 </codeblock>
 </source>
 <markup>
-<p>interpretations of the <phrase><annotation type="code">xref</annotation></phrase>’s instruction</p>
+<p>interpretations of the <code>xref</code>’s instruction</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3968,7 +3968,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 <case>
 <title>Escaped dumb quotes</title>
 <description>
-<p>If you want to enter straight quotes and have them stay straight when smart quotes are applied, you have to escape them with <phrase><annotation type="code">\</annotation></phrase> or use the <phrase><annotation type="code">&amp;quot;</annotation></phrase> character entity.</p>
+<p>If you want to enter straight quotes and have them stay straight when smart quotes are applied, you have to escape them with <code>\</code> or use the <code>&amp;quot;</code> character entity.</p>
 </description>
 <source>
 <codeblock language ="sam">
@@ -3999,8 +3999,8 @@ This para contains -- an en dash and an---em dash.
 <p>This para contains – <phrase><annotation type="word">an</annotation></phrase> en dash and an—<phrase><annotation type="word">em</annotation></phrase> dash.</p>
 <p>This para <phrase><annotation type="word">contains</annotation></phrase> – an en dash and <phrase><annotation type="word">an</annotation></phrase>—em dash.</p>
 <p>This para <phrase><annotation type="bold">contains</annotation></phrase> – an en dash and <phrase><annotation type="italic">an</annotation></phrase>—em dash.</p>
-<p>This para <phrase><annotation type="code">contains</annotation></phrase> – an en dash and “an”—em dash.</p>
-<p>This para ‘contains’ – an en dash and <phrase><annotation type="code">an</annotation></phrase>—em dash.</p>
+<p>This para <code>contains</code> – an en dash and “an”—em dash.</p>
+<p>This para ‘contains’ – an en dash and <code>an</code>—em dash.</p>
 </markup>
 <result>
 <codeblock language ="xml">
