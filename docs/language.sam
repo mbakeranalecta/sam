@@ -161,7 +161,7 @@ specification: Semantic Authoring Markdown (SAM)
         The following is a list of the structures of a SAM document.
 
         structure:(#root) Root
-            Every SAM document has a root which contains the entire content of the document. The root can contain a single block which is the parent of all other blocks in the document. This block is called the {root block}.  
+            Every SAM document has a root which contains the entire content of the document. The root can contain a single block which is the parent of all other blocks in the document. This block is called the {document block}.  
 
             syntax:
                 The {root} had no syntax of its own. It is an implicit container for the contents of the file. 
@@ -184,29 +184,29 @@ specification: Semantic Authoring Markdown (SAM)
             SOM:
                 The {root} is represented by a {Root}(SOM_object) object that is created automatically by the parser when parsing starts. 
             
-                All {declarations}, {comments}, {remarks}, and {string definitions} prior to the root block, and the root block itself, are children of the {Root} object. 
+                All {declarations}, {comments}, {remarks}, and {string definitions} prior to the document block, and the document block itself, are children of the {Root} object. 
 
-                Note that the SOM {Root} object is not the same thing as the root block. The {Root} object is a container for all the structures declared at column zero in the SAM document. The {root block} of the document itself is the only {block structure} permitted as a direct child of the {Root} object. 
+                Note that the SOM {Root} object is not the same thing as the {document block}. The {Root} object is a container for all the structures declared at column zero in the SAM document. The {document block} is the only {block structure} permitted as a direct child of the {Root} object. 
 
-        structure:(#root-block) Root block
+        structure:(#document-block) Document block
 
-            The {root block} is the first structure declared in the document after any {declaration}s, {comment}s, {remark}s or {string definition}s. It is the container for all other blocks in the document. 
+            The {document block} is the first structure declared in the document after any {declaration}s, {comment}s, {remark}s or {string definition}s. It is the container for all other blocks in the document. 
 
-            Any type of {block} can be the {root block}. However, choosing a structure other than a {named block} as the root block will be extremely limiting, as most {concrete block} types allow for little of no nesting of other blocks. For instance, nothing can be nested under a {paragraph} so while a paragraph can be the root block of a SAM document, it would also be the only structure in the document. 
+            Any type of {block} can be the {docuemtn block}. However, choosing a structure other than a {named block} as the document block will be extremely limiting, as most {concrete block} types allow for little of no nesting of other blocks. For instance, nothing can be nested under a {paragraph} so while a paragraph can be the document block of a SAM document, it would also be the only structure in the document. 
 
             syntax:
-                The {root block} is not indented. All other structures in the document must be children of the {root block}, and therefore must be indented under it. In all other respects, the syntax of the root block are the syntax of it root type. 
+                The {document block} is not indented. All other structures in the document (excluding {comments}, {declarations}, and {string definitions}) must be children of the {document block}, and therefore must be indented under it. In all other respects, the syntax of the document block is the syntax of it type. 
 
             semantics:
 
-                The {root block} determines the type of the SAM document (just as the root element name in XML forms the type of an XML document). In all other respects, the semantics of the {root block} are no different from the semantics of that structure type. 
+                The {document block} determines the type of the SAM document (just as the root element name in XML forms the type of an XML document). In all other respects, the semantics of the {document block} are no different from the semantics of that structure type. 
 
             serialization:
 
-                The {root block} is serialized according to its block type. In addition, however, if a namespace is declared for the document, the appropriate namespace declaration will be added to the root element generated. 
+                The {document block} is serialized according to its block type. In addition, however, if a namespace is declared for the document, the appropriate namespace declaration will be added to the root element generated. 
 
             SOM:
-                The root block is the only block child of the {Root} object. In every other respect, it is represented as its normal block type.
+                The document block is the only block child of the {Root} object. In every other respect, it is represented as its normal block type.
 
         structure:(#declaration) Declaration
 
@@ -219,21 +219,21 @@ specification: Semantic Authoring Markdown (SAM)
                     !namespace: http://spfeopentoolkit.org/sam/ns/tests
 
             semantics:
-                A declaration is a and instruction to the parser on how to interpret the SAM document. Declarations are not part of the content of the document described by the SAM markup. Rather, they describe the markup itself.    
+                A declaration is an instruction to the parser on how to interpret the SAM document. Declarations are not part of the content of the document described by the SAM markup. Rather, they describe the markup itself.    
 
                 Currently the only declaration supported is the namespace declaration which sets the namespace for the entire SAM document. You cannot assign namespaces to individual structures in the text of a SAM document like you can in XML.
-
-            future:
-                The schema declaration specifies the location of a schema file. The location will be processed through an XML catalog if one is specified to the parser. If a schema is specified, the namespace declaration is ignored and namespaces are assigned per the schema. A schema may assign different elements to different namespaces.
-
-                ```(sam) 
-                    !schema: http://spfeopentoolkit.org/schemas/think-plan-do-topic.sams
 
             serialization:
                 The namespace declaration causes the namespace of a document to be set to the specified namespace. This will result in the appropriate namespace declaration in the serialized XML file. A parser may handle namespace prefixes in any way it sees fit. 
 
             SOM:
                 The namespace declaration is used to update the namespace property of all blocks. In future, the namespace property of blocks may be set by the schema. 
+
+             future:
+                The schema declaration specifies the location of a schema file. The location will be processed through an XML catalog if one is specified to the parser. If a schema is specified, the namespace declaration is ignored and namespaces are assigned per the schema. A schema may assign different elements to different namespaces.
+
+                ```(sam) 
+                    !schema: http://spfeopentoolkit.org/schemas/think-plan-do-topic.sams
 
         structure:(#block) Named Block
 
@@ -1407,7 +1407,7 @@ specification: Semantic Authoring Markdown (SAM)
 
         structure:(#decoration) Bold and italic decorations
 
-            A decoration is a shortcut for creating an annotated phrase. They are used for common text formatting features: bold, italic, and code. Decorations are shortcuts, so
+            A decoration is a shortcut for creating an annotated phrase. They are used for common text formatting features  bold, and italic. Decorations are shortcuts, so
 
             ```(sam)
                 This text is in *important* type.
@@ -1432,7 +1432,7 @@ specification: Semantic Authoring Markdown (SAM)
 
 
                 ```(sam)
-                    This text is *italic* type.
+                    This text is _italic_ type.
 
 
                 Decorations cannot be nested, so
@@ -1479,7 +1479,7 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam)
                     {Moby Dick}(italic) is about a whale.
 
-                And we should not in this case that the abstract `emphasis` is not only vague, it is actually incorrect. This is not a case of emphasizing a word, but of formatting a book title according to the commonly accepted convention. If you actually want an emphasis annotation in your tagging language, you should do it like this:
+                And we should note in this case that the abstract `emphasis` is not only vague, it is actually incorrect. This is not a case of emphasizing a word, but of formatting a book title according to the commonly accepted convention. If you actually want an emphasis annotation in your tagging language, you should do it like this:
 
                 ```(sam)
                     {Moby Dick}(italic) is a {very}(emphasis) good book.
@@ -1513,12 +1513,11 @@ specification: Semantic Authoring Markdown (SAM)
 
                 The only character that can be escaped in inline code is the back tick, which is escaped using a double back tick: ````.
 
-                *Not implemented yet* Inline code can take a language attribute:
 
                 ```(sam)
                     In Python 3, use `print("Hello World")`(python). 
 
-                Since decorations are just shortcuts for annotated phrases, you can add additional {annotation}s and {citation}s to decorations just as if they were regular phrases. The following 
+                Inline code an also take all the regular attributes, except the {language attribute}. 
 
                 ```(sam)
                     In Python 3, the correct form is `print("Hello World")`(python). 
