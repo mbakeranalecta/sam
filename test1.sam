@@ -1753,7 +1753,7 @@ tests:(!en) SAM Parser Tests
             A codeblock is a block of program code. A codeblock is treated as
             plain text and is not parsed as SAM markup. It will be copied to
             output exactly as it occurs in the source. Codeblocks are denoted
-            by three backtick at the start of a line. Codeblocks have a special
+            by three back ticks at the start of a line. Codeblocks have a special
             annotation. The first word of an annotation on a codeblock is
             the language of the code.
 
@@ -1764,7 +1764,7 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    ```(pyt&#x68;on)(?foo)
+                    ```(pyt&#x68;on)(?foo)(!en)
                         def escape_for_xml(s):
                             t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
                             try:
@@ -1772,7 +1772,7 @@ tests:(!en) SAM Parser Tests
                             except AttributeError:
                                 return s
             markup:
-                ```(pyt&#x68;on)(?foo)
+                ```(pyt&#x68;on)(?foo)(!en)
                     def escape_for_xml(s):
                         t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
                         try:
@@ -1782,7 +1782,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <codeblock conditions="foo" language="python">
+                    <codeblock conditions="foo" language="python" xml:lang="en">
                     def escape_for_xml(s):
                         t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
                         try:
@@ -1926,8 +1926,6 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <embed conditions="a,b" encoding="latexmathml" id="id13" name="name"> n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k </embed>
-
-
 
     test: Lines
 
@@ -2627,14 +2625,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath) in the middle of a paragraph. 
+                    This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the middle of a paragraph. 
 
             markup:
-                This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath) in the middle of a paragraph. 
+                This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the middle of a paragraph. 
 
             result:
                 ```(xml)
-                    <p>This is an equation <code language="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p> 
+                    <p>This is an equation <code language="latexmath" xml:lang="en">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p> 
 
         case: Embedded latexmath
 
