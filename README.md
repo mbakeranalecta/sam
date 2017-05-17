@@ -71,3 +71,12 @@ To run SAM Parser on Xnix or Mac, invoke Python 3 as appropriate on your system.
 Revision 227cb3dd7bb322f5579858806071c1ff8456c0b6 introduced a change in the 
 way the XML representation of a record is generate. A record
 used to output as "row". It is now output as "record".
+
+### NOTE 
+
+Revision 3fdd6528d88b1a7f0a72c10ce5b5e768433eaf19 introduced the following non-backward compatible changes:
+
+* Inline code is now serialized as a <code> element rather than as a <phrase> element with an <annotation type="code"> nested element.
+
+* 
+
