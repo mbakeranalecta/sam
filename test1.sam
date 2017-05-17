@@ -15,15 +15,15 @@ tests:(!en) SAM Parser Tests
         test file. This is not a perfect test. Two issues are known:
 
         1. Test are done on whitespace normalized versions of the XML markup
-          strings. As such, they do not validly test situations where whitespace
-          should be retained, such as in codeblocks and at the beginning of
-          lines.
+           strings. As such, they do not validly test situations where whitespace
+           should be retained, such as in codeblocks and at the beginning of
+           lines.
 
         2. The SAM parser outputs attributes in alphabetical order. (From an XML point of view,
-          the order of attributes does not matter.) Test should be written such
-          that the attributes in the `result:` section are in alphabetical
-          order. If not, the test will fail even though the XML is semantically
-          identical.
+           the order of attributes does not matter.) Test should be written such
+           that the attributes in the `result:` section are in alphabetical
+           order. If not, the test will fail even though the XML is semantically
+           identical.
 
         When running this test you should receive one SAM Parser Warning:
 
@@ -83,7 +83,6 @@ tests:(!en) SAM Parser Tests
                     <p>This file includes another file.</p>
                     <p>Nested includes work! Yipee!</p>
                     </message>
-
 
     test: Blocks
 
@@ -247,7 +246,7 @@ tests:(!en) SAM Parser Tests
                     <article>
                     <title>Foo</title>
                     <p>foo<phrase><annotation type="link" specifically="http://www.example.com/">bar</annotation></phrase>.</p>
-                    <p><phrase><annotation type="code">foo::bar</annotation></phrase> baz.</p>
+                    <p><code>foo::bar</code> baz.</p>
                     </article>
 
     # FIXME: Need tests for comments.
@@ -959,7 +958,6 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ul>
 
-
     test: Mixed lists
 
         description:
@@ -1330,7 +1328,6 @@ tests:(!en) SAM Parser Tests
                     <p>* This is just a paragraph</p>
                     <p>* This is just a paragraph</p>
 
-
     test: Labeled lists
         description:
             You can create lists with labels rather than bullets. The label is
@@ -1506,7 +1503,6 @@ tests:(!en) SAM Parser Tests
                     <film>The Shootish</film>
                     </record>
                     </filmography>
-
 
     test: Grids
 
@@ -1752,7 +1748,6 @@ tests:(!en) SAM Parser Tests
                     <p>This is a blockquote without a citation.</p>
                     </blockquote>
 
-
     test: Codeblocks
         description:
             A codeblock is a block of program code. A codeblock is treated as
@@ -1910,6 +1905,28 @@ tests:(!en) SAM Parser Tests
                         {fonty: 12pt "Century Schoolbook"}&lt;++count&gt;.[tab]
                     </codeblock>
 
+    test: Embed
+        description:
+            An embed is a block of markup or code in another language that is intended to be interpreted rather than displayed. For instance, it can be used to include an equation using LaTeX or a diagram using SVG.
+
+        case: Simple embed
+
+            description:
+                Simple embed of an equation using LaTeX.
+
+            source:
+                ```(sam)
+                    ```(=latexmathml)(*id13)(#name)(?a)(?b)
+                        n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
+
+            markup:
+                ```(=latexmathml)(*id13)(#name)(?a)(?b)
+                    n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
+
+            result:
+                ```(xml)
+                    <embed conditions="a,b" encoding="latexmathml" id="id13" name="name"> n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k </embed>
+
 
 
     test: Lines
@@ -1973,7 +1990,6 @@ tests:(!en) SAM Parser Tests
                     <line conditions="bar">Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
                     </blockquote>
-
 
     test: Attributes
 
@@ -2312,16 +2328,16 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    ===(latexmathml)(*id13)(#name)(?a)(?b)
+                    ```(=latexmathml)(*id13)(#name)(?a)(?b)
                         n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             markup:
-                ===(latexmathml)(*id13)(#name)(?a)(?b)
+                ```(=latexmathml)(*id13)(#name)(?a)(?b)
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             result:
                 ```(xml)
-                    <embed conditions="a,b" id="id13" language="latexmathml" name="name">
+                    <embed conditions="a,b" encoding="latexmathml" id="id13" name="name">
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
                     </embed>
 
@@ -2340,7 +2356,6 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <insert conditions="a,b" id="id14" item="foo.gif" name="name" type="image"/>
-
 
     test: Annotations
 
@@ -2403,14 +2418,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    {The Duke}(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
+                    {The Duke}(actor "John Wayne")(if "1969"){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
 
             markup:
-                {The Duke}(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
+                {The Duke}(actor "John Wayne")(if "1969"){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
 
             result:
                 ```(xml)
-                    <p><phrase><annotation type="code"><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></annotation></phrase><phrase><annotation type="bold"><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></annotation></phrase> plays Rooster Cogburn.</p>
+                    <p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
 
 
 
@@ -2585,7 +2600,7 @@ tests:(!en) SAM Parser Tests
             
             result:
                 ```(xml)
-                    <p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <phrase><annotation type="code">code</annotation></phrase>.</p>
+                    <p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <code>code</code>.</p>
 
         case: Unbalanced decorations and escapes
             description:
@@ -2600,6 +2615,27 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <p>In Rio Bravo, *the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.</p>
+
+    test: Inline code
+        description:
+            Inline code is a special form of phrase used for phrases that are in computer languages or other encodings other than the human language of the text. 
+
+        case: Inline latexmath
+
+            description:
+                A selection of latex math to be printed. 
+
+            source:
+                ```(sam)
+                    This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
+
+            markup:
+                This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
+
+            result:
+                ```(xml)
+                    <p>This is an equation <code language="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.<p> 
+
 
 
 
@@ -2695,7 +2731,6 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>Rio Bravo refers to the movie (and not to <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></phrase>)</p>
 
-
     test: Citations
 
         description:
@@ -2765,7 +2800,6 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <p>Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in <citation type="nameref" value="chapter.linking"/> and the subject-based composition and architecture algorithms described in <citation type="nameref" value="chapter.composition"/> and <citation type="nameref" value="chapter.architecture"/>, including bottom-up information architecture.</p>
-
 
     test: Characters
 
@@ -2869,7 +2903,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>The doggy in the window costs <phrase><annotation type="code">&amp;#xA3;</annotation></phrase>5.00.</p>
+                    <p>The doggy in the window costs <code>&amp;#xA3;</code>5.00.</p>
 
 
 
@@ -2961,9 +2995,9 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>There is a backtick and two backslashes in <phrase><annotation type="code">th\\is ` code</annotation></phrase> decoration.</p>
-                    <p>There is a backslash and a curly brace in <phrase><annotation type="code">this \{ code</annotation></phrase> decoration.</p>
-                    <p><phrase><annotation type="code">pubwork="book"</annotation></phrase> is an attribute on the element <phrase><annotation type="code">citetitle</annotation></phrase>.</p>
+                    <p>There is a backtick and two backslashes in <code>th\\is ` code</code> decoration.</p>
+                    <p>There is a backslash and a curly brace in <code>this \{ code</code> decoration.</p>
+                    <p><code>pubwork="book"</code> is an attribute on the element <code>citetitle</code>.</p>
 
 
 
@@ -2986,8 +3020,8 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>There is a <phrase><annotation type="code">*</annotation></phrase> in <phrase><annotation type="bold">this * bold</annotation></phrase> decoration.</p>
-                    <p>There is a <phrase><annotation type="code">_</annotation></phrase> in <phrase><annotation type="italic">this _ italic</annotation></phrase> decoration.</p>
+                    <p>There is a <code>*</code> in <phrase><annotation type="bold">this * bold</annotation></phrase> decoration.</p>
+                    <p>There is a <code>_</code> in <phrase><annotation type="italic">this _ italic</annotation></phrase> decoration.</p>
 
         case: XML reserved characters in citation specifically attribute
 
@@ -3004,9 +3038,6 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <p><phrase><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp; Possum&quot;" namespace="Eliott">Skimbleshanks</annotation></phrase>.</p>
-
-
-
 
     test: Conditions
 
@@ -3090,7 +3121,6 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
-
     test: Block inserts
 
         description:
@@ -3127,7 +3157,6 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <insert item="glug" type="key"/>
-
 
     test: Inline inserts
 
@@ -3175,6 +3204,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <p><inline-insert item="foo" type="name"/></p>
+
     test: Strings
 
         description:
@@ -3280,9 +3310,6 @@ tests:(!en) SAM Parser Tests
                     <string name="b">breadfruit</string>
                     </insert>
 
-
-
-
     test: XML fragments
 
         description:
@@ -3384,7 +3411,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>interpretations of the <phrase><annotation type="code">xref</annotation></phrase>’s instruction</p>
+                    <p>interpretations of the <code>xref</code>’s instruction</p>
 
         case: Smart quotes with annotations
 
@@ -3527,7 +3554,8 @@ tests:(!en) SAM Parser Tests
                     <p>This para contains – <phrase><annotation type="word">an</annotation></phrase> en dash and an—<phrase><annotation type="word">em</annotation></phrase> dash.</p>
                     <p>This para <phrase><annotation type="word">contains</annotation></phrase> – an en dash and <phrase><annotation type="word">an</annotation></phrase>—em dash.</p>
                     <p>This para <phrase><annotation type="bold">contains</annotation></phrase> – an en dash and <phrase><annotation type="italic">an</annotation></phrase>—em dash.</p>
-                    <p>This para <phrase><annotation type="code">contains</annotation></phrase> – an en dash and “an”—em dash.</p>
-                    <p>This para ‘contains’ – an en dash and <phrase><annotation type="code">an</annotation></phrase>—em dash.</p>
+                    <p>This para <code>contains</code> – an en dash and “an”—em dash.</p>
+                    <p>This para ‘contains’ – an en dash and <code>an</code>—em dash.</p>
 
 # Can we have comments after the end of the document?
+# Yes we can!

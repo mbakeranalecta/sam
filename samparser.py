@@ -40,8 +40,6 @@ class SamParser:
         self.stateMachine.add_state("CODEBLOCK-START", self._codeblock_start)
         self.stateMachine.add_state("CODEBLOCK", self._codeblock)
         self.stateMachine.add_state("REMARK-START", self._remark_start)
-        self.stateMachine.add_state("EMBED-START", self._embed_start)
-        self.stateMachine.add_state("EMBED", self._embed)
         self.stateMachine.add_state("BLOCKQUOTE-START", self._blockquote_start)
         self.stateMachine.add_state("FRAGMENT-START", self._fragment_start)
         self.stateMachine.add_state("PARAGRAPH-START", self._paragraph_start)
@@ -74,9 +72,6 @@ class SamParser:
             'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + '\s' + re_content + r'?', re.U),
             'codeblock-start': re.compile(
                 re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
-                re.U),
-            'embed-start': re.compile(
-                re_indent + r'(?P<flag>===)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
                 re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(
@@ -129,7 +124,7 @@ class SamParser:
             raise SAMParserError("Unexpected characters in codeblock header. Found: " + match.group("unexpected"))
         indent = match.end("indent")
 
-        attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
+        attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?!=", unflagged="language")
 
         b = Codeblock(indent, attributes, citations)
         self.doc.add_block(b)
@@ -169,41 +164,6 @@ class SamParser:
         b = Remark(indent, attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
-
-    def _embed_start(self, context):
-        source, match = context
-        if match.group("unexpected"):
-            raise SAMParserError("Unexpected characters in embed header. Found: " + match.group("unexpected"))
-        indent = match.end("indent")
-
-        attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?", unflagged="language")
-
-        b = Embed(indent, attributes, citations)
-        self.doc.add_block(b)
-        self.current_text_block = UnparsedTextBlock()
-        return "EMBED", context
-
-    def _embed(self, context):
-        source, match = context
-        try:
-            line = source.next_line
-        except EOFError:
-            self.doc.add_flow(Pre(self.current_text_block))
-            self.current_text_block = None
-            return "END", context
-
-        indent = len(line) - len(line.lstrip())
-        if self.patterns['blank-line'].match(line):
-            self.current_text_block.append(line)
-            return "EMBED", context
-        if indent <= self.doc.ancestor_or_self_type(Embed).indent:
-            source.return_line()
-            self.doc.add_flow(Pre(self.current_text_block.strip()))
-            self.current_text_block = None
-            return "SAM", context
-        else:
-            self.current_text_block.append(line)
-            return "EMBED", context
 
     def _blockquote_start(self, context):
         source, match = context
@@ -506,10 +466,6 @@ class SamParser:
         if match is not None:
             return "CODEBLOCK-START", (source, match)
 
-        match = self.patterns['embed-start'].match(line)
-        if match is not None:
-            return "EMBED-START", (source, match)
-
         match = self.patterns['blockquote-start'].match(line)
         if match is not None:
             return "BLOCKQUOTE-START", (source, match)
@@ -694,15 +650,42 @@ class Codeblock(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='codeblock', indent=indent, attributes=attributes, citations=citations,namespace=namespace)
 
+    def serialize_xml(self):
+
+        if any(x.type == 'encoding' for x in self.attributes):
+            tag="embed"
+        else:
+            tag = "codeblock"
+
+        yield '<{0}'.format(tag)
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+
+        if self.attributes:
+            newlist = sorted(self.attributes, key=lambda x: x.type)
+
+            for a in newlist:
+                yield from a.serialize_xml()
+
+        if self.children:
+            yield ">"
+
+            if type(self.children[0]) is not Flow:
+                yield "\n"
+
+            for x in self.children:
+                if x is not None:
+                    yield from x.serialize_xml()
+            yield "</{0}>\n".format(tag)
+        else:
+            yield '/>'
+
 
 class Remark(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='remark', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
-
-
-class Embed(Block):
-    def __init__(self, indent, attributes=None, citations=None, namespace=None):
-        super().__init__(name='embed', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
 
 class Grid(Block):
@@ -1573,16 +1556,22 @@ class FlowParser:
             else:
                 specifically = match.group('specifically') if match.group('specifically') is not None else None
             namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
+            if type(self.flow[-1]) is Code:
+                if annotation_type[0] == '=':
+                    self.flow.append(Attribute('encoding', unescape(annotation_type[1:])))
+                else:
+                    self.flow.append(Attribute('language', unescape(annotation_type)))
+            elif annotation_type[0] == '=':
+                raise SAMParserError("Only code can have and embed attribute. At: " + match.group(0))
+
             if annotation_type[0] == '!':
-                self.flow.append(Attribute('language', unescape(annotation_type[1:])))
+                self.flow.append(Attribute('language-tag', unescape(annotation_type[1:])))
             elif annotation_type[0] == '*':
                 self.flow.append(Attribute('id', unescape(annotation_type[1:])))
             elif annotation_type[0] == '#':
                 self.flow.append(Attribute('name', unescape(annotation_type[1:])))
             elif annotation_type[0] == '?':
                 self.flow.append(Attribute('condition', unescape(annotation_type[1:])))
-            elif type(self.flow[-1]) is Code:
-                self.flow.append(Attribute('language', unescape(annotation_type)))
             else:
                 self.flow.append(Annotation(annotation_type, unescape(specifically), namespace))
             para.advance(len(match.group(0)))
@@ -1814,7 +1803,7 @@ class Phrase:
             self.id = attr.value
         elif attr.type == 'name':
             self.name = attr.value
-        elif attr.type == 'language':
+        elif attr.type == 'language-tag':
             self.language = attr.value
         elif attr.type == 'condition':
             self.condition = attr.value
@@ -2052,7 +2041,7 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         else:
             raise SAMParserError("Unrecognized character '" + x.group('bad') + "' found in attributes list at: " + attributes_string)
 
-    unflagged_attributes = [x for x in attributes_list if not (x[0] in '?#*!')]
+    unflagged_attributes = [x for x in attributes_list if not (x[0] in '?#*!=')]
     if unflagged_attributes:
         if unflagged is None:
             raise SAMParserError("Unexpected attribute(s): {0}".format(', '.join(unflagged_attributes)))
@@ -2070,18 +2059,25 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         raise SAMParserError("Names not allowed in this context. Found: #{0}".format(', #'.join(names)))
     if len(names) > 1:
         raise SAMParserError("More than one name specified: " + ", ".join(names))
-    language = [x[1:] for x in attributes_list if x[0] == '!']
-    if language and not '!' in flagged:
-        raise SAMParserError("Language specification not allowed in this context. Found: !{0}".format(', !'.join(language)))
-    if len(language) > 1:
-        raise SAMParserError("More than one language specified: " + ", ".join(language))
+    language_tag = [x[1:] for x in attributes_list if x[0] == '!']
+    if language_tag and not '!' in flagged:
+        raise SAMParserError("Language tag not allowed in this context. Found: !{0}".format(', !'.join(language_tag)))
+    if len(language_tag) > 1:
+        raise SAMParserError("More than one language tag specified: " + ", ".join(language_tag))
+    embed = [x[1:] for x in attributes_list if x[0] == '=']
+    if embed and not '=' in flagged:
+        raise SAMParserError("Embeded encoding specification not allowed in this context. Found: !{0}".format(', !'.join(embed)))
+    if len(embed) > 1:
+        raise SAMParserError("More than one embedded encoding specified: " + ", ".join(embed))
     conditions = [x[1:] for x in attributes_list if x[0] == '?']
     if ids:
         attributes.append(Attribute("id", unescape(ids[0])))
     if names:
         attributes.append(Attribute("name", unescape(names[0])))
-    if language:
-        attributes.append(Attribute("xml:lang", unescape(language[0])))
+    if language_tag:
+        attributes.append(Attribute("xml:lang", unescape(language_tag[0])))
+    if embed:
+        attributes.append(Attribute("encoding", unescape(embed[0])))
     if conditions:
         attributes.append(Attribute("conditions", ",".join([unescape(x) for x in conditions])))
 

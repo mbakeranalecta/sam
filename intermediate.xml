@@ -6,15 +6,13 @@
 <tests xml:lang ="en">
 <title>SAM Parser Tests</title>
 <description>
-<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code language="sam">markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
+<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code>markup:</code><annotation type="sam"/> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <ol>
 <li>
-<p>Test are done on whitespace normalized versions of the XML markup</p>
-<p>strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
+<p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
 </li>
 <li>
-<p>The SAM parser outputs attributes in alphabetical order. (From an XML point of view,</p>
-<p>the order of attributes does not matter.) Test should be written such that the attributes in the <code>result:</code> section are in alphabetical order. If not, the test will fail even though the XML is semantically identical.</p>
+<p>The SAM parser outputs attributes in alphabetical order. (From an XML point of view, the order of attributes does not matter.) Test should be written such that the attributes in the <code>result:</code> section are in alphabetical order. If not, the test will fail even though the XML is semantically identical.</p>
 </li>
 </ol>
 <p>When running this test you should receive one SAM Parser Warning:</p>
@@ -35,7 +33,7 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 </description>
 <source>
 <codeblock language ="sam">
-&lt;&lt;&lt;(C:\Users\Mark\sam\includeme.sam)
+&lt;&lt;&lt;(includeme.sam)
 </codeblock>
 </source>
 <markup>
@@ -82,7 +80,7 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 </description>
 <source>
 <codeblock language ="sam">
-&lt;&lt;&lt;(file:///C:/Users/Mark/sam/includeme1.sam)
+&lt;&lt;&lt;(includeme1.sam)
 </codeblock>
 </source>
 <markup>
@@ -300,7 +298,7 @@ article: Foo
 &lt;article&gt;
 &lt;title&gt;Foo&lt;/title&gt;
 &lt;p&gt;foo&lt;phrase&gt;&lt;annotation type="link" specifically="http://www.example.com/"&gt;bar&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;phrase&gt;&lt;annotation type="code"&gt;foo::bar&lt;/annotation&gt;&lt;/phrase&gt; baz.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;foo::bar&lt;/code&gt; baz.&lt;/p&gt;
 &lt;/article&gt;
 </codeblock>
 </result>
@@ -2320,6 +2318,34 @@ ordered-list-item =
 </case>
 </test>
 <test>
+<title>Embed</title>
+<description>
+<p>An embed is a block of markup or code in another language that is intended to be interpreted rather than displayed. For instance, it can be used to include an equation using LaTeX or a diagram using SVG.</p>
+</description>
+<case>
+<title>Simple embed</title>
+<description>
+<p>Simple embed of an equation using LaTeX.</p>
+</description>
+<source>
+<codeblock language ="sam">
+```(=latexmathml)(*id13)(#name)(?a)(?b)
+    n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
+</codeblock>
+</source>
+<markup>
+<embed conditions ="a,b" encoding ="latexmathml" id ="id13" name ="name">
+n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
+</embed>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;embed conditions="a,b" encoding="latexmathml" id="id13" name="name"&gt; n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k &lt;/embed&gt;
+</codeblock>
+</result>
+</case>
+</test>
+<test>
 <title>Lines</title>
 <description>
 <p>Lines allows you to create text with specific line breaks. Lines are created by beginning each line on a new line and starting with a <code>|</code> character. There must be one space after the <code>|</code>, which is discarded. All other spaces after <code>|</code> are retained. (Retained spaces are not tested for in text.xslt because the test normalize space.)</p>
@@ -2763,18 +2789,18 @@ def escape_for_xml(s):
 </description>
 <source>
 <codeblock language ="sam">
-===(latexmathml)(*id13)(#name)(?a)(?b)
+```(=latexmathml)(*id13)(#name)(?a)(?b)
     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </codeblock>
 </source>
 <markup>
-<embed conditions ="a,b" id ="id13" language ="latexmathml" name ="name">
+<embed conditions ="a,b" encoding ="latexmathml" id ="id13" name ="name">
 n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </embed>
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;embed conditions="a,b" id="id13" language="latexmathml" name="name"&gt;
+&lt;embed conditions="a,b" encoding="latexmathml" id="id13" name="name"&gt;
 n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 &lt;/embed&gt;
 </codeblock>
@@ -2860,15 +2886,15 @@ This `foo`(bar) baz.
 </description>
 <source>
 <codeblock language ="sam">
-{The Duke}(actor "John Wayne")(if "1969")*Jeff Bridges*(actor)(if "2010") plays Rooster Cogburn.
+{The Duke}(actor "John Wayne")(if "1969"){Jeff Bridges}(actor)(if "2010") plays Rooster Cogburn.
 </codeblock>
 </source>
 <markup>
-<p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="bold"><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></annotation></phrase> plays Rooster Cogburn.</p>
+<p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;&lt;phrase&gt;&lt;annotation type="code"&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;&lt;annotation type="if" specifically="1969"&gt;The Duke&lt;/annotation&gt;&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt;&lt;phrase&gt;&lt;annotation type="bold"&gt;&lt;annotation type="actor"&gt;&lt;annotation type="if" specifically="2010"&gt;Jeff Bridges&lt;/annotation&gt;&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
+&lt;p&gt;&lt;phrase&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;&lt;annotation type="if" specifically="1969"&gt;The Duke&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt;&lt;phrase&gt;&lt;annotation type="actor"&gt;&lt;annotation type="if" specifically="2010"&gt;Jeff Bridges&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3043,7 +3069,7 @@ This sentence contains decorations for *bold*, _italic_, and `code`.
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;This sentence contains decorations for &lt;phrase&gt;&lt;annotation type="bold"&gt;bold&lt;/annotation&gt;&lt;/phrase&gt;, &lt;phrase&gt;&lt;annotation type="italic"&gt;italic&lt;/annotation&gt;&lt;/phrase&gt;, and &lt;phrase&gt;&lt;annotation type="code"&gt;code&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;This sentence contains decorations for &lt;phrase&gt;&lt;annotation type="bold"&gt;bold&lt;/annotation&gt;&lt;/phrase&gt;, &lt;phrase&gt;&lt;annotation type="italic"&gt;italic&lt;/annotation&gt;&lt;/phrase&gt;, and &lt;code&gt;code&lt;/code&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3063,6 +3089,31 @@ In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays
 <result>
 <codeblock language ="xml">
 &lt;p&gt;In Rio Bravo, *the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+</test>
+<test>
+<title>Inline code</title>
+<description>
+<p>Inline code is a special form of phrase used for phrases that are in computer languages or other encodings other than the human language of the text.</p>
+</description>
+<case>
+<title>Inline latexmath</title>
+<description>
+<p>A selection of latex math to be printed.</p>
+</description>
+<source>
+<codeblock language ="sam">
+This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
+</codeblock>
+</source>
+<markup>
+<p>This is an equation <code>\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code><annotation type="=latexmath"/> in the middle of a paragraph.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;This is an equation &lt;code language="latexmath"&gt;\frac{ \sum_{t=0}^{N}f(t,k) }{N}&lt;/code&gt; in the middle of a paragraph.&lt;p&gt; 
 </codeblock>
 </result>
 </case>
@@ -3330,7 +3381,7 @@ The doggy in the window costs `&amp;#xA3;`5.00.
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;The doggy in the window costs &lt;phrase&gt;&lt;annotation type="code"&gt;&amp;amp;#xA3;&lt;/annotation&gt;&lt;/phrase&gt;5.00.&lt;/p&gt;
+&lt;p&gt;The doggy in the window costs &lt;code&gt;&amp;amp;#xA3;&lt;/code&gt;5.00.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3422,9 +3473,9 @@ There is a backslash and a curly brace in `this \{ code` decoration.
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;There is a backtick and two backslashes in &lt;phrase&gt;&lt;annotation type="code"&gt;th\\is ` code&lt;/annotation&gt;&lt;/phrase&gt; decoration.&lt;/p&gt;
-&lt;p&gt;There is a backslash and a curly brace in &lt;phrase&gt;&lt;annotation type="code"&gt;this \{ code&lt;/annotation&gt;&lt;/phrase&gt; decoration.&lt;/p&gt;
-&lt;p&gt;&lt;phrase&gt;&lt;annotation type="code"&gt;pubwork="book"&lt;/annotation&gt;&lt;/phrase&gt; is an attribute on the element &lt;phrase&gt;&lt;annotation type="code"&gt;citetitle&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;There is a backtick and two backslashes in &lt;code&gt;th\\is ` code&lt;/code&gt; decoration.&lt;/p&gt;
+&lt;p&gt;There is a backslash and a curly brace in &lt;code&gt;this \{ code&lt;/code&gt; decoration.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;pubwork="book"&lt;/code&gt; is an attribute on the element &lt;code&gt;citetitle&lt;/code&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3446,8 +3497,8 @@ There is a `_` in _this \_ italic_ decoration.
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;There is a &lt;phrase&gt;&lt;annotation type="code"&gt;*&lt;/annotation&gt;&lt;/phrase&gt; in &lt;phrase&gt;&lt;annotation type="bold"&gt;this * bold&lt;/annotation&gt;&lt;/phrase&gt; decoration.&lt;/p&gt;
-&lt;p&gt;There is a &lt;phrase&gt;&lt;annotation type="code"&gt;_&lt;/annotation&gt;&lt;/phrase&gt; in &lt;phrase&gt;&lt;annotation type="italic"&gt;this _ italic&lt;/annotation&gt;&lt;/phrase&gt; decoration.&lt;/p&gt;
+&lt;p&gt;There is a &lt;code&gt;*&lt;/code&gt; in &lt;phrase&gt;&lt;annotation type="bold"&gt;this * bold&lt;/annotation&gt;&lt;/phrase&gt; decoration.&lt;/p&gt;
+&lt;p&gt;There is a &lt;code&gt;_&lt;/code&gt; in &lt;phrase&gt;&lt;annotation type="italic"&gt;this _ italic&lt;/annotation&gt;&lt;/phrase&gt; decoration.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3867,7 +3918,7 @@ interpretations of the `xref`'s instruction
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;interpretations of the &lt;phrase&gt;&lt;annotation type="code"&gt;xref&lt;/annotation&gt;&lt;/phrase&gt;’s instruction&lt;/p&gt;
+&lt;p&gt;interpretations of the &lt;code&gt;xref&lt;/code&gt;’s instruction&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -4008,11 +4059,12 @@ This para contains -- an en dash and an---em dash.
 &lt;p&gt;This para contains – &lt;phrase&gt;&lt;annotation type="word"&gt;an&lt;/annotation&gt;&lt;/phrase&gt; en dash and an—&lt;phrase&gt;&lt;annotation type="word"&gt;em&lt;/annotation&gt;&lt;/phrase&gt; dash.&lt;/p&gt;
 &lt;p&gt;This para &lt;phrase&gt;&lt;annotation type="word"&gt;contains&lt;/annotation&gt;&lt;/phrase&gt; – an en dash and &lt;phrase&gt;&lt;annotation type="word"&gt;an&lt;/annotation&gt;&lt;/phrase&gt;—em dash.&lt;/p&gt;
 &lt;p&gt;This para &lt;phrase&gt;&lt;annotation type="bold"&gt;contains&lt;/annotation&gt;&lt;/phrase&gt; – an en dash and &lt;phrase&gt;&lt;annotation type="italic"&gt;an&lt;/annotation&gt;&lt;/phrase&gt;—em dash.&lt;/p&gt;
-&lt;p&gt;This para &lt;phrase&gt;&lt;annotation type="code"&gt;contains&lt;/annotation&gt;&lt;/phrase&gt; – an en dash and “an”—em dash.&lt;/p&gt;
-&lt;p&gt;This para ‘contains’ – an en dash and &lt;phrase&gt;&lt;annotation type="code"&gt;an&lt;/annotation&gt;&lt;/phrase&gt;—em dash.&lt;/p&gt;
+&lt;p&gt;This para &lt;code&gt;contains&lt;/code&gt; – an en dash and “an”—em dash.&lt;/p&gt;
+&lt;p&gt;This para ‘contains’ – an en dash and &lt;code&gt;an&lt;/code&gt;—em dash.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
 </test>
 </tests>
 <!--  Can we have comments after the end of the document? -->
+<!--  Yes we can! -->
