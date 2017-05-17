@@ -3105,6 +3105,25 @@ In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays
 </description>
 <source>
 <codeblock language ="sam">
+This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath) in the middle of a paragraph. 
+</codeblock>
+</source>
+<markup>
+<p>This is an equation <code>\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code><annotation type="latexmath"/> in the middle of a paragraph.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;This is an equation &lt;code language="latexmath"&gt;\frac{ \sum_{t=0}^{N}f(t,k) }{N}&lt;/code&gt; in the middle of a paragraph.&lt;p&gt; 
+</codeblock>
+</result>
+</case>
+<case>
+<title>Embedded latexmath</title>
+<description>
+<p>A selection of latex math to be embedded as an equation.</p>
+</description>
+<source>
+<codeblock language ="sam">
 This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
 </codeblock>
 </source>
@@ -3113,7 +3132,7 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;This is an equation &lt;code language="latexmath"&gt;\frac{ \sum_{t=0}^{N}f(t,k) }{N}&lt;/code&gt; in the middle of a paragraph.&lt;p&gt; 
+&lt;p&gt;This is an equation &lt;embed encoding="latexmath"&gt;\frac{ \sum_{t=0}^{N}f(t,k) }{N}&lt;/code&gt; in the middle of a paragraph.&lt;p&gt; 
 </codeblock>
 </result>
 </case>

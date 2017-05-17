@@ -2627,6 +2627,22 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
+                    This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath) in the middle of a paragraph. 
+
+            markup:
+                This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath) in the middle of a paragraph. 
+
+            result:
+                ```(xml)
+                    <p>This is an equation <code language="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.<p> 
+
+        case: Embedded latexmath
+
+            description:
+                A selection of latex math to be embedded as an equation. 
+
+            source:
+                ```(sam)
                     This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
 
             markup:
@@ -2634,7 +2650,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>This is an equation <code language="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.<p> 
+                    <p>This is an equation <embed encoding="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</embed> in the middle of a paragraph.<p> 
 
 
 
