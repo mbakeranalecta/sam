@@ -6,7 +6,7 @@
 <tests xml:lang ="en">
 <title>SAM Parser Tests</title>
 <description>
-<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code>markup:</code><annotation type="sam"/> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
+<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code language="sam">markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <ol>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
@@ -3109,11 +3109,11 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath) in the middle 
 </codeblock>
 </source>
 <markup>
-<p>This is an equation <code>\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code><annotation type="latexmath"/> in the middle of a paragraph.</p>
+<p>This is an equation <code language="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p>
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;This is an equation &lt;code language="latexmath"&gt;\frac{ \sum_{t=0}^{N}f(t,k) }{N}&lt;/code&gt; in the middle of a paragraph.&lt;p&gt; 
+&lt;p&gt;This is an equation &lt;code language="latexmath"&gt;\frac{ \sum_{t=0}^{N}f(t,k) }{N}&lt;/code&gt; in the middle of a paragraph.&lt;/p&gt; 
 </codeblock>
 </result>
 </case>
@@ -3128,11 +3128,11 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle
 </codeblock>
 </source>
 <markup>
-<p>This is an equation <code>\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code><annotation type="=latexmath"/> in the middle of a paragraph.</p>
+<p>This is an equation <embed encoding="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</embed> in the middle of a paragraph.</p>
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;This is an equation &lt;embed encoding="latexmath"&gt;\frac{ \sum_{t=0}^{N}f(t,k) }{N}&lt;/code&gt; in the middle of a paragraph.&lt;p&gt; 
+&lt;p&gt;This is an equation &lt;embed encoding="latexmath"&gt;\frac{ \sum_{t=0}^{N}f(t,k) }{N}&lt;/embed&gt; in the middle of a paragraph.&lt;/p&gt; 
 </codeblock>
 </result>
 </case>
