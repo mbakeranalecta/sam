@@ -310,7 +310,7 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam) 
                     name:(?BC)(#fred) Fred Flintstone 
 
-                There are four types of attributes. The type of an attribute it determined by the flag character that precedes it. The four types are:
+                There are four general attributes. The type of an attribute it determined by the flag character that precedes it. The four general types are:
 
                 * {Conditions}(feature), which start with a `?`
                 * {Name}(feature), which start with `#`
@@ -368,7 +368,6 @@ specification: Semantic Authoring Markdown (SAM)
                     phrase            | !language | #name | ?condition| *id | 
 
                     codeblock         |           | #name | ?condition| *id | *
-                    embed             |           | #name | ?condition| *id | *
 
                     string-def        |           |       |           |     | 
 
@@ -392,7 +391,7 @@ specification: Semantic Authoring Markdown (SAM)
                 * {condition}s are represented by a `conditions` attribute. If multiple condition attributes are applied in SAM, they will be concatenated with commas in the `conditions` attribute value. 
 
             SOM:
-                Attributes are represented by the attribute field of the {Block} object as dictionary. 
+                Attributes are represented by the attribute field of the {Block} object as a dictionary. 
         
         structure:(#field) Field
         
@@ -520,7 +519,7 @@ specification: Semantic Authoring Markdown (SAM)
                 A phrase has no semantics of its own. Its semantics are determined by any {annotation}s attached to it. 
 
             serialization:
-                A phrase is serialized as an `phrase` element in XML.
+                A phrase is serialized as a `phrase` element in XML.
 
                 ```(xml) 
                     <p>In <phrase>Rio Bravo</phrase>, <phrase>the Duke</phrase> plays a union colonel.</p>
@@ -992,10 +991,10 @@ specification: Semantic Authoring Markdown (SAM)
 
             syntax:
 
-                An embed works just like a {codeblock}, except with three equals instead of three backticks.
+                An embed works just like a {codeblock}, except that there is an {encoding} attribute on the block.
 
                 ```(sam)
-                    ===(latexmathml)(*id13)(#name)(?a)(?b)
+                    ```(=latexmathml)(*id13)(#name)(?a)(?b)
                         n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             semantics:
@@ -1007,12 +1006,12 @@ specification: Semantic Authoring Markdown (SAM)
                 An {embed} is serialized as follows:
 
                 ```(xml)
-                    <embed conditions="a,b" id="id13" language="latexmathml" name="name">
+                    <embed conditions="a,b" id="id13" encoding="latexmathml" name="name">
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
                     </embed>
 
             SOM:
-                An embed is represented in the SOM as an {Embed}(object) object. The contents are represented as a {Pre} object.
+                An embed is represented in the SOM as an {Codebloack}(object) object with an {encoding}(attribute) attribute. The contents are represented as a {Pre} object.
 
         structure:(#xml) Embedded XML
             In cases where SAM markup will not suffice to express a structure, you can embed a well formed chunk of XML into the document. 
@@ -1517,23 +1516,23 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam)
                     In Python 3, use `print("Hello World")`(python). 
 
-                Inline code an also take all the regular attributes, except the {language attribute}. 
+                Inline code can also take all the regular attributes. 
 
                 ```(sam)
-                    In Python 3, the correct form is `print("Hello World")`(python). 
+                    In the correct form is `print("Hello World")`(python)(?p3)`print "Hello World`(python)(?p2). 
 
              semantics:
-                The content of an inline code structure is to presented as code, without interpretation. It may be formatted in accordance with its language. 
+                The content of an inline code structure to presented as code, without interpretation. It may be formatted in accordance with its language. 
 
             SOM:
                 Inline code is represented in the SOM as an {Phrase} object with an {annotation} of "code". 
         
         structure:(#inline-embed) Inline embed
 
-            *Not implemented yet* An inline embed is a piece of embedded code that is intended to be interpreted by the application layer. For example, an inline embed could be used to embed an equation in latexmath.
+            An inline embed is a piece of embedded code that is intended to be interpreted by the application layer. For example, an inline embed could be used to embed an equation in latexmath.
 
             syntax:
-                An inline embed looks exactly like {inline code} except that the language attribute is preceded by a `=`:
+                An inline embed looks exactly like {inline code} except that it has an annotation containing an encoding attribute, which it the name of the encoding language preceded by a `=`:
 
                 ```(sam)
                     This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
@@ -1542,24 +1541,9 @@ specification: Semantic Authoring Markdown (SAM)
                 The application layer should interpret the inline embed according to its language type and display the result. 
 
             serialization:
-                *TBD*
+                ```(xml)
+                    <p>This is an equation <embed encoding="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</embed> in the middle of a paragraph.</p> 
 
             SOM:
-                *TBD*
-
-                
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
+                An inline embed is represented in the SOM as a {Code} object with an {Encoding} attribute.
 

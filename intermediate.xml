@@ -2152,7 +2152,7 @@ This is another paragraph. Then there is an alternate blockquote:
 <test>
 <title>Codeblocks</title>
 <description>
-<p>A codeblock is a block of program code. A codeblock is treated as plain text and is not parsed as SAM markup. It will be copied to output exactly as it occurs in the source. Codeblocks are denoted by three backtick at the start of a line. Codeblocks have a special annotation. The first word of an annotation on a codeblock is the language of the code.</p>
+<p>A codeblock is a block of program code. A codeblock is treated as plain text and is not parsed as SAM markup. It will be copied to output exactly as it occurs in the source. Codeblocks are denoted by three back ticks at the start of a line. Codeblocks have a special annotation. The first word of an annotation on a codeblock is the language of the code.</p>
 </description>
 <case>
 <title>Simple codeblock</title>
@@ -2161,7 +2161,7 @@ This is another paragraph. Then there is an alternate blockquote:
 </description>
 <source>
 <codeblock language ="sam">
-```(pyt&amp;#x68;on)(?foo)
+```(pyt&amp;#x68;on)(?foo)(!en)
     def escape_for_xml(s):
         t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
         try:
@@ -2171,7 +2171,7 @@ This is another paragraph. Then there is an alternate blockquote:
 </codeblock>
 </source>
 <markup>
-<codeblock conditions ="foo" language ="python">
+<codeblock conditions ="foo" language ="python" xml:lang ="en">
 def escape_for_xml(s):
     t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
     try:
@@ -2182,7 +2182,7 @@ def escape_for_xml(s):
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;codeblock conditions="foo" language="python"&gt;
+&lt;codeblock conditions="foo" language="python" xml:lang="en"&gt;
 def escape_for_xml(s):
     t = dict(zip([ord('&amp;lt;'), ord('&amp;gt;'), ord('&amp;amp;')], ['&amp;amp;lt;', '&amp;amp;gt;', '&amp;amp;amp;']))
     try:
@@ -3105,15 +3105,15 @@ In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays
 </description>
 <source>
 <codeblock language ="sam">
-This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath) in the middle of a paragraph. 
+This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the middle of a paragraph. 
 </codeblock>
 </source>
 <markup>
-<p>This is an equation <code language="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p>
+<p>This is an equation <code language="latexmath" xml:lang="en">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p>
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;This is an equation &lt;code language="latexmath"&gt;\frac{ \sum_{t=0}^{N}f(t,k) }{N}&lt;/code&gt; in the middle of a paragraph.&lt;/p&gt; 
+&lt;p&gt;This is an equation &lt;code language="latexmath" xml:lang="en"&gt;\frac{ \sum_{t=0}^{N}f(t,k) }{N}&lt;/code&gt; in the middle of a paragraph.&lt;/p&gt; 
 </codeblock>
 </result>
 </case>

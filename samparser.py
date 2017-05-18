@@ -1900,6 +1900,8 @@ class Code(Phrase):
             yield ' name="' + escape_for_xml_attribute(self._name) + '"'
         if self._language:
             yield ' language="' + escape_for_xml_attribute(self._language) + '"'
+        if self._language_tag:
+            yield ' xml:lang="' + escape_for_xml_attribute(self._language_tag) + '"'
         if self._encoding:
             yield ' encoding="' + escape_for_xml_attribute(self._encoding) + '"'
         yield '>'
