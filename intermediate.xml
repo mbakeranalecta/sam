@@ -3052,7 +3052,7 @@ This {should be reported}.
 <test>
 <title>Decorations</title>
 <description>
-<p>A decoration is a shortcut for a <phrase>media domain</phrase> annotation. Three decorations are supported, bold, italic, and code.</p>
+<p>A decoration is a shortcut for a <phrase><annotation type="concept">media domain</annotation></phrase> annotation. Three decorations are supported, bold, italic, and code.</p>
 </description>
 <case>
 <title>Bold, italic, and code</title>

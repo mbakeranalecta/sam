@@ -2582,7 +2582,7 @@ tests:(!en) SAM Parser Tests
 
     test: Decorations
         description:
-            A decoration is a shortcut for a {media domain} annotation. Three decorations are supported, bold, italic, and code. 
+            A decoration is a shortcut for a {media domain}(concept) annotation. Three decorations are supported, bold, italic, and code.
 
         case: Bold, italic, and code
 

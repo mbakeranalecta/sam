@@ -323,7 +323,7 @@ specification: Semantic Authoring Markdown (SAM)
 
                 IDs must be SAM {name tokens}.
 
-                Languages must be {ISO 639} language codes. 
+                Languages should be {BCP 47} language codes, but the parser is not required to enforce this. 
 
                 Certain block types take additional attributes with meanings specific to those block types. 
 
@@ -348,7 +348,7 @@ specification: Semantic Authoring Markdown (SAM)
 
                 |Name| A {name} attribute assigns a name to a block. A name performs the same function as an ID, allowing the block to be references from elsewhere. However, there are no limits on the scope of names. Uniqueness of names is not enforced. Name references are not required to match a name in the current file. This allows you to use names to reference blocks in other files. (Note the namerefs so not support naming the file in which a name is located. Rather it is left to the application layer to locate names by whatever mechanism seems appropriate.)  
 
-                |Language| A {language} attribute specified the language in which the content of a block is written. It is expected, but not required, that standard {ISO 639} language codes be used to identify languages. 
+                |Language| A {language} attribute specified the language in which the content of a block is written. It is expected, but not required, that standard {BCP 47} language codes be used to identify languages. 
 
                 Certain block types have additional attributes that are specific to those block types. See the relevant entries for details. 
 
@@ -1521,7 +1521,9 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam)
                     In the correct form is `print("Hello World")`(python)(?p3)`print "Hello World`(python)(?p2). 
 
-             semantics:
+                Inline code cannot take chained annotations, however. 
+
+            semantics:
                 The content of an inline code structure to presented as code, without interpretation. It may be formatted in accordance with its language. 
 
             SOM:

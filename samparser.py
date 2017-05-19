@@ -1887,7 +1887,7 @@ class Code(Phrase):
     def serialize_xml(self):
 
         if self._encoding:
-            tag="embed"
+            tag = "embed"
         else:
             tag = "code"
 
