@@ -66,17 +66,19 @@ To run SAM Parser on Xnix or Mac, invoke Python 3 as appropriate on your system.
 
     python3 samparser.py foo.sam -o foo.html -x foo2html.xslt -i foo.xml
 
-### NOTE
 
-Revision 227cb3dd7bb322f5579858806071c1ff8456c0b6 introduced a change in the 
+
+### Backward-incompatible changes
+
+Since SAM is under active development, there may be backward-incompatible changes in the language. They will be noted here as they occur, up until we get to the point where the language or its serialization are considered final.
+
+* Revision 227cb3dd7bb322f5579858806071c1ff8456c0b6 introduced a change in the 
 way the XML representation of a record is generate. A record
 used to output as "row". It is now output as "record".
 
-### NOTE 
+* Revision 3fdd6528d88b1a7f0a72c10ce5b5e768433eaf19 introduced a change in how inline code is  serialized. It is now serialized as a <code> element rather than as a <phrase> element with an <annotation type="code"> nested element.
 
-Revision 3fdd6528d88b1a7f0a72c10ce5b5e768433eaf19 introduced the following non-backward compatible changes:
+* Revision 8e8c6a0b4c9c41bd72fab5fd53e3d967e9688110 removed the `===` flag for a block of embedded code, which had been briefly introduced in an earlier revision. Blocks of embed code should now be represented as regular code blocks using an encoding attribute `(=svg)` rather than a language attribute `(svg)`.
 
-* Inline code is now serialized as a <code> element rather than as a <phrase> element with an <annotation type="code"> nested element.
-
-* 
+Please report any other backward incompatibilities you find so they can be added to this list. 
 
