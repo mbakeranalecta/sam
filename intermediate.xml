@@ -6,7 +6,7 @@
 <tests xml:lang ="en">
 <title>SAM Parser Tests</title>
 <description>
-<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code language="sam">markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
+<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code>markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <ol>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
@@ -50,7 +50,7 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 <cell>bat</cell>
 </row>
 </grid>
-<p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
+<p>Annotation lookup test: <phrase>test phrase</phrase>.</p>
 </message>
 </markup>
 <result>
@@ -198,9 +198,9 @@ document:
 <markup>
 <document>
 <head name ="foo">
-<foo>barney <phrase><annotation type="conjunction">and</annotation></phrase> betty</foo>
+<foo>barney <phrase>and</phrase> betty</foo>
 <baz>bat</baz>
-<string name="name">fred <phrase><annotation type="conjunction">and</annotation></phrase> wilma</string>
+<string name="name">fred <phrase>and</phrase> wilma</string>
 <history>
 <record>
 <date>2014-06-23</date>
@@ -289,7 +289,7 @@ article: Foo
 <markup>
 <article>
 <title>Foo</title>
-<p>foo<phrase><annotation type="link" specifically="http://www.example.com/">bar</annotation></phrase>.</p>
+<p>foo<phrase>bar</phrase>.</p>
 <p><code>foo::bar</code> baz.</p>
 </article>
 </markup>
@@ -434,7 +434,7 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<p>This is a <phrase><annotation type="foo">paragraph</annotation></phrase> that wraps across multiple lines.</p>
+<p>This is a <phrase>paragraph</phrase> that wraps across multiple lines.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -1870,9 +1870,9 @@ filmography:: film
 <markup>
 <grid>
 <row>
-<cell><phrase><annotation type="bold">Type</annotation></phrase></cell>
-<cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
-<cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
+<cell><phrase>Type</phrase></cell>
+<cell><phrase>Term</phrase></cell>
+<cell><phrase>Notes</phrase></cell>
 </row>
 <row>
 <cell>feature</cell>
@@ -1927,9 +1927,9 @@ filmography:: film
 <markup>
 <grid conditions ="baz" id ="foom" name ="bar">
 <row>
-<cell><phrase><annotation type="bold">Type</annotation></phrase></cell>
-<cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
-<cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
+<cell><phrase>Type</phrase></cell>
+<cell><phrase>Term</phrase></cell>
+<cell><phrase>Notes</phrase></cell>
 </row>
 <row>
 <cell>feature</cell>
@@ -1981,9 +1981,9 @@ filmography:: film
 <markup>
 <grid>
 <row>
-<cell><phrase><annotation type="bold">Type</annotation></phrase></cell>
-<cell><phrase><annotation type="bold">Term</annotation></phrase></cell>
-<cell><phrase><annotation type="bold">Notes</annotation></phrase></cell>
+<cell><phrase>Type</phrase></cell>
+<cell><phrase>Term</phrase></cell>
+<cell><phrase>Notes</phrase></cell>
 </row>
 <row>
 <cell>feature</cell>
@@ -1991,9 +1991,9 @@ filmography:: film
 <cell>bing</cell>
 </row>
 <row>
-<cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
-<cell><phrase><annotation type="bold">fragments</annotation></phrase></cell>
-<cell><phrase><annotation type="bold">bang</annotation></phrase></cell>
+<cell><phrase>feature</phrase></cell>
+<cell><phrase>fragments</phrase></cell>
+<cell><phrase>bang</phrase></cell>
 </row>
 </grid>
 </markup>
@@ -2035,17 +2035,17 @@ filmography:: film
 <markup>
 <grid>
 <row>
-<cell><phrase><annotation type="bold">Type</annotation></phrase></cell>
+<cell><phrase>Type</phrase></cell>
 <cell>Term</cell>
 <cell>Notes</cell>
 </row>
 <row>
-<cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
+<cell><phrase>feature</phrase></cell>
 <cell>fragment</cell>
 <cell>bing</cell>
 </row>
 <row>
-<cell><phrase><annotation type="bold">feature</annotation></phrase></cell>
+<cell><phrase>feature</phrase></cell>
 <cell>fragments</cell>
 <cell>bang</cell>
 </row>
@@ -2098,7 +2098,7 @@ After this paragraph, there is a blockquote:
 <p>After this paragraph, there is a blockquote:</p>
 <blockquote conditions ="baz" id ="foo" name ="bar">
 <p>The quick brown fox jumps over the lazy dog.</p>
-<p>And the <phrase><annotation type="beast" specifically="bovine"><citation type = "citation" value = "Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
+<p>And the <phrase>cow</phrase> jumps over the moon.</p>
 </blockquote>
 </markup>
 <result>
@@ -2710,7 +2710,7 @@ After this paragraph, there is a blockquote:
 <p>After this paragraph, there is a blockquote:</p>
 <blockquote conditions ="a,b" id ="id10" name ="name" xml:lang ="en-CA">
 <citation type = "idref" value = "cit"/><p>The quick brown fox jumps over the lazy dog.</p>
-<p>And the <phrase><annotation type="beast" specifically="bovine"><citation type = "citation" value = "Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
+<p>And the <phrase>cow</phrase> jumps over the moon.</p>
 </blockquote>
 </markup>
 <result>
@@ -2735,7 +2735,7 @@ After this paragraph, there is a blockquote:
 </codeblock>
 </source>
 <markup>
-<p><phrase id="id11" conditions="a,b" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type = "idref" value = "cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
+<p><phrase>The Duke</phrase> plays Rooster Cogburn.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2848,9 +2848,9 @@ This `foo`(bar) baz.
 </codeblock>
 </source>
 <markup>
-<p>This is <phrase><annotation type="bold">very</annotation></phrase> important.</p>
-<p>This is <phrase><annotation type="bold"><annotation type="italic">very</annotation></annotation></phrase> important.</p>
-<p>This is <phrase><annotation type="bold"><annotation type="italic"><annotation type="green">very</annotation></annotation></annotation></phrase> important.</p>
+<p>This is <phrase>very</phrase> important.</p>
+<p>This is <phrase>very</phrase> important.</p>
+<p>This is <phrase>very</phrase> important.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2871,7 +2871,7 @@ This `foo`(bar) baz.
 </codeblock>
 </source>
 <markup>
-<p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
+<p><phrase>The Duke</phrase><phrase>Jeff Bridges</phrase> plays Rooster Cogburn.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2890,7 +2890,7 @@ This `foo`(bar) baz.
 </codeblock>
 </source>
 <markup>
-<p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
+<p><phrase>The Duke</phrase><phrase>Jeff Bridges</phrase> plays Rooster Cogburn.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2926,7 +2926,7 @@ chapter}[#single_source].
 </codeblock>
 </source>
 <markup>
-<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation type = "nameref" value = "single_source">single sourcing chapter</citation></phrase>.</p>
+<p>When using the map approach, it is important to think about how your content will <phrase>single source</phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase>single sourcing chapter</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2945,7 +2945,7 @@ Press {Enter}(key)(!fr-CA)
 </codeblock>
 </source>
 <markup>
-<p>Press <phrase xml:lang="fr-CA"><annotation type="key">Enter</annotation></phrase></p>
+<p>Press <phrase>Enter</phrase></p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2964,7 +2964,7 @@ Press {Enter}(key)(?foo)
 </codeblock>
 </source>
 <markup>
-<p>Press <phrase conditions="foo"><annotation type="key">Enter</annotation></phrase></p>
+<p>Press <phrase>Enter</phrase></p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2983,7 +2983,7 @@ This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotat
 </codeblock>
 </source>
 <markup>
-<p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase>.</p>
+<p>This <phrase>annotation</phrase> is repeated <phrase>annotation</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3002,7 +3002,7 @@ Annotation lookup test: {test phrase}.
 </codeblock>
 </source>
 <markup>
-<p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
+<p>Annotation lookup test: <phrase>test phrase</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3021,7 +3021,7 @@ This {annotation} occurs previously.
 </codeblock>
 </source>
 <markup>
-<p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> occurs previously.</p>
+<p>This <phrase>annotation</phrase> occurs previously.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3048,11 +3048,30 @@ This {should be reported}.
 </codeblock>
 </result>
 </case>
+<case>
+<title>Local only annotations</title>
+<description>
+<p>A local-only annotation is one which applies only to the current phrase. It is not taken into consideration in annotation lookup, so the lookup search will proceed to the next phrase with the same text. Annotation lookup will occur for a phrase with a local-only annotation, and the local annotation will be added to the looked up annotations, if any.</p>
+</description>
+<source>
+<codeblock language ="sam">
+Testing {XML}(language) testing {XML}+(index) testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase>XML</phrase> testing <phrase>XML</phrase> testing <phrase>XML</phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;&lt;annotation type="index"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.
+</codeblock>
+</result>
+</case>
 </test>
 <test>
 <title>Decorations</title>
 <description>
-<p>A decoration is a shortcut for a <phrase><annotation type="concept">media domain</annotation></phrase> annotation. Three decorations are supported, bold, italic, and code.</p>
+<p>A decoration is a shortcut for a <phrase>media domain</phrase> annotation. Three decorations are supported, bold, italic, and code.</p>
 </description>
 <case>
 <title>Bold, italic, and code</title>
@@ -3065,7 +3084,7 @@ This sentence contains decorations for *bold*, _italic_, and `code`.
 </codeblock>
 </source>
 <markup>
-<p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <code>code</code>.</p>
+<p>This sentence contains decorations for <phrase>bold</phrase>, <phrase>italic</phrase>, and <code>code</code>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3109,7 +3128,7 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the mi
 </codeblock>
 </source>
 <markup>
-<p>This is an equation <code language="latexmath" xml:lang="en">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p>
+<p>This is an equation <code>\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3165,7 +3184,7 @@ Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
 </codeblock>
 </source>
 <markup>
-<p>Rio Bravo refers to the movie (and not to <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_" namespace="disambiguation">the city in Texas or the nature reserve in Belize</annotation></phrase>)</p>
+<p>Rio Bravo refers to the movie (and not to <phrase>the city in Texas or the nature reserve in Belize</phrase>)</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3187,7 +3206,7 @@ Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
 </codeblock>
 </source>
 <markup>
-<p>Rio Bravo refers to the movie (and not to <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></phrase>)</p>
+<p>Rio Bravo refers to the movie (and not to <phrase>the city in Texas or the nature reserve in Belize</phrase>)</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3209,7 +3228,7 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 </codeblock>
 </source>
 <markup>
-<p>Rio Bravo refers to the movie (and not to <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></phrase>)</p>
+<p>Rio Bravo refers to the movie (and not to <phrase>the city in Texas or the nature reserve in Belize</phrase>)</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3234,7 +3253,7 @@ You can {call me Ishmael}[Melville, 1851][Daffy, 2017].
 </codeblock>
 </source>
 <markup>
-<p>You can <phrase><citation type = "citation" value = "Melville, 1851"><citation type = "citation" value = "Daffy, 2017">call me Ishmael</citation></citation></phrase>.</p>
+<p>You can <phrase>call me Ishmael</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="XML">
@@ -3253,7 +3272,7 @@ You can {call me Ishmael}(quote)[Melville, 1851].
 </codeblock>
 </source>
 <markup>
-<p>You can <phrase><annotation type="quote"><citation type = "citation" value = "Melville, 1851">call me Ishmael</citation></annotation></phrase>.</p>
+<p>You can <phrase>call me Ishmael</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="XML">
@@ -3375,8 +3394,8 @@ The doggy in the window costs {&amp;#xA3;5.00}(money).
 </codeblock>
 </source>
 <markup>
-<p>The doggy in the window costs <phrase><annotation type="bold">£</annotation></phrase>5.00.</p>
-<p>The doggy in the window costs <phrase><annotation type="money">£5.00</annotation></phrase>.</p>
+<p>The doggy in the window costs <phrase>£</phrase>5.00.</p>
+<p>The doggy in the window costs <phrase>£5.00</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3415,7 +3434,7 @@ The doggy in the window costs *\&amp;#xA3;*5.00.
 </codeblock>
 </source>
 <markup>
-<p>The doggy in the window costs <phrase><annotation type="bold">&amp;#xA3;</annotation></phrase>5.00.</p>
+<p>The doggy in the window costs <phrase>&amp;#xA3;</phrase>5.00.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3463,7 +3482,7 @@ There is a curly brace and two backslashes in {this \\\\\{ phrase}(bold).
 </codeblock>
 </source>
 <markup>
-<p>There is a curly brace and two backslashes in <phrase><annotation type="bold">this \\{ phrase</annotation></phrase>.</p>
+<p>There is a curly brace and two backslashes in <phrase>this \\{ phrase</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3511,8 +3530,8 @@ There is a `_` in _this \_ italic_ decoration.
 </codeblock>
 </source>
 <markup>
-<p>There is a <code>*</code> in <phrase><annotation type="bold">this * bold</annotation></phrase> decoration.</p>
-<p>There is a <code>_</code> in <phrase><annotation type="italic">this _ italic</annotation></phrase> decoration.</p>
+<p>There is a <code>*</code> in <phrase>this * bold</phrase> decoration.</p>
+<p>There is a <code>_</code> in <phrase>this _ italic</phrase> decoration.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3532,7 +3551,7 @@ There is a `_` in _this \_ italic_ decoration.
 </codeblock>
 </source>
 <markup>
-<p><phrase><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp; Possum&quot;" namespace="Eliott">Skimbleshanks</annotation></phrase>.</p>
+<p><phrase>Skimbleshanks</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3700,7 +3719,7 @@ that you can define string substitutions whenever you insert a fragment into you
 </codeblock>
 </source>
 <markup>
-<p>Because you often want to <inline-insert conditions ="baz,bat" item ="foo.gif" name ="bar" type ="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert item ="my-table" type ="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+<p>Because you often want to <inline-insert conditions ="baz,bat" item ="foo.gif" name ="bar" type ="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase>strings</phrase>. Any <phrase>string references</phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert item ="my-table" type ="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3958,7 +3977,7 @@ know what you mean by "glory,"' Alice said."
 </codeblock>
 </source>
 <markup>
-<p>“For once, ‘<phrase><annotation type="salutation">sir</annotation></phrase>’ adding, ‘you’re making a scene.’” and “For once, <phrase><annotation type="salutation">‘sir’</annotation></phrase> adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
+<p>“For once, ‘<phrase>sir</phrase>’ adding, ‘you’re making a scene.’” and “For once, <phrase>‘sir’</phrase> adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -4024,8 +4043,8 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 </source>
 <markup>
 <p>“title”?</p>
-<p><phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
-<p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
+<p><phrase>DocBook</phrase>’s</p>
+<p><phrase>DITA</phrase> and <phrase>DocBook</phrase>’s</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -4066,9 +4085,9 @@ This para contains -- an en dash and an---em dash.
 </source>
 <markup>
 <p>This para contains – an en dash and an—em dash.</p>
-<p>This para contains – <phrase><annotation type="word">an</annotation></phrase> en dash and an—<phrase><annotation type="word">em</annotation></phrase> dash.</p>
-<p>This para <phrase><annotation type="word">contains</annotation></phrase> – an en dash and <phrase><annotation type="word">an</annotation></phrase>—em dash.</p>
-<p>This para <phrase><annotation type="bold">contains</annotation></phrase> – an en dash and <phrase><annotation type="italic">an</annotation></phrase>—em dash.</p>
+<p>This para contains – <phrase>an</phrase> en dash and an—<phrase>em</phrase> dash.</p>
+<p>This para <phrase>contains</phrase> – an en dash and <phrase>an</phrase>—em dash.</p>
+<p>This para <phrase>contains</phrase> – an en dash and <phrase>an</phrase>—em dash.</p>
 <p>This para <code>contains</code> – an en dash and “an”—em dash.</p>
 <p>This para ‘contains’ – an en dash and <code>an</code>—em dash.</p>
 </markup>

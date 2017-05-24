@@ -2580,6 +2580,26 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>This <phrase>should be reported</phrase>.</p>
 
+        case: Local only annotations
+
+            description:
+                A local-only annotation is one which applies only to the current phrase.
+                It is not taken into consideration in annotation lookup, so the lookup
+                search will proceed to the next phrase with the same text. Annotation lookup will
+                occur for a phrase with a local-only annotation, and the local annotation will
+                be added to the looked up annotations, if any.
+
+            source:
+                ```(sam)
+                    Testing {XML}(language) testing {XML}+(index) testing {XML}.
+
+            markup:
+                Testing {XML}(language) testing {XML}+(index) testing {XML}.
+
+            result:
+                ```(xml)
+                    <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="language"><annotation type="index">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.
+
     test: Decorations
         description:
             A decoration is a shortcut for a {media domain}(concept) annotation. Three decorations are supported, bold, italic, and code.
