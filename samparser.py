@@ -1412,6 +1412,7 @@ class FlowParser:
         self.stateMachine.add_state("ESCAPE", self._escape)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.add_state("PHRASE-START", self._phrase_start)
+        self.stateMachine.add_state("PHRASE-END", self._phrase_end)
         self.stateMachine.add_state("ANNOTATION-START", self._annotation_start)
         self.stateMachine.add_state("CITATION-START", self._citation_start)
         self.stateMachine.add_state("BOLD-START", self._bold_start)
@@ -1549,11 +1550,40 @@ class FlowParser:
             self.current_string += '{'
             return "PARA", para
 
+    def _phrase_end(self, para):
+        phrase = self.flow[-1]
+        if not phrase.annotated:
+            # If there is a phrase with no annotation, look back
+            # to see if it has been annotated already, and if so, copy the
+            # closest preceding annotation.
+            # First look back in the current flow
+            # (which is not part of the doc structure yet).
+            previous = self.flow.find_last_annotation(phrase.text)
+            if previous is not None:
+                phrase.annotations.extend(previous)
+            else:
+                # Then look back in the document.
+                previous = self.doc.find_last_annotation(phrase.text)
+                if previous is not None:
+                    phrase.annotations.extend(previous)
+
+                # Else output a warning.
+                else:
+                    SAM_parser_warning(
+                        "Unannotated phrase found: {" +
+                        phrase.text + "} " +
+                        "If you are trying to insert curly braces " +
+                        "into the document, use \{" + phrase.text + "}."
+                    )
+
+        return "PARA", para
+
     def _annotation_start(self, para):
         match = self.patterns['annotation'].match(para.rest_of_para)
         phrase = self.flow[-1]
         if match:
             annotation_type = match.group('type')
+            is_local = bool(match.group('plus'))
 
             # Check for link shortcut
             if urlparse(annotation_type, None).scheme is not None:
@@ -1580,7 +1610,10 @@ class FlowParser:
                 if type(self.flow[-1]) is Code:
                     phrase.add_attribute(Attribute('language', unescape(annotation_type)))
                 else:
-                    phrase.annotations.append(Annotation(annotation_type, unescape(specifically), namespace))
+                    if is_local:
+                        phrase.local_annotations.append(Annotation(annotation_type, unescape(specifically), namespace))
+                    else:
+                        phrase.annotations.append(Annotation(annotation_type, unescape(specifically), namespace))
             para.advance(len(match.group(0)))
             if self.patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
@@ -1588,9 +1621,9 @@ class FlowParser:
                 return "CITATION-START", para
             else:
                 para.retreat(1)
-                return "PARA", para
+                return "PHRASE-END", para
         else:
-            self.current_string += '{'
+            self.current_string += '('
             return "PARA", para
 
     def _citation_start(self, para):
@@ -1865,6 +1898,17 @@ class Phrase:
         self._conditions.append(condition)
 
     condition = property(None,setcondition)
+
+    @property
+    def annotated(self):
+        return len(self.annotations) > 0 or \
+                self._id or \
+                self._name or \
+                self._language_tag or \
+                self._language or \
+                self._encoding or \
+                self._conditions
+
 
     def serialize_xml(self):
         yield '<phrase'

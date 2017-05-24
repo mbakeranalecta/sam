@@ -3059,11 +3059,11 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase>.</p>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="language"><annotation type="index">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;&lt;annotation type="index"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;&lt;annotation type="index"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>

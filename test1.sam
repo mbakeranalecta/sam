@@ -2598,7 +2598,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="language"><annotation type="index">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.
+                    <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="language"><annotation type="index">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 
     test: Decorations
         description:
