@@ -1565,20 +1565,20 @@ class FlowParser:
 
             if annotation_type[0] == '=':
                 if type(phrase) is Code:
-                    self.flow.append(Attribute('encoding', unescape(annotation_type[1:])))
+                    phrase.add_attribute(Attribute('encoding', unescape(annotation_type[1:])))
                 else:
                     raise SAMParserError("Only code can have and embed attribute. At: " + match.group(0))
             elif annotation_type[0] == '!':
-                phrase.annotations.append(Attribute('language-tag', unescape(annotation_type[1:])))
+                phrase.add_attribute(Attribute('language-tag', unescape(annotation_type[1:])))
             elif annotation_type[0] == '*':
-                phrase.annotations.append(Attribute('id', unescape(annotation_type[1:])))
+                phrase.add_attribute(Attribute('id', unescape(annotation_type[1:])))
             elif annotation_type[0] == '#':
-                phrase.annotations.append(Attribute('name', unescape(annotation_type[1:])))
+                phrase.add_attribute(Attribute('name', unescape(annotation_type[1:])))
             elif annotation_type[0] == '?':
-                phrase.annotations.append(Attribute('condition', unescape(annotation_type[1:])))
+                phrase.add_attribute(Attribute('condition', unescape(annotation_type[1:])))
             else:
                 if type(self.flow[-1]) is Code:
-                    phrase.annotations.append(Attribute('language', unescape(annotation_type)))
+                    phrase.add_attribute(Attribute('language', unescape(annotation_type)))
                 else:
                     phrase.annotations.append(Annotation(annotation_type, unescape(specifically), namespace))
             para.advance(len(match.group(0)))
@@ -1883,7 +1883,7 @@ class Phrase:
         yield '>'
 
         #Nest attributes for serialization
-        attrs = self.annotations.extend(self.local_annotations)
+        attrs = self.annotations + self.local_annotations
         if attrs:
             attr, *rest = attrs
             yield from attr.serialize_xml(rest, escape_for_xml(self.text))
@@ -1990,7 +1990,8 @@ class Annotation:
 
         #Nest attributes for serialization
         if attrs:
-            attr, *rest = self.attributes
+            attr, *rest = attrs
+            yield '>'
             yield from attr.serialize_xml(rest, payload)
             yield '</annotation>'
         elif payload:
@@ -2042,7 +2043,8 @@ class Citation:
         #Nest attributes for serialization
         #Nest attributes for serialization
         if attrs:
-            attr, *rest = self.attributes
+            attr, *rest = attrs
+            yield '>'
             yield from attr.serialize_xml(rest, payload)
             yield '</citation>'
         elif payload:
