@@ -1599,7 +1599,7 @@ class FlowParser:
                 else:
                     raise SAMParserError("Only code can have and embed attribute. At: " + match.group(0))
             elif annotation_type[0] == '!':
-                phrase.add_attribute(Attribute('language-tag', unescape(annotation_type[1:]), is_local))
+                phrase.add_attribute(Attribute('xml:lang', unescape(annotation_type[1:]), is_local))
             elif annotation_type[0] == '*':
                 phrase.add_attribute(Attribute('id', unescape(annotation_type[1:]), is_local))
             elif annotation_type[0] == '#':
@@ -1828,12 +1828,6 @@ class FlowParser:
 class Phrase:
     def __init__(self, text):
         self.text = text
-#        self.child = None
-#         self._id = None
-#         self._name = None
-#         self._language = None
-#         self._language_tag = None
-#         self._encoding = None
         self._conditions = []
         self.annotations = []
         self._attributes = []
@@ -1856,95 +1850,31 @@ class Phrase:
                 return x.value
         return None
 
-    # def add_attribute(self,attr):
-    #     if attr.type == 'id':
-    #         self.id = attr.value
-    #     elif attr.type == 'name':
-    #         self.name = attr.value
-    #     elif attr.type == 'language-tag':
-    #         self.language_tag = attr.value
-    #     elif attr.type == 'language':
-    #         self.language = attr.value
-    #     elif attr.type == 'encoding':
-    #         self.encoding = attr.value
-    #     elif attr.type == 'condition':
-    #         self.condition = attr.value
-
-    # def setid(self, id):
-    #     if self._id is not None:
-    #         raise SAMParserError("A phrase cannot have more than one ID: " + self._id + ',' + id)
-    #     self._id = id
-    #
-    # id = property(None,setid)
-    #
-    # def setencoding(self, encoding):
-    #     if self._encoding is not None:
-    #         raise SAMParserError("A phrase cannot have more than one encoding: " + self._encoding + ',' + encoding)
-    #     self._encoding = encoding
-    #
-    # encoding = property(None,setencoding)
-    #
-    # def setname(self, name):
-    #     if self._name is not None:
-    #         raise SAMParserError("A phrase cannot have more than one name: " + self._name + ',' + name)
-    #     self._name = name
-    #
-    # name = property(None,setname)
-    #
-    # def setlanguagetag(self, language_tag):
-    #     if self._language_tag is not None:
-    #         raise SAMParserError("A phrase cannot have more than one language tag: "+ self._language_tag + ',' + language_tag)
-    #     self._language_tag = language_tag
-    #
-    # language_tag = property(None,setlanguagetag)
-    #
-    # def setlanguage(self, language):
-    #     if self._language is not None:
-    #         raise SAMParserError("A phrase cannot have more than one language: "+ self._language + ',' + language)
-    #     self._language = language
-    #
-    # language = property(None,setlanguage)
-    #
-    # def setcondition(self, condition):
-    #     self._conditions.append(condition)
-    #
-    # condition = property(None,setcondition)
-
     @property
     def annotated(self):
         return len([x for x in self.annotations if not x.local]) > 0 or \
                len([x for x in self._attributes if not x.local]) > 0
 
-
     def serialize_xml(self):
         yield '<phrase'
-        # if self._id:
-        #     yield ' id="' + escape_for_xml_attribute(self._id) + '"'
-        # if self._conditions:
-        #     yield ' conditions="' + ",".join(self._conditions) + '"'
-        # if self._name:
-        #     yield ' name="' + escape_for_xml_attribute(self._name) + '"'
-        # if self._language_tag:
-        #     yield ' xml:lang="' + escape_for_xml_attribute(self._language_tag) + '"'
-        # if self._language:
-        #     yield ' language="' + escape_for_xml_attribute(self._language) + '"'
-        # if self._encoding:
-        #     yield ' encoding="' + escape_for_xml_attribute(self._encoding) + '"'
+        if any([x.value for x in self._attributes if x.type == 'condition']):
+            conditions = Attribute('conditions', ','.join([x.value for x in self._attributes if x.type == 'condition']))
+            attrs = [x for x in self._attributes if x.type != 'condition']
+            attrs.append(conditions)
+            for att in sorted(attrs, key=lambda x: x.type):
+                yield from att.serialize_xml()
+        else:
+            for att in sorted(self._attributes, key=lambda x: x.type):
+                yield from att.serialize_xml()
         yield '>'
 
         #Nest attributes for serialization
         if self.annotations:
-            attr, *rest = self.annotations
-            yield from attr.serialize_xml(rest, escape_for_xml(self.text))
+            ann, *rest = self.annotations
+            yield from ann.serialize_xml(rest, escape_for_xml(self.text))
         else:
             yield escape_for_xml(self.text)
         yield '</phrase>'
-
-        # if self.child:
-        #     yield from self.child.serialize_xml(escape_for_xml(self.text))
-        # else:
-        #     yield escape_for_xml(self.text)
-        # yield '</phrase>'
 
     def append(self, thing):
         if not self.child:
@@ -1956,24 +1886,21 @@ class Code(Phrase):
 
     def serialize_xml(self):
 
-        if any(x for x in self._attributes if x.type=="encoding"):
+        if any(x for x in self._attributes if x.type == "encoding"):
             tag = "embed"
         else:
             tag = "code"
 
         yield '<' + tag
-        # if self._id:
-        #     yield ' id="' + escape_for_xml_attribute(self._id) + '"'
-        # if self._conditions:
-        #     yield ' conditions="' + ",".join(self._conditions) + '"'
-        # if self._name:
-        #     yield ' name="' + escape_for_xml_attribute(self._name) + '"'
-        # if self._language:
-        #     yield ' language="' + escape_for_xml_attribute(self._language) + '"'
-        # if self._language_tag:
-        #     yield ' xml:lang="' + escape_for_xml_attribute(self._language_tag) + '"'
-        # if self._encoding:
-        #     yield ' encoding="' + escape_for_xml_attribute(self._encoding) + '"'
+        if any([x.value for x in self._attributes if x.type == 'condition']):
+            conditions = Attribute('conditions', ','.join([x.value for x in self._attributes if x.type == 'condition']))
+            attrs = [x for x in self._attributes if x.type != 'condition']
+            attrs.append(conditions)
+            for att in sorted(attrs, key=lambda x: x.type):
+                yield from att.serialize_xml()
+        else:
+            for att in sorted(self._attributes, key=lambda x: x.type):
+                yield from att.serialize_xml()
         yield '>'
         yield escape_for_xml(self.text)
         yield '</' + tag + '>'
@@ -2010,7 +1937,7 @@ class Attribute:
     def __init__(self, type, value, local=False):
         self.type = type
         self.value = value
-        self.local = False
+        self.local = local
 
     def __str__(self):
         return '%s ="%s" ' % (self.type, self.value)
@@ -2029,7 +1956,7 @@ class Annotation:
     def __str__(self):
         return '(%s "%s" (%s))' % (self.annotation_type, self.specifically, self.namespace)
 
-    def serialize_xml(self, attrs=None, payload=None):
+    def serialize_xml(self, annotations=None, payload=None):
         yield '<annotation'
         if self.annotation_type:
             yield ' type="{0}"'.format(self.annotation_type)
@@ -2038,11 +1965,11 @@ class Annotation:
         if self.namespace:
             yield ' namespace="{0}"'.format(self.namespace)
 
-        #Nest attributes for serialization
-        if attrs:
-            attr, *rest = attrs
+        #Nest annotations for serialization
+        if annotations:
+            anns, *rest = annotations
             yield '>'
-            yield from attr.serialize_xml(rest, payload)
+            yield from anns.serialize_xml(rest, payload)
             yield '</annotation>'
         elif payload:
             yield '>'
