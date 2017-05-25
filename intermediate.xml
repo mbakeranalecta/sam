@@ -6,7 +6,8 @@
 <tests xml:lang ="en">
 <title>SAM Parser Tests</title>
 <description>
-<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code language="sam">markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
+<p>foo(<phrase><annotation type="bold">foo) bar(</annotation></phrase>foo)</p>
+<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code>markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <ol>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
@@ -2735,7 +2736,7 @@ After this paragraph, there is a blockquote:
 </codeblock>
 </source>
 <markup>
-<p><phrase id="id11" conditions="a,b" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type = "idref" value = "cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
+<p><phrase><annotation type="actor" specifically="John Wayne"><citation type = "idref" value = "cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2945,7 +2946,7 @@ Press {Enter}(key)(!fr-CA)
 </codeblock>
 </source>
 <markup>
-<p>Press <phrase xml:lang="fr-CA"><annotation type="key">Enter</annotation></phrase></p>
+<p>Press <phrase><annotation type="key">Enter</annotation></phrase></p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2964,7 +2965,7 @@ Press {Enter}(key)(?foo)
 </codeblock>
 </source>
 <markup>
-<p>Press <phrase conditions="foo"><annotation type="key">Enter</annotation></phrase></p>
+<p>Press <phrase><annotation type="key">Enter</annotation></phrase></p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3059,11 +3060,11 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="language"><annotation type="index">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;&lt;annotation type="index"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3074,11 +3075,11 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 </description>
 <source>
 <codeblock language ="sam">
-Testing {XML}(*foo) testing {XML}+(index) testing {XML}.
+Testing {XML}+(*foo) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase id="foo">XML</phrase> testing <phrase><annotation type="language"><annotation type="index">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+<p>Testing <phrase>XML</phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3147,7 +3148,7 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the mi
 </codeblock>
 </source>
 <markup>
-<p>This is an equation <code language="latexmath" xml:lang="en">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p>
+<p>This is an equation <code>\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3166,7 +3167,7 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle
 </codeblock>
 </source>
 <markup>
-<p>This is an equation <embed encoding="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</embed> in the middle of a paragraph.</p>
+<p>This is an equation <embed>\frac{ \sum_{t=0}^{N}f(t,k) }{N}</embed> in the middle of a paragraph.</p>
 </markup>
 <result>
 <codeblock language ="xml">

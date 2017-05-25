@@ -1064,11 +1064,11 @@ class Flow(list):
             super().append(thing)
 
     def find_last_annotation(self, text):
-        for i in reversed(self):
+        for i in reversed(self[:-1]):
 
             if type(i) is Phrase:
                 if i.annotations and i.text == text:
-                    return i.annotations
+                    return [x for x in i.annotations if not x.local]
 
             #     c = i.child
             #     while c:
@@ -1287,7 +1287,7 @@ class DocStructure:
 
         # Check for duplicate IDs in the flow
         # Add any ids found to list of ids
-        ids=[f._id for f in flow if type(f) is Phrase and f._id is not None]
+        ids=[f.id for f in flow if type(f) is Phrase and f.id is not None]
         for id in ids:
             if id in self.ids:
                 raise SAMParserError("Duplicate ID found: " + ids[0])
@@ -1595,25 +1595,22 @@ class FlowParser:
 
             if annotation_type[0] == '=':
                 if type(phrase) is Code:
-                    phrase.add_attribute(Attribute('encoding', unescape(annotation_type[1:])))
+                    phrase.add_attribute(Attribute('encoding', unescape(annotation_type[1:]), is_local))
                 else:
                     raise SAMParserError("Only code can have and embed attribute. At: " + match.group(0))
             elif annotation_type[0] == '!':
-                phrase.add_attribute(Attribute('language-tag', unescape(annotation_type[1:])))
+                phrase.add_attribute(Attribute('language-tag', unescape(annotation_type[1:]), is_local))
             elif annotation_type[0] == '*':
-                phrase.add_attribute(Attribute('id', unescape(annotation_type[1:])))
+                phrase.add_attribute(Attribute('id', unescape(annotation_type[1:]), is_local))
             elif annotation_type[0] == '#':
-                phrase.add_attribute(Attribute('name', unescape(annotation_type[1:])))
+                phrase.add_attribute(Attribute('name', unescape(annotation_type[1:]), is_local))
             elif annotation_type[0] == '?':
-                phrase.add_attribute(Attribute('condition', unescape(annotation_type[1:])))
+                phrase.add_attribute(Attribute('condition', unescape(annotation_type[1:]), is_local))
             else:
                 if type(self.flow[-1]) is Code:
-                    phrase.add_attribute(Attribute('language', unescape(annotation_type)))
+                    phrase.add_attribute(Attribute('language', unescape(annotation_type), is_local))
                 else:
-                    if is_local:
-                        phrase.local_annotations.append(Annotation(annotation_type, unescape(specifically), namespace))
-                    else:
-                        phrase.annotations.append(Annotation(annotation_type, unescape(specifically), namespace))
+                    phrase.annotations.append(Annotation(annotation_type, unescape(specifically), namespace, is_local))
             para.advance(len(match.group(0)))
             if self.patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
@@ -1832,104 +1829,112 @@ class Phrase:
     def __init__(self, text):
         self.text = text
 #        self.child = None
-        self._id = None
-        self._name = None
-        self._language = None
-        self._language_tag = None
-        self._encoding = None
+#         self._id = None
+#         self._name = None
+#         self._language = None
+#         self._language_tag = None
+#         self._encoding = None
         self._conditions = []
         self.annotations = []
-        self.local_annotations = []
-
+        self._attributes = []
 
     def __str__(self):
         return u'{{{0:s}}}'.format(self.text)
 
-    def add_attribute(self,attr):
-        if attr.type == 'id':
-            self.id = attr.value
-        elif attr.type == 'name':
-            self.name = attr.value
-        elif attr.type == 'language-tag':
-            self.language_tag = attr.value
-        elif attr.type == 'language':
-            self.language = attr.value
-        elif attr.type == 'encoding':
-            self.encoding = attr.value
-        elif attr.type == 'condition':
-            self.condition = attr.value
+    def add_attribute(self, attr):
+        if attr.type == "condition":
+            self._attributes.append(attr)
+        elif any(x.type == attr.type for x in self._attributes):
+            raise SAMParserError(f"A phrase cannot have more than one {attr.type}: {attr.value}")
+        else:
+            self._attributes.append(attr)
 
-    def setid(self, id):
-        if self._id is not None:
-            raise SAMParserError("A phrase cannot have more than one ID: " + self._id + ',' + id)
-        self._id = id
+    @property
+    def id(self):
+        for x in self._attributes:
+            if x.type == 'id':
+                return x.value
+        return None
 
-    id = property(None,setid)
+    # def add_attribute(self,attr):
+    #     if attr.type == 'id':
+    #         self.id = attr.value
+    #     elif attr.type == 'name':
+    #         self.name = attr.value
+    #     elif attr.type == 'language-tag':
+    #         self.language_tag = attr.value
+    #     elif attr.type == 'language':
+    #         self.language = attr.value
+    #     elif attr.type == 'encoding':
+    #         self.encoding = attr.value
+    #     elif attr.type == 'condition':
+    #         self.condition = attr.value
 
-    def setencoding(self, encoding):
-        if self._encoding is not None:
-            raise SAMParserError("A phrase cannot have more than one encoding: " + self._encoding + ',' + encoding)
-        self._encoding = encoding
-
-    encoding = property(None,setencoding)
-
-    def setname(self, name):
-        if self._name is not None:
-            raise SAMParserError("A phrase cannot have more than one name: " + self._name + ',' + name)
-        self._name = name
-
-    name = property(None,setname)
-
-    def setlanguagetag(self, language_tag):
-        if self._language_tag is not None:
-            raise SAMParserError("A phrase cannot have more than one language tag: "+ self._language_tag + ',' + language_tag)
-        self._language_tag = language_tag
-
-    language_tag = property(None,setlanguagetag)
-
-    def setlanguage(self, language):
-        if self._language is not None:
-            raise SAMParserError("A phrase cannot have more than one language: "+ self._language + ',' + language)
-        self._language = language
-
-    language = property(None,setlanguage)
-
-    def setcondition(self, condition):
-        self._conditions.append(condition)
-
-    condition = property(None,setcondition)
+    # def setid(self, id):
+    #     if self._id is not None:
+    #         raise SAMParserError("A phrase cannot have more than one ID: " + self._id + ',' + id)
+    #     self._id = id
+    #
+    # id = property(None,setid)
+    #
+    # def setencoding(self, encoding):
+    #     if self._encoding is not None:
+    #         raise SAMParserError("A phrase cannot have more than one encoding: " + self._encoding + ',' + encoding)
+    #     self._encoding = encoding
+    #
+    # encoding = property(None,setencoding)
+    #
+    # def setname(self, name):
+    #     if self._name is not None:
+    #         raise SAMParserError("A phrase cannot have more than one name: " + self._name + ',' + name)
+    #     self._name = name
+    #
+    # name = property(None,setname)
+    #
+    # def setlanguagetag(self, language_tag):
+    #     if self._language_tag is not None:
+    #         raise SAMParserError("A phrase cannot have more than one language tag: "+ self._language_tag + ',' + language_tag)
+    #     self._language_tag = language_tag
+    #
+    # language_tag = property(None,setlanguagetag)
+    #
+    # def setlanguage(self, language):
+    #     if self._language is not None:
+    #         raise SAMParserError("A phrase cannot have more than one language: "+ self._language + ',' + language)
+    #     self._language = language
+    #
+    # language = property(None,setlanguage)
+    #
+    # def setcondition(self, condition):
+    #     self._conditions.append(condition)
+    #
+    # condition = property(None,setcondition)
 
     @property
     def annotated(self):
-        return len(self.annotations) > 0 or \
-                self._id or \
-                self._name or \
-                self._language_tag or \
-                self._language or \
-                self._encoding or \
-                self._conditions
+        return len([x for x in self.annotations if not x.local]) > 0 or \
+               len([x for x in self._attributes if not x.local]) > 0
 
 
     def serialize_xml(self):
         yield '<phrase'
-        if self._id:
-            yield ' id="' + escape_for_xml_attribute(self._id) + '"'
-        if self._conditions:
-            yield ' conditions="' + ",".join(self._conditions) + '"'
-        if self._name:
-            yield ' name="' + escape_for_xml_attribute(self._name) + '"'
-        if self._language_tag:
-            yield ' xml:lang="' + escape_for_xml_attribute(self._language_tag) + '"'
-        if self._language:
-            yield ' language="' + escape_for_xml_attribute(self._language) + '"'
-        if self._encoding:
-            yield ' encoding="' + escape_for_xml_attribute(self._encoding) + '"'
+        # if self._id:
+        #     yield ' id="' + escape_for_xml_attribute(self._id) + '"'
+        # if self._conditions:
+        #     yield ' conditions="' + ",".join(self._conditions) + '"'
+        # if self._name:
+        #     yield ' name="' + escape_for_xml_attribute(self._name) + '"'
+        # if self._language_tag:
+        #     yield ' xml:lang="' + escape_for_xml_attribute(self._language_tag) + '"'
+        # if self._language:
+        #     yield ' language="' + escape_for_xml_attribute(self._language) + '"'
+        # if self._encoding:
+        #     yield ' encoding="' + escape_for_xml_attribute(self._encoding) + '"'
         yield '>'
 
         #Nest attributes for serialization
-        attrs = self.annotations + self.local_annotations
-        if attrs:
-            attr, *rest = attrs
+        if self.annotations:
+            attr, *rest = self.annotations
             yield from attr.serialize_xml(rest, escape_for_xml(self.text))
         else:
             yield escape_for_xml(self.text)
@@ -1951,24 +1956,24 @@ class Code(Phrase):
 
     def serialize_xml(self):
 
-        if self._encoding:
+        if any(x for x in self._attributes if x.type=="encoding"):
             tag = "embed"
         else:
             tag = "code"
 
         yield '<' + tag
-        if self._id:
-            yield ' id="' + escape_for_xml_attribute(self._id) + '"'
-        if self._conditions:
-            yield ' conditions="' + ",".join(self._conditions) + '"'
-        if self._name:
-            yield ' name="' + escape_for_xml_attribute(self._name) + '"'
-        if self._language:
-            yield ' language="' + escape_for_xml_attribute(self._language) + '"'
-        if self._language_tag:
-            yield ' xml:lang="' + escape_for_xml_attribute(self._language_tag) + '"'
-        if self._encoding:
-            yield ' encoding="' + escape_for_xml_attribute(self._encoding) + '"'
+        # if self._id:
+        #     yield ' id="' + escape_for_xml_attribute(self._id) + '"'
+        # if self._conditions:
+        #     yield ' conditions="' + ",".join(self._conditions) + '"'
+        # if self._name:
+        #     yield ' name="' + escape_for_xml_attribute(self._name) + '"'
+        # if self._language:
+        #     yield ' language="' + escape_for_xml_attribute(self._language) + '"'
+        # if self._language_tag:
+        #     yield ' xml:lang="' + escape_for_xml_attribute(self._language_tag) + '"'
+        # if self._encoding:
+        #     yield ' encoding="' + escape_for_xml_attribute(self._encoding) + '"'
         yield '>'
         yield escape_for_xml(self.text)
         yield '</' + tag + '>'
@@ -2002,9 +2007,10 @@ class FlowSource:
 
 
 class Attribute:
-    def __init__(self, type, value):
+    def __init__(self, type, value, local=False):
         self.type = type
         self.value = value
+        self.local = False
 
     def __str__(self):
         return '%s ="%s" ' % (self.type, self.value)
@@ -2014,11 +2020,11 @@ class Attribute:
 
 
 class Annotation:
-    def __init__(self, annotation_type, specifically='', namespace=''):
+    def __init__(self, annotation_type, specifically='', namespace='', local=False):
         self.annotation_type = annotation_type.strip()
         self.specifically = specifically
         self.namespace = namespace
-        self.child = None
+        self.local = local
 
     def __str__(self):
         return '(%s "%s" (%s))' % (self.annotation_type, self.specifically, self.namespace)
@@ -2044,17 +2050,6 @@ class Annotation:
             yield '</annotation>'
         else:
             yield '/>'
-
-        # if self.child:
-        #     yield '>'
-        #     yield from self.child.serialize_xml(payload)
-        #     yield '</annotation>'
-        # elif payload:
-        #     yield '>'
-        #     yield payload
-        #     yield '</annotation>'
-        # else:
-        #     yield '/>'
 
     def append(self, thing):
         if not self.child:

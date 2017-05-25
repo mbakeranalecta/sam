@@ -8,6 +8,8 @@ tests:(!en) SAM Parser Tests
 
     description:
 
+        foo(*foo) bar(*foo)
+
         This document is the {output}(foo of the test document processed by test.xslt.
         That stylesheet attempt to validate the outcome of tests by generating a string
         version of the markup under the `markup:`(sam) heading and comparing it to the
@@ -2598,7 +2600,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="language"><annotation type="index">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+                    <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 
         case: Attribute annotations
             description:
@@ -2606,10 +2608,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    Testing {XML}(*foo) testing {XML}+(index) testing {XML}.
+                    Testing {XML}+(*foo) testing {XML}+(index) testing {XML}.
 
             markup:
-                Testing {XML}(*foo) testing {XML}+(index) testing {XML}.
+                Testing {XML}+(*foo) testing {XML}+(index) testing {XML}.
 
             result:
                 ```(xml)
