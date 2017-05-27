@@ -2617,7 +2617,34 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>Testing <phrase id="foo"><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 
+        case: Mix of local and global
+            description:
+                A mix of local and global annotations. 
 
+            source:
+                ```(sam)
+                    Testing {XML}+(foo)(language) testing {XML}+(index) testing {XML}.
+
+            markup:
+                Testing {XML}+(foo)(language) testing {XML}+(index) testing {XML}.
+
+            result:
+                ```(xml)
+                    <p>Testing <phrase><annotation type="foo"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+        case: Multiple local
+            description:
+                Multiple local annotations. 
+
+            source:
+                ```(sam)
+                    Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
+
+            markup:
+                Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
+
+            result:
+                ```(xml)
+                    <p>Testing <phrase><annotation type="foobar"><annotation type="verbiage"><annotation type="language">XML</annotation></annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
     test: Decorations
         description:
             A decoration is a shortcut for a {media domain}(concept) annotation. Three decorations are supported, bold, italic, and code.

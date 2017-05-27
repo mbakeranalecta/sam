@@ -3087,6 +3087,44 @@ Testing {XML}+(*foo) testing {XML}+(index) testing {XML}.
 </codeblock>
 </result>
 </case>
+<case>
+<title>Mix of local and global</title>
+<description>
+<p>A mix of local and global annotations.</p>
+</description>
+<source>
+<codeblock language ="sam">
+Testing {XML}+(foo)(language) testing {XML}+(index) testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase><annotation type="foo"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="foo"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Multiple local</title>
+<description>
+<p>Multiple local annotations.</p>
+</description>
+<source>
+<codeblock language ="sam">
+Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase><annotation type="foobar"><annotation type="verbiage"><annotation type="language">XML</annotation></annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="foobar"&gt;&lt;annotation type="verbiage"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
 </test>
 <test>
 <title>Decorations</title>
