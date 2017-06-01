@@ -3002,7 +3002,7 @@ Annotation lookup test: {test phrase}.
 </codeblock>
 </source>
 <markup>
-<p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
+<p>Annotation lookup test: <phrase>test phrase</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3021,7 +3021,7 @@ This {annotation} occurs previously.
 </codeblock>
 </source>
 <markup>
-<p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> occurs previously.</p>
+<p>This <phrase>annotation</phrase> occurs previously.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -4025,7 +4025,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 <markup>
 <p>“title”?</p>
 <p><phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
-<p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
+<p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase>DocBook</phrase>’s</p>
 </markup>
 <result>
 <codeblock language ="xml">
