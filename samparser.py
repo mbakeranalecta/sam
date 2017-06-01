@@ -438,6 +438,8 @@ class SamParser:
                 raise SAMParserError("Declarations must come before all other content. Found:" + match.group(0))
             if name == 'namespace':
                 self.doc.default_namespace = content
+            if name == 'annotation-lookup':
+                self.doc.annotation_lookup = content
             else:
                 raise SAMParserError("Unknown declaration: " + match.group(0))
 
@@ -1063,19 +1065,17 @@ class Flow(list):
         elif not thing == '':
             super().append(thing)
 
-    def find_last_annotation(self, text):
-        for i in reversed(self[:-1]):
-
-            if type(i) is Phrase:
-                if i.annotations and i.text == text:
-                    return [x for x in i.annotations if not x.local]
-
-            #     c = i.child
-            #     while c:
-            #         if type(c) is Annotation:
-            #             if i.text == text:
-            #                 return c
-            #         c=c.child
+    def find_last_annotation(self, text, mode):
+        if mode=='case insensitive':
+            for i in reversed(self):
+                if type(i) is Phrase:
+                    if i.annotations and i.text.lower() == text.lower():
+                        return [x for x in i.annotations if not x.local]
+        else:
+            for i in reversed(self):
+                if type(i) is Phrase:
+                    if i.annotations and i.text == text:
+                        return [x for x in i.annotations if not x.local]
         return None
 
     def serialize_xml(self):
@@ -1131,6 +1131,7 @@ class DocStructure:
         self.root = Root()
         self.current_block = self.root
         self.default_namespace = None
+        self.annotation_lookup = "case insensitive"
         self.ids = []
 
 
@@ -1312,7 +1313,7 @@ class DocStructure:
         if node is None:
             node = self.root
         if type(node) is Flow:
-            result = node.find_last_annotation(text)
+            result = node.find_last_annotation(text, self.annotation_lookup)
             if result is not None:
                 return result
         else:
@@ -1527,7 +1528,7 @@ class FlowParser:
                 # closest preceding annotation.
                 # First look back in the current flow
                 # (which is not part of the doc structure yet).
-                previous = self.flow.find_last_annotation(text)
+                previous = self.flow.find_last_annotation(text, self.doc.annotation_lookup)
                 if previous is not None:
                     p.annotations.extend(previous)
                 else:
@@ -1558,7 +1559,7 @@ class FlowParser:
             # closest preceding annotation.
             # First look back in the current flow
             # (which is not part of the doc structure yet).
-            previous = self.flow.find_last_annotation(phrase.text)
+            previous = self.flow.find_last_annotation(phrase.text, self.doc.annotation_lookup)
             if previous is not None:
                 phrase.annotations.extend(previous)
             else:

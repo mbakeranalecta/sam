@@ -6,8 +6,7 @@
 <tests xml:lang ="en">
 <title>SAM Parser Tests</title>
 <description>
-<p>foo(<phrase><annotation type="bold">foo) bar(</annotation></phrase>foo)</p>
-<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code language ="sam">markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
+<p>This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code language ="sam">markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <ol>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
@@ -2993,6 +2992,44 @@ This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotat
 </result>
 </case>
 <case>
+<title>Case insensitive lookup</title>
+<description>
+<p>Annotation lookup is case insensitive unless the annotation-lookup declaration is set to <code>case sensitive</code>.</p>
+</description>
+<source>
+<codeblock language ="sam">
+This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {Annotation}.
+</codeblock>
+</source>
+<markup>
+<p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">Annotation</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;This &lt;phrase&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;annotation&lt;/annotation&gt;&lt;/phrase&gt; is repeated &lt;phrase&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;Annotation&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Case insensitive lookup with multiple annotations</title>
+<description>
+<p>Make sure all annotations are copied</p>
+</description>
+<source>
+<codeblock language ="sam">
+This {annotation}(foo)(https://en.wikipedia.org/wiki/Annotation) is repeated {Annotation}.
+</codeblock>
+</source>
+<markup>
+<p>This <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></annotation></phrase> is repeated <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">Annotation</annotation></annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;This &lt;phrase&gt;&lt;annotation type="foo"&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;annotation&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; is repeated &lt;phrase&gt;&lt;annotation type="foo"&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;Annotation&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
 <title>Prior annotation lookup in included file</title>
 <description>
 <p>Look up annotations in included files.</p>
@@ -3022,11 +3059,11 @@ This {annotation} occurs previously.
 </codeblock>
 </source>
 <markup>
-<p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> occurs previously.</p>
+<p>This <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></annotation></phrase> occurs previously.</p>
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;This &lt;phrase&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;annotation&lt;/annotation&gt;&lt;/phrase&gt; occurs previously.&lt;/p&gt;
+&lt;p&gt;This &lt;phrase&gt;&lt;annotation type="foo"&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;annotation&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; occurs previously.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3060,7 +3097,7 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase>XML</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3079,7 +3116,7 @@ Testing {XML}+(*foo) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase id ="foo"><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+<p>Testing <phrase id ="foo">XML</phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase>XML</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3098,7 +3135,7 @@ Testing {XML}+(foo)(language) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="foo"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+<p>Testing <phrase><annotation type="foo"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase>XML</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3117,7 +3154,7 @@ Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="foobar"><annotation type="verbiage"><annotation type="language">XML</annotation></annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+<p>Testing <phrase><annotation type="foobar"><annotation type="verbiage">XML</annotation></annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase>XML</phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
