@@ -1069,7 +1069,7 @@ class Flow(list):
         if mode=='case insensitive':
             for i in reversed(self):
                 if type(i) is Phrase:
-                    if i.annotations and i.text.lower() == text.lower():
+                    if [x for x in i.annotations if not x.local] and i.text.lower() == text.lower():
                         return [x for x in i.annotations if not x.local]
         else:
             for i in reversed(self):
