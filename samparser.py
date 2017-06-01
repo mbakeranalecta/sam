@@ -1074,7 +1074,7 @@ class Flow(list):
         else:
             for i in reversed(self):
                 if type(i) is Phrase:
-                    if i.annotations and i.text == text:
+                    if [x for x in i.annotations if not x.local] and i.text == text:
                         return [x for x in i.annotations if not x.local]
         return None
 
@@ -1994,6 +1994,7 @@ class Citation:
         self.citation_type = citation_type
         self.citation_value = citation_value
         self.citation_extra = citation_extra
+        self.local=True
         self.child = None
 
     def __str__(self):
