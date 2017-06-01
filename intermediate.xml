@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- !annotation-lookup: case sensitive -->
 <!--  This file is part of the SPFE Open Toolkit. See the accompanying license.txt file -->
 <!--  for applicable licenses. -->
 <!--  (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved. -->
@@ -7,7 +6,7 @@
 <tests xml:lang ="en">
 <title>SAM Parser Tests</title>
 <description>
-<p>This document is the <phrase>output</phrase>(foo of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code language="sam">markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
+<p>This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code language ="sam">markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <ol>
 <li>
 <p>Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.</p>
@@ -27,6 +26,25 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 <description>
 <p>Include content from another SAM file.</p>
 </description>
+<case>
+<title>Local only annotations</title>
+<description>
+<p>A local-only annotation is one which applies only to the current phrase. It is not taken into consideration in annotation lookup, so the lookup search will proceed to the next phrase with the same text. Annotation lookup will occur for a phrase with a local-only annotation, and the local annotation will be added to the looked up annotations, if any.</p>
+</description>
+<source>
+<codeblock language ="sam">
+Testing {XML}(language) testing {XML}+(index) testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
 <case>
 <title>Simple include</title>
 <description>
@@ -2736,11 +2754,11 @@ After this paragraph, there is a blockquote:
 </codeblock>
 </source>
 <markup>
-<p><phrase id="id11" conditions="a,b" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type = "idref" value = "cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
+<p><phrase conditions ="a,b" id ="id11" name ="name" xml:lang ="en-CA"><annotation type="actor" specifically="John Wayne"><citation type = "idref" value = "cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;&lt;phrase id="id11" conditions="a,b" name="name" xml:lang="en-CA"&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;&lt;citation type="idref" value="cit"&gt;The Duke&lt;/citation&gt;&lt;/annotation&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
+&lt;p&gt;&lt;phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;&lt;citation type="idref" value="cit"&gt;The Duke&lt;/citation&gt;&lt;/annotation&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -2946,7 +2964,7 @@ Press {Enter}(key)(!fr-CA)
 </codeblock>
 </source>
 <markup>
-<p>Press <phrase xml:lang="fr-CA"><annotation type="key">Enter</annotation></phrase></p>
+<p>Press <phrase xml:lang ="fr-CA"><annotation type="key">Enter</annotation></phrase></p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2965,7 +2983,7 @@ Press {Enter}(key)(?foo)
 </codeblock>
 </source>
 <markup>
-<p>Press <phrase conditions="foo"><annotation type="key">Enter</annotation></phrase></p>
+<p>Press <phrase conditions ="foo"><annotation type="key">Enter</annotation></phrase></p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -2993,6 +3011,44 @@ This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotat
 </result>
 </case>
 <case>
+<title>Case insensitive lookup</title>
+<description>
+<p>Annotation lookup is case insensitive unless the annotation-lookup declaration is set to <code>case sensitive</code>.</p>
+</description>
+<source>
+<codeblock language ="sam">
+This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {Annotation}.
+</codeblock>
+</source>
+<markup>
+<p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">Annotation</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;This &lt;phrase&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;annotation&lt;/annotation&gt;&lt;/phrase&gt; is repeated &lt;phrase&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;Annotation&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Case insensitive lookup with multiple annotations</title>
+<description>
+<p>Make sure all annotations are copied</p>
+</description>
+<source>
+<codeblock language ="sam">
+This {annotation}(foo)(https://en.wikipedia.org/wiki/Annotation) is repeated {Annotation}.
+</codeblock>
+</source>
+<markup>
+<p>This <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></annotation></phrase> is repeated <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">Annotation</annotation></annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;This &lt;phrase&gt;&lt;annotation type="foo"&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;annotation&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; is repeated &lt;phrase&gt;&lt;annotation type="foo"&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;Annotation&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
 <title>Prior annotation lookup in included file</title>
 <description>
 <p>Look up annotations in included files.</p>
@@ -3003,7 +3059,7 @@ Annotation lookup test: {test phrase}.
 </codeblock>
 </source>
 <markup>
-<p>Annotation lookup test: <phrase>test phrase</phrase>.</p>
+<p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3022,11 +3078,11 @@ This {annotation} occurs previously.
 </codeblock>
 </source>
 <markup>
-<p>This <phrase>annotation</phrase> occurs previously.</p>
+<p>This <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></annotation></phrase> occurs previously.</p>
 </markup>
 <result>
 <codeblock language ="xml">
-&lt;p&gt;This &lt;phrase&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;annotation&lt;/annotation&gt;&lt;/phrase&gt; occurs previously.&lt;/p&gt;
+&lt;p&gt;This &lt;phrase&gt;&lt;annotation type="foo"&gt;&lt;annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation"&gt;annotation&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; occurs previously.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3046,6 +3102,82 @@ This {should be reported}.
 <result>
 <codeblock language ="xml">
 &lt;p&gt;This &lt;phrase&gt;should be reported&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Local only annotations</title>
+<description>
+<p>A local-only annotation is one which applies only to the current phrase. It is not taken into consideration in annotation lookup, so the lookup search will proceed to the next phrase with the same text. Annotation lookup will occur for a phrase with a local-only annotation, and the local annotation will be added to the looked up annotations, if any.</p>
+</description>
+<source>
+<codeblock language ="sam">
+Testing {XML}(language) testing {XML}+(index) testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Attribute annotations</title>
+<description>
+<p>Attributes like ID should not be copied because they are supposed to be unique.</p>
+</description>
+<source>
+<codeblock language ="sam">
+Testing {XML}+(*foo) testing {XML}+(index) testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase id ="foo"><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;Testing &lt;phrase id="foo"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Mix of local and global</title>
+<description>
+<p>A mix of local and global annotations.</p>
+</description>
+<source>
+<codeblock language ="sam">
+Testing {XML}+(foo)(language) testing {XML}+(index) testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase><annotation type="foo"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="foo"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Multiple local</title>
+<description>
+<p>Multiple local annotations.</p>
+</description>
+<source>
+<codeblock language ="sam">
+Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase><annotation type="foobar"><annotation type="verbiage"><annotation type="language">XML</annotation></annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language ="xml">
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="foobar"&gt;&lt;annotation type="verbiage"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3110,7 +3242,7 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the mi
 </codeblock>
 </source>
 <markup>
-<p>This is an equation <code language="latexmath" xml:lang="en">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p>
+<p>This is an equation <code language ="latexmath" xml:lang ="en">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -3129,7 +3261,7 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle
 </codeblock>
 </source>
 <markup>
-<p>This is an equation <embed encoding="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</embed> in the middle of a paragraph.</p>
+<p>This is an equation <embed encoding ="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</embed> in the middle of a paragraph.</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -4026,7 +4158,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 <markup>
 <p>“title”?</p>
 <p><phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
-<p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase>DocBook</phrase>’s</p>
+<p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
 </markup>
 <result>
 <codeblock language ="xml">
