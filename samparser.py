@@ -1066,6 +1066,7 @@ class Flow(list):
             super().append(thing)
 
     def find_last_annotation(self, text, mode):
+        SAM_parser_info(f"finding '{text}' in {mode} mode")
         for i in reversed(self):
 
             if type(i) is Phrase:
@@ -1079,6 +1080,7 @@ class Flow(list):
                 else:
                     while c:
                         if type(c) is Annotation:
+                            SAM_parser_info(f"comparing {i.text.lower()} with {text.lower()}")
                             if i.text.lower() == text.lower():
                                 return c
                         c = c.child
@@ -1537,7 +1539,7 @@ class FlowParser:
                     self.flow.append(previous)
                 else:
                     # Then look back in the document.
-                    previous = self.doc.find_last_annotation(text, self.doc.annotation_lookup)
+                    previous = self.doc.find_last_annotation(text)
                     if previous is not None:
                         self.flow.append(previous)
 
