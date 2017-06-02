@@ -1840,7 +1840,7 @@ class Phrase:
         if attr.type == "condition":
             self._attributes.append(attr)
         elif any(x.type == attr.type for x in self._attributes):
-            raise SAMParserError(f"A phrase cannot have more than one {attr.type}: {attr.value}")
+            raise SAMParserError("A phrase cannot have more than one {0}: {1}".format(attr.type, attr.value))
         else:
             self._attributes.append(attr)
 
