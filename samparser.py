@@ -751,7 +751,7 @@ class RecordSet(Block):
         if b.indent <= self.indent:
             self.parent.add(b)
         elif not type(b) is Record:
-            raise SAMParserError('A RecordSet can only have Record children. At \"{0}\".'.format(
+            raise SAMParserError('A RecordSet can only have Record children. At: \n\"{0}\".'.format(
                     str(self)))
         elif len(b.field_values) != len(self.field_names):
             raise SAMParserError('Record length does not match record set header. At: \n{0}\n'.format(
@@ -774,7 +774,9 @@ class Record(Block):
         yield " " * int(self.indent)
         yield "[record:'%s'" % (self.content) + '\n'
         for x in self.record:
-            yield " " * int(self.indent + 4) + x[0] + ' = ' + x[1] + "\n"
+            yield " " * int(self.indent + 4) + x[0] + ' = '
+            yield from x[1].serialize_xml()
+            yield "\n"
         yield "]"
 
     def serialize_xml(self):
