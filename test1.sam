@@ -3669,6 +3669,18 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     This para contains -- an en dash and an---em dash.
 
+                    This para contains -- {an}(word) en dash and an---{em}(word) dash.
+
+                    This para {contains}(word) -- an en dash and {an}(word)---em dash.
+
+                    This para *contains* -- an en dash and _an_---em dash.
+
+                    This para `contains` -- an en dash and "an"---em dash.
+
+                    This para 'contains' -- an en dash and `an`---em dash.
+
+                    x, y, z, etc. -- something else
+
             markup:
                 This para contains -- an en dash and an---em dash.
 
@@ -3682,6 +3694,8 @@ tests:(!en) SAM Parser Tests
 
                 This para 'contains' -- an en dash and `an`---em dash.
 
+                x, y, z, etc. -- something else
+
             result:
                 ```(xml)
                     <p>This para contains – an en dash and an—em dash.</p>
@@ -3690,6 +3704,7 @@ tests:(!en) SAM Parser Tests
                     <p>This para <phrase><annotation type="bold">contains</annotation></phrase> – an en dash and <phrase><annotation type="italic">an</annotation></phrase>—em dash.</p>
                     <p>This para <code>contains</code> – an en dash and “an”—em dash.</p>
                     <p>This para ‘contains’ – an en dash and <code>an</code>—em dash.</p>
+                    <p>x, y, z, etc. – something else</p>
 
 # Can we have comments after the end of the document?
 # Yes we can!

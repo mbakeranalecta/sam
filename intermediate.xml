@@ -4196,6 +4196,18 @@ This para uses \"dumb\" quotes. Don\'t get them &amp;quot;mixed up&amp;quot;.
 <source>
 <codeblock language ="sam">
 This para contains -- an en dash and an---em dash.
+
+This para contains -- {an}(word) en dash and an---{em}(word) dash.
+
+This para {contains}(word) -- an en dash and {an}(word)---em dash.
+
+This para *contains* -- an en dash and _an_---em dash.
+
+This para `contains` -- an en dash and "an"---em dash.
+
+This para 'contains' -- an en dash and `an`---em dash.
+
+x, y, z, etc. -- something else
 </codeblock>
 </source>
 <markup>
@@ -4205,6 +4217,7 @@ This para contains -- an en dash and an---em dash.
 <p>This para <phrase><annotation type="bold">contains</annotation></phrase> – an en dash and <phrase><annotation type="italic">an</annotation></phrase>—em dash.</p>
 <p>This para <code>contains</code> – an en dash and “an”—em dash.</p>
 <p>This para ‘contains’ – an en dash and <code>an</code>—em dash.</p>
+<p>x, y, z, etc. – something else</p>
 </markup>
 <result>
 <codeblock language ="xml">
@@ -4214,6 +4227,7 @@ This para contains -- an en dash and an---em dash.
 &lt;p&gt;This para &lt;phrase&gt;&lt;annotation type="bold"&gt;contains&lt;/annotation&gt;&lt;/phrase&gt; – an en dash and &lt;phrase&gt;&lt;annotation type="italic"&gt;an&lt;/annotation&gt;&lt;/phrase&gt;—em dash.&lt;/p&gt;
 &lt;p&gt;This para &lt;code&gt;contains&lt;/code&gt; – an en dash and “an”—em dash.&lt;/p&gt;
 &lt;p&gt;This para ‘contains’ – an en dash and &lt;code&gt;an&lt;/code&gt;—em dash.&lt;/p&gt;
+&lt;p&gt;x, y, z, etc. – something else&lt;/p&gt;
 </codeblock>
 </result>
 </case>
