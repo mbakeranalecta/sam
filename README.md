@@ -76,7 +76,7 @@ Since SAM is under active development, there may be backward-incompatible change
 way the XML representation of a record is generate. A record
 used to output as "row". It is now output as "record".
 
-* Revision 3fdd6528d88b1a7f0a72c10ce5b5e768433eaf19 introduced a change in how inline code is  serialized. It is now serialized as a <code> element rather than as a <phrase> element with an <annotation type="code"> nested element.
+* Revision 3fdd6528d88b1a7f0a72c10ce5b5e768433eaf19 introduced a change in how inline code is  serialized. It is now serialized as a `<code>` element rather than as a `<phrase>` element with an `<annotation type="code">` nested element.
 
 * Revision 8e8c6a0b4c9c41bd72fab5fd53e3d967e9688110 removed the `===` flag for a block of embedded code, which had been briefly introduced in an earlier revision. Blocks of embed code should now be represented as regular code blocks using an encoding attribute `(=svg)` rather than a language attribute `(svg)`.
 
