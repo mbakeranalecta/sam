@@ -148,7 +148,7 @@ footnote:(*moby)
 </section>
 <section>
 <title>Blocks</title>
-<p>Blocks are indicated by a token followed by a semicolon at the start of a line.</p>
+<p>Blocks are indicated by a token followed by a colon at the start of a line.</p>
 <p>Blocks can have metadata in parens that follow the colon with no space:</p>
 <codeblock>
 <![CDATA[section:(?ultra) The ultra feature is really cool! 

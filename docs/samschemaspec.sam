@@ -17,7 +17,7 @@ rule:(#header) SAM Schema Header
 
     A SAM Schema begins with a SAM Schema Header
 
-    A SAM schema header consists of the word "samschema" followed by a semicolon
+    A SAM schema header consists of the word "samschema" followed by a colon
     followed optionally by a namespace URI in curly braces. For example:
 
     ```(samschema)
