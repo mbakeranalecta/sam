@@ -82,5 +82,7 @@ used to output as "row". It is now output as "record".
 
 * Revision fac3fea6a9570a20c825369417ab2eaf94d34d2b made annotation lookup case insensitive. Case sensitive lookup can be turned on using the declaration `!annotation-lookup: case sensitive`
 
+* Revision 828ef33d291f1364a6edf036588ac5f21fac0abb addressed issue #142 by detecting recursive includes. This had the side effect of changing the behavior when the parser encounters an error in an included file. Previously this error was demoted to a warning (not sure why). Now it is treated as an error and stops the parser. Without this change, the error would not get noted in the error count for batch processing, which is clearly not a good idea. To allow for more lenient error handling while retaining appropriate error reporting, we would need to introduce a reportable non-fatal error type. Issue #148 has been raised to consider this. 
+
 Please report any other backward incompatibilities you find so they can be added to this list. 
 
