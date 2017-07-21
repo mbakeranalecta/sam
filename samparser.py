@@ -343,7 +343,7 @@ class SamParser:
                 includeparser = SamParser()
                 with urllib.request.urlopen(fullhref) as response:
                     includeparser.parse(reader(response))
-                include = Include(includeparser.doc, fullhref, indent)
+                include = Include(includeparser.doc, href, fullhref, indent)
                 self.doc.add_block(include)
                 SAM_parser_info("Finished parsing include " + href)
             #except SAMParserError as e:
@@ -645,13 +645,13 @@ class Block(ABC):
 
     def _output_block(self):
         yield " " * int(self.indent)
-        yield "[%s:" % (self.name)
+        yield "%s:" % (self.name)
         if self.content:
-            yield "['%s'" % (self.content)
+            yield "%s" % (self.content)
+        yield "\n"
         for x in self.children:
-            yield "\n"
             yield str(x)
-        yield "]"
+
 
     def serialize_xml(self):
         yield '<{0}'.format(self.name)
@@ -699,6 +699,14 @@ class Codeblock(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='codeblock', indent=indent, attributes=attributes, citations=citations,namespace=namespace)
 
+    def __str__(self):
+        return " " * int(self.indent) +\
+               '```' +\
+               ''.join(str(x) for x in self.attributes) +\
+               '\n' +\
+               ''.join(str(x) for x in self.children) +\
+               '\n'
+
     def serialize_xml(self):
 
         if any(x.type == 'encoding' for x in self.attributes):
@@ -741,10 +749,15 @@ class Grid(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='grid', indent=indent, attributes=attributes,  citations=citations, namespace=namespace)
 
+    def __str__(self):
+        return " " * int(self.indent) + "+++\n" + ''.join(str(x) for x in self.children) + '\n'
 
 class Row(Block):
     def __init__(self, indent,  namespace=None):
         super().__init__(name='row', indent=indent, namespace=namespace)
+
+    def __str__(self):
+        return " " * int(self.indent) + ' | '.join(str(x) for x in self.children) + '\n'
 
     def add(self, b):
         """
@@ -763,10 +776,13 @@ class Row(Block):
             else:
                 self.parent.add(b)
 
+
 class Cell(Block):
     def __init__(self, indent, namespace=None):
         super().__init__(name='cell', indent=indent, namespace=namespace)
 
+    def __str__(self):
+        return ''.join(str(x) for x in self.children)
 
 class Line(Block):
     def __init__(self, indent, attributes, content, citations=None, namespace=None):
@@ -834,10 +850,11 @@ class Record(Block):
                 yield ' xmlns="{0}"'.format(self.namespace)
         yield ">\n"
 
-        for x in self.record:
-            yield "<{0}>".format(x[0])
-            yield from x[1].serialize_xml()
-            yield "</{0}>\n".format(x[0])
+        if self.record:
+            for x in self.record:
+                yield "<{0}>".format(x[0])
+                yield from x[1].serialize_xml()
+                yield "</{0}>\n".format(x[0])
         yield "</record>\n"
 
 
@@ -854,6 +871,8 @@ class List(Block):
         else:
             self.parent._add_child(b)
 
+    def __str__(self):
+        return ''.join(str(x) for x in self.children)
 
 class UnorderedList(List):
     def __init__(self, indent, namespace=None):
@@ -899,6 +918,8 @@ class OrderedList(List):
             else:
                 self.parent.add(b)
 
+
+
 class ListItem(Block):
     @abstractmethod
     def __init__(self, name, indent, attributes=None, citations=None,  namespace=None):
@@ -909,11 +930,16 @@ class OrderedListItem(ListItem):
     def __init__(self, indent, attributes=None, citations=None,  namespace=None):
         super().__init__(name = "li", indent=indent, attributes=attributes, citations=citations,  namespace=namespace)
 
+    def __str__(self):
+        return " " * int(self.indent) + str(self.parent.children.index(self) + 1) + '. ' + ''.join(str(x) for x in self.children) + "\n"
+
 
 class UnorderedListItem(ListItem):
     def __init__(self, indent, attributes=None, citations=None,  namespace=None):
         super().__init__(name =  "li", indent = indent, attributes = attributes,  namespace = namespace)
 
+    def __str__(self):
+        return " " * int(self.indent) + '*' + ''.join(str(x) for x in self.attributes) + ' ' + ''.join(str(x) for x in self.children) + "\n"
 
 class LabeledListItem(ListItem):
     def __init__(self, indent, label, attributes=None, citations=None,  namespace=None):
@@ -966,6 +992,13 @@ class Paragraph(Block):
     def __init__(self, indent,  namespace=None):
         super().__init__(name='p', indent=indent, namespace=namespace)
 
+    def __str__(self):
+        if type(self.parent) is Block:
+            return " " * int(self.indent) + str(self.children[0]) + "\n\n"
+        else:
+            return str(self.children[0]) + "\n"
+
+
     def _add_child(self, b):
         if type(b) is Flow:
             b.parent = self
@@ -996,7 +1029,7 @@ class Comment(Block):
                     str(self)))
 
     def __str__(self):
-        return u"[#{0}]".format(self.content)
+        return u"#{0}\n".format(self.content)
 
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
@@ -1007,7 +1040,7 @@ class StringDef(Block):
         super().__init__(name=string_name, content=value, indent=indent)
 
     def __str__(self):
-        return "[%s:'%s']" % ('$' + self.name, self.content)
+        return "${0}: {1}".format(self.name, self.content)
 
     def serialize_xml(self):
         yield '<string name="{0}">'.format(self.name)
@@ -1023,6 +1056,9 @@ class Root(Block):
         self.indent = -1
         self.parent = None
         self.children = []
+
+    def __str__(self):
+        return "{0}".format(''.join([str(x) for x in self.children]))
 
     def serialize_xml(self):
         yield '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -1087,7 +1123,7 @@ class UnparsedTextBlock:
 
 class Flow(list):
     def __str__(self):
-        return "[{0}]".format(''.join([str(x) for x in self]))
+        return "{0}".format(''.join([str(x) for x in self]))
 
     def append(self, thing):
         if type(thing) is Attribute:
@@ -1146,6 +1182,10 @@ class Pre(Flow):
         except ValueError:
             min_indent = 0
         self.lines = [x[min_indent:] if len(x) > min_indent else x for x in text_block.lines]
+        self.indent = min_indent
+
+    def __str__(self):
+        return  "{0}".format(''.join( [" " * int(self.indent) + str(x) for x in self.lines]))
 
     def serialize_xml(self):
         for x in self.lines:
@@ -1182,6 +1222,9 @@ class DocStructure:
         self.default_namespace = None
         self.annotation_lookup = "case insensitive"
         self.ids = []
+
+    def __str__(self):
+        return str(self.root)
 
 
     def _cur_blk(self):
@@ -1389,13 +1432,17 @@ class DocStructure:
 
 
 class Include(Block):
-    def __init__(self, doc, href, indent):
+    def __init__(self, doc, content, href, indent):
         self.children=doc.root.children
         self.indent = indent
         self.namespace = None
         self.ids = doc.ids
         self.name = "<<<"
-        self.content = href
+        self.content = content
+        self.href= href
+
+    def __str__(self):
+        return " " * int(self.indent) + "<<<(" + self.content + ")\n\n"
 
     def serialize_xml(self):
         for x in self.children:
@@ -1883,7 +1930,7 @@ class Phrase:
         self._attributes = []
 
     def __str__(self):
-        return u'{{{0:s}}}'.format(self.text)
+        return u'{{{0:s}}}'.format(self.text) + "".join([str(x) for x in self.annotations])
 
     def add_attribute(self, attr):
         if attr.type == "condition":
@@ -1904,6 +1951,7 @@ class Phrase:
     def annotated(self):
         return len([x for x in self.annotations if not x.local]) > 0 or \
                len([x for x in self._attributes if not x.local]) > 0
+
 
     def serialize_xml(self):
         yield '<phrase'
@@ -1984,13 +2032,22 @@ class FlowSource:
 
 
 class Attribute:
+    attribute_symbols = {'language': '',
+                         'name': '#',
+                         'conditions': '?',
+                         'id': '*',
+                         'xml:lang': '!',
+                         'encoding': '='}
+
     def __init__(self, type, value, local=False):
         self.type = type
         self.value = value
         self.local = local
 
     def __str__(self):
-        return '%s ="%s" ' % (self.type, self.value)
+       #if type(self.parent is Codeblock):
+
+        return '(%s%s)' % (Attribute.attribute_symbols[self.type], self.value)
 
     def serialize_xml(self):
         yield ' %s ="%s"' % (self.type, escape_for_xml_attribute(self.value))
@@ -2004,7 +2061,10 @@ class Annotation:
         self.local = local
 
     def __str__(self):
-        return '(%s "%s" (%s))' % (self.annotation_type, self.specifically, self.namespace)
+        return '({0}'.format(self.annotation_type) +\
+               ("{0}".format(self.specifically) if self.specifically else '') +\
+               ("({0})".format(self.namespace) if self.namespace else '') +\
+               ')'
 
     def serialize_xml(self, annotations=None, payload=None):
         yield '<annotation'
@@ -2071,18 +2131,6 @@ class Citation:
         else:
             yield '/>'
 
-
-        # if self.child:
-        #     yield '>'
-        #     yield from self.child.serialize_xml(payload)
-        #     yield '</citation>'
-        # elif payload:
-        #     yield '>'
-        #     yield payload
-        #     yield '</citation>'
-        # else:
-        #     yield '/>'
-
     def append(self, thing):
         if not self.child:
             self.child = thing
@@ -2096,7 +2144,8 @@ class InlineInsert:
         self.citations = citations
 
     def __str__(self):
-        return "[#insert:'%s' '%s']" % self.attributes, self.citations
+        return ">>>({0})[{1}]".format(self.attributes, self.citations)
+        #Fixme: Why are citations here?
 
     def serialize_xml(self):
         newlist = sorted(self.attributes, key=lambda x: x.type)
@@ -2333,7 +2382,8 @@ if __name__ == "__main__":
     argparser.add_argument("-xsd", help="Specify an XSD schema to validate generated XML")
     argparser.add_argument("-outputextension", "-oext",  nargs='?', const='.xml', default='.xml')
     argparser.add_argument("-intermediateextension", "-iext",  nargs='?', const='.xml', default='.xml')
-
+    argparser.add_argument("-regurgitate", "-r", help="regurgitate the input in normalized form",
+                           action="store_true")
 
     args = argparser.parse_args()
     transformed = None
@@ -2359,9 +2409,6 @@ if __name__ == "__main__":
 
                 SAM_parser_info("Parsing " + os.path.abspath(inf.name))
                 samParser.parse(inf)
-
-                for i in samParser.serialize('xml'):
-                    assert type(i) is str
 
                 xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
 
@@ -2411,6 +2458,8 @@ if __name__ == "__main__":
                 else:
                     if transformed:
                         sys.stdout.buffer.write(transformed)
+                    elif args.regurgitate:
+                        print(samParser.doc)
                     else:
                         for i in samParser.serialize('xml'):
                             sys.stdout.buffer.write(i.encode('utf-8'))
@@ -2431,6 +2480,7 @@ if __name__ == "__main__":
                         error_count += 1
                     else:
                         SAM_parser_info("Validation successful.")
+
 
 
         except FileNotFoundError:
