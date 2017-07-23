@@ -431,7 +431,7 @@ class SamParser:
             cell_values = [x.strip() for x in re.split(r'(?<!\\)\|', line)]
             if self.doc.current_block.name == 'row':
                 if len(self.doc.current_block.children) != len(cell_values):
-                    raise SAMParserStructureError('Uneven number of cells in grid row at: "' + line + '"')
+                    raise SAMParserStructureError('Uneven number of cells in grid row')
             b = Row(indent)
             self.doc.add_block(b)
 
@@ -484,13 +484,13 @@ class SamParser:
             name = match.group('name').strip()
             content = match.group('content').strip()
             if self.doc.root.children:
-                raise SAMParserStructureError("Declarations must come before all other content. Found:" + match.group(0))
+                raise SAMParserStructureError("Declarations must come before all other content.")
             if name == 'namespace':
                 self.doc.default_namespace = content
             if name == 'annotation-lookup':
                 self.doc.annotation_lookup = content
             else:
-                raise SAMParserStructureError("Unknown declaration: " + match.group(0))
+                raise SAMParserStructureError("Unknown declaration.")
 
             return "SAM", (source, match)
 
@@ -799,8 +799,7 @@ class Line(Block):
 
     def add(self, b):
         if b.indent > self.indent:
-            raise SAMParserStructureError('A Line cannot have children. At \"{0}\".'.format(
-                str(self)))
+            raise SAMParserStructureError('A Line cannot have children.')
         else:
             self.parent.add(b)
 
@@ -837,11 +836,9 @@ class RecordSet(Block):
         if b.indent <= self.indent:
             self.parent.add(b)
         elif not type(b) is Record:
-            raise SAMParserStructureError('A RecordSet can only have Record children. At: \n\"{0}\".'.format(
-                    str(self)))
+            raise SAMParserStructureError('A RecordSet can only have Record children.')
         elif len(b.field_values) != len(self.field_names):
-            raise SAMParserStructureError('Record length does not match record set header. At: \n{0}\n'.format(
-                    str(self)))
+            raise SAMParserStructureError('Record length does not match record set header.')
         else:
             b.record = list(zip(self.field_names, b.field_values))
             b.parent = self
@@ -1031,8 +1028,7 @@ class Paragraph(Block):
             self.parent.children.append(b)
         else:
             raise SAMParserStructureError(
-                'A paragraph cannot have block children. Following \"{0}\".'.format(
-                    str(self)))
+                'A paragraph cannot have block children.')
 
 
 class Comment(Block):
@@ -1047,9 +1043,7 @@ class Comment(Block):
             b.parent = self.parent
             self.parent.children.append(b)
         else:
-            raise SAMParserStructureError(
-                'A comment cannot have block children. Following \"{0}\".'.format(
-                    str(self)))
+            raise SAMParserStructureError('A comment cannot have block children.')
 
     def __str__(self):
         return u"#{0}\n".format(self.content)
@@ -1095,7 +1089,7 @@ class Root(Block):
         # the error at the XML output stage, I suppose, but would rather
         # catch it earlier and give feedback.
         if type(b) is not Comment and any( type(x) is not Comment for x in self.children):
-            raise SAMParserStructureError("A SAM document can only have one root. Found: "+ str(b))
+            raise SAMParserStructureError('A SAM document can only have one root. Found "{0}".'.format(str(b)))
         b.parent = self
         self.children.append(b)
 
@@ -1370,7 +1364,7 @@ class DocStructure:
 
             if 'id' in block.attributes:
                 if block.attributes['id'] in self.ids:
-                    raise SAMParserStructureError("Duplicate ID found: " + block.attributes['id'])
+                    raise SAMParserStructureError('Duplicate ID found "{0}".'.format(block.attributes['id']))
                 self.ids.append(block.attributes['id'])
         except (TypeError, AttributeError):
             pass
@@ -1379,7 +1373,7 @@ class DocStructure:
         try:
             overlapping_ids = set(block.ids) & set(self.ids)
             if overlapping_ids:
-                raise SAMParserStructureError("Duplicate ID found: " + ', '.join(overlapping_ids))
+                raise SAMParserStructureError('Duplicate ID found "{0}".'.format(', '.join(overlapping_ids)))
             self.ids.extend(block.ids)
         except (TypeError, AttributeError):
             pass
@@ -1406,7 +1400,7 @@ class DocStructure:
         ids=[f.id for f in flow if type(f) is Phrase and f.id is not None]
         for id in ids:
             if id in self.ids:
-                raise SAMParserStructureError("Duplicate ID found: " + ids[0])
+                raise SAMParserStructureError('Duplicate ID found "{0}".'.format(ids[0]))
             self.ids.append(id)
 
         self.current_block._add_child(flow)
@@ -1720,7 +1714,7 @@ class FlowParser:
                 if type(phrase) is Code:
                     phrase.add_attribute(Attribute('encoding', unescape(annotation_type[1:]), is_local))
                 else:
-                    raise SAMParserStructureError("Only code can have an embed attribute. At: " + match.group(0))
+                    raise SAMParserStructureError("Only code can have an embed attribute.")
             elif annotation_type[0] == '!':
                 phrase.add_attribute(Attribute('xml:lang', unescape(annotation_type[1:]), is_local))
             elif annotation_type[0] == '*':
@@ -2030,7 +2024,7 @@ class Code(Phrase):
         yield '</' + tag + '>'
 
     def append(self, thing):
-        raise SAMParserStructureError("Inline code cannot have typed annotations. At: " + str(thing))
+        raise SAMParserStructureError("Inline code cannot have typed annotations.")
 
 class FlowSource:
     def __init__(self, para, strip=True):
@@ -2214,36 +2208,36 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         elif x.group("cit") is not None:
             citations_list.append(x.group("cit").strip())
         else:
-            raise SAMParserStructureError("Unrecognized character '" + x.group('bad') + "' found in attributes list at: " + attributes_string)
+            raise SAMParserStructureError('Unrecognized character "{0}" found in attributes list.'.format(x.group('bad')))
 
     unflagged_attributes = [x for x in attributes_list if not (x[0] in '?#*!=')]
     if unflagged_attributes:
         if unflagged is None:
-            raise SAMParserStructureError("Unexpected attribute(s): {0}".format(', '.join(unflagged_attributes)))
+            raise SAMParserStructureError("Unexpected attribute(s). Found: {0}".format(', '.join(unflagged_attributes)))
         elif len(unflagged_attributes) > 1:
-            raise SAMParserStructureError("More than one " + unflagged + " attribute specified: {0}".format(', '.join(unflagged_attributes)))
+            raise SAMParserStructureError("More than one {0} attribute specified. Found: {1}".format(unflagged, ', '.join(unflagged_attributes)))
         else:
             attributes.append(Attribute(unescape(unflagged), unescape(unflagged_attributes[0])))
     ids = [x[1:] for x in attributes_list if x[0] == '*']
     if ids and not '*' in flagged:
-        raise SAMParserStructureError("IDs not allowed in this context. Found: *{0}".format(', *'.join(ids)))
+        raise SAMParserStructureError('IDs not allowed in this context. Found: {0}'.format(', *'.join(ids)))
     if len(ids) > 1:
-        raise SAMParserStructureError("More than one ID specified: " + ", ".join(ids))
+        raise SAMParserStructureError('More than one ID specified. Found: "{0}".'.format(", ".join(ids)))
     names = [x[1:] for x in attributes_list if x[0] == '#']
     if names and not '#' in flagged:
-        raise SAMParserStructureError("Names not allowed in this context. Found: #{0}".format(', #'.join(names)))
+        raise SAMParserStructureError('Names not allowed in this context. Found: #{0}'.format(', #'.join(names)))
     if len(names) > 1:
-        raise SAMParserStructureError("More than one name specified: " + ", ".join(names))
+        raise SAMParserStructureError('More than one name specified. Found: #{0}'.format(", #".join(names)))
     language_tag = [x[1:] for x in attributes_list if x[0] == '!']
     if language_tag and not '!' in flagged:
-        raise SAMParserStructureError("Language tag not allowed in this context. Found: !{0}".format(', !'.join(language_tag)))
+        raise SAMParserStructureError('Language tag not allowed in this context. Found: !{0}'.format(', !'.join(language_tag)))
     if len(language_tag) > 1:
-        raise SAMParserStructureError("More than one language tag specified: " + ", ".join(language_tag))
+        raise SAMParserStructureError('More than one language tag specified. Found: !{0}'.format(", !".join(language_tag)))
     embed = [x[1:] for x in attributes_list if x[0] == '=']
     if embed and not '=' in flagged:
-        raise SAMParserStructureError("Embeded encoding specification not allowed in this context. Found: !{0}".format(', !'.join(embed)))
+        raise SAMParserStructureError('Embeded encoding specification not allowed in this context. Found: !{0}'.format(', !'.join(embed)))
     if len(embed) > 1:
-        raise SAMParserStructureError("More than one embedded encoding specified: " + ", ".join(embed))
+        raise SAMParserStructureError('More than one embedded encoding specified. Found: {0}.',format(", ".join(embed)))
     conditions = [x[1:] for x in attributes_list if x[0] == '?']
     if ids:
         attributes.append(Attribute("id", unescape(ids[0])))
@@ -2319,7 +2313,7 @@ def parse_insert(annotation_string):
     # strip unnecessary quotes from insert item
     insert_item = re.sub(r'^(["\'])|(["\'])$', '', insert_item)
     if insert_item == '':
-        raise SAMParserStructureError ("Insert item not specified in: " + annotation_string)
+        raise SAMParserStructureError ("Insert item not specified in: {0}".format(annotation_string))
     result.append(Attribute('item', unescape(insert_item)))
     return result
 
@@ -2388,7 +2382,7 @@ def replace_charref(match):
         charref = match
     character = html.unescape(charref)
     if character == charref:  # Escape not recognized
-        raise SAMParserStructureError("Unrecognized character entity found: " + charref)
+        raise SAMParserStructureError("Unrecognized character entity found: {0}".format(charref))
     return character
 
 
