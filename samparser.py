@@ -788,6 +788,13 @@ class Line(Block):
     def __init__(self, indent, attributes, content, citations=None, namespace=None):
         super().__init__(name='line', indent=indent, attributes=attributes, content=content, citations=citations, namespace=namespace)
 
+    def __str__(self):
+        return " " * int(self.indent) \
+               + '|' + ''.join(str(x) for x in self.attributes) \
+               + ' ' \
+               + str(self.content) \
+               + "\n"
+
     def add(self, b):
         if b.indent > self.indent:
             raise SAMParserError('A Line cannot have children. At \"{0}\".'.format(
@@ -799,11 +806,25 @@ class Fragment(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='fragment', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
+    def __str__(self):
+        return " " * int(self.indent) +\
+               '~~~' +\
+               ''.join(str(x) for x in self.attributes) +\
+               '\n' +\
+               ''.join(str(x) for x in self.children) +\
+               '\n'
 
 class Blockquote(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='blockquote', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
+    def __str__(self):
+        return " " * int(self.indent) +\
+               '"""' +\
+               ''.join(str(x) for x in self.attributes) +\
+               '\n' +\
+               ''.join(str(x) for x in self.children) +\
+               '\n'
 
 class RecordSet(Block):
     def __init__(self, name, field_names, indent, attributes=None, citations=None, namespace=None):
@@ -993,7 +1014,7 @@ class Paragraph(Block):
         super().__init__(name='p', indent=indent, namespace=namespace)
 
     def __str__(self):
-        if type(self.parent) is Block:
+        if type(self.parent) is Block or Blockquote:
             return " " * int(self.indent) + str(self.children[0]) + "\n\n"
         else:
             return str(self.children[0]) + "\n"
