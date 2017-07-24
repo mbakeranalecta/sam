@@ -663,10 +663,23 @@ class Block(ABC):
                 yield ' xmlns="{0}"'.format(self.namespace)
 
         if self.attributes:
-            newlist = sorted(self.attributes, key=lambda x: x.type)
+            if any([x.value for x in self.attributes if x.type == 'condition']):
+                conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
+                attrs = [x for x in self.attributes if x.type != 'condition']
+                attrs.append(conditions)
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+            else:
+                for att in sorted(self.attributes, key=lambda x: x.type):
+                    yield from att.serialize_xml()
 
-            for a in newlist:
-                yield from a.serialize_xml()
+
+#        if self.attributes:
+#            newlist = sorted(self.attributes, key=lambda x: x.type)
+
+#            for a in newlist:
+#                yield ' %s ="%s"' % (a.type, escape_for_xml_attribute(a.value))
+                #yield from a.serialize_xml()
 
         if self.children:
             yield ">"
@@ -723,10 +736,24 @@ class Codeblock(Block):
                 yield ' xmlns="{0}"'.format(self.namespace)
 
         if self.attributes:
-            newlist = sorted(self.attributes, key=lambda x: x.type)
+            if any([x.value for x in self.attributes if x.type == 'condition']):
+                conditions = Attribute('conditions',
+                                       ','.join([x.value for x in self.attributes if x.type == 'condition']))
+                attrs = [x for x in self.attributes if x.type != 'condition']
+                attrs.append(conditions)
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+            else:
+                for att in sorted(self.attributes, key=lambda x: x.type):
+                    yield from att.serialize_xml()
 
-            for a in newlist:
-                yield from a.serialize_xml()
+
+        #        if self.attributes:
+#            newlist = sorted(self.attributes, key=lambda x: x.type)
+
+#            for a in newlist:
+#                yield ' %s ="%s"' % (a.type, escape_for_xml_attribute(a.value))
+                #yield from a.serialize_xml()
 
         if self.children:
             yield ">"
@@ -963,7 +990,7 @@ class UnorderedListItem(ListItem):
 
 class LabeledListItem(ListItem):
     def __init__(self, indent, label, attributes=None, citations=None,  namespace=None):
-        super().__init__(name = "li", indent = indent, attributes = attributes, citations=citations,  namespace = namespace)
+        super().__init__(name="li", indent=indent, attributes=attributes, citations=citations,  namespace=namespace)
         self.label = label
 
     def serialize_xml(self):
@@ -972,11 +999,11 @@ class LabeledListItem(ListItem):
         if self.namespace is not None:
             if type(self.parent) is Root or self.namespace != self.parent.namespace:
                 yield ' xmlns="{0}"'.format(self.namespace)
-
-        if self.attributes:
-            newlist = sorted(self.attributes, key=lambda x: x.type, reverse=True)
-            for a in newlist:
-                yield from a.serialize_xml()
+# FIXME Not creating valid structure.
+#         if self.attributes:
+#             newlist = sorted(self.attributes, key=lambda x: x.type, reverse=True)
+#             for a in newlist:
+#                 yield from a.serialize_xml()
 
         yield "<label>"
         yield from self.label.serialize_xml()
@@ -1945,24 +1972,23 @@ class FlowParser:
 class Phrase:
     def __init__(self, text):
         self.text = text
-        self._conditions = []
         self.annotations = []
-        self._attributes = []
+        self.attributes = []
 
     def __str__(self):
         return u'{{{0:s}}}'.format(self.text) + "".join([str(x) for x in self.annotations])
 
     def add_attribute(self, attr):
         if attr.type == "condition":
-            self._attributes.append(attr)
-        elif any(x.type == attr.type for x in self._attributes):
+            self.attributes.append(attr)
+        elif any(x.type == attr.type for x in self.attributes):
             raise SAMParserStructureError("A phrase cannot have more than one {0}: {1}".format(attr.type, attr.value))
         else:
-            self._attributes.append(attr)
+            self.attributes.append(attr)
 
     @property
     def id(self):
-        for x in self._attributes:
+        for x in self.attributes:
             if x.type == 'id':
                 return x.value
         return None
@@ -1970,19 +1996,19 @@ class Phrase:
     @property
     def annotated(self):
         return len([x for x in self.annotations if not x.local]) > 0 or \
-               len([x for x in self._attributes if not x.local]) > 0
+               len([x for x in self.attributes if not x.local]) > 0
 
 
     def serialize_xml(self):
         yield '<phrase'
-        if any([x.value for x in self._attributes if x.type == 'condition']):
-            conditions = Attribute('conditions', ','.join([x.value for x in self._attributes if x.type == 'condition']))
-            attrs = [x for x in self._attributes if x.type != 'condition']
+        if any([x.value for x in self.attributes if x.type == 'condition']):
+            conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
+            attrs = [x for x in self.attributes if x.type != 'condition']
             attrs.append(conditions)
             for att in sorted(attrs, key=lambda x: x.type):
                 yield from att.serialize_xml()
         else:
-            for att in sorted(self._attributes, key=lambda x: x.type):
+            for att in sorted(self.attributes, key=lambda x: x.type):
                 yield from att.serialize_xml()
         yield '>'
 
@@ -2004,20 +2030,20 @@ class Code(Phrase):
 
     def serialize_xml(self):
 
-        if any(x for x in self._attributes if x.type == "encoding"):
+        if any(x for x in self.attributes if x.type == "encoding"):
             tag = "embed"
         else:
             tag = "code"
 
         yield '<' + tag
-        if any([x.value for x in self._attributes if x.type == 'condition']):
-            conditions = Attribute('conditions', ','.join([x.value for x in self._attributes if x.type == 'condition']))
-            attrs = [x for x in self._attributes if x.type != 'condition']
+        if any([x.value for x in self.attributes if x.type == 'condition']):
+            conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
+            attrs = [x for x in self.attributes if x.type != 'condition']
             attrs.append(conditions)
             for att in sorted(attrs, key=lambda x: x.type):
                 yield from att.serialize_xml()
         else:
-            for att in sorted(self._attributes, key=lambda x: x.type):
+            for att in sorted(self.attributes, key=lambda x: x.type):
                 yield from att.serialize_xml()
         yield '>'
         yield escape_for_xml(self.text)
@@ -2054,7 +2080,7 @@ class FlowSource:
 class Attribute:
     attribute_symbols = {'language': '',
                          'name': '#',
-                         'conditions': '?',
+                         'condition': '?',
                          'id': '*',
                          'xml:lang': '!',
                          'encoding': '='}
@@ -2069,7 +2095,11 @@ class Attribute:
 
         return '(%s%s)' % (Attribute.attribute_symbols[self.type], self.value)
 
+    #@property
     def serialize_xml(self):
+        # Disable serialize_xml for attributes because we need to handle them
+        # at the block level to deal with multiple condition attributes
+        #raise AttributeError("'Attribute' object has no attribute 'serialize_xml'")
         yield ' %s ="%s"' % (self.type, escape_for_xml_attribute(self.value))
 
 
@@ -2168,10 +2198,22 @@ class InlineInsert:
         #Fixme: Why are citations here?
 
     def serialize_xml(self):
-        newlist = sorted(self.attributes, key=lambda x: x.type)
+#        newlist = sorted(self.attributes, key=lambda x: x.type)
         yield '<inline-insert'
-        for a in newlist:
-            yield from a.serialize_xml()
+#        for a in newlist:
+#            yield from a.serialize_xml()
+        if self.attributes:
+            if any([x.value for x in self.attributes if x.type == 'condition']):
+                conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
+                attrs = [x for x in self.attributes if x.type != 'condition']
+                attrs.append(conditions)
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+            else:
+                for att in sorted(self.attributes, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+
+
         if self.citations:
             yield '>'
             for c in self.citations:
@@ -2248,7 +2290,8 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     if embed:
         attributes.append(Attribute("encoding", unescape(embed[0])))
     if conditions:
-        attributes.append(Attribute("conditions", ",".join([unescape(x) for x in conditions])))
+        for c in conditions:
+            attributes.append(Attribute("condition", unescape(c)))
 
     re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*))|(\s*\#(?P<name>\S+)(?P<name_extra>.*))|(\s*(?P<citation>.*))'
 
