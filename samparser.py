@@ -858,6 +858,12 @@ class RecordSet(Block):
         super().__init__(name=name, indent=indent, attributes=attributes,  citations=citations, namespace=namespace)
         self.field_names = field_names
 
+    def __str__(self):
+        return '{0}{1}:: {2}\n{3}'.format(" " * int(self.indent),
+                                          self.name,
+                                          ', '.join(self.field_names),
+                                          ''.join(str(x) for x in self.children))
+
     def add(self, b):
         if b.indent <= self.indent:
             self.parent.add(b)
@@ -871,22 +877,16 @@ class RecordSet(Block):
             self.children.append(b)
 
 class Record(Block):
-    def __init__(self, field_values, indent, content=None, namespace=None):
+    def __init__(self, field_values, indent, namespace=None):
         self.name='record'
         self.field_values = field_values
-        self.content = content
+        self.content = None
         self.namespace = namespace
         self.indent = indent
         self.record=None
 
-    def _output_block(self):
-        yield " " * int(self.indent)
-        yield "[record:'%s'" % (self.content) + '\n'
-        for x in self.record:
-            yield " " * int(self.indent + 4) + x[0] + ' = '
-            yield from x[1].serialize_xml()
-            yield "\n"
-        yield "]"
+    def __str__(self):
+        return " " * int(self.indent) + ', '.join([str(x).replace(',', '\\,') for x in self.field_values]) + '\n'
 
     def serialize_xml(self):
         yield '<record'
@@ -1028,7 +1028,7 @@ class LabeledList(List):
         """
         Override the Block add method to:
         * Accept LabeledListItems as children
-        * Raise error is asked to add anything else
+        * Raise error if asked to add anything else
 
         :param b: The block to add.
 
