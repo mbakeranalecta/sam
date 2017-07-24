@@ -673,14 +673,6 @@ class Block(ABC):
                 for att in sorted(self.attributes, key=lambda x: x.type):
                     yield from att.serialize_xml()
 
-
-#        if self.attributes:
-#            newlist = sorted(self.attributes, key=lambda x: x.type)
-
-#            for a in newlist:
-#                yield ' %s ="%s"' % (a.type, escape_for_xml_attribute(a.value))
-                #yield from a.serialize_xml()
-
         if self.children:
             yield ">"
 
@@ -994,17 +986,24 @@ class LabeledListItem(ListItem):
         self.label = label
 
     def serialize_xml(self):
-        yield "<{0}>\n".format(self.name)
+        yield "<{0}".format(self.name)
 
         if self.namespace is not None:
             if type(self.parent) is Root or self.namespace != self.parent.namespace:
                 yield ' xmlns="{0}"'.format(self.namespace)
-# FIXME Not creating valid structure.
-#         if self.attributes:
-#             newlist = sorted(self.attributes, key=lambda x: x.type, reverse=True)
-#             for a in newlist:
-#                 yield from a.serialize_xml()
 
+
+        if self.attributes:
+            if any([x.value for x in self.attributes if x.type == 'condition']):
+                conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
+                attrs = [x for x in self.attributes if x.type != 'condition']
+                attrs.append(conditions)
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+            else:
+                for att in sorted(self.attributes, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+        yield '>\n'
         yield "<label>"
         yield from self.label.serialize_xml()
         yield "</label>\n"
@@ -2091,16 +2090,10 @@ class Attribute:
         self.local = local
 
     def __str__(self):
-       #if type(self.parent is Codeblock):
-
         return '(%s%s)' % (Attribute.attribute_symbols[self.type], self.value)
 
-    #@property
     def serialize_xml(self):
-        # Disable serialize_xml for attributes because we need to handle them
-        # at the block level to deal with multiple condition attributes
-        #raise AttributeError("'Attribute' object has no attribute 'serialize_xml'")
-        yield ' %s ="%s"' % (self.type, escape_for_xml_attribute(self.value))
+        yield ' %s="%s"' % (self.type, escape_for_xml_attribute(self.value))
 
 
 class Annotation:

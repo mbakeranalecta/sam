@@ -2233,6 +2233,73 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
+        case: Attributes on labeled list
+            description:
+                Attributes on a labeled list item.
+
+            source:
+                ```(sam)
+                    |Do|(#foo)(?bar)(?green) a deer,
+                                             a female deer
+
+                    |Re| a drop of
+                         golden sun
+
+                         Is it a particle or a wave?
+                    |Me|(*bananas) a name I call myself
+                    |Fa| a long long way to run
+                    |So| a needle pulling thread
+                    |La| a note to follow so
+                    |Te| a drink with jam and bread
+
+            markup:
+                |Do|(#foo)(?bar)(?green) a deer,
+                                         a female deer
+
+                |Re| a drop of
+                     golden sun
+
+                     Is it a particle or a wave?
+                |Me|(*bananas) a name I call myself
+                |Fa| a long long way to run
+                |So| a needle pulling thread
+                |La| a note to follow so
+                |Te| a drink with jam and bread
+
+            result:
+                ```(xml)
+                    <ll>
+                    <li conditions="bar,green" name="foo">
+                    <label>Do</label>
+                    <p>a deer, a female deer</p>
+                    </li>
+                    <li>
+                    <label>Re</label>
+                    <p>a drop of golden sun</p>
+                    <p>Is it a particle or a wave?</p>
+                    </li>
+                    <li id="bananas">
+                    <label>Me</label>
+                    <p>a name I call myself</p>
+                    </li>
+                    <li>
+                    <label>Fa</label>
+                    <p>a long long way to run</p>
+                    </li>
+                    <li>
+                    <label>So</label>
+                    <p>a needle pulling thread</p>
+                    </li>
+                    <li>
+                    <label>La</label>
+                    <p>a note to follow so</p>
+                    </li>
+                    <li>
+                    <label>Te</label>
+                    <p>a drink with jam and bread</p>
+                    </li>
+                    </ll>
+
         case: Attributes on lines
 
             description:
