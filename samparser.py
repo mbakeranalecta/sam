@@ -651,11 +651,15 @@ class Block(ABC):
         if self.attributes:
             for a in self.attributes:
                 yield str(a)
+
+        for y in [x for x in self.children if type(x) is Citation]:
+            yield str(y)
+
         if self.content:
-            yield "%s" % (self.content)
+            yield " %s" % (self.content)
         yield "\n"
-        for x in self.children:
-            yield str(x)
+        for z in [x for x in self.children if type(x) is not Citation]:
+            yield str(z)
 
 
     def serialize_xml(self):
@@ -1086,7 +1090,7 @@ class StringDef(Block):
         super().__init__(name=string_name, content=value, indent=indent)
 
     def __str__(self):
-        return "${0}: {1}".format(self.name, self.content)
+        return "{0}${1}: {2}\n".format(" " * int(self.indent), self.name, self.content)
 
     def serialize_xml(self):
         yield '<string name="{0}">'.format(self.name)
@@ -2161,8 +2165,15 @@ class Citation:
 
     def __str__(self):
         cit_extra = self.citation_extra if self.citation_extra else ''
-        return u'[{0:s} {1:s} {2:s}]'.format(self.citation_type, self.citation_value,
-                                             cit_extra)
+        return ''.join([
+            '[',
+            '' if self.citation_type == 'citation' else self.citation_type + ' ',
+            self.citation_value,
+            '' if self.citation_extra is None else self.citation_extra,
+            ']'
+        ])
+
+        #u'[{0:s} {1:s} {2:s}]'.format(self.citation_type, self.citation_value, cit_extra)
 
     def serialize_xml(self, attrs=None, payload=None):
         yield '<citation'
