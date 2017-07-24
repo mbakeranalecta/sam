@@ -648,6 +648,9 @@ class Block(ABC):
     def _output_block(self):
         yield " " * int(self.indent)
         yield "%s:" % (self.name)
+        if self.attributes:
+            for a in self.attributes:
+                yield str(a)
         if self.content:
             yield "%s" % (self.content)
         yield "\n"
@@ -970,7 +973,7 @@ class OrderedListItem(ListItem):
         super().__init__(name = "li", indent=indent, attributes=attributes, citations=citations,  namespace=namespace)
 
     def __str__(self):
-        return " " * int(self.indent) + str(self.parent.children.index(self) + 1) + '. ' + ''.join(str(x) for x in self.children) + "\n"
+        return " " * int(self.indent) + str(self.parent.children.index(self) + 1) + '.' + ''.join(str(x) for x in self.attributes) +' ' + ''.join(str(x) for x in self.children) + "\n"
 
 
 class UnorderedListItem(ListItem):
@@ -1039,7 +1042,7 @@ class Paragraph(Block):
         super().__init__(name='p', indent=indent, namespace=namespace)
 
     def __str__(self):
-        if type(self.parent) is Block or Blockquote:
+        if type(self.parent) in [Block, Blockquote]:
             return " " * int(self.indent) + str(self.children[0]) + "\n\n"
         else:
             return str(self.children[0]) + "\n"
@@ -1237,9 +1240,13 @@ class Pre(Flow):
 
 
 class EmbeddedXML(Block):
+    def __init__(self, text, indent=0):
+        super().__init__(name="<?xml?>", content=text, indent=indent)
+
     def __init__(self, text, indent):
         self.content = text
         self.indent = indent
+        self.attributes= None
         self.namespace = None
         self.name = "<?xml?>"
         self.children = []
@@ -2082,7 +2089,10 @@ class Attribute:
                          'condition': '?',
                          'id': '*',
                          'xml:lang': '!',
-                         'encoding': '='}
+                         'encoding': '=',
+                         'attribution': '',
+                         'type': '',
+                         'item': ''}
 
     def __init__(self, type, value, local=False):
         self.type = type
