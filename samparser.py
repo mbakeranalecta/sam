@@ -727,12 +727,17 @@ class Codeblock(Block):
         super().__init__(name='codeblock', indent=indent, attributes=attributes, citations=citations,namespace=namespace)
 
     def __str__(self):
-        return " " * int(self.indent) +\
-               '```' +\
-               ''.join(str(x) for x in self.attributes) +\
-               '\n' +\
-               ''.join(str(x) for x in self.children) +\
-               '\n'
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield '```'
+        for  x in self.attributes:
+            yield from x.regurgitate()
+        yield '\n'
+        for x in self.children:
+            yield from x.regurgitate()
+        yield '\n'
 
     def serialize_xml(self):
 
@@ -785,20 +790,42 @@ class Remark(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='remark', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
+    def __str__(self):
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield '!!!({0})'.format(next(x.value for x in self.attributes if x.type == 'attribution'))
+        yield ''.join(str(x) for x in self.attributes if x.type not in ['attribution'])
+        yield '\n'
+        yield ''.join(str(x) for x in self.children)
+        yield '\n'
+
 
 class Grid(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='grid', indent=indent, attributes=attributes,  citations=citations, namespace=namespace)
 
     def __str__(self):
-        return " " * int(self.indent) + "+++\n" + ''.join(str(x) for x in self.children) + '\n'
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield "+++\n"
+        for x in self.children:
+            yield from x.regurgitate()
+        yield '\n'
 
 class Row(Block):
     def __init__(self, indent,  namespace=None):
         super().__init__(name='row', indent=indent, namespace=namespace)
 
     def __str__(self):
-        return " " * int(self.indent) + ' | '.join(str(x) for x in self.children) + '\n'
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield ' | '.join([''.join(x.regurgitate()).replace('|', '\\|') for x in self.children]) + '\n'
 
     def add(self, b):
         """
@@ -823,14 +850,21 @@ class Cell(Block):
         super().__init__(name='cell', indent=indent, namespace=namespace)
 
     def __str__(self):
-        return ''.join(str(x) for x in self.children)
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        for x in self.children:
+            yield from x.regurgitate()
 
 class Line(Block):
     def __init__(self, indent, attributes, content, citations=None, namespace=None):
         super().__init__(name='line', indent=indent, attributes=attributes, content=content, citations=citations, namespace=namespace)
 
     def __str__(self):
-        return " " * int(self.indent) \
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent) \
                + '|' + ''.join(str(x) for x in self.attributes) \
                + ' ' \
                + str(self.content) \
@@ -847,24 +881,34 @@ class Fragment(Block):
         super().__init__(name='fragment', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
     def __str__(self):
-        return " " * int(self.indent) +\
-               '~~~' +\
-               ''.join(str(x) for x in self.attributes) +\
-               '\n' +\
-               ''.join(str(x) for x in self.children) +\
-               '\n'
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield '~~~'
+        for x in self.attributes:
+            yield from x.regurgitate()
+        yield '\n'
+        for x in self.children:
+            yield from x.regurgitate()
+        yield '\n'
 
 class Blockquote(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='blockquote', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
     def __str__(self):
-        return " " * int(self.indent) +\
-               '"""' +\
-               ''.join(str(x) for x in self.attributes) +\
-               '\n' +\
-               ''.join(str(x) for x in self.children) +\
-               '\n'
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield '"""'
+        for x in self.attributes:
+            yield from x.regurgitate()
+        yield '\n'
+        for x in self.children:
+            yield from x.regurgitate()
+        yield '\n'
 
 class RecordSet(Block):
     def __init__(self, name, field_names, indent, attributes=None, citations=None, namespace=None):
@@ -872,10 +916,15 @@ class RecordSet(Block):
         self.field_names = field_names
 
     def __str__(self):
-        return '{0}{1}:: {2}\n{3}'.format(" " * int(self.indent),
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield '{0}{1}:: {2}\n'.format(" " * int(self.indent),
                                           self.name,
-                                          ', '.join(self.field_names),
-                                          ''.join(str(x) for x in self.children))
+                                          ', '.join(self.field_names))
+        for x in self.children:
+            yield from x.regurgitate()
+
 
     def add(self, b):
         if b.indent <= self.indent:
@@ -885,7 +934,6 @@ class RecordSet(Block):
         elif len(b.field_values) != len(self.field_names):
             raise SAMParserStructureError('Record length does not match record set header.')
         else:
-            b.record = list(zip(self.field_names, b.field_values))
             b.parent = self
             self.children.append(b)
 
@@ -896,12 +944,16 @@ class Record(Block):
         self.content = None
         self.namespace = namespace
         self.indent = indent
-        self.record=None
 
     def __str__(self):
-        return " " * int(self.indent) + ', '.join([str(x).replace(',', '\\,') for x in self.field_values]) + '\n'
+        return
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield ', '.join([''.join(x.regurgitate()).replace(',', '\\,') for x in self.field_values]) + '\n'
 
     def serialize_xml(self):
+        record = list(zip(self.parent.field_names, self.field_values))
         yield '<record'
 
         if self.namespace is not None:
@@ -909,11 +961,11 @@ class Record(Block):
                 yield ' xmlns="{0}"'.format(self.namespace)
         yield ">\n"
 
-        if self.record:
-            for x in self.record:
-                yield "<{0}>".format(x[0])
-                yield from x[1].serialize_xml()
-                yield "</{0}>\n".format(x[0])
+        if record:
+            for name, value in zip(self.parent.field_names, self.field_values):
+                yield "<{0}>".format(name)
+                yield from value.serialize_xml()
+                yield "</{0}>\n".format(name)
         yield "</record>\n"
 
 
@@ -931,7 +983,11 @@ class List(Block):
             self.parent._add_child(b)
 
     def __str__(self):
-        return ''.join(str(x) for x in self.children)
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        for x in self.children:
+            yield from x.regurgitate()
 
 class UnorderedList(List):
     def __init__(self, indent, namespace=None):
@@ -990,7 +1046,17 @@ class OrderedListItem(ListItem):
         super().__init__(name = "li", indent=indent, attributes=attributes, citations=citations,  namespace=namespace)
 
     def __str__(self):
-        return " " * int(self.indent) + str(self.parent.children.index(self) + 1) + '.' + ''.join(str(x) for x in self.attributes) +' ' + ''.join(str(x) for x in self.children) + "\n"
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield '{0}.'.format(str(self.parent.children.index(self) + 1))
+        for x in self.attributes:
+            yield from x.regurgitate()
+        yield ' '
+        for x in self.children:
+            yield from x.regurgitate()
+        yield "\n"
 
 
 class UnorderedListItem(ListItem):
@@ -2267,14 +2333,15 @@ class InlineInsert:
         self.citations = citations
 
     def __str__(self):
-        return ">>>({0})[{1}]".format(self.attributes, self.citations)
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield ">>>({0})[{1}]".format(self.attributes, self.citations)
         #Fixme: Why are citations here?
 
     def serialize_xml(self):
-#        newlist = sorted(self.attributes, key=lambda x: x.type)
+
         yield '<inline-insert'
-#        for a in newlist:
-#            yield from a.serialize_xml()
         if self.attributes:
             if any([x.value for x in self.attributes if x.type == 'condition']):
                 conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
