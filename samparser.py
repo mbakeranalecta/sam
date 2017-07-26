@@ -1064,7 +1064,16 @@ class UnorderedListItem(ListItem):
         super().__init__(name =  "li", indent = indent, attributes = attributes,  namespace = namespace)
 
     def __str__(self):
-        return " " * int(self.indent) + '*' + ''.join(str(x) for x in self.attributes) + ' ' + ''.join(str(x) for x in self.children) + "\n"
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield '*'
+        for x in self.attributes:
+            yield from x.regurgitate()
+        yield ' '
+        for x in self.children:
+            yield from x.regurgitate()
 
 class LabeledListItem(ListItem):
     def __init__(self, indent, label, attributes=None, citations=None,  namespace=None):
@@ -1125,10 +1134,16 @@ class Paragraph(Block):
         super().__init__(name='p', indent=indent, namespace=namespace)
 
     def __str__(self):
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
         if type(self.parent) in [Block, Blockquote]:
-            return " " * int(self.indent) + str(self.children[0]) + "\n\n"
+            yield " " * int(self.indent)
+            yield from self.children[0].regurgitate()
+            yield "\n\n"
         else:
-            return str(self.children[0]) + "\n"
+            yield from self.children[0].regurgitate()
+            yield "\n"
 
 
     def _add_child(self, b):
