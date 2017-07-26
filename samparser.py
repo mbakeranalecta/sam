@@ -451,6 +451,7 @@ class SamParser:
         embedded_xml_parser.XmlDeclHandler = self._embedded_xml_declaration_check
         embedded_xml_parser.Parse(source.current_line.strip())
         xml_lines = []
+        header=match.group(0)
         try:
             while True:
                 line = source.next_line
@@ -460,7 +461,7 @@ class SamParser:
             if err.code == 9:  # junk after document element
                 source.return_line()
                 xml_text = ''.join(xml_lines[:-1])
-                b = EmbeddedXML(xml_text, indent)
+                b = EmbeddedXML(xml_text, header, indent)
                 self.doc.add_block(b)
                 return "SAM", context
             else:
@@ -643,23 +644,23 @@ class Block(ABC):
         return x
 
     def __str__(self):
-        return ''.join(self._output_block())
+        return ''.join(self.regurgitate())
 
-    def _output_block(self):
+    def regurgitate(self):
         yield " " * int(self.indent)
         yield "%s:" % (self.name)
         if self.attributes:
             for a in self.attributes:
-                yield str(a)
+                yield from a.regurgitate()
 
         for y in [x for x in self.children if type(x) is Citation]:
-            yield str(y)
+            yield from y.regurgitate()
 
         if self.content:
             yield " %s" % (self.content)
         yield "\n"
         for z in [x for x in self.children if type(x) is not Citation]:
-            yield str(z)
+            yield from z.regurgitate()
 
 
     def serialize_xml(self):
@@ -707,6 +708,18 @@ class Block(ABC):
 class BlockInsert(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='insert', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+
+    def __str__(self):
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield '>>>({0} {1})'.format(next(x.value for x in self.attributes if x.type == 'type'),
+                                    next(x.value for x in self.attributes if x.type == 'item'))
+        yield ''.join(str(x) for x in self.attributes if x.type not in ['type', 'item'])
+        yield '\n'
+        yield ''.join(str(x) for x in self.children)
+        yield '\n'
 
 
 class Codeblock(Block):
@@ -1070,6 +1083,8 @@ class Comment(Block):
         self.indent=indent
         self.name='#comment'
         self.namespace=None
+        self.attributes=[]
+        self.children=[]
 
     def _add_child(self, b):
         if self.parent.name == 'li' and b.name in ['ol', 'ul', '#comment']:
@@ -1079,7 +1094,10 @@ class Comment(Block):
             raise SAMParserStructureError('A comment cannot have block children.')
 
     def __str__(self):
-        return u"#{0}\n".format(self.content)
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield u"#{0}\n".format(self.content)
 
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
@@ -1173,7 +1191,16 @@ class UnparsedTextBlock:
 
 class Flow(list):
     def __str__(self):
-        return "{0}".format(''.join([str(x) for x in self]))
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+
+        for x in self:
+            if hasattr(x, 'regurgitate'):
+                yield from x.regurgitate()
+            else:
+                yield x.replace('\\', '\\\\')
+
 
     def append(self, thing):
         if type(thing) is Attribute:
@@ -1244,16 +1271,18 @@ class Pre(Flow):
 
 
 class EmbeddedXML(Block):
-    def __init__(self, text, indent=0):
-        super().__init__(name="<?xml?>", content=text, indent=indent)
 
-    def __init__(self, text, indent):
+    def __init__(self, text, header, indent):
         self.content = text
         self.indent = indent
         self.attributes= None
         self.namespace = None
-        self.name = "<?xml?>"
+        self.name = None
+        self.header = header
         self.children = []
+
+    def __str__(self):
+        return '{0}\n{1}'.format(self.header, self.content)
 
     def serialize_xml(self):
         yield self.content
@@ -1278,8 +1307,10 @@ class DocStructure:
         self.ids = []
 
     def __str__(self):
-        return str(self.root)
+        return ''.join(self.regurgitate())
 
+    def regurgitate(self):
+        yield from self.root.regurgitate()
 
     def _cur_blk(self):
         """
@@ -1496,7 +1527,11 @@ class Include(Block):
         self.href= href
 
     def __str__(self):
-        return " " * int(self.indent) + "<<<(" + self.content + ")\n\n"
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield "<<<(" + self.content + ")\n\n"
 
     def serialize_xml(self):
         for x in self.children:
@@ -1986,7 +2021,14 @@ class Phrase:
         self.attributes = []
 
     def __str__(self):
-        return u'{{{0:s}}}'.format(self.text) + "".join([str(x) for x in self.annotations])
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield u'{{{0:s}}}'.format(self.text.replace('\\', '\\\\'))
+        for x in self.annotations:
+            yield from x.regurgitate()
+
+
 
     def add_attribute(self, attr):
         if attr.type == "condition":
@@ -2037,6 +2079,15 @@ class Phrase:
             self.child.append(thing)
 
 class Code(Phrase):
+
+    def __str__(self):
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield '`{0}`'.format(self.text.replace('`', '``'))
+        for x in self.annotations:
+            yield from x.regurgitate()
+
 
     def serialize_xml(self):
 
@@ -2104,7 +2155,10 @@ class Attribute:
         self.local = local
 
     def __str__(self):
-        return '(%s%s)' % (Attribute.attribute_symbols[self.type], self.value)
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield '(%s%s)' % (Attribute.attribute_symbols[self.type], self.value)
 
     def serialize_xml(self):
         yield ' %s="%s"' % (self.type, escape_for_xml_attribute(self.value))
@@ -2118,10 +2172,13 @@ class Annotation:
         self.local = local
 
     def __str__(self):
-        return '({0}'.format(self.annotation_type) +\
-               ("{0}".format(self.specifically) if self.specifically else '') +\
-               ("({0})".format(self.namespace) if self.namespace else '') +\
-               ')'
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield '({0}'.format(self.annotation_type)
+        yield (' "{0}"'.format(self.specifically.replace('"','\\"')) if self.specifically else '')
+        yield (' ({0})'.format(self.namespace) if self.namespace else '')
+        yield ')'
 
     def serialize_xml(self, annotations=None, payload=None):
         yield '<annotation'
@@ -2154,7 +2211,6 @@ class Annotation:
 class Decoration(Annotation):
     pass
 
-
 class Citation:
     def __init__(self, citation_type, citation_value, citation_extra):
         self.citation_type = citation_type
@@ -2164,14 +2220,17 @@ class Citation:
         self.child = None
 
     def __str__(self):
-        cit_extra = self.citation_extra if self.citation_extra else ''
-        return ''.join([
-            '[',
-            '' if self.citation_type == 'citation' else self.citation_type + ' ',
-            self.citation_value,
-            '' if self.citation_extra is None else self.citation_extra,
-            ']'
-        ])
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield '['
+        if self.citation_type != 'citation':
+            yield '{0} '.format(self.citation_type)
+        yield self.citation_value
+        if self.citation_extra:
+            yield ' {0}'.format(self.citation_extra)
+        yield ']'
+
 
         #u'[{0:s} {1:s} {2:s}]'.format(self.citation_type, self.citation_value, cit_extra)
 
@@ -2541,7 +2600,9 @@ if __name__ == "__main__":
                     if transformed:
                         sys.stdout.buffer.write(transformed)
                     elif args.regurgitate:
-                        print(samParser.doc)
+                        for i in samParser.doc.regurgitate():
+                            sys.stdout.buffer.write(i.encode('utf-8'))
+
                     else:
                         for i in samParser.serialize('xml'):
                             sys.stdout.buffer.write(i.encode('utf-8'))
