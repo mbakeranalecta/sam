@@ -1353,8 +1353,8 @@ class Pre(Flow):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
-        yield " " * int(self.indent)
         for x in self.lines:
+            yield " " * int(self.indent)
             yield x
 
     def serialize_xml(self):
