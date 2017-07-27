@@ -1189,7 +1189,10 @@ class StringDef(Block):
         super().__init__(name=string_name, content=value, indent=indent)
 
     def __str__(self):
-        return "{0}${1}: {2}\n".format(" " * int(self.indent), self.name, self.content)
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield "{0}${1}: {2}\n".format(" " * int(self.indent), self.name, self.content)
 
     def serialize_xml(self):
         yield '<string name="{0}">'.format(self.name)
@@ -1207,7 +1210,11 @@ class Root(Block):
         self.children = []
 
     def __str__(self):
-        return "{0}".format(''.join([str(x) for x in self.children]))
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        for x in self.children:
+            yield from x.regurgitate()
 
     def serialize_xml(self):
         yield '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -1343,7 +1350,12 @@ class Pre(Flow):
         self.indent = min_indent
 
     def __str__(self):
-        return  "{0}".format(''.join( [" " * int(self.indent) + str(x) for x in self.lines]))
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        for x in self.lines:
+            yield x
 
     def serialize_xml(self):
         for x in self.lines:
@@ -1363,7 +1375,10 @@ class EmbeddedXML(Block):
         self.children = []
 
     def __str__(self):
-        return '{0}\n{1}'.format(self.header, self.content)
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield '{0}\n{1}'.format(self.header, self.content)
 
     def serialize_xml(self):
         yield self.content
@@ -2633,12 +2648,20 @@ if __name__ == "__main__":
                 SAM_parser_info("Parsing " + os.path.abspath(inf.name))
                 samParser.parse(inf)
 
-                xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
+                if args.outdir:
+                    outputfile = os.path.join(args.outdir,
+                                              os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension)
+                else:
+                    outputfile = args.outfile
 
                 if args.intermediatedir:
                     intermediatefile=os.path.join(args.intermediatedir, os.path.splitext(os.path.basename(inputfile))[0] + args.intermediateextension)
                 else:
                     intermediatefile=args.intermediatefile
+
+
+                xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
+
 
                 if intermediatefile:
                     with open(intermediatefile, "wb") as intermediate:
@@ -2656,18 +2679,8 @@ if __name__ == "__main__":
                     except etree.XSLTApplyError as e:
                         raise SAMParserError("XSLT processor reported error: " + str(e))
 
-                if args.outdir:
-                    outputfile=os.path.join(args.outdir, os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension)
-                else:
-                    outputfile=args.outfile
-
-                if outputfile:
-                    if transformed:
-                        with open(outputfile, "wb") as outf:
-                            outf.write(str(transformed).encode(encoding='utf-8'))
-
-                        if transform.error_log:
-                            SAM_parser_warning("Messages from the XSLT transformation:")
+                    if transform.error_log:
+                        SAM_parser_warning("Messages from the XSLT transformation:")
                         for entry in transform.error_log:
                             print('message from line %s, col %s: %s' % (
                                 entry.line, entry.column, entry.message), file=sys.stderr)
@@ -2675,15 +2688,23 @@ if __name__ == "__main__":
                             print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
                             print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
 
-                    else:
-                        with open(outputfile, "wb") as outf:
-                            outf.write(xml_string)
+                if outputfile:
+                    with open(outputfile, "wb") as outf:
+                        if args.regurgitate:
+                            for i in samParser.doc.regurgitate():
+                                outf.write(i.encode('utf-8'))
+                        if transformed:
+                            outf.write(str(transformed).encode(encoding='utf-8'))
+                        else:
+                            for i in samParser.serialize('xml'):
+                                outf.write(i.encode('utf-8'))
                 else:
-                    if transformed:
-                        sys.stdout.buffer.write(transformed)
-                    elif args.regurgitate:
+                    if args.regurgitate:
                         for i in samParser.doc.regurgitate():
                             sys.stdout.buffer.write(i.encode('utf-8'))
+                    elif transformed:
+                        sys.stdout.buffer.write(transformed)
+
 
                     else:
                         for i in samParser.serialize('xml'):
