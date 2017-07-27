@@ -593,8 +593,7 @@ class Block(ABC):
         self.indent = indent
         self.parent = None
         self.children = []
-        if citations:
-            self.children.extend(citations)
+        self.citations = citations
 
     def add(self, b):
         """
@@ -653,13 +652,13 @@ class Block(ABC):
             for a in self.attributes:
                 yield from a.regurgitate()
 
-        for y in [x for x in self.children if type(x) is Citation]:
+        for y in [x for x in self.citations]:
             yield from y.regurgitate()
 
         if self.content:
             yield " %s" % (self.content)
         yield "\n"
-        for z in [x for x in self.children if type(x) is not Citation]:
+        for z in [x for x in self.children]:
             yield from z.regurgitate()
 
 
@@ -681,8 +680,12 @@ class Block(ABC):
                 for att in sorted(self.attributes, key=lambda x: x.type):
                     yield from att.serialize_xml()
 
-        if self.children:
+        if self.children or self.citations:
             yield ">"
+
+            if self.citations:
+                for x in self.citations:
+                    yield from x.serialize_xml()
 
             if self.content:
                 yield "\n<title>"
@@ -905,6 +908,9 @@ class Blockquote(Block):
         yield '"""'
         for x in self.attributes:
             yield from x.regurgitate()
+        if self.citations:
+            for x in self.citations:
+                yield from x.regurgitate()
         yield '\n'
         for x in self.children:
             yield from x.regurgitate()
@@ -1080,6 +1086,18 @@ class LabeledListItem(ListItem):
         super().__init__(name="li", indent=indent, attributes=attributes, citations=citations,  namespace=namespace)
         self.label = label
 
+    def __str__(self):
+        return ''.join(self.regurgitate())
+
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield '|{0}|'.format(self.label)
+        for x in self.attributes:
+            yield from x.regurgitate()
+        yield ' '
+        for x in self.children:
+            yield from x.regurgitate()
+
     def serialize_xml(self):
         yield "<{0}".format(self.name)
 
@@ -1137,11 +1155,15 @@ class Paragraph(Block):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
-        if type(self.parent) in [Block, Blockquote]:
+        if type(self.parent) in [Block, Blockquote] :
             yield " " * int(self.indent)
             yield from self.children[0].regurgitate()
             yield "\n\n"
+        elif self.parent.children.index(self) == 0:
+            yield from self.children[0].regurgitate()
+            yield "\n"
         else:
+            yield " " * int(self.indent)
             yield from self.children[0].regurgitate()
             yield "\n"
 
@@ -1192,7 +1214,7 @@ class StringDef(Block):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
-        yield "{0}${1}: {2}\n".format(" " * int(self.indent), self.name, self.content)
+        yield "{0}${1}={2}\n".format(" " * int(self.indent), self.name, self.content)
 
     def serialize_xml(self):
         yield '<string name="{0}">'.format(self.name)
