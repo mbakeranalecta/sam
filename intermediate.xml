@@ -160,9 +160,9 @@ section:(!sp)[Mother McCree] Greeting
 </codeblock>
 </source>
 <markup>
-<section xml:lang="sp">
+<section xml:lang="sp"><citation type = "citation" value = "Mother McCree"/>
 <title>Greeting</title>
-<citation type = "citation" value = "Mother McCree"/><p>Feliz Navidad</p>
+<p>Feliz Navidad</p>
 </section>
 </markup>
 <result>
@@ -2149,8 +2149,8 @@ This is another paragraph. Then there is an alternate blockquote:
 </source>
 <markup>
 <p>This is another paragraph. Then there is an alternate blockquote:</p>
-<blockquote conditions="bar,baz" name="foo5">
-<citation type = "citation" value = "Mother Goose"/><citation type = "citation" value = "Father Time"/><citation extra="page 2" type = "idref" value = "foo"/><p>The quick brown fox jumps over the lazy dog.</p>
+<blockquote conditions="bar,baz" name="foo5"><citation type = "citation" value = "Mother Goose"/><citation type = "citation" value = "Father Time"/><citation extra="page 2" type = "idref" value = "foo"/>
+<p>The quick brown fox jumps over the lazy dog.</p>
 </blockquote>
 <blockquote>
 <p>This is a blockquote without a citation.</p>
@@ -2282,7 +2282,7 @@ warnings:
 </source>
 <markup>
 <codeblock conditions="foo" language="python">
-<citation type = "citation" value = "demos/foo.py"/>def escape_for_xml(s):
+def escape_for_xml(s):
     t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
     try:
         return s.translate(t)
@@ -2413,8 +2413,8 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </codeblock>
 </source>
 <markup>
-<blockquote>
-<citation extra="page 22" type = "idref" value = "bing"/><line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" type = "idref" value = "bing"/></line>
+<blockquote><citation extra="page 22" type = "idref" value = "bing"/>
+<line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" type = "idref" value = "bing"/></line>
 <line>You gotta walk it by yourself,</line>
 <line conditions="bar">Nobody here can walk it for you,</line>
 <line>   You gotta walk it by yourself.</line>
@@ -2818,8 +2818,8 @@ After this paragraph, there is a blockquote:
 </source>
 <markup>
 <p>After this paragraph, there is a blockquote:</p>
-<blockquote conditions="a,b" id="id10" name="name" xml:lang="en-CA">
-<citation type = "idref" value = "cit"/><p>The quick brown fox jumps over the lazy dog.</p>
+<blockquote conditions="a,b" id="id10" name="name" xml:lang="en-CA"><citation type = "idref" value = "cit"/>
+<p>The quick brown fox jumps over the lazy dog.</p>
 <p>And the <phrase><annotation type="beast" specifically="bovine"><citation type = "citation" value = "Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
 </blockquote>
 </markup>
@@ -3924,7 +3924,7 @@ that you can define string substitutions whenever you insert a fragment into you
 </codeblock>
 </source>
 <markup>
-<p>Because you often want to <inline-insert conditions="baz,bat" item="foo.gif" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+<p>Because you often want to <inline-insert type="(image)" item="(foo.gif)" conditions="baz,bat" name="bar"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert type="(id)" item="(my-table)"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3943,7 +3943,7 @@ that you can define string substitutions whenever you insert a fragment into you
 </codeblock>
 </source>
 <markup>
-<p><inline-insert item="foo" type="name"/></p>
+<p><inline-insert type="(name)" item="(foo)"/></p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3987,7 +3987,7 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 </codeblock>
 </source>
 <markup>
-<p>This sentence includes a string reference <inline-insert item="name" type="string"/>. And a shortcut version <inline-insert item="name" type="string"/>.</p>
+<p>This sentence includes a string reference <inline-insert type="(string)" item="(name)"/>. And a shortcut version <inline-insert type="(string)" item="(name)"/>.</p>
 </markup>
 <result>
 <codeblock language="xml">

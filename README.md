@@ -84,5 +84,14 @@ used to output as "row". It is now output as "record".
 
 * Revision 828ef33d291f1364a6edf036588ac5f21fac0abb addressed issue #142 by detecting recursive includes. This had the side effect of changing the behavior when the parser encounters an error in an included file. Previously this error was demoted to a warning (not sure why). Now it is treated as an error and stops the parser. Without this change, the error would not get noted in the error count for batch processing, which is clearly not a good idea. To allow for more lenient error handling while retaining appropriate error reporting, we would need to introduce a reportable non-fatal error type. Issue #148 has been raised to consider this. 
 
+* Revision 
+   * Changed the format of error messages to report the original line on which the error occurred rather than a representation of the object created.
+   
+   * Changed the format produced by the `__str__()` method on doc structure objects to a normalized representaion of the input text.
+   
+   * Changed the serialization of citations on a block so they come before the title, not after it as before.
+   
+   * Changed the object model of Blockinsert and Inlineinsert object to make the type and item value seprate fields of the object rather than simple attributes.
+
 Please report any other backward incompatibilities you find so they can be added to this list. 
 
