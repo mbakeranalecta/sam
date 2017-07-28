@@ -950,9 +950,10 @@ class RecordSet(Block):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
-        yield '{0}{1}:: {2}\n'.format(" " * int(self.indent),
-                                          self.name,
-                                          ', '.join(self.field_names))
+        yield '{0}{1}::'.format(" " * int(self.indent), self.name)
+        for x in self.attributes:
+            yield from x.regurgitate()
+        yield '{0}\n'.format(', '.join(self.field_names))
         for x in self.children:
             yield from x.regurgitate()
 
