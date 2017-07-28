@@ -170,7 +170,9 @@ class SamParser:
 
         attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?!=", unflagged="language")
 
-        b = Codeblock(indent, attributes, citations)
+        language=attributes.pop(0) if attributes else None
+
+        b = Codeblock(indent, language, attributes, citations)
         self.doc.add_block(b)
         self.current_text_block = UnparsedTextBlock()
         return "CODEBLOCK", context
@@ -751,9 +753,12 @@ class BlockInsert(Block):
             yield '</insert>\n'
         else:
             yield '/>\n'
+
+
 class Codeblock(Block):
-    def __init__(self, indent, attributes=None, citations=None, namespace=None):
+    def __init__(self, indent, language=None, attributes=None, citations=None, namespace=None):
         super().__init__(name='codeblock', indent=indent, attributes=attributes, citations=citations,namespace=namespace)
+        self.language = language
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -761,6 +766,8 @@ class Codeblock(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '```'
+        if self.language:
+            yield from self.language.regurgitate()
         for x in self.attributes:
             yield from x.regurgitate()
         for x in self.citations:
@@ -771,12 +778,7 @@ class Codeblock(Block):
         yield '\n'
 
     def serialize_xml(self):
-
-        if any(x.type == 'encoding' for x in self.attributes):
-            tag="embed"
-        else:
-            tag = "codeblock"
-
+        tag = "embed" if self.language and self.language.type == 'encoding' else 'codeblock'
         yield '<{0}'.format(tag)
 
         if self.namespace is not None:
@@ -794,14 +796,6 @@ class Codeblock(Block):
             else:
                 for att in sorted(self.attributes, key=lambda x: x.type):
                     yield from att.serialize_xml()
-
-
-        #        if self.attributes:
-#            newlist = sorted(self.attributes, key=lambda x: x.type)
-
-#            for a in newlist:
-#                yield ' %s ="%s"' % (a.type, escape_for_xml_attribute(a.value))
-                #yield from a.serialize_xml()
 
         if self.children:
             yield ">"
@@ -2511,14 +2505,14 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     if len(embed) > 1:
         raise SAMParserStructureError('More than one embedded encoding specified. Found: {0}.',format(", ".join(embed)))
     conditions = [x[1:] for x in attributes_list if x[0] == '?']
+    if embed:
+        attributes.append(Attribute("encoding", unescape(embed[0])))
+    if language_tag:
+        attributes.append(Attribute("xml:lang", unescape(language_tag[0])))
     if ids:
         attributes.append(Attribute("id", unescape(ids[0])))
     if names:
         attributes.append(Attribute("name", unescape(names[0])))
-    if language_tag:
-        attributes.append(Attribute("xml:lang", unescape(language_tag[0])))
-    if embed:
-        attributes.append(Attribute("encoding", unescape(embed[0])))
     if conditions:
         for c in conditions:
             attributes.append(Attribute("condition", unescape(c)))
