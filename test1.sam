@@ -148,8 +148,9 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <section xml:lang="sp">
+                        <citation type="citation" value="Mother McCree"/>
                         <title>Greeting</title>
-                        <citation type="citation" value="Mother McCree"/><p>Feliz Navidad</p>
+                        <p>Feliz Navidad</p>
                     </section>
 
         case: Escaping block syntax
@@ -1764,7 +1765,10 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>This is another paragraph. Then there is an alternate blockquote:</p>
                     <blockquote conditions="bar,baz" name="foo5">
-                    <citation type="citation" value="Mother Goose"/><citation type="citation" value="Father Time"/><citation extra="page 2" type="idref" value="foo"/><p>The quick brown fox jumps over the lazy dog.</p>
+                    <citation type="citation" value="Mother Goose"/>
+                    <citation type="citation" value="Father Time"/>
+                    <citation extra="page 2" type="idref" value="foo"/>
+                    <p>The quick brown fox jumps over the lazy dog.</p>
                     </blockquote>
                     <blockquote>
                     <p>This is a blockquote without a citation.</p>
@@ -1886,7 +1890,8 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <codeblock conditions="foo" language="python">
-                    <citation type="citation" value="demos/foo.py"/>def escape_for_xml(s):
+                    <citation type="citation" value="demos/foo.py"/>
+                    def escape_for_xml(s):
                         t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
                         try:
                             return s.translate(t)
@@ -1947,7 +1952,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <embed conditions="a,b" encoding="latexmathml" id="id13" name="name"> n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k </embed>
+                    <embedblock conditions="a,b" encoding="latexmathml" id="id13" name="name"> n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k </embedblock>
 
     test: Lines
 
@@ -2005,7 +2010,8 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <blockquote>
-                    <citation extra="page 22" type="idref" value="bing"/><line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" type="idref" value="bing"/></line>
+                    <citation extra="page 22" type="idref" value="bing"/>
+                    <line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" type="idref" value="bing"/></line>
                     <line>You gotta walk it by yourself,</line>
                     <line conditions="bar">Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
@@ -2351,7 +2357,8 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>After this paragraph, there is a blockquote:</p>
                     <blockquote conditions="a,b" id="id10" name="name" xml:lang="en-CA">
-                    <citation type="idref" value="cit"/><p>The quick brown fox jumps over the lazy dog.</p>
+                    <citation type="idref" value="cit"/>
+                    <p>The quick brown fox jumps over the lazy dog.</p>
 
                     <p>And the <phrase><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
                     </blockquote>
@@ -2424,9 +2431,9 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <embed conditions="a,b" encoding="latexmathml" id="id13" name="name">
+                    <embedblock conditions="a,b" encoding="latexmathml" id="id13" name="name">
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
-                    </embed>
+                    </embedblock>
 
 
         case: Attributes on inserts

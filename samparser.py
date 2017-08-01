@@ -171,8 +171,12 @@ class SamParser:
         attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?!=", unflagged="language")
 
         language=attributes.pop(0) if attributes else None
-
-        b = Codeblock(indent, language, attributes, citations)
+        if language and language.type == 'encoding':
+            b = Embedblock(indent, language.value, attributes, citations)
+        elif language:
+            b = Codeblock(indent, language.value, attributes, citations)
+        else:
+            b = Codeblock(indent, None, attributes, citations)
         self.doc.add_block(b)
         self.current_text_block = UnparsedTextBlock()
         return "CODEBLOCK", context
@@ -190,7 +194,7 @@ class SamParser:
         if self.patterns['blank-line'].match(line):
             self.current_text_block.append(line)
             return "CODEBLOCK", context
-        if indent <= self.doc.ancestor_or_self_type(Codeblock).indent:
+        if indent <= self.doc.ancestor_or_self_type([Codeblock, Embedblock]).indent:
             source.return_line()
             self.doc.add_flow(Pre(self.current_text_block.strip()))
             self.current_text_block = None
@@ -687,6 +691,7 @@ class Block(ABC):
 
             if self.citations:
                 for x in self.citations:
+                    yield '\n'
                     yield from x.serialize_xml()
 
             if self.content:
@@ -732,25 +737,26 @@ class BlockInsert(Block):
 
     def serialize_xml(self):
 
-        yield '<insert type="{0}" item="{1}"'.format(self.type, escape_for_xml_attribute(self.item))
+        attrs=[Attribute('type', self.type), Attribute('item', self.item)]
 
+        yield '<insert'
         if self.attributes:
             if any([x.value for x in self.attributes if x.type == 'condition']):
                 conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
-                attrs = [x for x in self.attributes if x.type != 'condition']
                 attrs.append(conditions)
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_xml()
-            else:
-                for att in sorted(self.attributes, key=lambda x: x.type):
-                    yield from att.serialize_xml()
+                attrs.extend([x for x in self.attributes if x.type != 'condition'])
 
+        for att in sorted(attrs, key=lambda x: x.type):
+            yield from att.serialize_xml()
 
-        if self.citations:
-            yield '>'
-            for c in self.citations:
+        if self.citations or self.children:
+            yield '>\n'
+            for cit in self.citations:
+                yield from cit.serialize_xml()
+
+            for c in self.children:
                 yield from c.serialize_xml()
-            yield '</insert>\n'
+            yield '</insert>'
         else:
             yield '/>\n'
 
@@ -767,7 +773,7 @@ class Codeblock(Block):
         yield " " * int(self.indent)
         yield '```'
         if self.language:
-            yield from self.language.regurgitate()
+            yield "({0})".format(self.language)
         for x in self.attributes:
             yield from x.regurgitate()
         for x in self.citations:
@@ -778,23 +784,68 @@ class Codeblock(Block):
         yield '\n'
 
     def serialize_xml(self):
-        tag = "embed" if self.language and self.language.type == 'encoding' else 'codeblock'
-        yield '<{0}'.format(tag)
+        attrs = []
+        yield '<codeblock'
 
         if self.namespace is not None:
             if type(self.parent) is Root or self.namespace != self.parent.namespace:
                 yield ' xmlns="{0}"'.format(self.namespace)
-
+        if self.language:
+            attrs.append(Attribute('language', self.language))
         if self.attributes:
-            if any([x.value for x in self.attributes if x.type == 'condition']):
+            attrs.extend(self.attributes)
+        if attrs:
+            if any([x.value for x in attrs if x.type == 'condition']):
                 conditions = Attribute('conditions',
-                                       ','.join([x.value for x in self.attributes if x.type == 'condition']))
-                attrs = [x for x in self.attributes if x.type != 'condition']
+                                       ','.join([x.value for x in attrs if x.type == 'condition']))
+                attrs = [x for x in attrs if x.type != 'condition']
                 attrs.append(conditions)
                 for att in sorted(attrs, key=lambda x: x.type):
                     yield from att.serialize_xml()
             else:
-                for att in sorted(self.attributes, key=lambda x: x.type):
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+
+        if self.citations or self.children:
+            yield ">\n"
+        if self.citations:
+            for x in self.citations:
+                yield from x.serialize_xml()
+                yield '\n'
+        if self.children:
+            if type(self.children[0]) is not Flow:
+                yield "\n"
+
+            for x in self.children:
+                if x is not None:
+                    yield from x.serialize_xml()
+            yield "</codeblock>\n"
+        else:
+            yield '/>'
+
+class Embedblock(Codeblock):
+
+    def serialize_xml(self):
+        attrs = []
+        yield '<embedblock'
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+        if self.language:
+            attrs.append(Attribute('encoding', self.language))
+        if self.attributes:
+            attrs.extend(self.attributes)
+        if attrs:
+            if any([x.value for x in attrs if x.type == 'condition']):
+                conditions = Attribute('conditions',
+                                       ','.join([x.value for x in attrs if x.type == 'condition']))
+                attrs = [x for x in attrs if x.type != 'condition']
+                attrs.append(conditions)
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+            else:
+                for att in sorted(attrs, key=lambda x: x.type):
                     yield from att.serialize_xml()
 
         if self.children:
@@ -806,10 +857,9 @@ class Codeblock(Block):
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_xml()
-            yield "</{0}>\n".format(tag)
+            yield "</embedblock>\n"
         else:
             yield '/>'
-
 
 class Remark(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
@@ -1511,14 +1561,14 @@ class DocStructure:
                 return False
         return True
 
-    def ancestor_or_self(self,ancestor_name, block=None):
+    def ancestor_or_self(self, ancestor_name, block=None):
         """
         Returns a block that is the reference block or it ancestor based on its name.
         
         For SAM's concrete types is it better to use ancestor_or_self_type as
         the names of concrete types could be changed in the schema. 
         
-        :param ancestor_name: The name of the block to return.
+        :param ancestor_name: The name or names of the block to return.
         :param block: The reference block. If not specified, the current block is used.
         :return: The block requested, nor None if no block matches.
         """
@@ -1526,7 +1576,7 @@ class DocStructure:
             block = self.current_block
         try:
             while True:
-                if block.name == ancestor_name:
+                if block.name in ancestor_name:
                     return block
                 block = block.parent
         except(AttributeError):
@@ -1539,15 +1589,21 @@ class DocStructure:
         For named blocks is it better to use ancestor_or_self as
         all named blocks are of type Block. 
 
-        :param ancestor_name: The type of the block to return.
+        :param ancestor_name: The type or names of the block to return.
         :param block: The reference block. If not specified, the current block is used.
         :return: The block requested, nor None if no block matches.
         """
+
+        test_list = []
+        try:
+            test_list.extend(ancestor_type)
+        except TypeError:
+            test_list.append(ancestor_type)
         if block is None:
             block = self.current_block
         try:
             while True:
-                if type(block) is ancestor_type:
+                if type(block) in test_list:
                     return block
                 block = block.parent
         except(AttributeError):
@@ -2222,7 +2278,8 @@ class Code(Phrase):
         yield '`{0}`'.format(self.text.replace('`', '``'))
         for x in self.annotations:
             yield from x.regurgitate()
-
+        for x in self.attributes:
+            yield from x.regurgitate()
 
     def serialize_xml(self):
 
@@ -2396,6 +2453,7 @@ class Citation:
         else:
             yield '/>'
 
+
     def append(self, thing):
         if not self.child:
             self.child = thing
@@ -2425,19 +2483,18 @@ class InlineInsert:
 
     def serialize_xml(self):
 
-        yield '<inline-insert type="{0}" item="{1}"'.format(self.type, escape_for_xml_attribute(self.item))
+        attrs=[Attribute('type', self.type), Attribute('item', self.item)]
+
+        yield '<inline-insert'
 
         if self.attributes:
             if any([x.value for x in self.attributes if x.type == 'condition']):
                 conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
-                attrs = [x for x in self.attributes if x.type != 'condition']
                 attrs.append(conditions)
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_xml()
-            else:
-                for att in sorted(self.attributes, key=lambda x: x.type):
-                    yield from att.serialize_xml()
+                attrs.extend([x for x in self.attributes if x.type != 'condition'])
 
+        for att in sorted(attrs, key=lambda x: x.type):
+            yield from att.serialize_xml()
 
         if self.citations:
             yield '>'
