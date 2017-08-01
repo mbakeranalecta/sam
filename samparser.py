@@ -2064,7 +2064,7 @@ class FlowParser:
             self.current_string = ''
             p = Phrase(unescape(match.group("text")))
             self.flow.append(p)
-            p.annotations.append(Decoration('bold'))
+            p.annotations.append(Annotation('bold'))
             para.advance(len(match.group(0)))
         else:
             self.current_string += '*'
@@ -2085,7 +2085,7 @@ class FlowParser:
             self.current_string = ''
             p = Phrase(unescape(match.group("text")))
             self.flow.append(p)
-            p.annotations.append(Decoration('italic'))
+            p.annotations.append(Annotation('italic'))
             para.advance(len(match.group(0)))
         else:
             self.current_string += '_'
@@ -2401,8 +2401,6 @@ class Annotation:
         else:
             self.child.append(thing)
 
-class Decoration(Annotation):
-    pass
 
 class Citation:
     def __init__(self, citation_type, citation_value, citation_extra):
