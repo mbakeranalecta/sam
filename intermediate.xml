@@ -199,7 +199,7 @@ and\:
 </codeblock>
 </source>
 <markup>
-<and/>
+<p>and:</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -564,7 +564,8 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two this paragraph wraps. This is another para in the list item.</p>
+<p>Two this paragraph wraps.</p>
+<p>This is another para in the list item.</p>
 </li>
 <li>
 <p>Three</p>
@@ -1461,7 +1462,9 @@ multiple lines.
 </ul>
 </li>
 <li>
-<p>Three times three is nine. Four times four is sixteen. Five time five is twenty five.</p>
+<p>Three times three is nine.</p>
+<p>Four times four is sixteen.</p>
+<p>Five time five is twenty five.</p>
 </li>
 <li>
 <p>Four</p>
@@ -1660,17 +1663,9 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ol>
-<li>
-<p>This is just a paragraph</p>
-</li>
-<li>
-<p>This is just a paragraph</p>
-</li>
-<li>
-<p>This is just a paragraph</p>
-</li>
-</ol>
+<p>2. This is just a paragraph</p>
+<p>4. This is just a paragraph</p>
+<p>9. This is just a paragraph</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -1697,17 +1692,9 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<ul>
-<li>
-<p>This is just a paragraph</p>
-</li>
-<li>
-<p>This is just a paragraph</p>
-</li>
-<li>
-<p>This is just a paragraph</p>
-</li>
-</ul>
+<p>* This is just a paragraph</p>
+<p>* This is just a paragraph</p>
+<p>* This is just a paragraph</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -1753,7 +1740,8 @@ multiple lines.
 </li>
 <li>
 <label>Re</label>
-<p>a drop of golden sun Is it a particle or a wave?</p>
+<p>a drop of golden sun</p>
+<p>Is it a particle or a wave?</p>
 </li>
 <li>
 <label>Me</label>
@@ -2854,7 +2842,8 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </li>
 <li>
 <label>Re</label>
-<p>a drop of golden sun Is it a particle or a wave?</p>
+<p>a drop of golden sun</p>
+<p>Is it a particle or a wave?</p>
 </li>
 <li id="bananas">
 <label>Me</label>
@@ -3500,7 +3489,7 @@ In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays
 </codeblock>
 </source>
 <markup>
-<p>In Rio Bravo, <phrase><annotation type="bold">the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays </annotation></phrase>an ex-Union colonel `out for revenge.</p>
+<p>In Rio Bravo, *the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4312,8 +4301,10 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 </codeblock>
 </source>
 <markup>
-<insert item="foobar" type="fragment"/>
-</markup>
+<insert item="foobar" type="fragment">
+<string name="a">apricot</string>
+<string name="b">breadfruit</string>
+</insert></markup>
 <result>
 <codeblock language="xml">
 
@@ -4537,7 +4528,7 @@ This para uses \"dumb\" quotes. Don\'t get them &amp;quot;mixed up&amp;quot;.
 </codeblock>
 </source>
 <markup>
-<p>This para uses “dumb” quotes. Don’t get them “mixed up”.</p>
+<p>This para uses "dumb" quotes. Don't get them "mixed up".</p>
 </markup>
 <result>
 <codeblock language="xml">

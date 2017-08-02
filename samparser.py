@@ -31,21 +31,6 @@ re_one_space = r'\s'
 re_comment = r'#(?P<comment>.*)'
 re_citation = r'(\[\s*\*(?P<id>\S+)(?P<id_extra>.*?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.*?)\])|(\[\s*(?P<citation>.*?)\])'
 
-class NonRecursiveTreeExecption (Exception):
-    """ Exception class for NonRecursiveTreeNode"""
-
-class NonRecursiveTree:
-    def __init__(self):
-        self.root = NonRecursiveTreeNode()
-        self.last = self.root
-
-    def push(self, value):
-        self.last = self.last.add(value)
-
-    def pop(self):
-        x = self.last
-        self.last = self.last.parent
-        return x
 
 block_patterns = {
             'comment': re.compile(re_indent + re_comment, re.U),
@@ -131,29 +116,7 @@ smart_quote_subs = {re_double_quote_close:'”',
                     re_en_dash: '–',
                     re_em_dash: '—'}
 
-class NonRecursiveTreeNode:
-    def __init__(self, value=None, parent=None):
-        self.value = value
-        self.child = None
-        self.parent = parent
-
-    def add(self, value):
-            if self._in_tree(value):
-                raise NonRecursiveTreeExecption()
-            else:
-                x = NonRecursiveTreeNode(value, self)
-                self.child = x
-                return x
-
-    def _in_tree(self, value):
-        if self.value == value:
-            return True
-        elif self.parent is None:
-            return False
-        else:
-            return self.parent._in_tree(value)
-
-included_files = NonRecursiveTree()
+included_files = []
 
 class SamParser:
     def __init__(self):
@@ -399,26 +362,28 @@ class SamParser:
             SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known.")
             return
 
-        try:
-            included_files.push(fullhref)
-            reader = codecs.getreader("utf-8")
-            SAM_parser_info("Parsing include " + href)
-            try:
-                includeparser = SamParser()
-                with urllib.request.urlopen(fullhref) as response:
-                    includeparser.parse(reader(response))
-                include = Include(includeparser.doc, href, fullhref, indent)
-                self.doc.add_block(include)
-                SAM_parser_info("Finished parsing include " + href)
-            #except SAMParserError as e:
-             #   SAM_parser_warning("Unable to parse " + href + " because " + str(e))
-            except FileNotFoundError as e:
-                SAM_parser_warning(str(e))
-            except urllib.error.URLError as e:
-                SAM_parser_warning(str(e))
-            included_files.pop()
-        except NonRecursiveTreeExecption:
+        if fullhref in included_files:
             raise SAMParserError("Duplicate file inclusion detected with file: " + fullhref)
+        else:
+            included_files.append(fullhref)
+
+        reader = codecs.getreader("utf-8")
+        SAM_parser_info("Parsing include " + href)
+        try:
+            includeparser = SamParser()
+            with urllib.request.urlopen(fullhref) as response:
+                includeparser.parse(reader(response))
+            include = Include(includeparser.doc, href, fullhref, indent)
+            self.doc.add_block(include)
+            SAM_parser_info("Finished parsing include " + href)
+        except FileNotFoundError as e:
+            SAM_parser_warning(str(e))
+        except urllib.error.URLError as e:
+            SAM_parser_warning(str(e))
+
+        included_files.pop()
+
+
 
         return "SAM", context
 
