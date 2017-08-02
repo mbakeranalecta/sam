@@ -47,6 +47,89 @@ class NonRecursiveTree:
         self.last = self.last.parent
         return x
 
+block_patterns = {
+            'comment': re.compile(re_indent + re_comment, re.U),
+            'remark-start': re.compile(
+                re_indent + r'(?P<flag>!!!)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
+                re.U),
+            'declaration': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
+            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + '\s' + re_content + r'?', re.U),
+            'codeblock-start': re.compile(
+                re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
+                re.U),
+            'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
+            'blockquote-start': re.compile(
+                re_indent + r'("""|\'\'\')(' + re_remainder + r')?',
+                re.U),
+            'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
+            'paragraph-start': re.compile(r'\w*', re.U),
+            'line-start': re.compile(re_indent + r'\|' + re_attributes + re_one_space + re_content, re.U),
+            'blank-line': re.compile(r'^\s*$'),
+            'record-start': re.compile(re_indent + re_name + r'(?<!\\)::' + re_attributes + '(?P<field_names>.*)', re.U),
+            'list-item': re.compile(re_indent + re_ul_marker + re_attributes + re_spaces + re_content, re.U),
+            'num-list-item': re.compile(re_indent + re_ol_marker + re_attributes + re_spaces + re_content, re.U),
+            'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
+            'block-insert': re.compile(re_indent + r'>>>(?P<insert>\((.*?(?<!\\))\))(' + re_attributes + ')?\s*(?P<unexpected>.*)', re.U),
+            'include': re.compile(re_indent + r'<<<' + re_attributes, re.U),
+            'string-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U),
+            'embedded-xml': re.compile(re_indent + r'(?P<xmltag>\<\?xml.+)', re.U)
+        }
+
+# Flow regex component expressions
+re_single_quote_close = '(?<=[\w\.\,\"\)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
+re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{-])'
+re_double_quote_close = '(?<=[\w\.\,\'\)\}\?-])\"((?=[\.\s\'\)},\?!:;\[-])|$)'
+re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{-])'
+re_apostrophe = "(?<=[\w`\*_\}\)])'(?=\w)"
+re_en_dash = "(?<=[\w\*_`\"\'\.\)\}]\s)--(?=\s[\w\*_`\"\'\{\(])"
+re_em_dash = "(?<=[\w\*_`\"\'\.\)\}])---(?=[\w\*_`\"\'\{\(])"
+
+
+flow_patterns = {
+            'escape': re.compile(r'\\', re.U),
+            'phrase': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
+            'annotation': re.compile(
+                r'''
+                (
+                    (?P<plus>\+?)                            #conditional flag
+                    \(                                       #open paren
+                        \s*                                  #any spaces
+                        (?P<type>\S*?)                       #any non-space characters = annotation type
+                        \s*                                  #any spaces
+                        (                                    #specifically attribute
+                            (?P<quote>["\'])                 #open quote
+                            (?P<specifically>.*?)            #any text = specifically
+                            (?<!\\)(?P=quote)                #close matching quote if not preceded by backslash
+                        )??                                  #end specifically attribute
+                        \s*                                  #any spaces
+                        (\((?P<namespace>\w+)\))?            #any text in parens = namespace
+                    (?<!\\)\)                                #closing paren if not preceded by backslash
+                )
+                ''',
+                re.VERBOSE | re.U),
+            'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
+            'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
+            'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
+            'apostrophe': re.compile(re_apostrophe, re.U),
+            'single_quote_close': re.compile(re_single_quote_close, re.U),
+            'single_quote_open': re.compile(re_single_quote_open, re.U),
+            'double_quote_close': re.compile(re_double_quote_close, re.U),
+            'double_quote_open': re.compile(re_double_quote_open, re.U),
+            'inline-insert': re.compile(r'>(?P<insert>\((.*?(?<!\\))\))' + re_attributes, re.U),
+            'en-dash': re.compile(re_en_dash, re.U),
+            'em-dash': re.compile(re_em_dash, re.U),
+            'citation': re.compile(
+                r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
+                re.U)
+        }
+
+smart_quote_subs = {re_double_quote_close:'”',
+                    re_double_quote_open: '“',
+                    re_single_quote_close:'’',
+                    re_single_quote_open: '‘',
+                    re_apostrophe: '’',
+                    re_en_dash: '–',
+                    re_em_dash: '—'}
 
 class NonRecursiveTreeNode:
     def __init__(self, value=None, parent=None):
@@ -104,33 +187,6 @@ class SamParser:
         self.source = None
         self.sourceurl = None
         self.smart_quotes = False
-        self.patterns = {
-            'comment': re.compile(re_indent + re_comment, re.U),
-            'remark-start': re.compile(
-                re_indent + r'(?P<flag>!!!)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
-                re.U),
-            'declaration': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
-            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + '\s' + re_content + r'?', re.U),
-            'codeblock-start': re.compile(
-                re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
-                re.U),
-            'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
-            'blockquote-start': re.compile(
-                re_indent + r'("""|\'\'\')(' + re_remainder + r')?',
-                re.U),
-            'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
-            'paragraph-start': re.compile(r'\w*', re.U),
-            'line-start': re.compile(re_indent + r'\|' + re_attributes + re_one_space + re_content, re.U),
-            'blank-line': re.compile(r'^\s*$'),
-            'record-start': re.compile(re_indent + re_name + r'(?<!\\)::' + re_attributes + '(?P<field_names>.*)', re.U),
-            'list-item': re.compile(re_indent + re_ul_marker + re_attributes + re_spaces + re_content, re.U),
-            'num-list-item': re.compile(re_indent + re_ol_marker + re_attributes + re_spaces + re_content, re.U),
-            'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
-            'block-insert': re.compile(re_indent + r'>>>(?P<insert>\((.*?(?<!\\))\))(' + re_attributes + ')?\s*(?P<unexpected>.*)', re.U),
-            'include': re.compile(re_indent + r'<<<' + re_attributes, re.U),
-            'string-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U),
-            'embedded-xml': re.compile(re_indent + r'(?P<xmltag>\<\?xml.+)', re.U)
-        }
 
 
     def parse(self, source):
@@ -191,7 +247,7 @@ class SamParser:
             return "END", context
 
         indent = len(line) - len(line.lstrip())
-        if self.patterns['blank-line'].match(line):
+        if block_patterns['blank-line'].match(line):
             self.current_text_block.append(line)
             return "CODEBLOCK", context
         if indent <= self.doc.ancestor_or_self_type([Codeblock, Embedblock]).indent:
@@ -254,7 +310,7 @@ class SamParser:
         first_line_indent = len(match.string) - len(match.string.lstrip())
         this_line_indent = len(line) - len(line.lstrip())
 
-        if self.patterns['blank-line'].match(line):
+        if block_patterns['blank-line'].match(line):
             f = flow_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
             self.doc.add_flow(f)
@@ -268,7 +324,7 @@ class SamParser:
             return "SAM", context
 
         if self.doc.in_context(['p', 'li']):
-            if self.patterns['list-item'].match(line) or self.patterns['num-list-item'].match(line) or self.patterns[
+            if block_patterns['list-item'].match(line) or block_patterns['num-list-item'].match(line) or block_patterns[
                 'labeled-list-item'].match(line):
                 f = flow_parser.parse(self.current_text_block.text, self.doc)
                 self.current_text_block = None
@@ -400,7 +456,7 @@ class SamParser:
         except EOFError:
             return "END", context
         indent = len(line) - len(line.lstrip())
-        if self.patterns['blank-line'].match(line):
+        if block_patterns['blank-line'].match(line):
             return "RECORD", context
         if indent < self.doc.current_block.indent:
             source.return_line()
@@ -428,7 +484,7 @@ class SamParser:
         except EOFError:
             return "END", context
         indent = len(line) - len(line.lstrip())
-        if self.patterns['blank-line'].match(line):
+        if block_patterns['blank-line'].match(line):
             return "GRID", context
         elif indent <= self.doc.ancestor_or_self_type(Grid).indent:
             source.return_line()
@@ -486,7 +542,7 @@ class SamParser:
         except EOFError:
             return "END", context
 
-        match = self.patterns['declaration'].match(line)
+        match = block_patterns['declaration'].match(line)
         if match is not None:
             name = match.group('name').strip()
             content = match.group('content').strip()
@@ -501,78 +557,78 @@ class SamParser:
 
             return "SAM", (source, match)
 
-        match = self.patterns['remark-start'].match(line)
+        match = block_patterns['remark-start'].match(line)
         if match is not None:
             return "REMARK-START", (source, match)
 
-        match = self.patterns['comment'].match(line)
+        match = block_patterns['comment'].match(line)
         if match is not None:
             c = Comment(match.group('comment'), match.end('indent'))
             self.doc.add_block(c)
 
             return "SAM", (source, match)
 
-        match = self.patterns['record-start'].match(line)
+        match = block_patterns['record-start'].match(line)
         if match is not None:
             return "RECORD-START", (source, match)
 
-        match = self.patterns['blank-line'].match(line)
+        match = block_patterns['blank-line'].match(line)
         if match is not None:
             return "SAM", (source, match)
 
-        match = self.patterns['codeblock-start'].match(line)
+        match = block_patterns['codeblock-start'].match(line)
         if match is not None:
             return "CODEBLOCK-START", (source, match)
 
-        match = self.patterns['blockquote-start'].match(line)
+        match = block_patterns['blockquote-start'].match(line)
         if match is not None:
             return "BLOCKQUOTE-START", (source, match)
 
-        match = self.patterns['fragment-start'].match(line)
+        match = block_patterns['fragment-start'].match(line)
         if match is not None:
             return "FRAGMENT-START", (source, match)
 
-        match = self.patterns['grid-start'].match(line)
+        match = block_patterns['grid-start'].match(line)
         if match is not None:
             return "GRID-START", (source, match)
 
-        match = self.patterns['list-item'].match(line)
+        match = block_patterns['list-item'].match(line)
         if match is not None:
             return "LIST-ITEM", (source, match)
 
-        match = self.patterns['num-list-item'].match(line)
+        match = block_patterns['num-list-item'].match(line)
         if match is not None:
             return "NUM-LIST-ITEM", (source, match)
 
-        match = self.patterns['labeled-list-item'].match(line)
+        match = block_patterns['labeled-list-item'].match(line)
         if match is not None:
             return "LABELED-LIST-ITEM", (source, match)
 
-        match = self.patterns['block-insert'].match(line)
+        match = block_patterns['block-insert'].match(line)
         if match is not None:
             return "BLOCK-INSERT", (source, match)
 
-        match = self.patterns['include'].match(line)
+        match = block_patterns['include'].match(line)
         if match is not None:
             return "INCLUDE", (source, match)
 
-        match = self.patterns['string-def'].match(line)
+        match = block_patterns['string-def'].match(line)
         if match is not None:
             return "STRING-DEF", (source, match)
 
-        match = self.patterns['line-start'].match(line)
+        match = block_patterns['line-start'].match(line)
         if match is not None:
             return "LINE-START", (source, match)
 
-        match = self.patterns['embedded-xml'].match(line)
+        match = block_patterns['embedded-xml'].match(line)
         if match is not None:
             return "EMBEDDED-XML", (source, match)
 
-        match = self.patterns['block-start'].match(line)
+        match = block_patterns['block-start'].match(line)
         if match is not None:
             return "BLOCK", (source, match)
 
-        match = self.patterns['paragraph-start'].match(line)
+        match = block_patterns['paragraph-start'].match(line)
         if match is not None:
             return "PARAGRAPH-START", (source, match)
 
@@ -825,6 +881,20 @@ class Codeblock(Block):
 
 class Embedblock(Codeblock):
 
+    def regurgitate(self):
+        yield " " * int(self.indent)
+        yield '```'
+        if self.language:
+            yield "(={0})".format(self.language)
+        for x in self.attributes:
+            yield from x.regurgitate()
+        for x in self.citations:
+            yield from x.regurgitate()
+        yield '\n'
+        for x in self.children:
+            yield from x.regurgitate()
+        yield '\n'
+
     def serialize_xml(self):
         attrs = []
         yield '<embedblock'
@@ -871,9 +941,12 @@ class Remark(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '!!!({0})'.format(next(x.value for x in self.attributes if x.type == 'attribution'))
-        yield ''.join(str(x) for x in self.attributes if x.type not in ['attribution'])
+        for x in self.attributes:
+            if x.type not in ['attribution']:
+                yield from   x.regurgitate()
         yield '\n'
-        yield ''.join(str(x) for x in self.children)
+        for x in self.children:
+            yield from x.regurgitate()
         yield '\n'
 
 
@@ -1231,16 +1304,23 @@ class Paragraph(Block):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
-        if type(self.parent) in [Block, Blockquote] :
+        if type(self.parent) in [Block, Blockquote, Remark, Fragment] :
             yield " " * int(self.indent)
-            yield from self.children[0].regurgitate()
+            for x in self.children:
+                yield from x.regurgitate()
             yield "\n\n"
+        elif self.parent is None:
+            for x in self.children:
+                yield from x.regurgitate()
+            yield "\n"
         elif self.parent.children.index(self) == 0:
-            yield from self.children[0].regurgitate()
+            for x in self.children:
+                yield from x.regurgitate()
             yield "\n"
         else:
             yield " " * int(self.indent)
-            yield from self.children[0].regurgitate()
+            for x in self.children:
+                yield from x.regurgitate()
             yield "\n"
 
 
@@ -1276,6 +1356,7 @@ class Comment(Block):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
+        yield " " * int(self.indent)
         yield u"#{0}\n".format(self.content)
 
     def serialize_xml(self):
@@ -1381,11 +1462,17 @@ class Flow(list):
 
     def regurgitate(self):
 
-        for x in self:
+        for i, x in enumerate(self):
             if hasattr(x, 'regurgitate'):
                 yield from x.regurgitate()
+            elif i == 0:
+                match = block_patterns['block-start'].match(x)
+                if match is not None:
+                    yield escape_for_sam(x).replace(':', '\\:')
+                else:
+                    yield escape_for_sam(x)
             else:
-                yield x.replace('\\', '\\\\')
+                yield escape_for_sam(x)
 
 
     def append(self, thing):
@@ -1769,22 +1856,6 @@ class StringSource:
         self.current_line_number -= 1
 
 
-# Flow regex component expressions
-re_single_quote_close = '(?<=[\w\.\,\"\)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
-re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{-])'
-re_double_quote_close = '(?<=[\w\.\,\'\)\}\?-])\"((?=[\.\s\'\)},\?!:;\[-])|$)'
-re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{-])'
-re_apostrophe = "(?<=[\w`\*_\}\)])'(?=\w)"
-re_en_dash = "(?<=[\w\*_`\"\'\.\)\}]\s)--(?=\s[\w\*_`\"\'\{\(])"
-re_em_dash = "(?<=[\w\*_`\"\'\.\)\}])---(?=[\w\*_`\"\'\{\(])"
-
-smart_quote_subs = {re_double_quote_close:'”',
-                    re_double_quote_open: '“',
-                    re_single_quote_close:'’',
-                    re_single_quote_open: '‘',
-                    re_apostrophe: '’',
-                    re_en_dash: '–',
-                    re_em_dash: '—'}
 
 
 class FlowParser:
@@ -1813,43 +1884,7 @@ class FlowParser:
         self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
         self.stateMachine.add_state("CHARACTER-ENTITY", self._character_entity)
         self.stateMachine.set_start("PARA")
-        self.patterns = {
-            'escape': re.compile(r'\\', re.U),
-            'phrase': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
-            'annotation': re.compile(
-                r'''
-                (
-                    (?P<plus>\+?)                            #conditional flag
-                    \(                                       #open paren
-                        \s*                                  #any spaces
-                        (?P<type>\S*?)                       #any non-space characters = annotation type
-                        \s*                                  #any spaces
-                        (                                    #specifically attribute
-                            (?P<quote>["\'])                 #open quote
-                            (?P<specifically>.*?)            #any text = specifically
-                            (?<!\\)(?P=quote)                #close matching quote if not preceded by backslash
-                        )??                                  #end specifically attribute
-                        \s*                                  #any spaces
-                        (\((?P<namespace>\w+)\))?            #any text in parens = namespace
-                    (?<!\\)\)                                #closing paren if not preceded by backslash
-                )
-                ''',
-                re.VERBOSE | re.U),
-            'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
-            'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
-            'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
-            'apostrophe': re.compile(re_apostrophe, re.U),
-            'single_quote_close': re.compile(re_single_quote_close, re.U),
-            'single_quote_open': re.compile(re_single_quote_open, re.U),
-            'double_quote_close': re.compile(re_double_quote_close, re.U),
-            'double_quote_open': re.compile(re_double_quote_open, re.U),
-            'inline-insert': re.compile(r'>(?P<insert>\((.*?(?<!\\))\))' + re_attributes, re.U),
-            'en-dash': re.compile(re_en_dash, re.U),
-            'em-dash': re.compile(re_em_dash, re.U),
-            'citation': re.compile(
-                r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
-                re.U)
-        }
+
 
     def parse(self, flow_source, doc, strip=True):
         if flow_source is None:
@@ -1895,7 +1930,7 @@ class FlowParser:
             return "PARA", para
 
     def _phrase_start(self, para):
-        match = self.patterns['phrase'].match(para.rest_of_para)
+        match = flow_patterns['phrase'].match(para.rest_of_para)
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
@@ -1906,9 +1941,9 @@ class FlowParser:
             self.flow.append(p)
             para.advance(len(match.group(0)))
 
-            if self.patterns['annotation'].match(para.rest_of_para):
+            if flow_patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
-            elif self.patterns['citation'].match(para.rest_of_para):
+            elif flow_patterns['citation'].match(para.rest_of_para):
                 return "CITATION-START", para
             else:
                 # If there is an annotated phrase with no annotation, look back
@@ -1968,7 +2003,7 @@ class FlowParser:
         return "PARA", para
 
     def _annotation_start(self, para):
-        match = self.patterns['annotation'].match(para.rest_of_para)
+        match = flow_patterns['annotation'].match(para.rest_of_para)
         phrase = self.flow[-1]
         if match:
             annotation_type = match.group('type')
@@ -2001,9 +2036,9 @@ class FlowParser:
                 else:
                     phrase.annotations.append(Annotation(annotation_type, unescape(specifically), namespace, is_local))
             para.advance(len(match.group(0)))
-            if self.patterns['annotation'].match(para.rest_of_para):
+            if flow_patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
-            elif self.patterns['citation'].match(para.rest_of_para):
+            elif flow_patterns['citation'].match(para.rest_of_para):
                 return "CITATION-START", para
             else:
                 para.retreat(1)
@@ -2013,7 +2048,7 @@ class FlowParser:
             return "PARA", para
 
     def _citation_start(self, para):
-        match = self.patterns['citation'].match(para.rest_of_para)
+        match = flow_patterns['citation'].match(para.rest_of_para)
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
@@ -2046,9 +2081,9 @@ class FlowParser:
 
             self.flow.append(Citation(citation_type, citation_value, extra))
             para.advance(len(match.group(0)))
-            if self.patterns['annotation'].match(para.rest_of_para):
+            if flow_patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
-            elif self.patterns['citation'].match(para.rest_of_para):
+            elif flow_patterns['citation'].match(para.rest_of_para):
                 return "CITATION-START", para
             else:
                 para.retreat(1)
@@ -2058,7 +2093,7 @@ class FlowParser:
             return "PARA", para
 
     def _bold_start(self, para):
-        match = self.patterns['bold'].match(para.rest_of_para)
+        match = flow_patterns['bold'].match(para.rest_of_para)
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
@@ -2070,16 +2105,16 @@ class FlowParser:
             self.current_string += '*'
             return "PARA", para
 
-        if self.patterns['annotation'].match(para.rest_of_para):
+        if flow_patterns['annotation'].match(para.rest_of_para):
             return "ANNOTATION-START", para
-        elif self.patterns['citation'].match(para.rest_of_para):
+        elif flow_patterns['citation'].match(para.rest_of_para):
             return "CITATION-START", para
         else:
             para.retreat(1)
             return "PARA", para
 
     def _italic_start(self, para):
-        match = self.patterns['italic'].match(para.rest_of_para)
+        match = flow_patterns['italic'].match(para.rest_of_para)
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
@@ -2091,16 +2126,16 @@ class FlowParser:
             self.current_string += '_'
             return "PARA", para
 
-        if self.patterns['annotation'].match(para.rest_of_para):
+        if flow_patterns['annotation'].match(para.rest_of_para):
             return "ANNOTATION-START", para
-        elif self.patterns['citation'].match(para.rest_of_para):
+        elif flow_patterns['citation'].match(para.rest_of_para):
             return "CITATION-START", para
         else:
             para.retreat(1)
             return "PARA", para
 
     def _code_start(self, para):
-        match = self.patterns['code'].match(para.rest_of_para)
+        match = flow_patterns['code'].match(para.rest_of_para)
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
@@ -2110,9 +2145,9 @@ class FlowParser:
             self.current_string += '`'
             return "PARA", para
 
-        if self.patterns['annotation'].match(para.rest_of_para):
+        if flow_patterns['annotation'].match(para.rest_of_para):
             return "ANNOTATION-START", para
-        elif self.patterns['citation'].match(para.rest_of_para):
+        elif flow_patterns['citation'].match(para.rest_of_para):
             return "CITATION-START", para
         else:
             para.retreat(1)
@@ -2120,12 +2155,12 @@ class FlowParser:
 
     def _dash_start(self, para):
         if self.smart_quotes:
-            if self.patterns['en-dash'].search(para.para, para.currentCharNumber,
+            if flow_patterns['en-dash'].search(para.para, para.currentCharNumber,
                                                           para.currentCharNumber + 5):
                 self.current_string += '–'
                 self.flow_source.advance(1)
 
-            elif self.patterns['em-dash'].search(para.para, para.currentCharNumber,
+            elif flow_patterns['em-dash'].search(para.para, para.currentCharNumber,
                                                            para.currentCharNumber + 5):
                 self.current_string += '—'
                 self.flow_source.advance(2)
@@ -2137,10 +2172,10 @@ class FlowParser:
 
     def _double_quote(self, para):
         if self.smart_quotes:
-            if self.patterns['double_quote_close'].search(para.para, para.currentCharNumber,
+            if flow_patterns['double_quote_close'].search(para.para, para.currentCharNumber,
                                                           para.currentCharNumber + 2):
                 self.current_string += '”'
-            elif self.patterns['double_quote_open'].search(para.para, para.currentCharNumber,
+            elif flow_patterns['double_quote_open'].search(para.para, para.currentCharNumber,
                                                            para.currentCharNumber + 2):
                 self.current_string += '“'
             else:
@@ -2154,13 +2189,13 @@ class FlowParser:
 
     def _single_quote(self, para):
         if self.smart_quotes:
-            if self.patterns['single_quote_close'].search(para.para, para.currentCharNumber,
+            if flow_patterns['single_quote_close'].search(para.para, para.currentCharNumber,
                                                           para.currentCharNumber + 2):
                 self.current_string += '’'
-            elif self.patterns['single_quote_open'].search(para.para, para.currentCharNumber,
+            elif flow_patterns['single_quote_open'].search(para.para, para.currentCharNumber,
                                                            para.currentCharNumber + 2):
                 self.current_string += '‘'
-            elif self.patterns['apostrophe'].search(para.para, para.currentCharNumber, para.currentCharNumber + 2):
+            elif flow_patterns['apostrophe'].search(para.para, para.currentCharNumber, para.currentCharNumber + 2):
                 self.current_string += '’'
             else:
                 self.current_string += "'"
@@ -2172,7 +2207,7 @@ class FlowParser:
         return "PARA", para
 
     def _inline_insert(self, para):
-        match = self.patterns['inline-insert'].match(para.rest_of_para)
+        match = flow_patterns['inline-insert'].match(para.rest_of_para)
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
@@ -2213,7 +2248,7 @@ class Phrase:
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
-        yield u'{{{0:s}}}'.format(self.text.replace('\\', '\\\\'))
+        yield u'{{{0:s}}}'.format(escape_for_sam(self.text))
         for x in self.attributes:
             yield from x.regurgitate()
         for x in self.annotations:
@@ -2290,7 +2325,8 @@ class Code(Phrase):
 
         yield '<' + tag
         if any([x.value for x in self.attributes if x.type == 'condition']):
-            conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
+            conditions = Attribute('conditions',
+                                   ','.join([x.value for x in self.attributes if x.type == 'condition']))
             attrs = [x for x in self.attributes if x.type != 'condition']
             attrs.append(conditions)
             for att in sorted(attrs, key=lambda x: x.type):
@@ -2640,6 +2676,13 @@ def parse_insert(annotation_string):
     #result.append(Attribute('item', unescape(insert_item)))
     return insert_type, insert_item
 
+
+def escape_for_sam(s):
+    t = dict(zip([ord('['), ord('{'), ord('&'), ord('\\')], ['\\[', '\\{', '\\&', '\\\\']))
+    try:
+        return s.translate(t)
+    except AttributeError:
+        return s
 
 def escape_for_xml(s):
     t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
