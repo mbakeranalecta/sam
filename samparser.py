@@ -352,7 +352,10 @@ class SamParser:
         indent = match.end("indent")
         href=match.group("attributes")[1:-1]
 
-        if bool(urllib.parse.urlparse(href).netloc):  # An absolute URL
+        if href.strip() == "":
+            SAM_parser_warning("No HREF specified for include.")
+            return "SAM", context
+        elif bool(urllib.parse.urlparse(href).netloc):  # An absolute URL
             fullhref = href
         elif os.path.isabs(href):  # An absolute file path
             fullhref = pathlib.Path(href).as_uri()
@@ -360,7 +363,7 @@ class SamParser:
             fullhref = urllib.parse.urljoin(self.sourceurl, href)
         else:
             SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known.")
-            return
+            return "SAM", context
 
         if fullhref in included_files:
             raise SAMParserError("Duplicate file inclusion detected with file: " + fullhref)
