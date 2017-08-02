@@ -1304,7 +1304,7 @@ class Paragraph(Block):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
-        if type(self.parent) in [Block, Blockquote, Remark, Fragment] :
+        if type(self.parent) in [Block, Blockquote, Remark, Fragment]:
             yield " " * int(self.indent)
             for x in self.children:
                 yield from x.regurgitate()
