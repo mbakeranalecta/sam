@@ -54,6 +54,12 @@ The meaning of each parameter is as follows:
    
  * `-smartquotes`: Turns on smart quotes processing. (short form `-q`)
    
+### Validating with an XML schema
+
+Eventually, SAM is going to have its own schema language, but until that is available (and probably afteward) you can validate your document against an XML schema. Schema validation is done on the XML output format, not the input (because it is an XML schema, not a SAM schema). To invoke schema validation, use the `-xsd` option on the command line:
+
+     -xsd <scehma.xsd>
+
 ### Regurgitating the SAM document
 
 The parser can also regurgitate the SAM document (that is, create a SAM serialization of 
