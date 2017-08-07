@@ -120,5 +120,7 @@ used to output as "row". It is now output as "record".
    
    * Changed type of embedded blocks from Codeblock to Embedblock.
    
+   * Removed support for embeded XML fragments per the discussion of issue #145. SAM has outgrown this feature, which is incompatible with the plan to introduce SAM Schemas.
+
 Please report any other backward incompatibilities you find so they can be added to this list. 
 
