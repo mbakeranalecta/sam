@@ -2445,7 +2445,7 @@ ordered-list-item =
 </case>
 </test>
 <test>
-<title>Embed</title>
+<title>Embedblock</title>
 <description>
 <p>An embed is a block of markup or code in another language that is intended to be interpreted rather than displayed. For instance, it can be used to include an equation using LaTeX or a diagram using SVG.</p>
 </description>
@@ -2470,6 +2470,44 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <codeblock language="xml">
 
 &lt;embedblock conditions="a,b" encoding="latexmathml" id="id13" name="name"&gt; n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k &lt;/embedblock&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Embedded XML</title>
+<description>
+<p>A chunk of XML.</p>
+</description>
+<source>
+<codeblock language="sam">
+
+```(=xml)
+    &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+    &lt;foo bar="bat"&gt;
+        &lt;boo/&gt;
+        &lt;hoo/&gt;
+    &lt;/foo&gt;
+</codeblock>
+</source>
+<markup>
+<embedblock encoding="xml">
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;foo bar="bat"&gt;
+    &lt;boo/&gt;
+    &lt;hoo/&gt;
+&lt;/foo&gt;
+</embedblock>
+</markup>
+<result>
+<codeblock language="xml">
+
+&lt;embedblock encoding="xml"&gt;
+    &amp;lt;?xml version="1.0" encoding="UTF-8"?&amp;gt; 
+    &amp;lt;foo bar="bat"&amp;gt; 
+    &amp;lt;boo/&amp;gt; 
+    &amp;lt;hoo/&amp;gt; 
+    &amp;lt;/foo&amp;gt;
+&lt;/embedblock&gt;
 </codeblock>
 </result>
 </case>
@@ -4312,44 +4350,6 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 &lt;string name="a"&gt;apricot&lt;/string&gt;
 &lt;string name="b"&gt;breadfruit&lt;/string&gt;
 &lt;/insert&gt;
-</codeblock>
-</result>
-</case>
-</test>
-<test>
-<title>XML fragments</title>
-<description>
-<p>You can insert a fragment of XML. It must be well formed and must start with an XML header. It must be UTF-8. It will be copied to output verbatim, minus the XML header.</p>
-</description>
-<case>
-<title>XML fragment</title>
-<description>
-<p>A chunk of XML.</p>
-</description>
-<source>
-<codeblock language="sam">
-
-&lt;?xml version="1.0" encoding="UTF-8"?&gt;
-&lt;foo bar="bat"&gt;
-    &lt;boo/&gt;
-    &lt;hoo/&gt;
-&lt;/foo&gt;
-</codeblock>
-</source>
-<markup>
-                <foo bar="bat">
-                    <boo/>
-                    <hoo/>
-                </foo>
-
-</markup>
-<result>
-<codeblock language="xml">
-
-&lt;foo bar="bat"&gt;
-    &lt;boo/&gt;
-    &lt;hoo/&gt;
-&lt;/foo&gt;
 </codeblock>
 </result>
 </case>

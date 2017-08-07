@@ -56,8 +56,7 @@ block_patterns = {
             'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
             'block-insert': re.compile(re_indent + r'>>>(?P<insert>\((.*?(?<!\\))\))(' + re_attributes + ')?\s*(?P<unexpected>.*)', re.U),
             'include': re.compile(re_indent + r'<<<' + re_attributes, re.U),
-            'string-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U),
-            'embedded-xml': re.compile(re_indent + r'(?P<xmltag>\<\?xml.+)', re.U)
+            'string-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U)
         }
 
 # Flow regex component expressions
@@ -142,7 +141,6 @@ class SamParser:
         self.stateMachine.add_state("INCLUDE", self._include)
         self.stateMachine.add_state("STRING-DEF", self._string_def)
         self.stateMachine.add_state("LINE-START", self._line_start)
-        self.stateMachine.add_state("EMBEDDED-XML", self._embedded_xml)
         self.stateMachine.add_state("END", None, end_state=1)
         self.stateMachine.set_start("SAM")
         self.current_text_block = None
@@ -474,35 +472,6 @@ class SamParser:
 
             return "GRID", context
 
-    def _embedded_xml(self, context):
-        source, match = context
-        indent = match.end("indent")
-        embedded_xml_parser = xml.parsers.expat.ParserCreate()
-        embedded_xml_parser.XmlDeclHandler = self._embedded_xml_declaration_check
-        embedded_xml_parser.Parse(source.current_line.strip())
-        xml_lines = []
-        header=match.group(0)
-        try:
-            while True:
-                line = source.next_line
-                xml_lines.append(line)
-                embedded_xml_parser.Parse(line)
-        except xml.parsers.expat.ExpatError as err:
-            if err.code == 9:  # junk after document element
-                source.return_line()
-                xml_text = ''.join(xml_lines[:-1])
-                b = EmbeddedXML(xml_text, header, indent)
-                self.doc.add_block(b)
-                return "SAM", context
-            else:
-                raise
-
-    def _embedded_xml_declaration_check(self, version, encoding, standalone):
-        if version != "1.0":
-            raise SAMParserStructureError("The version of an embedded XML fragment must be 1.0.")
-        if encoding.upper() != "UTF-8":
-            raise SAMParserStructureError("The encoding of an embedded XML fragment must be UTF-8.")
-
     def _sam(self, context):
         source, match = context
         try:
@@ -587,10 +556,6 @@ class SamParser:
         match = block_patterns['line-start'].match(line)
         if match is not None:
             return "LINE-START", (source, match)
-
-        match = block_patterns['embedded-xml'].match(line)
-        if match is not None:
-            return "EMBEDDED-XML", (source, match)
 
         match = block_patterns['block-start'].match(line)
         if match is not None:
@@ -1513,29 +1478,6 @@ class Pre(Flow):
     def serialize_xml(self):
         for x in self.lines:
             yield escape_for_xml(x)
-
-
-
-class EmbeddedXML(Block):
-
-    def __init__(self, text, header, indent):
-        self.content = text
-        self.indent = indent
-        self.attributes= None
-        self.namespace = None
-        self.name = None
-        self.header = header
-        self.children = []
-
-    def __str__(self):
-        return ''.join(self.regurgitate())
-
-    def regurgitate(self):
-        yield '{0}\n{1}'.format(self.header, self.content)
-
-    def serialize_xml(self):
-        yield self.content
-
 
 class DocStructure:
     """

@@ -1932,7 +1932,7 @@ tests:(!en) SAM Parser Tests
                         {fonty: 12pt "Century Schoolbook"}&lt;++count&gt;.[tab]
                     </codeblock>
 
-    test: Embed
+    test: Embedblock
         description:
             An embed is a block of markup or code in another language that is intended to be interpreted rather than displayed. For instance, it can be used to include an equation using LaTeX or a diagram using SVG.
 
@@ -1954,6 +1954,37 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <embedblock conditions="a,b" encoding="latexmathml" id="id13" name="name"> n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k </embedblock>
 
+        case: Embedded XML 
+
+            description:
+                A chunk of XML.
+
+            source:
+                ```(sam)
+                    ```(=xml)
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <foo bar="bat">
+                            <boo/>
+                            <hoo/>
+                        </foo>
+
+            markup:
+                ```(=xml)
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <foo bar="bat">
+                        <boo/>
+                        <hoo/>
+                    </foo>
+
+            result:
+                ```(xml)
+                    <embedblock encoding="xml">
+                        &lt;?xml version="1.0" encoding="UTF-8"?&gt; 
+                        &lt;foo bar="bat"&gt; 
+                        &lt;boo/&gt; 
+                        &lt;hoo/&gt; 
+                        &lt;/foo&gt;
+                    </embedblock>
     test: Lines
 
         description:
@@ -3518,38 +3549,7 @@ tests:(!en) SAM Parser Tests
                     <string name="b">breadfruit</string>
                     </insert>
 
-    test: XML fragments
 
-        description:
-            You can insert a fragment of XML. It must be well formed and must start with an XML header. It must be UTF-8.
-            It will be copied to output verbatim, minus the XML header.
-
-        case: XML fragment
-
-            description:
-                A chunk of XML.
-
-            source:
-                ```(sam)
-                    <?xml version="1.0" encoding="UTF-8"?>
-                    <foo bar="bat">
-                        <boo/>
-                        <hoo/>
-                    </foo>
-
-            markup:
-                <?xml version="1.0" encoding="UTF-8"?>
-                <foo bar="bat">
-                    <boo/>
-                    <hoo/>
-                </foo>
-
-            result:
-                ```(xml)
-                    <foo bar="bat">
-                        <boo/>
-                        <hoo/>
-                    </foo>
 
     test: Smart quotes
 
