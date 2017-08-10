@@ -1677,7 +1677,12 @@ class DocStructure:
         In this case, "last" means the most recent instance of that annotation text 
         in document order. In other words, the method searches backwards through the 
         document and stops at the first occurrence of an annotation with that text that
-        it encounters. 
+        it encounters.
+
+        Annotations can only exist inside flows, so the flow version of find_last_annotation()
+        does all the work. The block version just passes the call on to child blocks
+        so that their flows get searched. That is why we only need to pass the annotation_lookup
+        mode parameter to the flow version.
         
         :param text: The annotation text to search for. 
         :param node: The node in the document tree to start the search from. If not specified, 
@@ -1687,7 +1692,7 @@ class DocStructure:
         if node is None:
             node = self.root
         if type(node) is Flow:
-            result = node.find_last_annotation(text, self.annotation_lookup)
+            result = node.find_last_annotation(text, mode=self.annotation_lookup)
             if result is not None:
                 return result
         else:
@@ -2739,8 +2744,18 @@ if __name__ == "__main__":
                     xml_input = etree.parse(open(intermediatefile, 'r', encoding="utf-8-sig"))
                     try:
                         transformed = transform(xml_input)
-                    except etree.XSLTApplyError as e:
+                    except etree.XSLTError as e:
                         raise SAMParserError("XSLT processor reported error: " + str(e))
+                    finally:
+                        if transform.error_log:
+                            SAM_parser_warning("Messages from the XSLT transformation:")
+                            for entry in transform.error_log:
+                                print('message from line %s, col %s: %s' % (
+                                    entry.line, entry.column, entry.message), file=sys.stderr)
+                                print('domain: %s (%d)' % (entry.domain_name, entry.domain), file=sys.stderr)
+                                print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
+                                print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
+
 
                     if transform.error_log:
                         SAM_parser_warning("Messages from the XSLT transformation:")
