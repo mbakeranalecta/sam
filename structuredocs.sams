@@ -1,4 +1,35 @@
-structure-docs{http://spfeopentoolkit.org/ns/spfe-docs}
+!namespace: http://spfeopentoolkit.org/ns/sam-schema
+$namespace = http://example.com/ns/structure-docs
+$word =	\W+
+
+structure-docs:
+
+		
+
+	description:
+		~~~(*text-general)(?many)
+			p:
+			ul:
+			ol:
+
+	group:(?repeat)
+		title: xs:string
+			# The title of the group
+		description: 
+			#A description of the group
+			>>>(*text-general)
+		element:(?repeat)
+			index:: type, term
+				>($word), xs:string
+			type:
+				xs:string
+			description:
+				>>>(*text-general)
+
+
+
+
+structure-docs{}
 	description
 		@text-general
 	*group
