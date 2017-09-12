@@ -1990,7 +1990,7 @@ class FlowParser:
                 citation_value = nameref.strip()
                 extra = match.group('name_extra')
             else:
-                citation_type = 'citation'
+                citation_type = 'value'
                 citation_value = citation.strip()
                 extra = None
 
@@ -2366,7 +2366,7 @@ class Citation:
 
     def regurgitate(self):
         yield '['
-        if self.citation_type == 'citation':
+        if self.citation_type == 'value':
             pass
         elif self.citation_type == 'idref':
             yield '*'
@@ -2387,8 +2387,7 @@ class Citation:
         if self.citation_extra is not None:
             if self.citation_extra:
                 yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
-        yield ' type = "{0}" value = "{1}"'.format(self.citation_type, escape_for_xml_attribute(self.citation_value))
-        #Nest attributes for serialization
+        yield ' {0}="{1}"'.format(self.citation_type, escape_for_xml_attribute(self.citation_value))
         #Nest attributes for serialization
         if attrs:
             attr, *rest = attrs
@@ -2550,7 +2549,7 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
             citation_value = nameref.strip()
             extra = match.group('name_extra')
         elif citation:
-            citation_type = 'citation'
+            citation_type = 'value'
             citation_value = citation.strip()
             extra=None
         else:

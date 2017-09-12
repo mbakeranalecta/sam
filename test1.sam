@@ -148,7 +148,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <section xml:lang="sp">
-                        <citation type="citation" value="Mother McCree"/>
+                        <citation value="Mother McCree"/>
                         <title>Greeting</title>
                         <p>Feliz Navidad</p>
                     </section>
@@ -1734,7 +1734,7 @@ tests:(!en) SAM Parser Tests
                     <p>After this paragraph, there is a blockquote:</p>
                     <blockquote conditions="baz" id="foo" name="bar">
                     <p>The quick brown fox jumps over the lazy dog.</p>
-                    <p>And the <phrase><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
+                    <p>And the <phrase><annotation type="beast" specifically="bovine"><citation value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
                     </blockquote>
 
         case: Alternate block quote
@@ -1765,9 +1765,9 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>This is another paragraph. Then there is an alternate blockquote:</p>
                     <blockquote conditions="bar,baz" name="foo5">
-                    <citation type="citation" value="Mother Goose"/>
-                    <citation type="citation" value="Father Time"/>
-                    <citation extra="page 2" type="idref" value="foo"/>
+                    <citation value="Mother Goose"/>
+                    <citation value="Father Time"/>
+                    <citation extra="page 2" idref="foo"/>
                     <p>The quick brown fox jumps over the lazy dog.</p>
                     </blockquote>
                     <blockquote>
@@ -1890,7 +1890,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <codeblock conditions="foo" language="python">
-                    <citation type="citation" value="demos/foo.py"/>
+                    <citation value="demos/foo.py"/>
                     def escape_for_xml(s):
                         t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
                         try:
@@ -2013,7 +2013,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" type="idref" value="bing"/></line>
+                    <line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" idref="bing"/></line>
                     <line>You gotta walk it by yourself,</line>
                     <line conditions="bar">Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
@@ -2041,8 +2041,8 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <blockquote>
-                    <citation extra="page 22" type="idref" value="bing"/>
-                    <line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" type="idref" value="bing"/></line>
+                    <citation extra="page 22" idref="bing"/>
+                    <line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" idref="bing"/></line>
                     <line>You gotta walk it by yourself,</line>
                     <line conditions="bar">Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
@@ -2356,7 +2356,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <line conditions="a,b" id="id9" name="name" xml:lang="en-CA">You gotta walk that lonesome valley,<citation extra="page 22" type="idref" value="bing"/></line>
+                    <line conditions="a,b" id="id9" name="name" xml:lang="en-CA">You gotta walk that lonesome valley,<citation extra="page 22" idref="bing"/></line>
                     <line>You gotta walk it by yourself,</line>
                     <line>Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
@@ -2388,10 +2388,10 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>After this paragraph, there is a blockquote:</p>
                     <blockquote conditions="a,b" id="id10" name="name" xml:lang="en-CA">
-                    <citation type="idref" value="cit"/>
+                    <citation idref="cit"/>
                     <p>The quick brown fox jumps over the lazy dog.</p>
 
-                    <p>And the <phrase><annotation type="beast" specifically="bovine"><citation type="citation" value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
+                    <p>And the <phrase><annotation type="beast" specifically="bovine"><citation value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
                     </blockquote>
 
 
@@ -2409,7 +2409,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p><phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation type="idref" value="cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
+                    <p><phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation idref="cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
 
 
         case: Attributes on a codeblock
@@ -2604,7 +2604,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation type="nameref" value="single_source">single sourcing chapter</citation></phrase>.</p>
+                    <p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation nameref="single_source">single sourcing chapter</citation></phrase>.</p>
 
         case: Annotation with language metadata
             description:
@@ -2990,7 +2990,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(XML)
-                    <p>You can <phrase><citation type="citation" value="Melville, 1851"><citation type="citation" value="Daffy, 2017">call me Ishmael</citation></citation></phrase>.</p>
+                    <p>You can <phrase><citation value="Melville, 1851"><citation value="Daffy, 2017">call me Ishmael</citation></citation></phrase>.</p>
 
         case: Citation and annotation on one phrase
 
@@ -3006,7 +3006,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(XML)
-                    <p>You can <phrase><annotation type="quote"><citation type="citation" value="Melville, 1851">call me Ishmael</citation></annotation></phrase>.</p>
+                    <p>You can <phrase><annotation type="quote"><citation value="Melville, 1851">call me Ishmael</citation></annotation></phrase>.</p>
 
         case: Literal square brackets
             description:
@@ -3038,7 +3038,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in <citation type="nameref" value="chapter.linking"/> and the subject-based composition and architecture algorithms described in <citation type="nameref" value="chapter.composition"/> and <citation type="nameref" value="chapter.architecture"/>, including bottom-up information architecture.</p>
+                    <p>Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in <citation nameref="chapter.linking"/> and the subject-based composition and architecture algorithms described in <citation nameref="chapter.composition"/> and <citation nameref="chapter.architecture"/>, including bottom-up information architecture.</p>
 
     test: Characters
 
@@ -3684,7 +3684,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>“What is truth?”<citation type="citation" value="John 18:38"/></p>
+                    <p>“What is truth?”<citation value="John 18:38"/></p>
 
         case: Miscellaneous cases
 
