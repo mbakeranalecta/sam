@@ -139,7 +139,7 @@ article: SAM Recipes
                         * etc
 
     recipe: Single sourcing via attribute substitution
-        You can provide single sourcing support via attribute chaining. That is, you can provide but an
+        You can provide single sourcing support via attribute chaining. That is, you can provide both an
         HTTP link and a subject annotation. But if you use the trick of importing a file of
         annotation definitions and relying on annotation lookup to add them to the content, you
         can also substitute in different annotation lookup sets for different media (or different
@@ -209,3 +209,78 @@ article: SAM Recipes
             Look it up in {Wikipedia}[*wikipedia]
 
             link(*wikipedia): http://wikipedia.org
+
+    recipe: Compound Identifiers
+
+        Compound identifiers are ones that reference one resource inside another, such as a figure inside a particular chapter, as opposed to just referencing the figure itself. 
+
+        ```
+            #chapter2/#figure3
+
+        SAM does not have any syntax support for this directly. The following discussion explains the issues and some possibilities:
+
+        SAM does not provide any facility for dereferencing compound identifiers. Neither does XML. That is purely an application layer thing.
+
+        But unlike XML, SAM provide specific syntax for dereferencing identifiers in the form of citation markup. And SAM also makes an explicit distinction between names and IDs at the authoring level, whereas in XML the distinction between ID/IDREF and all other forms of identifier creation and dereferencing that you may decide to invent at the application layer, is not expressed in the markup, but only in the schema. The author does not know, when creating an attribute `id="foo"` if the id attribute is of type "ID" or not. Similarly when they create a reference `idref="foo"`, they do not know if the attribute `idref` is of type `IDREF` or not (and therefore if it must be resolved locally or not.)
+
+        The decision in SAM to force the author to choose between an ID with a * and a name with a # was based on my distaste for hidden semantics. If I am forcing the author create things that have different rules, then they should have a different form so that the distinction is clear.
+
+        However, this approach makes dereferencing of compound identifiers more problematic. If the compound identifier is in the form
+
+        ```
+            [ #chapter.separate/#ex.separate-1]
+
+        The XML serialization would render it as:
+
+        ```
+            <citation type="nameref" value="chapter.separate/#ex.separate-1"/>
+
+        That is by no means impossible to process. It requires the processor to break apart the nameref value, but any compound identifier is going to require that. There is nothing (currently) to prevent the application designer from implementing this in their markup language and its processors.
+
+        However, this will only work for names as the first identified resource. The following would produce a parser error:
+
+        ```
+            [*section.separate/*ex.separate-1]
+
+        This is an error because the parser will consider the entire string as an ID, which means it won't match and IDs in the document, which it must, in the case of IDs.
+
+        In an XML vocabulary it is possible to create a reference to an ID without running into this issue by not declaring the reference to be of type IDREF. In SAM, the citation of a ID is always an IDREF.
+
+        Of course, when you are designing your markup language, nothing forces you to use IDs. You can use names for all references, and the current processing will give you free reign to create whatever conventions you like for dereferencing names at the application layer. 
+
+        Compound identifiers are really all about namespaces. In SAM (and XML) the namespace of an ID is the current file. In XML, any other identifiers is an invention of the application layer and the application layer can make the scope of its namespace anything it likes. It can make names global in scope but specific to different types of objects, so that a footnote named #foo is different from a figure named #foo or a page named #foo. But this assumes that you have different constructs for dereferencing the names, so that the reference to a footnote is different from a reference to a figure or a page.
+
+        SAM's names do not work like that. The dereferencing of a name by a citation makes no statement about what is being dereferenced. Thus [#foo] becomes a reference to a footnote because the application layer looks up what type of thing has that name and formats it accordingly. In other words, the format is determined based on the type of the object named, not the type of the reference. This means that SAM names have a global namespace with respect to types. The application layer could decide to restrict their namespace to the file in which they occur, or indeed to any subset of the docset it chooses, but it can't restrict it by type.
+
+        All of which suggests that it is best to treat SAM names as global in scope in all senses. One way to deal with this is to have a naming convention for names which encodes their type in the name. For examples, prefix all figure names with `figure.` as in `#figure.foo`.
+
+        Since names are global in scope, you don't need to do:
+
+        ```
+            [#chapter.separate/#ex.separate-1]
+
+        Because the name #ex.separate-1 is global in scope anyway. So
+
+        ```
+            [#ex.separate-1]    
+
+        is all you need to identify that resource.
+
+        SAM's name facility is not as flexible as some of the naming conventions you could invent in a XML-based language where you can use arbitrary attributes to create arbitrary addressing and dereferencing schemes. This is deliberate, because relationships based on arbitrary names don't scale well without big iron CMSs that add complexity and reduce {functional lucidity}. SAM wants you to manage relationships based on {subject annotations} as far as possible, not arbitrary names or IDs.
+
+        SAM does have one other identifier dereferencing mechanism, however, and that is key citations.
+
+        ```
+            [%foo]
+
+        SAM does not provide a mechanism for creating keys or any rules for managing them. That is entirely up to the application layer. One way it might do this would be:
+
+        ```
+            key:
+                  name: foo
+                  chapter: chapter.separate
+                  example: ex.separate-1
+
+        If DITA has taught us anything it is that when you are creating compound identifiers, things will get out of hand as the scale increases and keys will help restore some order (or at least some management potential). {Subject annotation} is still infinitely preferable, where practical, but {keys} are sometimes a necessary fallback.
+
+
