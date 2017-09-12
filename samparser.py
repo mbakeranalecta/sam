@@ -802,9 +802,6 @@ class Codeblock(Block):
                 yield from x.serialize_xml()
                 yield '\n'
         if self.children:
-            if type(self.children[0]) is not Flow:
-                yield "\n"
-
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_xml()
