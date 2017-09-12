@@ -122,5 +122,7 @@ used to output as "row". It is now output as "record".
    
    * Removed support for embeded XML fragments per the discussion of issue #145. SAM has outgrown this feature, which is incompatible with the plan to introduce SAM Schemas.
 
-Please report any other backward incompatibilities you find so they can be added to this list. 
+* Revision 1d16fd6d0544c32fa23930f303989b1b4a82c477 addressed #157 by changing the serialization of citations as described in #157 and adding support of the use of keys in citations.
+
+Please report any other backward incompatibilities you find so they can be added to this list.
 
