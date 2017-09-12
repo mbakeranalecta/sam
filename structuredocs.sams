@@ -2,9 +2,7 @@
 $namespace = http://example.com/ns/structure-docs
 $word =	\W+
 
-structure-docs:
-
-		
+structure-docs: xs:string
 
 	description:
 		~~~(*text-general)(?many)
@@ -16,7 +14,7 @@ structure-docs:
 		title: xs:string
 			# The title of the group
 		description: 
-			#A description of the group
+			# A description of the group
 			>>>(*text-general)
 		element:(?repeat)
 			index:: type, term
@@ -26,7 +24,14 @@ structure-docs:
 			description:
 				>>>(*text-general)
 
+schema: 
+	block: sturcuture-docs
+		>>>(#text-general)
 
+	group:(#text-general)(?many)
+		paragraph:
+		block: ol
+		block: ul
 
 
 structure-docs{}
