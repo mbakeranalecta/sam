@@ -103,7 +103,7 @@ flow_patterns = {
             'en-dash': re.compile(re_en_dash, re.U),
             'em-dash': re.compile(re_em_dash, re.U),
             'citation': re.compile(
-                r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
+                r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\%(?P<key>\S+?)(\s+(?P<key_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
                 re.U)
         }
 
@@ -1977,6 +1977,10 @@ class FlowParser:
             except IndexError:
                 nameref = None
             try:
+                keyref = match.group('key')
+            except IndexError:
+                keyref = None
+            try:
                 citation = match.group('citation')
             except IndexError:
                 citation = None
@@ -1989,6 +1993,10 @@ class FlowParser:
                 citation_type = 'nameref'
                 citation_value = nameref.strip()
                 extra = match.group('name_extra')
+            elif keyref:
+                citation_type = 'keyref'
+                citation_value = keyref.strip()
+                extra = match.group('key_extra')
             else:
                 citation_type = 'value'
                 citation_value = citation.strip()

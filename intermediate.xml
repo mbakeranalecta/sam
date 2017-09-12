@@ -2556,7 +2556,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <codeblock language="sam">
 
 """[*bing page 22]
-    |(#foo2) You gotta walk that lonesome valley,[*bing page 22]
+    |(#foo2) You gotta walk that lonesome valley,[%bing page 22]
     | You gotta walk it by yourself,
     |(?bar) Nobody here can walk it for you,
     |    You gotta walk it by yourself.
@@ -2565,7 +2565,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <markup>
 <blockquote>
 <citation extra="page 22" idref="bing"/>
-<line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" idref="bing"/></line>
+<line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" keyref="bing"/></line>
 <line>You gotta walk it by yourself,</line>
 <line conditions="bar">Nobody here can walk it for you,</line>
 <line>   You gotta walk it by yourself.</line>
@@ -2576,7 +2576,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
 &lt;blockquote&gt;
 &lt;citation extra="page 22" idref="bing"/&gt;
-&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" idref="bing"/&gt;&lt;/line&gt;
+&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" keyref="bing"/&gt;&lt;/line&gt;
 &lt;line&gt;You gotta walk it by yourself,&lt;/line&gt;
 &lt;line conditions="bar"&gt;Nobody here can walk it for you,&lt;/line&gt;
 &lt;line&gt;   You gotta walk it by yourself.&lt;/line&gt;

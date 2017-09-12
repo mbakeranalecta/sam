@@ -2026,14 +2026,14 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     """[*bing page 22]
-                        |(#foo2) You gotta walk that lonesome valley,[*bing page 22]
+                        |(#foo2) You gotta walk that lonesome valley,[%bing page 22]
                         | You gotta walk it by yourself,
                         |(?bar) Nobody here can walk it for you,
                         |    You gotta walk it by yourself.
 
             markup:
                 """[*bing page 22]
-                    |(#foo2) You gotta walk that lonesome valley,[*bing page 22]
+                    |(#foo2) You gotta walk that lonesome valley,[%bing page 22]
                     | You gotta walk it by yourself,
                     |(?bar) Nobody here can walk it for you,
                     |    You gotta walk it by yourself.
@@ -2042,7 +2042,7 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <blockquote>
                     <citation extra="page 22" idref="bing"/>
-                    <line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" idref="bing"/></line>
+                    <line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" keyref="bing"/></line>
                     <line>You gotta walk it by yourself,</line>
                     <line conditions="bar">Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
