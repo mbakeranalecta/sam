@@ -1,0 +1,48 @@
+sam-schema: 
+    $namespace = http://example.com/ns/recipe
+
+    template:
+        recipe: 
+            description:
+                >>>(#text-general)
+            ingredients:: ingredient, quality, unit
+                xs:string, xs:int, >($unit)
+            preparation:
+                >>>(#ol)
+
+    structures:
+        ~~~(#text-general)(?many)
+            p:
+            >>>(#ol)
+            >>>(#ul)
+
+        ~~~(#ol)
+            ol:
+                li:
+                    p:(?repeat)
+
+        ~~~(#ul)
+            ul:
+                li:
+                    p:(?repeat)
+
+    annotations:
+        |ingredient| xs:string
+        |tool| xs:string
+        |task| xs:string
+
+    decorations:
+        * bold
+        * italic
+        * code
+
+    rename:
+        |code| pre
+
+    patterns:
+        $unit = each|tsp|tbsp|oz
+
+
+
+
+
