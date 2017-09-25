@@ -1431,17 +1431,22 @@ class Flow(list):
             super().append(thing)
 
     def find_last_annotation(self, text, mode):
-        if mode=='case insensitive':
-            for i in reversed(self):
-                if type(i) is Phrase:
-                    if [x for x in i.annotations if not x.local] and i.text.lower() == text.lower():
-                        return [x for x in i.annotations if not x.local]
-        else:
-            for i in reversed(self):
-                if type(i) is Phrase:
-                    if [x for x in i.annotations if not x.local] and i.text == text:
-                        return [x for x in i.annotations if not x.local]
-        return None
+
+        try:
+            return annotation_lookup_modes[mode](self, text)
+        except KeyError:
+            raise SAMParserError("Unknown annotation lookup mode: " + mode)
+        # if mode=='case insensitive':
+        #     for i in reversed(self):
+        #         if type(i) is Phrase:
+        #             if [x for x in i.annotations if not x.local] and i.text.lower() == text.lower():
+        #                 return [x for x in i.annotations if not x.local]
+        # else:
+        #     for i in reversed(self):
+        #         if type(i) is Phrase:
+        #             if [x for x in i.annotations if not x.local] and i.text == text:
+        #                 return [x for x in i.annotations if not x.local]
+        # return None
 
     def serialize_xml(self):
         for x in self:
@@ -1449,6 +1454,27 @@ class Flow(list):
                 yield from x.serialize_xml()
             except AttributeError:
                 yield escape_for_xml(x)
+
+def _annotation_lookup_case_sensitive(flow, text):
+    for i in reversed(flow):
+        if type(i) is Phrase:
+            if [x for x in i.annotations if not x.local] and i.text == text:
+                return [x for x in i.annotations if not x.local]
+    return None
+
+def _annotation_lookup_case_insensitive(flow, text):
+    for i in reversed(flow):
+        if type(i) is Phrase:
+            if [x for x in i.annotations if not x.local] and i.text.lower() == text.lower():
+                return [x for x in i.annotations if not x.local]
+    return None
+
+
+annotation_lookup_modes = {
+    'case sensitive': _annotation_lookup_case_sensitive,
+    'case insensitive': _annotation_lookup_case_insensitive
+}
+
 
 
 class Pre(Flow):
