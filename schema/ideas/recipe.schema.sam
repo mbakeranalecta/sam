@@ -1,12 +1,13 @@
 sam-schema: 
     $namespace = http://example.com/ns/recipe
+    $pattern.unit = each|tsp|tbsp|oz
 
-    template:
+    templates:
         recipe: 
             description:
                 >>>(#text-general)
             ingredients:: ingredient, quality, unit
-                xs:string, xs:int, >($unit)
+                xs:string, xs:int, >($pattern.unit)
             preparation:
                 >>>(#ol)
 
@@ -39,8 +40,7 @@ sam-schema:
     rename:
         |code| pre
 
-    patterns:
-        $unit = each|tsp|tbsp|oz
+
 
 
 
