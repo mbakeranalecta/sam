@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- !annotation-lookup: fancy -->
 <!--  This file is part of the SPFE Open Toolkit. See the accompanying license.txt file -->
 <!--  for applicable licenses. -->
 <!--  (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved. -->
@@ -37,7 +38,7 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase>XML</phrase>.</p>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3142,7 +3143,7 @@ This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotat
 </codeblock>
 </source>
 <markup>
-<p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase>annotation</phrase>.</p>
+<p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3161,7 +3162,7 @@ This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {Annotat
 </codeblock>
 </source>
 <markup>
-<p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase>Annotation</phrase>.</p>
+<p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">Annotation</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3180,7 +3181,7 @@ This {annotation}(foo)(https://en.wikipedia.org/wiki/Annotation) is repeated {An
 </codeblock>
 </source>
 <markup>
-<p>This <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></annotation></phrase> is repeated <phrase>Annotation</phrase>.</p>
+<p>This <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></annotation></phrase> is repeated <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">Annotation</annotation></annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3199,7 +3200,7 @@ Annotation lookup test: {test phrase}.
 </codeblock>
 </source>
 <markup>
-<p>Annotation lookup test: <phrase>test phrase</phrase>.</p>
+<p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3218,7 +3219,7 @@ This {annotation} occurs previously.
 </codeblock>
 </source>
 <markup>
-<p>This <phrase>annotation</phrase> occurs previously.</p>
+<p>This <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></annotation></phrase> occurs previously.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3256,7 +3257,7 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase>XML</phrase>.</p>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3275,7 +3276,7 @@ Testing {XML}+(*foo) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase id="foo">XML</phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase>XML</phrase>.</p>
+<p>Testing <phrase id="foo"><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3294,7 +3295,7 @@ Testing {XML}+(foo)(language) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="foo"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase>XML</phrase>.</p>
+<p>Testing <phrase><annotation type="foo"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3313,7 +3314,7 @@ Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="foobar"><annotation type="verbiage">XML</annotation></annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase>XML</phrase>.</p>
+<p>Testing <phrase><annotation type="foobar"><annotation type="verbiage"><annotation type="language">XML</annotation></annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4261,7 +4262,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 <markup>
 <p>“title”?</p>
 <p><phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
-<p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase>DocBook</phrase>’s</p>
+<p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
 </markup>
 <result>
 <codeblock language="xml">
