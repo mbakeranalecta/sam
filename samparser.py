@@ -147,7 +147,7 @@ class SamParser:
         self.doc = None
         self.source = None
         self.sourceurl = None
-        self.smart_quotes = False
+        self.flow_parser = FlowParser()
 
 
     def parse(self, source):
@@ -174,7 +174,7 @@ class SamParser:
         block_name = match.group("name").strip()
         attributes, citations = parse_attributes(match.group("attributes"))
         content = match.group("content").strip()
-        parsed_content = None if content == '' else flow_parser.parse(content, self.doc)
+        parsed_content = None if content == '' else self.flow_parser.parse(content, self.doc)
         b = Block(block_name, indent, attributes, parsed_content, citations)
         self.doc.add_block(b)
         return "SAM", context
@@ -262,7 +262,7 @@ class SamParser:
         try:
             line = source.next_line
         except EOFError:
-            f = flow_parser.parse(self.current_text_block.text, self.doc)
+            f = self.flow_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
             self.doc.add_flow(f)
             return "END", context
@@ -272,13 +272,13 @@ class SamParser:
         this_line_indent = len(line) - len(line.lstrip())
 
         if block_patterns['blank-line'].match(line):
-            f = flow_parser.parse(self.current_text_block.text, self.doc)
+            f = self.flow_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
             self.doc.add_flow(f)
             return "SAM", context
 
         if this_line_indent < para_indent:
-            f = flow_parser.parse(self.current_text_block.text, self.doc)
+            f = self.flow_parser.parse(self.current_text_block.text, self.doc)
             self.current_text_block = None
             self.doc.add_flow(f)
             source.return_line()
@@ -287,7 +287,7 @@ class SamParser:
         if self.doc.in_context(['p', 'li']):
             if block_patterns['list-item'].match(line) or block_patterns['num-list-item'].match(line) or block_patterns[
                 'labeled-list-item'].match(line):
-                f = flow_parser.parse(self.current_text_block.text, self.doc)
+                f = self.flow_parser.parse(self.current_text_block.text, self.doc)
                 self.current_text_block = None
                 self.doc.add_flow(f)
                 source.return_line()
@@ -327,7 +327,7 @@ class SamParser:
         label = match.group("label")
         content_start = match.start("content")
         attributes, citations = parse_attributes(match.group("attributes"))
-        lli = LabeledListItem(indent, flow_parser.parse(label, self.doc), attributes, citations)
+        lli = LabeledListItem(indent, self.flow_parser.parse(label, self.doc), attributes, citations)
         self.doc.add_block(lli)
         p = Paragraph(content_start)
         self.doc.add_block(p)
@@ -391,7 +391,7 @@ class SamParser:
     def _string_def(self, context):
         source, match = context
         indent = match.end("indent")
-        s = StringDef(match.group('name'), flow_parser.parse(match.group('content'), self.doc), indent=indent)
+        s = StringDef(match.group('name'), self.flow_parser.parse(match.group('content'), self.doc), indent=indent)
         self.doc.add_block(s)
         return "SAM", context
 
@@ -400,7 +400,7 @@ class SamParser:
         indent = match.end("indent")
         attributes, citations = parse_attributes(match.group("attributes"))
         b=Line(indent, attributes,
-               flow_parser.parse(match.group('content'), self.doc, strip=False), citations)
+               self.flow_parser.parse(match.group('content'), self.doc, strip=False), citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -429,7 +429,7 @@ class SamParser:
             return "SAM", context
         else:
             #FIXME: splitting field values belongs to record object
-            field_values = [flow_parser.parse(x.strip(), self.doc) for x in re.split(r'(?<!\\),', line)]
+            field_values = [self.flow_parser.parse(x.strip(), self.doc) for x in re.split(r'(?<!\\),', line)]
             r = Record(field_values, indent)
             self.doc.add_block(r)
 
@@ -467,7 +467,7 @@ class SamParser:
                 b = Cell(indent)
                 self.doc.add_block(b)
 
-                self.doc.add_flow(flow_parser.parse(content, self.doc))
+                self.doc.add_flow(self.flow_parser.parse(content, self.doc))
             # Test for consistency with previous rows?
 
             return "GRID", context
@@ -487,8 +487,10 @@ class SamParser:
                 raise SAMParserStructureError("Declarations must come before all other content.")
             if name == 'namespace':
                 self.doc.default_namespace = content
-            if name == 'annotation-lookup':
+            elif name == 'annotation-lookup':
                 self.doc.annotation_lookup = content
+            elif name == 'smart-quotes':
+                self.flow_parser.smart_quotes = content
             else:
                 raise SAMParserStructureError("Unknown declaration.")
 
@@ -1803,8 +1805,8 @@ class FlowParser:
         self.flow_source = None
         self.current_string = None
         self.flow = None
-        self.smart_quotes = False
 
+        self.smart_quotes = 'off'
         self.stateMachine = StateMachine()
         self.stateMachine.add_state("PARA", self._para)
         self.stateMachine.add_state("ESCAPE", self._escape)
@@ -1873,7 +1875,7 @@ class FlowParser:
             self.flow.append(self.current_string)
             self.current_string = ''
             text = unescape(match.group("text"))
-            if self.smart_quotes:
+            if self.smart_quotes == 'on':
                 text = multi_replace(text, smart_quote_subs)
             p = Phrase(text)
             self.flow.append(p)
@@ -2100,7 +2102,7 @@ class FlowParser:
             return "PARA", para
 
     def _dash_start(self, para):
-        if self.smart_quotes:
+        if self.smart_quotes == 'on':
             if flow_patterns['en-dash'].search(para.para, para.currentCharNumber,
                                                           para.currentCharNumber + 5):
                 self.current_string += '–'
@@ -2117,7 +2119,7 @@ class FlowParser:
         return "PARA", para
 
     def _double_quote(self, para):
-        if self.smart_quotes:
+        if self.smart_quotes == 'on':
             if flow_patterns['double_quote_close'].search(para.para, para.currentCharNumber,
                                                           para.currentCharNumber + 2):
                 self.current_string += '”'
@@ -2134,7 +2136,7 @@ class FlowParser:
         return "PARA", para
 
     def _single_quote(self, para):
-        if self.smart_quotes:
+        if self.smart_quotes == 'on':
             if flow_patterns['single_quote_close'].search(para.para, para.currentCharNumber,
                                                           para.currentCharNumber + 2):
                 self.current_string += '’'
@@ -2697,8 +2699,6 @@ def replace_charref(match):
     return character
 
 
-flow_parser = FlowParser()
-
 if __name__ == "__main__":
 
     import glob
@@ -2713,8 +2713,6 @@ if __name__ == "__main__":
     intermediategroup = argparser.add_mutually_exclusive_group()
     intermediategroup.add_argument("-intermediatefile", "-i", help="name of file to dump intermediate XML to when using -xslt")
     intermediategroup.add_argument("-intermediatedir", "-id", help="name of directory to dump intermediate XML to when using -xslt")
-    argparser.add_argument("-smartquotes", "-q", help="turn on smart quotes processing",
-                           action="store_true")
     argparser.add_argument("-xsd", help="Specify an XSD schema to validate generated XML")
     argparser.add_argument("-outputextension", "-oext",  nargs='?', const='.xml', default='.xml')
     argparser.add_argument("-intermediateextension", "-iext",  nargs='?', const='.xml', default='.xml')
@@ -2725,9 +2723,6 @@ if __name__ == "__main__":
     transformed = None
 
     samParser = SamParser()
-
-    if args.smartquotes:
-        flow_parser.smart_quotes = True
 
     if (args.intermediatefile or args.intermediatedir) and not args.xslt:
         raise SAMParserError("Do not specify an intermediate file or directory if an XSLT file is not specified.")

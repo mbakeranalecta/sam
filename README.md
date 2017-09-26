@@ -51,9 +51,7 @@ The meaning of each parameter is as follows:
  * `-intermediate <intermediate-file>`: (optional, requires that `-xslt` be specified) The name and path of 
    a file to which the default XML representation of the SAM file will be written if
    `xslt-file` is specified. This may be useful for debugging purposes. (short form `-i`)
-   
- * `-smartquotes`: Turns on smart quotes processing. (short form `-q`)
-   
+
 ### Validating with an XML schema
 
 Eventually, SAM is going to have its own schema language, but until that is available (and probably afteward) you can validate your document against an XML schema. Schema validation is done on the XML output format, not the input (because it is an XML schema, not a SAM schema). To invoke schema validation, use the `-xsd` option on the command line:
@@ -123,6 +121,8 @@ used to output as "row". It is now output as "record".
    * Removed support for embeded XML fragments per the discussion of issue #145. SAM has outgrown this feature, which is incompatible with the plan to introduce SAM Schemas.
 
 * Revision 1d16fd6d0544c32fa23930f303989b1b4a82c477 addressed #157 by changing the serialization of citations as described in #157 and adding support of the use of keys in citations.
+
+* Removed the smart quotes parser option and introduced the `!smart-quotes` declaration.
 
 Please report any other backward incompatibilities you find so they can be added to this list.
 

@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- !annotation-lookup: fancy -->
 <!--  This file is part of the SPFE Open Toolkit. See the accompanying license.txt file -->
 <!--  for applicable licenses. -->
 <!--  (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved. -->
@@ -59,7 +58,7 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 <markup>
 <message>
 <title>Hello World.</title>
-<p>This is the include test file.</p>
+<p>This is the "include" test -- file.</p>
 <grid>
 <row>
 <cell>foo</cell>
@@ -77,7 +76,7 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 <codeblock language="xml">
 &lt;message&gt;
 &lt;title&gt;Hello World.&lt;/title&gt;
-&lt;p&gt;This is the include test file.&lt;/p&gt;
+&lt;p&gt;This is the "include" test -- file.&lt;/p&gt;
 &lt;grid&gt;
 &lt;row&gt;
 &lt;cell&gt;foo&lt;/cell&gt;

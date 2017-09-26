@@ -1,5 +1,5 @@
-﻿#!annotation-lookup: fancy
-
+﻿!annotation-lookup: case insensitive
+!smart-quotes: on
 # This file is part of the SPFE Open Toolkit. See the accompanying license.txt file
 # for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
@@ -74,7 +74,7 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <message>
                     <title>Hello World.</title>
-                    <p>This is the include test file.</p>
+                    <p>This is the "include" test -- file.</p>
                     <grid>
                     <row>
                     <cell>foo</cell>
