@@ -110,6 +110,7 @@ smart_quote_subs = {re.compile(re_double_quote_close):'”',
                     re.compile(re_en_dash): '–',
                     re.compile(re_em_dash): '—'}
 
+smart_quote_sets = {'on': smart_quote_subs}
 
 included_files = []
 
@@ -1442,6 +1443,10 @@ class Flow(list):
             except AttributeError:
                 yield escape_for_xml(x)
 
+# Annotation lookup modes. Third parties can add additional lookup modes
+# by extending the annotation_lookup_modes dictionary with new annotation
+# matching algorithms.
+
 def _annotation_lookup_case_sensitive(flow, text):
     for i in reversed(flow):
         if type(i) is Phrase:
@@ -1842,8 +1847,8 @@ class FlowParser:
         elif char == "&":
             return "CHARACTER-ENTITY", para
         else:
-            if self.smart_quotes == 'on':
-                for r, sub in smart_quote_subs.items():
+            if self.smart_quotes != 'off':
+                for r, sub in smart_quote_sets[self.smart_quotes].items():
                     match = r.match(para.para, para.currentCharNumber)
                     if match is not None:
                         self.current_string += sub
@@ -1861,7 +1866,7 @@ class FlowParser:
             self.current_string = ''
             text = unescape(match.group("text"))
             if self.smart_quotes == 'on':
-                text = multi_replace(text, smart_quote_subs)
+                text = multi_replace(text, smart_quote_sets[self.smart_quotes])
             p = Phrase(text)
             self.flow.append(p)
             para.advance(len(match.group(0)))
