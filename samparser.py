@@ -59,23 +59,9 @@ block_patterns = {
             'string-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U)
         }
 
-# Flow regex component expressions
-re_single_quote_close = '(?<=[\w\.\,\"\)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
-re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{-])'
-re_double_quote_close = '(?<=[\w\.\,\'\)\}\?-])\"((?=[\.\s\'\)},\?!:;\[-])|$)'
-re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{-])'
-re_apostrophe = "(?<=[\w`\*_\}\)])'(?=\w)"
-re_en_dash = "(?<=[\w\*_`\"\'\.\)\}]\s)--(?=\s[\w\*_`\"\'\{\(])"
-re_em_dash = "(?<=[\w\*_`\"\'\.\)\}])---(?=[\w\*_`\"\'\{\(])"
 
-smart_quote_subs = {re.compile(re_double_quote_close):'”',
-                    re.compile(re_double_quote_open): '“',
-                    re.compile(re_single_quote_close):'’',
-                    re.compile(re_single_quote_open): '‘',
-                    re.compile(re_apostrophe): '’',
-                    re.compile(re_en_dash): '–',
-                    re.compile(re_em_dash): '—'}
 
+# Flow patterns
 flow_patterns = {
             'escape': re.compile(r'\\', re.U),
             'phrase': re.compile(r'(?<!\\)\{(?P<text>.*?)(?<!\\)\}'),
@@ -101,18 +87,28 @@ flow_patterns = {
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
             'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
-            'apostrophe': re.compile(re_apostrophe, re.U),
-            'single_quote_close': re.compile(re_single_quote_close, re.U),
-            'single_quote_open': re.compile(re_single_quote_open, re.U),
-            'double_quote_close': re.compile(re_double_quote_close, re.U),
-            'double_quote_open': re.compile(re_double_quote_open, re.U),
             'inline-insert': re.compile(r'>(?P<insert>\((.*?(?<!\\))\))' + re_attributes, re.U),
-            'en-dash': re.compile(re_en_dash, re.U),
-            'em-dash': re.compile(re_em_dash, re.U),
             'citation': re.compile(
                 r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\%(?P<key>\S+?)(\s+(?P<key_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
                 re.U)
         }
+
+#smart quote patterns
+re_single_quote_close = '(?<=[\w\.\,\"\)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
+re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{-])'
+re_double_quote_close = '(?<=[\w\.\,\'\)\}\?-])\"((?=[\.\s\'\)},\?!:;\[-])|$)'
+re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{-])'
+re_apostrophe = "(?<=[\w`\*_\}\)])'(?=\w)"
+re_en_dash = "(?<=[\w\*_`\"\'\.\)\}]\s)--(?=\s[\w\*_`\"\'\{\(])"
+re_em_dash = "(?<=[\w\*_`\"\'\.\)\}])---(?=[\w\*_`\"\'\{\(])"
+
+smart_quote_subs = {re.compile(re_double_quote_close):'”',
+                    re.compile(re_double_quote_open): '“',
+                    re.compile(re_single_quote_close):'’',
+                    re.compile(re_single_quote_open): '‘',
+                    re.compile(re_apostrophe): '’',
+                    re.compile(re_en_dash): '–',
+                    re.compile(re_em_dash): '—'}
 
 
 included_files = []
