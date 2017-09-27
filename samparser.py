@@ -68,6 +68,13 @@ re_apostrophe = "(?<=[\w`\*_\}\)])'(?=\w)"
 re_en_dash = "(?<=[\w\*_`\"\'\.\)\}]\s)--(?=\s[\w\*_`\"\'\{\(])"
 re_em_dash = "(?<=[\w\*_`\"\'\.\)\}])---(?=[\w\*_`\"\'\{\(])"
 
+smart_quote_subs = {re.compile(re_double_quote_close):'”',
+                    re.compile(re_double_quote_open): '“',
+                    re.compile(re_single_quote_close):'’',
+                    re.compile(re_single_quote_open): '‘',
+                    re.compile(re_apostrophe): '’',
+                    re.compile(re_en_dash): '–',
+                    re.compile(re_em_dash): '—'}
 
 flow_patterns = {
             'escape': re.compile(r'\\', re.U),
@@ -107,13 +114,6 @@ flow_patterns = {
                 re.U)
         }
 
-smart_quote_subs = {re_double_quote_close:'”',
-                    re_double_quote_open: '“',
-                    re_single_quote_close:'’',
-                    re_single_quote_open: '‘',
-                    re_apostrophe: '’',
-                    re_en_dash: '–',
-                    re_em_dash: '—'}
 
 included_files = []
 
@@ -1438,17 +1438,6 @@ class Flow(list):
             return annotation_lookup_modes[mode](self, text)
         except KeyError:
             raise SAMParserError("Unknown annotation lookup mode: " + mode)
-        # if mode=='case insensitive':
-        #     for i in reversed(self):
-        #         if type(i) is Phrase:
-        #             if [x for x in i.annotations if not x.local] and i.text.lower() == text.lower():
-        #                 return [x for x in i.annotations if not x.local]
-        # else:
-        #     for i in reversed(self):
-        #         if type(i) is Phrase:
-        #             if [x for x in i.annotations if not x.local] and i.text == text:
-        #                 return [x for x in i.annotations if not x.local]
-        # return None
 
     def serialize_xml(self):
         for x in self:
@@ -1818,9 +1807,6 @@ class FlowParser:
         self.stateMachine.add_state("BOLD-START", self._bold_start)
         self.stateMachine.add_state("ITALIC-START", self._italic_start)
         self.stateMachine.add_state("CODE-START", self._code_start)
-        self.stateMachine.add_state("DOUBLE_QUOTE", self._double_quote)
-        self.stateMachine.add_state("SINGLE_QUOTE", self._single_quote)
-        self.stateMachine.add_state("DASH-START", self._dash_start)
         self.stateMachine.add_state("INLINE-INSERT", self._inline_insert)
         self.stateMachine.add_state("CHARACTER-ENTITY", self._character_entity)
         self.stateMachine.set_start("PARA")
@@ -1855,17 +1841,20 @@ class FlowParser:
             return "ITALIC-START", para
         elif char == "`":
             return "CODE-START", para
-        elif char == '"':
-            return "DOUBLE_QUOTE", para
-        elif char == "'":
-            return "SINGLE_QUOTE", para
         elif char == ">":
             return "INLINE-INSERT", para
         elif char == "&":
             return "CHARACTER-ENTITY", para
-        elif char == "-":
-            return "DASH-START", para
         else:
+            if self.smart_quotes == 'on':
+                for r, sub in smart_quote_subs.items():
+                    match = r.match(para.para, para.currentCharNumber)
+                    if match is not None:
+                        self.current_string += sub
+                        if len(match.group(0)) > 1:
+                            para.advance(len(match.group(0)) - 1)
+                        return "PARA", para
+
             self.current_string += char
             return "PARA", para
 
@@ -2101,59 +2090,6 @@ class FlowParser:
             para.retreat(1)
             return "PARA", para
 
-    def _dash_start(self, para):
-        if self.smart_quotes == 'on':
-            if flow_patterns['en-dash'].search(para.para, para.currentCharNumber,
-                                                          para.currentCharNumber + 5):
-                self.current_string += '–'
-                self.flow_source.advance(1)
-
-            elif flow_patterns['em-dash'].search(para.para, para.currentCharNumber,
-                                                           para.currentCharNumber + 5):
-                self.current_string += '—'
-                self.flow_source.advance(2)
-            else:
-                self.current_string += '-'
-        else:
-            self.current_string += '-'
-        return "PARA", para
-
-    def _double_quote(self, para):
-        if self.smart_quotes == 'on':
-            if flow_patterns['double_quote_close'].search(para.para, para.currentCharNumber,
-                                                          para.currentCharNumber + 2):
-                self.current_string += '”'
-            elif flow_patterns['double_quote_open'].search(para.para, para.currentCharNumber,
-                                                           para.currentCharNumber + 2):
-                self.current_string += '“'
-            else:
-                self.current_string += '"'
-                SAM_parser_warning(
-                    'Detected straight double quote that was not recognized by smart quote rules in: "' + para.para + '" at position ' + str(
-                        para.currentCharNumber))
-        else:
-            self.current_string += '"'
-        return "PARA", para
-
-    def _single_quote(self, para):
-        if self.smart_quotes == 'on':
-            if flow_patterns['single_quote_close'].search(para.para, para.currentCharNumber,
-                                                          para.currentCharNumber + 2):
-                self.current_string += '’'
-            elif flow_patterns['single_quote_open'].search(para.para, para.currentCharNumber,
-                                                           para.currentCharNumber + 2):
-                self.current_string += '‘'
-            elif flow_patterns['apostrophe'].search(para.para, para.currentCharNumber, para.currentCharNumber + 2):
-                self.current_string += '’'
-            else:
-                self.current_string += "'"
-                SAM_parser_warning(
-                    'Detected straight single quote that was not recognized by smart quote rules in: "' + para.para + '" at position ' + str(
-                        para.currentCharNumber))
-        else:
-            self.current_string += "'"
-        return "PARA", para
-
     def _inline_insert(self, para):
         match = flow_patterns['inline-insert'].match(para.rest_of_para)
         if match:
@@ -2288,6 +2224,7 @@ class Code(Phrase):
 
     def append(self, thing):
         raise SAMParserStructureError("Inline code cannot have typed annotations.")
+
 
 class FlowSource:
     def __init__(self, para, strip=True):
@@ -2647,8 +2584,7 @@ def escape_for_xml_attribute(s):
 
 
 def multi_replace(string, subs):
-    for pattern, sub in subs.items():
-        r = re.compile(pattern)
+    for r, sub in subs.items():
         string= r.sub(sub, string)
     return string
 
