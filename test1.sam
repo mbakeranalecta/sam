@@ -2482,6 +2482,21 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <insert conditions="a,b" id="id14" item="foo.gif" name="name" type="image"/>
 
+        case: Attributes on inserts
+            description:
+                Attributes on inserts.
+
+            source:
+                ```(sam)
+                    >>>(image bar.png)(#baz)
+
+            markup:
+                >>>(image bar.png)(#baz)
+
+            result:
+                ```(xml)
+                    <insert item="bar.png" name="baz" type="image"/>
+
     test: Annotations
 
         description:

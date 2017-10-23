@@ -733,7 +733,7 @@ class BlockInsert(Block):
             if any([x.value for x in self.attributes if x.type == 'condition']):
                 conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
                 attrs.append(conditions)
-                attrs.extend([x for x in self.attributes if x.type != 'condition'])
+            attrs.extend([x for x in self.attributes if x.type != 'condition'])
 
         for att in sorted(attrs, key=lambda x: x.type):
             yield from att.serialize_xml()

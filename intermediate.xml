@@ -2500,7 +2500,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <p><code>(!en-CA)</code> creates a language attribute.</p>
 </li>
 </ul>
-<p>You can only apply one id, name, or language attribute to a block or phrase. You can apply more than one condition attribute. On output to XML, the condition attributes will be converted to a single <code>conditions</code> attribute with the individual conditions separated by commas. (For which reason, condition statements can’t include commas.)</p>
+<p>You can only apply one id, name, or language attribute to a block or phrase. You can apply more than one condition attribute. On output to XML, the condition attributes will be converted to a single <code>conditions</code> attribute with the individual conditions separated by commas. (For which reason, condition statements can't include commas.)</p>
 </description>
 <case>
 <title>Attributes on block</title>
@@ -2985,6 +2985,25 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </codeblock>
 </result>
 </case>
+<case>
+<title>Attributes on inserts</title>
+<description>
+<p>Attributes on inserts.</p>
+</description>
+<source>
+<codeblock language="sam">
+&gt;&gt;&gt;(image bar.png)(#baz)
+</codeblock>
+</source>
+<markup>
+<insert item="bar.png" name="baz" type="image"/>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;insert item="bar.png" name="baz" type="image"/&gt;
+</codeblock>
+</result>
+</case>
 </test>
 <test>
 <title>Annotations</title>
@@ -3086,7 +3105,7 @@ chapter}[#single_source].
 </codeblock>
 </source>
 <markup>
-<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation nameref="single_source">single sourcing chapter</citation></phrase>.</p>
+<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps -- or even to use completely different assembly techniques that don't involve maps at all -- to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation nameref="single_source">single sourcing chapter</citation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3798,7 +3817,7 @@ There is a `_` in _this \_ italic_ decoration.
 <case>
 <title>XML reserved characters in citation specifically attribute</title>
 <description>
-<p>XML reserved characters occurring within the text of a “specifically” attribute.</p>
+<p>XML reserved characters occurring within the text of a "specifically" attribute.</p>
 </description>
 <source>
 <codeblock language="sam">
@@ -4125,7 +4144,7 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 <test>
 <title>Smart quotes</title>
 <description>
-<p>Smart quotes is an optional feature of the parser, not a feature of the SAM language. It turns straight quotes into curly quotes. It raises a warning when it can’t figure out how to handle a case. The algorithm could be improved in the future to handle more cases correctly.</p>
+<p>Smart quotes is an optional feature of the parser, not a feature of the SAM language. It turns straight quotes into curly quotes. It raises a warning when it can't figure out how to handle a case. The algorithm could be improved in the future to handle more cases correctly.</p>
 <p>The canonical way to handle quotes in SAM is to use real curly quotes to begin with. All SAM documents are UTF-8.</p>
 <Note>These tests will fail if smart quotes is not selected</Note>
 <p>using the <code>-q</code> option of the parser command line or by setting the <code>smart_quotes</code> attribute of the SamParser object to <code>True</code>.</p>
@@ -4149,8 +4168,8 @@ For "the Duke", perhaps?
 </codeblock>
 </source>
 <markup>
-<p>“For once, ‘sir’ adding, ‘you’re making a scene.’” and “For once, ‘sir’ adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
-<p>For “the Duke”, perhaps?</p>
+<p>"For once, 'sir' adding, 'you're making a scene.'" and "For once, 'sir' adding, 'you're making a scene.'" In the winter of ’65. "Yes," he said, "I met her. She's very 'friendly.'" '"I don’t know what you mean by 'glory,'" Alice said.' "'I don’t know what you mean by "glory,"' Alice said."</p>
+<p>For "the Duke", perhaps?</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4170,7 +4189,7 @@ interpretations of the `xref`'s instruction
 </codeblock>
 </source>
 <markup>
-<p>interpretations of the <code>xref</code>’s instruction</p>
+<p>interpretations of the <code>xref</code>'s instruction</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4195,7 +4214,7 @@ know what you mean by "glory,"' Alice said."
 </codeblock>
 </source>
 <markup>
-<p>“For once, ‘<phrase><annotation type="salutation">sir</annotation></phrase>’ adding, ‘you’re making a scene.’” and “For once, <phrase><annotation type="salutation">‘sir’</annotation></phrase> adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”</p>
+<p>"For once, '<phrase><annotation type="salutation">sir</annotation></phrase>' adding, 'you're making a scene.'" and "For once, <phrase><annotation type="salutation">'sir'</annotation></phrase> adding, 'you're making a scene.'" In the winter of ’65. "Yes," he said, "I met her. She's very 'friendly.'" '"I don’t know what you mean by 'glory,'" Alice said.' "'I don’t know what you mean by "glory,"' Alice said."</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4216,8 +4235,8 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 </codeblock>
 </source>
 <markup>
-<p>A vector graphic program creates graphics as a collection of  objects (“vector” meaning the mathematical representation of a shape or line).</p>
-<p>The shape of the characters (technically, “glyphs”) that make up the font are stored separately in font files.</p>
+<p>A vector graphic program creates graphics as a collection of  objects ("vector" meaning the mathematical representation of a shape or line).</p>
+<p>The shape of the characters (technically, "glyphs") that make up the font are stored separately in font files.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4237,7 +4256,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 </codeblock>
 </source>
 <markup>
-<p>“What is truth?”<citation value="John 18:38"/></p>
+<p>"What is truth?"<citation value="John 18:38"/></p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4260,9 +4279,9 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 </codeblock>
 </source>
 <markup>
-<p>“title”?</p>
-<p><phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
-<p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
+<p>"title"?</p>
+<p><phrase><annotation type="language">DocBook</annotation></phrase>'s</p>
+<p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase><annotation type="language">DocBook</annotation></phrase>'s</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4314,13 +4333,13 @@ x, y, z, etc. -- something else
 </codeblock>
 </source>
 <markup>
-<p>This para contains – an en dash and an—em dash.</p>
-<p>This para contains – <phrase><annotation type="word">an</annotation></phrase> en dash and an—<phrase><annotation type="word">em</annotation></phrase> dash.</p>
-<p>This para <phrase><annotation type="word">contains</annotation></phrase> – an en dash and <phrase><annotation type="word">an</annotation></phrase>—em dash.</p>
-<p>This para <phrase><annotation type="bold">contains</annotation></phrase> – an en dash and <phrase><annotation type="italic">an</annotation></phrase>—em dash.</p>
-<p>This para <code>contains</code> – an en dash and “an”—em dash.</p>
-<p>This para ‘contains’ – an en dash and <code>an</code>—em dash.</p>
-<p>x, y, z, etc. – something else</p>
+<p>This para contains -- an en dash and an---em dash.</p>
+<p>This para contains -- <phrase><annotation type="word">an</annotation></phrase> en dash and an---<phrase><annotation type="word">em</annotation></phrase> dash.</p>
+<p>This para <phrase><annotation type="word">contains</annotation></phrase> -- an en dash and <phrase><annotation type="word">an</annotation></phrase>---em dash.</p>
+<p>This para <phrase><annotation type="bold">contains</annotation></phrase> -- an en dash and <phrase><annotation type="italic">an</annotation></phrase>---em dash.</p>
+<p>This para <code>contains</code> -- an en dash and "an"---em dash.</p>
+<p>This para 'contains' -- an en dash and <code>an</code>---em dash.</p>
+<p>x, y, z, etc. -- something else</p>
 </markup>
 <result>
 <codeblock language="xml">

@@ -1,3 +1,5 @@
+## Template based approach
+
 !namespace: http://spfeopentoolkit.org/ns/sam-schema
 $namespace = http://example.com/ns/structure-docs
 $word =	\W+
@@ -24,6 +26,9 @@ structure-docs: xs:string
 			description:
 				>>>(*text-general)
 
+
+# declarative approach using SAM syntax
+
 schema: 
 	block: sturcuture-docs
 		>>>(#text-general)
@@ -33,6 +38,8 @@ schema:
 		block: ol
 		block: ul
 
+
+# declarative approach using custom syntax
 
 structure-docs{}
 	description
