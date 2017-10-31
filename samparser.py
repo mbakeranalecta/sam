@@ -1848,13 +1848,16 @@ class FlowParser:
             return "CHARACTER-ENTITY", para
         else:
             if self.smart_quotes != 'off':
-                for r, sub in smart_quote_sets[self.smart_quotes].items():
-                    match = r.match(para.para, para.currentCharNumber)
-                    if match is not None:
-                        self.current_string += sub
-                        if len(match.group(0)) > 1:
-                            para.advance(len(match.group(0)) - 1)
-                        return "PARA", para
+                try:
+                    for r, sub in smart_quote_sets[self.smart_quotes].items():
+                        match = r.match(para.para, para.currentCharNumber)
+                        if match is not None:
+                            self.current_string += sub
+                            if len(match.group(0)) > 1:
+                                para.advance(len(match.group(0)) - 1)
+                            return "PARA", para
+                except KeyError:
+                    raise SAMParserError("Unknown smart quotes set specified: {0}".format(self.smart_quotes))
 
             self.current_string += char
             return "PARA", para
@@ -1865,7 +1868,7 @@ class FlowParser:
             self.flow.append(self.current_string)
             self.current_string = ''
             text = unescape(match.group("text"))
-            if self.smart_quotes == 'on':
+            if self.smart_quotes != 'off':
                 text = multi_replace(text, smart_quote_sets[self.smart_quotes])
             p = Phrase(text)
             self.flow.append(p)
@@ -2655,60 +2658,88 @@ if __name__ == "__main__":
     argparser.add_argument("-intermediateextension", "-iext",  nargs='?', const='.xml', default='.xml')
     argparser.add_argument("-regurgitate", "-r", help="regurgitate the input in normalized form",
                            action="store_true")
+    argparser.add_argument("-smartquotes", "-sq", help="the path to a file containing smartquote patterns and substitutions")
 
     args = argparser.parse_args()
     transformed = None
-
-    samParser = SamParser()
-
-    if (args.intermediatefile or args.intermediatedir) and not args.xslt:
-        raise SAMParserError("Do not specify an intermediate file or directory if an XSLT file is not specified.")
-
-    if args.xslt and not (args.intermediatefile or args.intermediatedir):
-        raise SAMParserError("An intermediate file or directory must be specified if an XSLT file is specified.")
-
-    if args.infile == args.outfile:
-        raise SAMParserError('Input and output files cannot have the same name.')
-
     error_count = 0
-    for inputfile in glob.glob(args.infile):
-        try:
-            with open(inputfile, "r", encoding="utf-8-sig") as inf:
 
-                SAM_parser_info("Parsing " + os.path.abspath(inf.name))
-                samParser.parse(inf)
+    try:
 
-                if args.outdir:
-                    outputfile = os.path.join(args.outdir,
-                                              os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension)
-                else:
-                    outputfile = args.outfile
+        samParser = SamParser()
 
-                if args.intermediatedir:
-                    intermediatefile=os.path.join(args.intermediatedir, os.path.splitext(os.path.basename(inputfile))[0] + args.intermediateextension)
-                else:
-                    intermediatefile=args.intermediatefile
+        if (args.intermediatefile or args.intermediatedir) and not args.xslt:
+            raise SAMParserError("Do not specify an intermediate file or directory if an XSLT file is not specified.")
+
+        if args.xslt and not (args.intermediatefile or args.intermediatedir):
+            raise SAMParserError("An intermediate file or directory must be specified if an XSLT file is specified.")
+
+        if args.infile == args.outfile:
+            raise SAMParserError('Input and output files cannot have the same name.')
+
+        if args.smartquotes:
+            with open(args.smartquotes,  encoding="utf8") as sqf:
+                try:
+                    substitution_sets = etree.parse(sqf)
+                except etree.XMLSyntaxError as e:
+                    raise SAMParserError("Smart quotes file {0} contains XML error {1}: " + str(e))
+
+                for x in substitution_sets.iterfind(".//subset"):
+                    subs = {}
+                    for y in x.iterfind("sub"):
+                        r= re.compile(y.find("pattern").text)
+                        subs.update({r: y.find("replace").text})
+                    smart_quote_sets.update({x.find("name").text: subs})
 
 
-                xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
+        for inputfile in glob.glob(args.infile):
+            try:
+                with open(inputfile, "r", encoding="utf-8-sig") as inf:
+
+                    SAM_parser_info("Parsing " + os.path.abspath(inf.name))
+                    samParser.parse(inf)
+
+                    if args.outdir:
+                        outputfile = os.path.join(args.outdir,
+                                                  os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension)
+                    else:
+                        outputfile = args.outfile
+
+                    if args.intermediatedir:
+                        intermediatefile=os.path.join(args.intermediatedir, os.path.splitext(os.path.basename(inputfile))[0] + args.intermediateextension)
+                    else:
+                        intermediatefile=args.intermediatefile
 
 
-                if intermediatefile:
-                    with open(intermediatefile, "wb") as intermediate:
-                        intermediate.write(xml_string)
+                    xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
 
-                if args.xslt:
-                    try:
-                        transform = etree.XSLT(etree.parse(args.xslt))
-                    except FileNotFoundError as e:
-                        raise SAMParserError(e.strerror + ' ' + e.filename)
 
-                    xml_input = etree.parse(open(intermediatefile, 'r', encoding="utf-8-sig"))
-                    try:
-                        transformed = transform(xml_input)
-                    except etree.XSLTError as e:
-                        raise SAMParserError("XSLT processor reported error: " + str(e))
-                    finally:
+                    if intermediatefile:
+                        with open(intermediatefile, "wb") as intermediate:
+                            intermediate.write(xml_string)
+
+                    if args.xslt:
+                        try:
+                            transform = etree.XSLT(etree.parse(args.xslt))
+                        except FileNotFoundError as e:
+                            raise SAMParserError(e.strerror + ' ' + e.filename)
+
+                        xml_input = etree.parse(open(intermediatefile, 'r', encoding="utf-8-sig"))
+                        try:
+                            transformed = transform(xml_input)
+                        except etree.XSLTError as e:
+                            raise SAMParserError("XSLT processor reported error: " + str(e))
+                        finally:
+                            if transform.error_log:
+                                SAM_parser_warning("Messages from the XSLT transformation:")
+                                for entry in transform.error_log:
+                                    print('message from line %s, col %s: %s' % (
+                                        entry.line, entry.column, entry.message), file=sys.stderr)
+                                    print('domain: %s (%d)' % (entry.domain_name, entry.domain), file=sys.stderr)
+                                    print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
+                                    print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
+
+
                         if transform.error_log:
                             SAM_parser_warning("Messages from the XSLT transformation:")
                             for entry in transform.error_log:
@@ -2718,64 +2749,58 @@ if __name__ == "__main__":
                                 print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
                                 print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
 
-
-                    if transform.error_log:
-                        SAM_parser_warning("Messages from the XSLT transformation:")
-                        for entry in transform.error_log:
-                            print('message from line %s, col %s: %s' % (
-                                entry.line, entry.column, entry.message), file=sys.stderr)
-                            print('domain: %s (%d)' % (entry.domain_name, entry.domain), file=sys.stderr)
-                            print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
-                            print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
-
-                if outputfile:
-                    with open(outputfile, "wb") as outf:
+                    if outputfile:
+                        with open(outputfile, "wb") as outf:
+                            if args.regurgitate:
+                                for i in samParser.doc.regurgitate():
+                                    outf.write(i.encode('utf-8'))
+                            elif transformed:
+                                outf.write(str(transformed).encode(encoding='utf-8'))
+                            else:
+                                for i in samParser.serialize('xml'):
+                                    outf.write(i.encode('utf-8'))
+                    else:
                         if args.regurgitate:
                             for i in samParser.doc.regurgitate():
-                                outf.write(i.encode('utf-8'))
+                                sys.stdout.buffer.write(i.encode('utf-8'))
                         elif transformed:
-                            outf.write(str(transformed).encode(encoding='utf-8'))
+                            sys.stdout.buffer.write(transformed)
+
+
                         else:
                             for i in samParser.serialize('xml'):
-                                outf.write(i.encode('utf-8'))
-                else:
-                    if args.regurgitate:
-                        for i in samParser.doc.regurgitate():
-                            sys.stdout.buffer.write(i.encode('utf-8'))
-                    elif transformed:
-                        sys.stdout.buffer.write(transformed)
+                                sys.stdout.buffer.write(i.encode('utf-8'))
 
 
-                    else:
-                        for i in samParser.serialize('xml'):
-                            sys.stdout.buffer.write(i.encode('utf-8'))
-
-
-                if args.xsd:
-                    try:
-                        xmlschema = etree.XMLSchema(file=args.xsd)
-                    except etree.XMLSchemaParseError as e:
-                        print(e, file=sys.stderr)
-                        exit(1)
-                    SAM_parser_info("Validating output using " + args.xsd)
-                    xml_doc = etree.fromstring(xml_string)
-                    try:
-                        xmlschema.assertValid(xml_doc)
-                    except etree.DocumentInvalid as e:
-                        print('STRUCTURE ERROR: ' + str(e), file=sys.stderr)
-                        error_count += 1
-                    else:
-                        SAM_parser_info("Validation successful.")
+                    if args.xsd:
+                        try:
+                            xmlschema = etree.XMLSchema(file=args.xsd)
+                        except etree.XMLSchemaParseError as e:
+                            print(e, file=sys.stderr)
+                            exit(1)
+                        SAM_parser_info("Validating output using " + args.xsd)
+                        xml_doc = etree.fromstring(xml_string)
+                        try:
+                            xmlschema.assertValid(xml_doc)
+                        except etree.DocumentInvalid as e:
+                            print('STRUCTURE ERROR: ' + str(e), file=sys.stderr)
+                            error_count += 1
+                        else:
+                            SAM_parser_info("Validation successful.")
 
 
 
-        except FileNotFoundError:
-            raise SAMParserError("No input file specified.")
+            except FileNotFoundError:
+                raise SAMParserError("No input file specified.")
 
-        except SAMParserError as e:
-            sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
-            error_count += 1
-            continue
+            except SAMParserError as e:
+                sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
+                error_count += 1
+                continue
+
+    except SAMParserError as e:
+        sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
+        error_count += 1
 
     print('Process completed with %d errors.' % error_count, file=sys.stderr)
     if error_count > 0:

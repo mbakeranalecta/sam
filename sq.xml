@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<subsets>
+    <subset>
+        <name>justquotes</name>
+        <sub>
+            <name>double_quote_close</name>
+            <pattern><![CDATA[(?<=[\w\.\,'\)\}\?-])"((?=[\.\s'\)},\?!:;\[-])|$)]]></pattern>
+            <replace>”</replace>
+        </sub>
+        <sub>
+            <name>re_double_quote_open</name>
+            <pattern><![CDATA[(^|(?<=[\s'{\(]))"(?=[\w'{-])]]></pattern>
+            <replace>“</replace>
+        </sub>
+        <sub>
+            <name>single_quote_close</name>
+            <pattern><![CDATA[(?<=[\w\.\,"\)}\?-])'((?=[\.\s"},\?!:;\[])|$)]]></pattern>
+            <replace>’</replace>
+        </sub>
+        <sub>
+            <name>single_quote_open</name>
+            <pattern><![CDATA[(^|(?<=[\s"{]))'(?=[\w"{-])]]></pattern>
+            <replace>‘</replace>
+        </sub>
+        <sub>
+            <name>apostrophe</name>
+            <pattern><![CDATA[(?<=[\w`\*_\}\)])'(?=\w)]]></pattern>
+            <replace>’</replace>
+        </sub>
+    </subset>
+    <subset>
+        <name>justdashes</name>
+        <sub>
+            <name>en_dash</name>
+            <pattern><![CDATA[(?<=[\w\*_`"'\.\)\}]\s)--(?=\s[\w\*_`"'\{\(])]]></pattern>
+            <replace>–</replace>
+        </sub>
+        <sub>
+            <name>em_dash</name>
+            <pattern><![CDATA[(?<=[\w\*_`"'\.\)\}])---(?=[\w\*_`"'\{\(])]]></pattern>
+            <replace>—</replace>
+        </sub>
+    </subset>
+</subsets>
