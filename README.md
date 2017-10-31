@@ -74,6 +74,64 @@ way as the original. Some of the difference are:
 
 To regurgitate, use the `-regurgitate` option, which may be abbreviated as `-r`. 
 
+### Smart quotes
+
+The parser incorporates a smart quotes feature. The writer can specify 
+that they want smartquotes processing for their document by including 
+the smartquotes declaration at the start of their document. 
+
+    !smart-quotes: on 
+    
+By default, the parser supports two values for the smart quotes declaration, `on` 
+and `off` (the default). The build-on `on` setting supports the following
+translations: 
+
+* single quotes to curly quotes 
+* double quotes to curly double quotes
+* single quotes as apostrophe to curly quotes
+* <space>--<space> to en-dash
+* --- to em-dash
+
+Note that no smart quote algorithm is perfect. This option will miss some 
+instances and may get some wrong. To ensure you always get the characters you 
+want, enter the unicode characters directly or use a character entity. 
+
+Smart quote processing is not applied to code phrases or to codeblocks 
+or embedded markup.
+
+Because different writers may want different smart quote rules, or different
+rules may be appropriate to different kinds of materials. the parser lets 
+you specify your own sets of smart quote rules. Essentially this lets you
+detect any pattern in the text and define a substitution for it. You can use
+it for any characters substitutions that you find useful, even those having 
+nothing to do with quotes. 
+
+To define a set of smart quote substitutions, create a XML file like the
+`sq.xml` file included with the parser. This file includes two alternate 
+sets of smart quote rules, `justquotes` and `justdashes`, which contains 
+rulesets which process just quotes and just dashes respectively. The dashes 
+and quotes rules in this file are the same as those build in to the parser.
+Note, however, that the parser does not use this file by default. 
+
+To invoke the `justquotes` rule set:
+
+1. Add the declaration `!smart-quotes: justquotes` to the document. 
+
+2. Use the command line parameter `-sq <path-to-sam-directory>/sq.xml`.
+
+To add a custom rule set, create your own rule set file and invoke it 
+in the same way. 
+
+Note that the rules in each rule set are represented by regular expressions. 
+The rules detect characters based on their surroundings. They do not detect 
+quotations by finding the opening and closing quotes as a pair. They find 
+separately. This means that the order of rules in the rule file may be 
+important. In the default rules, close quote rules are listed first. 
+Reversing the order might result in some close quotes being detected as 
+open quotes. 
+
+
+
 ### Running SAM Parser on Windows
 
 To run SAM Parser on Windows, use the `samparser` batch file:
@@ -122,7 +180,7 @@ used to output as "row". It is now output as "record".
 
 * Revision 1d16fd6d0544c32fa23930f303989b1b4a82c477 addressed #157 by changing the serialization of citations as described in #157 and adding support of the use of keys in citations.
 
-* Removed the smart quotes parser option and introduced the `!smart-quotes` declaration.
+* Revision ad4365064bdfe61fa43228991a31b3174feb2957 removes the smart quotes parser option (the flag that turned smart quotes on and off on the command line) and introduced the `!smart-quotes` document declaration and the option to add custom smart quotes rules to the parser.
 
 Please report any other backward incompatibilities you find so they can be added to this list.
 
