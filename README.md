@@ -71,6 +71,10 @@ way as the original. Some of the difference are:
 * Bold and italic decorations will be replaced with equivalent 
   annotations.
 * Some non-essential character escapes may be included.
+* Annoation lookups will be performed and any `!annotation-lookup` declaration
+  will be removed.
+* Smart quote processing will be performed and any `!smart-quotes` declaration
+  will be removed. 
 
 To regurgitate, use the `-regurgitate` option, which may be abbreviated as `-r`. 
 
