@@ -1930,10 +1930,7 @@ class FlowParser:
             if previous is None:
                 previous = self.doc.find_last_annotation(phrase.text)
             if previous is not None:
-                 pa = [x.annotation_type for x in phrase.annotations]
-                 for a in previous:
-                     if not a.annotation_type in pa:
-                         phrase.annotations.append(a)
+                phrase.annotations.extend(previous)
             # Else output a warning.
             else:
                 SAM_parser_warning(
