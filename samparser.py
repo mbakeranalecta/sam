@@ -1461,8 +1461,14 @@ def _annotation_lookup_case_insensitive(flow, text):
                 return [x for x in i.annotations if not x.local]
     return None
 
+def _annotation_lookup_off(flow, text):
+    return None
+
+
 
 annotation_lookup_modes = {
+    'on': _annotation_lookup_case_insensitive,
+    'off': _annotation_lookup_off,
     'case sensitive': _annotation_lookup_case_sensitive,
     'case insensitive': _annotation_lookup_case_insensitive
 }

@@ -221,7 +221,22 @@ specification: Semantic Authoring Markdown (SAM)
             semantics:
                 A declaration is an instruction to the parser on how to interpret the SAM document. Declarations are not part of the content of the document described by the SAM markup. Rather, they describe the markup itself.    
 
-                Currently the only declaration supported is the namespace declaration which sets the namespace for the entire SAM document. You cannot assign namespaces to individual structures in the text of a SAM document like you can in XML.
+                The following declarations are supported:
+
+                |namespace| Sets the namespace for the entire SAM document. You cannot assign namespaces to individual structures in the text of a SAM document like you can in XML. Future: Assigning individual elements to namespaces can be done through a schema.
+                |annotation-lookup| Sets the {annotation lookup}(feature) mode for the document. The options are:
+
+                                    * *on* Annotation lookup is performed in a case insensitive manner.
+                                    * *off* Annotation lookup is not performed.
+                                    * *case sensitive* Annotation lookup is performed in a case sensitive manner.
+                                    * *case insensitive* (default) Annotation lookup is performed in a case insensitive manner.
+                                    * <custom> Annotation lookup is performed using a custom algorithm supported by a user-supplied extension to the parser.
+
+                |smart-quotes| Set the smart quotes processing mode for the parser. The options are:
+
+                               * *on* Smart quotes processing is performed using the default rules.
+                               * *off* (default) Smart quotes processing is not performed.
+                               * <custom> Smart quotes processing is performed using a custom rule set provided by the parser. The default parser supports this via an XML file which is specified on the command line using the -sq option. Other parsers are free to support smart quotes or not, and to support custom smart quotes rules or not using a mechanism of their choice.
 
             serialization:
                 The namespace declaration causes the namespace of a document to be set to the specified namespace. This will result in the appropriate namespace declaration in the serialized XML file. A parser may handle namespace prefixes in any way it sees fit. 
