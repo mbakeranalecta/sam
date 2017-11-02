@@ -1454,12 +1454,14 @@ def _annotation_lookup_case_sensitive(flow, text):
                 return [x for x in i.annotations if not x.local]
     return None
 
+
 def _annotation_lookup_case_insensitive(flow, text):
     for i in reversed(flow):
         if type(i) is Phrase:
             if [x for x in i.annotations if not x.local] and i.text.lower() == text.lower():
                 return [x for x in i.annotations if not x.local]
     return None
+
 
 def _annotation_lookup_off(flow, text):
     return None
@@ -1885,30 +1887,33 @@ class FlowParser:
             elif flow_patterns['citation'].match(para.rest_of_para):
                 return "CITATION-START", para
             else:
-                # If there is an annotated phrase with no annotation, look back
+                # If there is an phrase with no annotation, look back
                 # to see if it has been annotated already, and if so, copy the
                 # closest preceding annotation.
                 # First look back in the current flow
                 # (which is not part of the doc structure yet).
-                previous = self.flow.find_last_annotation(text, self.doc.annotation_lookup)
-                if previous is not None:
-                    p.annotations.extend(previous)
-                else:
-                    # Then look back in the document.
-                    previous = self.doc.find_last_annotation(text)
-                    if previous is not None:
-                        p.annotations.extend(previous)
-
-                    # Else output a warning.
-                    else:
-                        SAM_parser_warning(
-                            "Unannotated phrase found: {" +
-                            text + "} " +
-                            "If you are trying to insert curly braces " +
-                            "into the document, use \{" + text + "}."
-                        )
+                # previous = self.flow.find_last_annotation(text, self.doc.annotation_lookup)
+                # if previous is not None:
+                #     pa = [x.annotation_type for x in p.annotations]
+                #     for a in previous:
+                #         if not a.annotation_type in pa:
+                #             p.annotations.append(a)
+                # else:
+                #     # Then look back in the document.
+                #     previous = self.doc.find_last_annotation(text)
+                #     if previous is not None:
+                #         p.annotations.extend(previous)
+                #
+                #     # Else output a warning.
+                #     else:
+                #         SAM_parser_warning(
+                #             "Unannotated phrase found: {" +
+                #             text + "} " +
+                #             "If you are trying to insert curly braces " +
+                #             "into the document, use \{" + text + "}."
+                #         )
                 para.retreat(1)
-                return "PARA", para
+                return "PHRASE-END", para
         else:
             self.current_string += '{'
             return "PARA", para
@@ -1922,22 +1927,21 @@ class FlowParser:
             # First look back in the current flow
             # (which is not part of the doc structure yet).
             previous = self.flow.find_last_annotation(phrase.text, self.doc.annotation_lookup)
-            if previous is not None:
-                phrase.annotations.extend(previous)
-            else:
-                # Then look back in the document.
+            if previous is None:
                 previous = self.doc.find_last_annotation(phrase.text)
-                if previous is not None:
-                    phrase.annotations.extend(previous)
-
-                # Else output a warning.
-                else:
-                    SAM_parser_warning(
-                        "Unannotated phrase found: {" +
-                        phrase.text + "} " +
-                        "If you are trying to insert curly braces " +
-                        "into the document, use \{" + phrase.text + "}."
-                    )
+            if previous is not None:
+                 pa = [x.annotation_type for x in phrase.annotations]
+                 for a in previous:
+                     if not a.annotation_type in pa:
+                         phrase.annotations.append(a)
+            # Else output a warning.
+            else:
+                SAM_parser_warning(
+                    "Unannotated phrase found: {" +
+                    phrase.text + "} " +
+                    "If you are trying to insert curly braces " +
+                    "into the document, use \{" + phrase.text + "}."
+                )
 
         return "PARA", para
 

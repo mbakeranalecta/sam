@@ -2768,10 +2768,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    Testing {XML}(language) testing {XML}+(index) testing {XML}.
+                    Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 
             markup:
-                Testing {XML}(language) testing {XML}+(index) testing {XML}.
+                Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 
             result:
                 ```(xml)

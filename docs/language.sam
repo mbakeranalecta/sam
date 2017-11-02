@@ -93,9 +93,7 @@ specification: Semantic Authoring Markdown (SAM)
             |flow insertion|  Flow insertions are an instruction to the application layer in content from an internal or external source at the flow level (that is, inside a flow).
             
             |citations| Citations are references to other works or structures.
-            
-            |embedded XML| You can embed XML in a SAM document. 
-            
+
             |include| You can include one SAM file in another.
 
             |ordered list| An ordered list is as list in which the order of the items is meaningful. An ordered list is any sequence of one or more ordered list items.
@@ -388,7 +386,6 @@ specification: Semantic Authoring Markdown (SAM)
 
                     paragraph         |           |       |           |     | 
                     record            |           |       |           |     | 
-                    XML               |           |       |           |     | 
 
                     block insert      |           | #name | ?condition| *id | *
                     inline insert     |           | #name | ?condition| *id | *
@@ -1302,7 +1299,7 @@ specification: Semantic Authoring Markdown (SAM)
             semantics:
                 A grid is nothing more than a two dimensional grid of cells. If you want any more complex representation of a table, you need to find a different way to mark it up. 
 
-                Note that SAM is primarily intended for creating {subject domain} languages and as such it does not provide native support for complex tables, which are document domain objects. {Record sets} are the SAM-like way to represent real record data. To create document domain tables in SAM, you would need to create a table markup using {blocks} and {fields}. Another alternative would be to use {embedded XML}.
+                Note that SAM is primarily intended for creating {subject domain} languages and as such it does not provide native support for complex tables, which are document domain objects. {Record sets} are the SAM-like way to represent real record data. To create document domain tables in SAM, you would need to create a table markup using {blocks} and {fields}. Another alternative would be to use {embedded}(feature "embedded markup) XML".
 
             serialization:
                 Grids are serialized as follows: 

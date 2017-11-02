@@ -3271,7 +3271,7 @@ This {should be reported}.
 </description>
 <source>
 <codeblock language="sam">
-Testing {XML}(language) testing {XML}+(index) testing {XML}.
+Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 </codeblock>
 </source>
 <markup>
