@@ -2277,7 +2277,7 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     |Do|(#foo7)(?bar)(?green) a deer,
-                                             a female deer
+                                              a female deer
 
                     |Re| a drop of
                          golden sun
@@ -2291,7 +2291,7 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 |Do|(#foo7)(?bar)(?green) a deer,
-                                         a female deer
+                                          a female deer
 
                 |Re| a drop of
                      golden sun

@@ -2738,7 +2738,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 <source>
 <codeblock language="sam">
 |Do|(#foo7)(?bar)(?green) a deer,
-                         a female deer
+                          a female deer
 
 |Re| a drop of
      golden sun
@@ -2755,8 +2755,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 <ll>
 <li conditions="bar,green" name="foo7">
 <label>Do</label>
-<p>a deer,</p>
-<p>a female deer</p>
+<p>a deer, a female deer</p>
 </li>
 <li>
 <label>Re</label>
@@ -3276,7 +3275,7 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language"><annotation type="language">XML</annotation></annotation></phrase>.</p>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">

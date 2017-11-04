@@ -1647,7 +1647,7 @@ class DocStructure:
         """
 
         # ID check
-        for i in [x.value for x in block.attributes if x.type=='id']:
+        for i in [x.value for x in block.attributes if x.type == 'id']:
             if i in self.ids:
                 raise SAMParserStructureError('Duplicate ID found "{0}".'.format(i))
             self.ids.append(i)
@@ -1886,9 +1886,9 @@ class FlowParser:
                 # (which is not part of the doc structure yet).
                 # previous = self.flow.find_last_annotation(text, self.doc.annotation_lookup)
                 # if previous is not None:
-                #     pa = [x.annotation_type for x in p.annotations]
+                #     pa = [x.type for x in p.annotations]
                 #     for a in previous:
-                #         if not a.annotation_type in pa:
+                #         if not a.type in pa:
                 #             p.annotations.append(a)
                 # else:
                 #     # Then look back in the document.
@@ -2290,8 +2290,8 @@ class Attribute:
 
 
 class Annotation:
-    def __init__(self, annotation_type, specifically='', namespace='', local=False):
-        self.annotation_type = annotation_type.strip()
+    def __init__(self, type, specifically='', namespace='', local=False):
+        self.type = type.strip()
         self.specifically = specifically
         self.namespace = namespace
         self.local = local
@@ -2299,16 +2299,22 @@ class Annotation:
     def __str__(self):
         return ''.join(self.regurgitate())
 
+    def __eq__(self, other):
+        return [self.type, self.specifically, self.namespace] == [other.type, other.specifically, other.namespace]
+
+    def __ne__(self, other):
+        return [self.type, self.specifically, self.namespace] != [other.type, other.specifically, other.namespace]
+
     def regurgitate(self):
-        yield '({0}'.format(self.annotation_type)
+        yield '({0}'.format(self.type)
         yield (' "{0}"'.format(self.specifically.replace('"','\\"')) if self.specifically else '')
         yield (' ({0})'.format(self.namespace) if self.namespace else '')
         yield ')'
 
     def serialize_xml(self, annotations=None, payload=None):
         yield '<annotation'
-        if self.annotation_type:
-            yield ' type="{0}"'.format(self.annotation_type)
+        if self.type:
+            yield ' type="{0}"'.format(self.type)
         if self.specifically:
             yield ' specifically="{0}"'.format(escape_for_xml_attribute(self.specifically))
         if self.namespace:
