@@ -572,7 +572,7 @@ class SamParser:
 
 
 class Block(ABC):
-    def __init__(self, name, indent, attributes=None, content=None, citations=None, namespace=None):
+    def __init__(self, name, indent, attributes=[], content=None, citations=[], namespace=None):
 
         # Test for a valid block name. Must be valid XML name.
         try:
@@ -1023,11 +1023,10 @@ class RecordSet(Block):
 
 class Record(Block):
     def __init__(self, field_values, indent, namespace=None):
-        self.name='record'
+        super().__init__(name='record', indent=indent, attributes=[],  citations=[], namespace=namespace)
         self.field_values = field_values
-        self.content = None
-        self.namespace = namespace
-        self.indent = indent
+
+
 
     def __str__(self):
         return
@@ -1648,14 +1647,10 @@ class DocStructure:
         """
 
         # ID check
-        try:
-
-            if 'id' in block.attributes:
-                if block.attributes['id'] in self.ids:
-                    raise SAMParserStructureError('Duplicate ID found "{0}".'.format(block.attributes['id']))
-                self.ids.append(block.attributes['id'])
-        except (TypeError, AttributeError):
-            pass
+        for i in [x.value for x in block.attributes if x.type=='id']:
+            if i in self.ids:
+                raise SAMParserStructureError('Duplicate ID found "{0}".'.format(i))
+            self.ids.append(i)
 
         # Check IDs from included files
         try:
@@ -1743,12 +1738,9 @@ class DocStructure:
 
 class Include(Block):
     def __init__(self, doc, content, href, indent):
+        super().__init__(name="include", indent=indent, attributes=[],  content = content, namespace=None)
         self.children=doc.root.children
-        self.indent = indent
-        self.namespace = None
         self.ids = doc.ids
-        self.name = "<<<"
-        self.content = content
         self.href= href
 
     def __str__(self):
@@ -1930,7 +1922,9 @@ class FlowParser:
             if previous is None:
                 previous = self.doc.find_last_annotation(phrase.text)
             if previous is not None:
-                phrase.annotations.extend(previous)
+                for a in previous:
+                    if a not in phrase.annotations:
+                        phrase.annotations.append(a)
             # Else output a warning.
             else:
                 SAM_parser_warning(
@@ -2281,6 +2275,12 @@ class Attribute:
 
     def __str__(self):
         return ''.join(self.regurgitate())
+
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def __ne__(self, other):
+        return self.__dict__ != other.__dict__
 
     def regurgitate(self):
         yield '(%s%s)' % (Attribute.attribute_symbols[self.type], self.value)

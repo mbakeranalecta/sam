@@ -2276,7 +2276,7 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    |Do|(#foo)(?bar)(?green) a deer,
+                    |Do|(#foo7)(?bar)(?green) a deer,
                                              a female deer
 
                     |Re| a drop of
@@ -2290,7 +2290,7 @@ tests:(!en) SAM Parser Tests
                     |Te| a drink with jam and bread
 
             markup:
-                |Do|(#foo)(?bar)(?green) a deer,
+                |Do|(#foo7)(?bar)(?green) a deer,
                                          a female deer
 
                 |Re| a drop of
@@ -2306,7 +2306,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <ll>
-                    <li conditions="bar,green" name="foo">
+                    <li conditions="bar,green" name="foo7">
                     <label>Do</label>
                     <p>a deer, a female deer</p>
                     </li>
@@ -2453,16 +2453,16 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    ```(=latexmathml)(*id13)(#name)(?a)(?b)
+                    ```(=latexmathml)(*id14)(#name)(?a)(?b)
                         n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             markup:
-                ```(=latexmathml)(*id13)(#name)(?a)(?b)
+                ```(=latexmathml)(*id14)(#name)(?a)(?b)
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             result:
                 ```(xml)
-                    <embedblock conditions="a,b" encoding="latexmathml" id="id13" name="name">
+                    <embedblock conditions="a,b" encoding="latexmathml" id="id14" name="name">
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
                     </embedblock>
 
@@ -2473,14 +2473,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >>>(image foo.gif)(*id14)(#name)(?a)(?b)
+                    >>>(image foo.gif)(*id15)(#name)(?a)(?b)
 
             markup:
-                >>>(image foo.gif)(*id14)(#name)(?a)(?b)
+                >>>(image foo.gif)(*id15)(#name)(?a)(?b)
 
             result:
                 ```(xml)
-                    <insert conditions="a,b" id="id14" item="foo.gif" name="name" type="image"/>
+                    <insert conditions="a,b" id="id15" item="foo.gif" name="name" type="image"/>
 
         case: Attributes on inserts
             description:
@@ -2768,10 +2768,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    Testing {XML}(language) testing {XML}+(index) testing {XML}.
+                    Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 
             markup:
-                Testing {XML}(language) testing {XML}+(index) testing {XML}.
+                Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 
             result:
                 ```(xml)
@@ -2783,14 +2783,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    Testing {XML}+(*foo) testing {XML}+(index) testing {XML}.
+                    Testing {XML}+(*foot) testing {XML}+(index) testing {XML}.
 
             markup:
-                Testing {XML}+(*foo) testing {XML}+(index) testing {XML}.
+                Testing {XML}+(*foot) testing {XML}+(index) testing {XML}.
 
             result:
                 ```(xml)
-                    <p>Testing <phrase id="foo"><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+                    <p>Testing <phrase id="foot"><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 
         case: Mix of local and global
             description:
@@ -3450,14 +3450,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >(#foo)
+                    >(#foo8)
 
             markup:
-                >(#foo)
+                >(#foo8)
 
             result:
                 ```(xml)
-                    <p><inline-insert item="foo" type="name"/></p>
+                    <p><inline-insert item="foo8" type="name"/></p>
 
     test: Strings
 

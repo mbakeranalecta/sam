@@ -2737,7 +2737,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </description>
 <source>
 <codeblock language="sam">
-|Do|(#foo)(?bar)(?green) a deer,
+|Do|(#foo7)(?bar)(?green) a deer,
                          a female deer
 
 |Re| a drop of
@@ -2753,9 +2753,10 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </source>
 <markup>
 <ll>
-<li conditions="bar,green" name="foo">
+<li conditions="bar,green" name="foo7">
 <label>Do</label>
-<p>a deer, a female deer</p>
+<p>a deer,</p>
+<p>a female deer</p>
 </li>
 <li>
 <label>Re</label>
@@ -2787,7 +2788,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 <result>
 <codeblock language="xml">
 &lt;ll&gt;
-&lt;li conditions="bar,green" name="foo"&gt;
+&lt;li conditions="bar,green" name="foo7"&gt;
 &lt;label&gt;Do&lt;/label&gt;
 &lt;p&gt;a deer, a female deer&lt;/p&gt;
 &lt;/li&gt;
@@ -2948,18 +2949,18 @@ def escape_for_xml(s):
 </description>
 <source>
 <codeblock language="sam">
-```(=latexmathml)(*id13)(#name)(?a)(?b)
+```(=latexmathml)(*id14)(#name)(?a)(?b)
     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </codeblock>
 </source>
 <markup>
-<embedblock conditions="a,b" encoding="latexmathml" id="id13" name="name">
+<embedblock conditions="a,b" encoding="latexmathml" id="id14" name="name">
 n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </embedblock>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;embedblock conditions="a,b" encoding="latexmathml" id="id13" name="name"&gt;
+&lt;embedblock conditions="a,b" encoding="latexmathml" id="id14" name="name"&gt;
 n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 &lt;/embedblock&gt;
 </codeblock>
@@ -2972,15 +2973,15 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </description>
 <source>
 <codeblock language="sam">
-&gt;&gt;&gt;(image foo.gif)(*id14)(#name)(?a)(?b)
+&gt;&gt;&gt;(image foo.gif)(*id15)(#name)(?a)(?b)
 </codeblock>
 </source>
 <markup>
-<insert conditions="a,b" id="id14" item="foo.gif" name="name" type="image"/>
+<insert conditions="a,b" id="id15" item="foo.gif" name="name" type="image"/>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;insert conditions="a,b" id="id14" item="foo.gif" name="name" type="image"/&gt;
+&lt;insert conditions="a,b" id="id15" item="foo.gif" name="name" type="image"/&gt;
 </codeblock>
 </result>
 </case>
@@ -3271,11 +3272,11 @@ This {should be reported}.
 </description>
 <source>
 <codeblock language="sam">
-Testing {XML}(language) testing {XML}+(index) testing {XML}.
+Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language"><annotation type="language">XML</annotation></annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3290,15 +3291,15 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 </description>
 <source>
 <codeblock language="sam">
-Testing {XML}+(*foo) testing {XML}+(index) testing {XML}.
+Testing {XML}+(*foot) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase id="foo"><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+<p>Testing <phrase id="foot"><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;Testing &lt;phrase id="foo"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;Testing &lt;phrase id="foot"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -4007,15 +4008,15 @@ that you can define string substitutions whenever you insert a fragment into you
 </description>
 <source>
 <codeblock language="sam">
-&gt;(#foo)
+&gt;(#foo8)
 </codeblock>
 </source>
 <markup>
-<p><inline-insert item="foo" type="name"/></p>
+<p><inline-insert item="foo8" type="name"/></p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;&lt;inline-insert item="foo" type="name"/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;inline-insert item="foo8" type="name"/&gt;&lt;/p&gt;
 </codeblock>
 </result>
 </case>

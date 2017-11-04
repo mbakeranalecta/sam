@@ -309,11 +309,11 @@ specification: Semantic Authoring Markdown (SAM)
 
         structure:(#attribute) Attributes
 
-            Attributes are metadata on a block.  
+            Attributes are metadata on a block or {phrase}.  
 
             syntax: 
 
-                Attributes are contained in parentheses that follow the colon of a {block} header with no space:
+                Attributes on blocks are contained in parentheses that follow the colon of a {block} header with no space:
 
                 ```(sam) 
                     name:(?BC) Fred Flintstone
@@ -322,6 +322,17 @@ specification: Semantic Authoring Markdown (SAM)
 
                 ```(sam) 
                     name:(?BC)(#fred) Fred Flintstone 
+
+                Attributes on {phrases} are contained in parentheses that follow the closing curly brace of the phrase or the closing parenthesis or bracket of another {annotation}, {attribute}, or {citation}.
+
+                ```(sam)
+
+                An attribute annotation looks like this:
+
+                ```(sam)
+                    In Quebec, a stop sign says {arrêt}(!fr).
+
+                A {phrase} can have an unlimited mix of attributes, {annotations}, and {citations} attached to it. 
 
                 There are four general attributes. The type of an attribute it determined by the flag character that precedes it. The four general types are:
 
@@ -365,7 +376,7 @@ specification: Semantic Authoring Markdown (SAM)
 
                 Certain block types have additional attributes that are specific to those block types. See the relevant entries for details. 
 
-                This is the list of the standard attributes allowed on each structure. Block types that take special attributes are indicated with an asterisk:
+                This is the list of the standard attributes allowed on each structure. Block types that take special attributes are indicated with <special>:
 
                 +++
                     block             | !language | #name | ?condition| *id | 
@@ -380,16 +391,16 @@ specification: Semantic Authoring Markdown (SAM)
                     blockquote        | !language | #name | ?condition| *id | 
                     phrase            | !language | #name | ?condition| *id | 
 
-                    codeblock         |           | #name | ?condition| *id | *
+                    codeblock         |           | #name | ?condition| *id | <special>
 
                     string-def        |           |       |           |     | 
 
                     paragraph         |           |       |           |     | 
                     record            |           |       |           |     | 
 
-                    block insert      |           | #name | ?condition| *id | *
-                    inline insert     |           | #name | ?condition| *id | *
-                    include           |           |       |           |     | *
+                    block insert      |           | #name | ?condition| *id | <special>
+                    inline insert     |           | #name | ?condition| *id | <special>
+                    include           |           |       |           |     | <special>
 
                 note:
                     It should be noted that the lack of arbitrary named attributes does not reduce the semantic flexibility of SAM as compared to XML. Any metadata that can be expressed by an attribute on a block can also be expressed by a field that is a child of that block. The reason for using attributes in XML is to preserve a pure distinction between text and metadata, but that is not a design consideration in SAM, which is meant for the creation of new text through structured writing, not for the annotation of existing texts for study.
@@ -402,8 +413,12 @@ specification: Semantic Authoring Markdown (SAM)
                 * {name} is represented by a `name` attribute.
                 * {condition}s are represented by a `conditions` attribute. If multiple condition attributes are applied in SAM, they will be concatenated with commas in the `conditions` attribute value. 
 
+                Attributes on {phrases} are serialized wrapped around the phrase to which they apply just as described for {annotations}.
+
             SOM:
-                Attributes are represented by the attribute field of the {Block} object as a dictionary. 
+                Attributes on {blocks} are represented by the attributes field of the {Block} object as a list of {Attribute} objects. 
+
+                Attributes on {phrases} are represented by the attributes field of the {Phrase} object as a list of {Attribute} objects. 
         
         structure:(#field) Field
         
@@ -546,15 +561,7 @@ specification: Semantic Authoring Markdown (SAM)
             syntax:
                 An {annotation} is attached to a phrase and is expressed as an expression in parentheses following the closing `}` of the phrase with no space in between. 
 
-                An {annotation} consists either of one of four management attribute types (language, id, name, condition) or an {annotation} type expression. 
-
-                An attribute annotation looks like this:
-
-                ```(sam)
-                    In Quebec, a stop sign says {arrêt}(!fr).
-
-
-                An annotation type expression is an expression that specifies the type of a string. Here the type expression says that the string "Rio Bravo" is a reference to a movie: 
+                An annotation specifies the type of a string. Here the type expression says that the string "Rio Bravo" is a reference to a movie: 
 
                 ```(sam) 
                     In {Rio Bravo}(movie), {the Duke}(actor "John Wayne" (SAG)) plays a union colonel.
@@ -574,7 +581,7 @@ specification: Semantic Authoring Markdown (SAM)
             semantics:
                 The specific semantics of individual annotation depend on the language designer, however, in order to maintain consistency across languages, it is important to use the specifically and namespace attributes for their intended purposes and not to hijack them to express some other semantics. 
 
-                Type annotations may be from any of the structured writing domains (media, document, subject, management). The relationship between the annotation type and the meaning of the specifically attribute changes in each domain. 
+                Annotations may be from any of the {structured writing domains} (media, document, subject, management). The relationship between the annotation type and the meaning of the specifically attribute changes in each domain. 
 
                 In the media domain, the annotation type refers to some media property to be applied to the text, and the specifically attribute supplies more specific information. For example it could be `{the Duke}(highlight "yellow")` or `{the Duke}(link "http://JohnWayne.com")`.
 
@@ -583,13 +590,6 @@ specification: Semantic Authoring Markdown (SAM)
                 In the subject domain, the annotation type refers to the type of the subject being referred to and the specifically attribute clarifies the intended subject if required. For example `{the Duke}(actor "John Wayne").
 
                 The key to using the annotation attributes correctly is simply to make sure that the attribute names apply in a reasonable fashion to the values they contain. If they don't, a different markup strategy should be used. 
-
-                The semantics of management attribute annotations are as follows:
-
-                * {condition}(attribute) determines if the {phrase} will be included in the output or not.
-                * {Name}(attribute), assigns a {name} to the {phrase} so it can be referred to elsewhere.
-                * {id}(attribute), assigns an {ID} to the {phrase} so it can be referred to elsewhere.
-                * {language}(attribute), specifies the language in which the phrase is written. 
 
             serialization:
 
