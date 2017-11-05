@@ -54,7 +54,7 @@ block_patterns = {
             'list-item': re.compile(re_indent + re_ul_marker + re_attributes + re_spaces + re_content, re.U),
             'num-list-item': re.compile(re_indent + re_ol_marker + re_attributes + re_spaces + re_content, re.U),
             'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
-            'block-insert': re.compile(re_indent + r'>>>(?P<insert>\((.*?(?<!\\))\))(' + re_attributes + ')?\s*(?P<unexpected>.*)', re.U),
+            'block-insert': re.compile(re_indent + r'>>>((\((?P<insert>.+?)\))|(\[(?P<ref>.*?(?<!\\))\]))(' + re_attributes + ')?\s*(?P<unexpected>.*)', re.U),
             'include': re.compile(re_indent + r'<<<' + re_attributes, re.U),
             'string-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U)
         }
@@ -87,7 +87,7 @@ flow_patterns = {
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
             'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
-            'inline-insert': re.compile(r'>(?P<insert>\((.*?(?<!\\))\))' + re_attributes, re.U),
+            'inline-insert': re.compile(r'>((\((?P<insert>.+?)\))|(\[(?P<ref>.*?(?<!\\))\]))' + re_attributes, re.U),
             'citation': re.compile(
                 r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\%(?P<key>\S+?)(\s+(?P<key_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
                 re.U)
@@ -336,9 +336,12 @@ class SamParser:
         if match.group("unexpected"):
             raise SAMParserError("Unexpected characters in block insert. Found: " + match.group("unexpected"))
         indent = match.end("indent")
-        attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?")
-        type, item = parse_insert(match.group("insert"))
-        b = BlockInsert(indent, type, item, attributes, citations)
+        if match.group("attributes"):
+            attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?")
+        else:
+            attributes, citations = [],[]
+        type, ref, item = parse_insert(match.group("insert"), match.group("ref"))
+        b = BlockInsert(indent, type, ref, item, attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -704,9 +707,10 @@ class Block(ABC):
 
 
 class BlockInsert(Block):
-    def __init__(self, indent, type, item, attributes=None, citations=None, namespace=None):
+    def __init__(self, indent, insert_type, ref_type, item, attributes=None, citations=None, namespace=None):
         super().__init__(name='insert', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
-        self.type =type
+        self.insert_type = insert_type
+        self.ref_type =ref_type
         self.item = item
 
     def __str__(self):
@@ -714,18 +718,23 @@ class BlockInsert(Block):
 
     def regurgitate(self):
         yield " " * int(self.indent)
-        type_symbol = Attribute.attribute_symbols.get(self.type)
-        if type_symbol:
-            yield '>>>({0}{1})'.format(type_symbol, self.item)
+        if self.ref_type:
+            ref_symbol = Attribute.attribute_symbols.get(self.ref_type)
+            yield '>>>[{0}{1}]'.format(ref_symbol, self.item)
         else:
-            yield '>>>({0} {1})'.format(self.type, self.item)
+            yield '>>>({0} {1})'.format(self.insert_type, self.item)
         for x in self.attributes:
             yield from x.regurgitate()
         yield '\n\n'
 
+
+
     def serialize_xml(self):
 
-        attrs=[Attribute('type', self.type), Attribute('item', self.item)]
+        if self.ref_type:
+            attrs = [Attribute(self.ref_type, self.item)]
+        else:
+            attrs=[Attribute('type', self.insert_type), Attribute('item', self.item)]
 
         yield '<insert'
         if self.attributes:
@@ -2100,10 +2109,13 @@ class FlowParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-            attributes, citations = parse_attributes(match.group("attributes"))
-            type, item =parse_insert(match.group("insert"))
+            if match.group("attributes"):
+                attributes, citations = parse_attributes(match.group("attributes"))
+            else:
+                attributes, citations = [],[]
+            type, ref, item =parse_insert(match.group("insert"), match.group("ref"))
 
-            self.flow.append(InlineInsert(type, item, attributes, citations))
+            self.flow.append(InlineInsert(type, ref, item, attributes, citations))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '>'
@@ -2266,7 +2278,12 @@ class Attribute:
                          'attribution': '',
                          'type': '',
                          'item': '',
-                         'key': '%'}
+                         'key': '%',
+                         'nameref': '#',
+                         'idref': '*',
+                         'keyref': '%',
+                         'fragmentref': '~',
+                         'stringref': '$'}
 
     def __init__(self, type, value, local=False):
         self.type = type
@@ -2371,9 +2388,8 @@ class Citation:
 
     def serialize_xml(self, attrs=None, payload=None):
         yield '<citation'
-        if self.citation_extra is not None:
-            if self.citation_extra:
-                yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
+        if self.citation_extra:
+            yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
         yield ' {0}="{1}"'.format(self.citation_type, escape_for_xml_attribute(self.citation_value))
         #Nest attributes for serialization
         if attrs:
@@ -2397,8 +2413,9 @@ class Citation:
 
 
 class InlineInsert:
-    def __init__(self, type, item, attributes=None, citations=None):
-        self.type = type
+    def __init__(self, insert_type, ref_type, item, attributes=None, citations=None):
+        self.insert_type = insert_type
+        self.ref_type =ref_type
         self.item = item
         self.attributes = attributes
         self.citations = citations
@@ -2407,18 +2424,22 @@ class InlineInsert:
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
-        type_symbol = Attribute.attribute_symbols.get(self.type)
-        if type_symbol:
-            yield '>({0}{1})'.format(type_symbol, self.item)
+        if self.ref_type:
+            ref_symbol = Attribute.attribute_symbols.get(self.ref_type)
+            yield '>[{0}{1}]'.format(ref_symbol, self.item)
         else:
-            yield '>({0} {1})'.format(self.type, self.item)
+            yield '>({0} {1})'.format(self.insert_type, self.item)
+
         for x in self.attributes:
             yield from x.regurgitate()
 
 
     def serialize_xml(self):
 
-        attrs=[Attribute('type', self.type), Attribute('item', self.item)]
+        if self.ref_type:
+            attrs = [Attribute(self.ref_type, self.item)]
+        else:
+            attrs=[Attribute('type', self.insert_type), Attribute('item', self.item)]
 
         yield '<inline-insert'
 
@@ -2455,9 +2476,6 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     citations =[]
     attributes_list=[]
     citations_list=[]
-
-    re_att = re.compile(r"(\(.*?(?<!\\)\))")
-    re_cit = re.compile(r"(\[.*?(?<!\\)\])")
 
     re_all = re.compile(r'(\((?P<att>.*?(?<!\\))\))|(\[((?P<cit>.*?(?<!\\))\])|(?P<bad>.))')
 
@@ -2546,36 +2564,40 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     return attributes, citations
 
 
-def parse_insert(annotation_string):
-    result = []
+def parse_insert(insert, ref):
+    insert_type = None
+    ref_type = None
+    item = None
 
-    insert_annotation = re.match(r'(\(.*?(?<!\\)\))', annotation_string)
-    attributes_list = insert_annotation.group(0)[1:-1].partition(' ')
-    insert_type = attributes_list[0]
-    if insert_type[0] == '$':
-        insert_item = insert_type[1:]
-        insert_type = 'string'
-    elif insert_type[0] == '*':
-        insert_item = insert_type[1:]
-        insert_type = 'id'
-    elif insert_type[0] == '#':
-        insert_item = insert_type[1:]
-        insert_type = 'name'
-    elif insert_type[0] == '~':
-        insert_item = insert_type[1:]
-        insert_type = 'fragment'
-    elif insert_type[0] == '%':
-        insert_item = insert_type[1:]
-        insert_type = 'key'
+    if insert:
+        insert_parts = insert.partition(' ')
+        insert_type = insert_parts[0]
+        item = insert_parts[2].strip()
+        # strip unnecessary quotes from insert item
+        item = re.sub(r'^(["\'])|(["\'])$', '', item)
+        if item == '':
+            raise SAMParserStructureError("Insert item not specified in: {0}".format(insert))
+    elif ref:
+        if ref[0] == '$':
+            item = ref[1:]
+            ref_type = 'stringref'
+        elif ref[0] == '*':
+            item = ref[1:]
+            ref_type = 'idref'
+        elif ref[0] == '#':
+            item = ref[1:]
+            ref_type = 'nameref'
+        elif ref[0] == '~':
+            item = ref[1:]
+            ref_type = 'fragmentref'
+        elif ref[0] == '%':
+            item = ref[1:]
+            ref_type = 'keyref'
     else:
-        insert_item = attributes_list[2].strip()
-    #result.append(Attribute('type', unescape(insert_type)))
-    # strip unnecessary quotes from insert item
-    insert_item = re.sub(r'^(["\'])|(["\'])$', '', insert_item)
-    if insert_item == '':
-        raise SAMParserStructureError ("Insert item not specified in: {0}".format(annotation_string))
-    #result.append(Attribute('item', unescape(insert_item)))
-    return insert_type, insert_item
+        raise SAMParserError("Unrecognized insert expression found.")
+
+
+    return insert_type, ref_type, item
 
 
 def escape_for_sam(s):

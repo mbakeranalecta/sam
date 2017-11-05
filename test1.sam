@@ -3403,14 +3403,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >>>(%glug)
+                    >>>[%glug]
 
             markup:
-                >>>(%glug)
+                >>>[%glug]
 
             result:
                 ```(xml)
-                    <insert item="glug" type="key"/>
+                    <insert keyref="glug"/>
 
     test: Inline inserts
 
@@ -3426,7 +3426,7 @@ tests:(!en) SAM Parser Tests
                     Because you often want to >(image "foo.gif")(#bar)(?baz)(?bat) change some part of a text when it is being
                     reused, <fragments> & fragment references can both define local {strings}(feature).
                     Any {string references}(feature) inside a fragment will be resolved by looking first
-                    at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
+                    at local-strings defined in the >[*my-table] fragment reference, then at local strings defined
                     in the fragment definition, and then at global strings. In effect, this means
                     that you can define string substitutions whenever you insert a fragment into your content.
 
@@ -3435,13 +3435,13 @@ tests:(!en) SAM Parser Tests
                 Because you often want to >(image "foo.gif")(#bar)(?baz)(?bat) change some part of a text when it is being
                 reused, <fragments> & fragment references can both define local {strings}(feature).
                 Any {string references}(feature) inside a fragment will be resolved by looking first
-                at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
+                at local-strings defined in the >[*my-table] fragment reference, then at local strings defined
                 in the fragment definition, and then at global strings. In effect, this means
                 that you can define string substitutions whenever you insert a fragment into your content.
 
             result:
                 ```(xml)
-                    <p>Because you often want to <inline-insert conditions="baz,bat" item="foo.gif" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+                    <p>Because you often want to <inline-insert conditions="baz,bat" item="foo.gif" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 
         case: Paragraph that is just an inline insert
             description:
@@ -3450,14 +3450,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >(#foo8)
+                    >[#foo8]
 
             markup:
-                >(#foo8)
+                >[#foo8]
 
             result:
                 ```(xml)
-                    <p><inline-insert item="foo8" type="name"/></p>
+                    <p><inline-insert nameref="foo8"/></p>
 
     test: Strings
 
@@ -3485,14 +3485,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    This sentence includes a string reference >(string name). And a shortcut version >($name).
+                    This sentence includes a string reference >[$name].
 
             markup:
-                This sentence includes a string reference >(string name). And a shortcut version >($name).
+                This sentence includes a string reference >[$name].
 
             result:
                 ```(xml)
-                   <p>This sentence includes a string reference <inline-insert item="name" type="string"/>. And a shortcut version <inline-insert item="name" type="string"/>.</p>
+                   <p>This sentence includes a string reference <inline-insert stringref="name"/>.</p>
 
     test: Fragments
         description:
@@ -3548,18 +3548,18 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >>>(~foobar)
+                    >>>[~foobar]
                         $a=apricot
                         $b=breadfruit
 
             markup:
-                >>>(~foobar)
+                >>>[~foobar]
                     $a=apricot
                     $b=breadfruit
 
             result:
                 ```(xml)
-                    <insert item="foobar" type="fragment">
+                    <insert fragmentref="foobar">
                     <string name="a">apricot</string>
                     <string name="b">breadfruit</string>
                     </insert>

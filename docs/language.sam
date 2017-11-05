@@ -752,7 +752,7 @@ specification: Semantic Authoring Markdown (SAM)
                 resource in parentheses:
 
                 ```(sam)
-                    My favorite flavor of ice cream is >($favorite-flavor).
+                    My favorite flavor of ice cream is >[$favorite-flavor].
 
 
                 The resource to be inserted may be identified either by type and URL as in the block example above or by
@@ -763,7 +763,7 @@ specification: Semantic Authoring Markdown (SAM)
                 the introduction to the deluxe version of a product, you could do this:
 
                 ```(sam)
-                    >>>(~deluxe-intro)(?model=deluxe)
+                    >>>[~deluxe-intro](?model=deluxe)
 
                 Remember that it is up to the application layer to implement such inserts.
 
@@ -848,9 +848,9 @@ specification: Semantic Authoring Markdown (SAM)
                 The string can then be inserted using a {block insert} or {inline insert}:
 
                 ```(sam)
-                    The sentence includes and string insert >($foo).
+                    The sentence includes and string insert >[$foo].
 
-                    >>>($foo)
+                    >>>[$foo])
 
 
 
@@ -899,17 +899,17 @@ specification: Semantic Authoring Markdown (SAM)
                 ```(sam) 
                     ~~~(#my-fragment) 
                         $color=black 
-                        Bar bar >>($color) sheep Have you any wool? 
+                        Bar bar >[$color] sheep Have you any wool? 
 
                 To insert a fragment: 
 
                 ```(sam) 
-                    >>>(~my-fragment)
+                    >>>[~my-fragment]
                 
                 Any strings defined within a fragment are scoped to that fragment (per normal {string} scoping rules. You can override these strings when you insert the fragment. In fact, you can override any in-scope strings in a fragment insert. String definitions must each be on a line by themselves. 
 
                 ```(sam)
-                    >>>(~my-fragment)
+                    >>>[~my-fragment]
                         $color=white
 
             semantics:

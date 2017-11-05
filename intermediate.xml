@@ -186,7 +186,7 @@ and\:
 </codeblock>
 </source>
 <markup>
-<p>and:</p>
+<and/>
 </markup>
 <result>
 <codeblock language="xml">
@@ -533,8 +533,7 @@ multiple lines.
 <p>One</p>
 </li>
 <li>
-<p>Two this paragraph wraps.</p>
-<p>This is another para in the list item.</p>
+<p>Two this paragraph wraps. This is another para in the list item.</p>
 </li>
 <li>
 <p>Three</p>
@@ -1405,9 +1404,7 @@ multiple lines.
 </ul>
 </li>
 <li>
-<p>Three times three is nine.</p>
-<p>Four times four is sixteen.</p>
-<p>Five time five is twenty five.</p>
+<p>Three times three is nine. Four times four is sixteen. Five time five is twenty five.</p>
 </li>
 <li>
 <p>Four</p>
@@ -1600,9 +1597,17 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<p>2. This is just a paragraph</p>
-<p>4. This is just a paragraph</p>
-<p>9. This is just a paragraph</p>
+<ol>
+<li>
+<p>This is just a paragraph</p>
+</li>
+<li>
+<p>This is just a paragraph</p>
+</li>
+<li>
+<p>This is just a paragraph</p>
+</li>
+</ol>
 </markup>
 <result>
 <codeblock language="xml">
@@ -1627,9 +1632,17 @@ multiple lines.
 </codeblock>
 </source>
 <markup>
-<p>* This is just a paragraph</p>
-<p>* This is just a paragraph</p>
-<p>* This is just a paragraph</p>
+<ul>
+<li>
+<p>This is just a paragraph</p>
+</li>
+<li>
+<p>This is just a paragraph</p>
+</li>
+<li>
+<p>This is just a paragraph</p>
+</li>
+</ul>
 </markup>
 <result>
 <codeblock language="xml">
@@ -1673,8 +1686,7 @@ multiple lines.
 </li>
 <li>
 <label>Re</label>
-<p>a drop of golden sun</p>
-<p>Is it a particle or a wave?</p>
+<p>a drop of golden sun Is it a particle or a wave?</p>
 </li>
 <li>
 <label>Me</label>
@@ -2460,7 +2472,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <markup>
 <blockquote>
 <citation extra="page 22" idref="bing"/>
-<line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" keyref="bing"/></line>
+<line name="foo2">You gotta walk that lonesome valley,<citation value="keyref bing page 22"/></line>
 <line>You gotta walk it by yourself,</line>
 <line conditions="bar">Nobody here can walk it for you,</line>
 <line>   You gotta walk it by yourself.</line>
@@ -2759,8 +2771,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </li>
 <li>
 <label>Re</label>
-<p>a drop of golden sun</p>
-<p>Is it a particle or a wave?</p>
+<p>a drop of golden sun Is it a particle or a wave?</p>
 </li>
 <li id="bananas">
 <label>Me</label>
@@ -3376,7 +3387,7 @@ In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays
 </codeblock>
 </source>
 <markup>
-<p>In Rio Bravo, *the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.</p>
+<p>In Rio Bravo, <phrase><annotation type="bold">the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays </annotation></phrase>an ex-Union colonel `out for revenge.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3958,15 +3969,15 @@ There is a `_` in _this \_ italic_ decoration.
 </description>
 <source>
 <codeblock language="sam">
-&gt;&gt;&gt;(%glug)
+&gt;&gt;&gt;[%glug]
 </codeblock>
 </source>
 <markup>
-<insert item="glug" type="key"/>
+<insert keyref="glug"/>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;insert item="glug" type="key"/&gt;
+&lt;insert keyref="glug"/&gt;
 </codeblock>
 </result>
 </case>
@@ -3986,17 +3997,17 @@ There is a `_` in _this \_ italic_ decoration.
 Because you often want to &gt;(image "foo.gif")(#bar)(?baz)(?bat) change some part of a text when it is being
 reused, &lt;fragments&gt; &amp; fragment references can both define local {strings}(feature).
 Any {string references}(feature) inside a fragment will be resolved by looking first
-at local-strings defined in the &gt;(*my-table) fragment reference, then at local strings defined
+at local-strings defined in the &gt;[*my-table] fragment reference, then at local strings defined
 in the fragment definition, and then at global strings. In effect, this means
 that you can define string substitutions whenever you insert a fragment into your content.
 </codeblock>
 </source>
 <markup>
-<p>Because you often want to <inline-insert conditions="baz,bat" item="foo.gif" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert item="my-table" type="id"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+<p>Because you often want to <inline-insert conditions="baz,bat" item="foo.gif" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;Because you often want to &lt;inline-insert conditions="baz,bat" item="foo.gif" name="bar" type="image"/&gt; change some part of a text when it is being reused, &amp;lt;fragments&amp;gt; &amp;amp; fragment references can both define local &lt;phrase&gt;&lt;annotation type="feature"&gt;strings&lt;/annotation&gt;&lt;/phrase&gt;. Any &lt;phrase&gt;&lt;annotation type="feature"&gt;string references&lt;/annotation&gt;&lt;/phrase&gt; inside a fragment will be resolved by looking first at local-strings defined in the &lt;inline-insert item="my-table" type="id"/&gt; fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.&lt;/p&gt;
+&lt;p&gt;Because you often want to &lt;inline-insert conditions="baz,bat" item="foo.gif" name="bar" type="image"/&gt; change some part of a text when it is being reused, &amp;lt;fragments&amp;gt; &amp;amp; fragment references can both define local &lt;phrase&gt;&lt;annotation type="feature"&gt;strings&lt;/annotation&gt;&lt;/phrase&gt;. Any &lt;phrase&gt;&lt;annotation type="feature"&gt;string references&lt;/annotation&gt;&lt;/phrase&gt; inside a fragment will be resolved by looking first at local-strings defined in the &lt;inline-insert idref="my-table"/&gt; fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -4007,15 +4018,15 @@ that you can define string substitutions whenever you insert a fragment into you
 </description>
 <source>
 <codeblock language="sam">
-&gt;(#foo8)
+&gt;[#foo8]
 </codeblock>
 </source>
 <markup>
-<p><inline-insert item="foo8" type="name"/></p>
+<p><inline-insert nameref="foo8"/></p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;&lt;inline-insert item="foo8" type="name"/&gt;&lt;/p&gt;
+&lt;p&gt;&lt;inline-insert nameref="foo8"/&gt;&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -4051,15 +4062,15 @@ $foo = bar bar black sheep
 </description>
 <source>
 <codeblock language="sam">
-This sentence includes a string reference &gt;(string name). And a shortcut version &gt;($name).
+This sentence includes a string reference &gt;[$name].
 </codeblock>
 </source>
 <markup>
-<p>This sentence includes a string reference <inline-insert item="name" type="string"/>. And a shortcut version <inline-insert item="name" type="string"/>.</p>
+<p>This sentence includes a string reference <inline-insert stringref="name"/>.</p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;This sentence includes a string reference &lt;inline-insert item="name" type="string"/&gt;. And a shortcut version &lt;inline-insert item="name" type="string"/&gt;.&lt;/p&gt;
+&lt;p&gt;This sentence includes a string reference &lt;inline-insert stringref="name"/&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -4120,19 +4131,17 @@ This sentence includes a string reference &gt;(string name). And a shortcut vers
 </description>
 <source>
 <codeblock language="sam">
-&gt;&gt;&gt;(~foobar)
+&gt;&gt;&gt;[~foobar]
     $a=apricot
     $b=breadfruit
 </codeblock>
 </source>
 <markup>
-<insert item="foobar" type="fragment">
-<string name="a">apricot</string>
-<string name="b">breadfruit</string>
-</insert></markup>
+<insert fragmentref="foobar"/>
+</markup>
 <result>
 <codeblock language="xml">
-&lt;insert item="foobar" type="fragment"&gt;
+&lt;insert fragmentref="foobar"&gt;
 &lt;string name="a"&gt;apricot&lt;/string&gt;
 &lt;string name="b"&gt;breadfruit&lt;/string&gt;
 &lt;/insert&gt;
