@@ -38,7 +38,7 @@ block_patterns = {
                 re_indent + r'(?P<flag>!!!)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
                 re.U),
             'declaration': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
-            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + '\s' + re_content + r'?', re.U),
+            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + '((\s' + re_content + r'?)|$)', re.U),
             'codeblock-start': re.compile(
                 re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
                 re.U),
@@ -170,8 +170,8 @@ class SamParser:
         indent = match.end("indent")
         block_name = match.group("name").strip()
         attributes, citations = parse_attributes(match.group("attributes"))
-        content = match.group("content").strip()
-        parsed_content = None if content == '' else self.flow_parser.parse(content, self.doc)
+        content = match.group("content")
+        parsed_content = None if content == None else self.flow_parser.parse(content.strip(), self.doc)
         b = Block(block_name, indent, attributes, parsed_content, citations)
         self.doc.add_block(b)
         return "SAM", context
@@ -1249,16 +1249,20 @@ class Paragraph(Block):
         elif self.parent is None:
             for x in self.children:
                 yield from x.regurgitate()
-            yield "\n"
+            yield "\n\n"
         elif self.parent.children.index(self) == 0:
             for x in self.children:
                 yield from x.regurgitate()
-            yield "\n"
+            yield "\n\n"
         else:
-            yield " " * int(self.indent)
+            parent_indent = self.parent.indent
+            parent_leader = len(str(self.parent.parent.children.index(self.parent)+1))+2
+
+
+            yield " " * (parent_indent + parent_leader)
             for x in self.children:
                 yield from x.regurgitate()
-            yield "\n"
+            yield "\n\n"
 
 
     def _add_child(self, b):
@@ -1403,9 +1407,12 @@ class Flow(list):
             if hasattr(x, 'regurgitate'):
                 yield from x.regurgitate()
             elif i == 0:
-                match = block_patterns['block-start'].match(x)
-                if match is not None:
-                    yield escape_for_sam(x).replace(':', '\\:')
+                if block_patterns['block-start'].match(x) is not None:
+                    yield escape_for_sam(x).replace(':', '\\:', 1)
+                elif block_patterns['num-list-item'].match(x) is not None:
+                    yield escape_for_sam(x).replace('.', '\\.', 1)
+                elif block_patterns['list-item'].match(x) is not None:
+                    yield escape_for_sam(x).replace('*', '\\*', 1)
                 else:
                     yield escape_for_sam(x)
             else:
