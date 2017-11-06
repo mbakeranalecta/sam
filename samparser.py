@@ -1411,8 +1411,10 @@ class Flow(list):
                     yield escape_for_sam(x).replace(':', '\\:', 1)
                 elif block_patterns['num-list-item'].match(x) is not None:
                     yield escape_for_sam(x).replace('.', '\\.', 1)
-                elif block_patterns['list-item'].match(x) is not None:
-                    yield escape_for_sam(x).replace('*', '\\*', 1)
+                # Don't need to do this for bulleted list items as escape_for_sam takes care of them
+
+#                elif block_patterns['list-item'].match(x) is not None:
+#                    yield escape_for_sam(x).replace('*', '\\*', 1)
                 else:
                     yield escape_for_sam(x)
             else:
@@ -2608,7 +2610,7 @@ def parse_insert(insert, ref):
 
 
 def escape_for_sam(s):
-    t = dict(zip([ord('['), ord('{'), ord('&'), ord('\\')], ['\\[', '\\{', '\\&', '\\\\']))
+    t = dict(zip([ord('['), ord('{'), ord('&'), ord('\\'), ord('*'), ord('_'), ord('`')], ['\\[', '\\{', '\\&', '\\\\', '\\*', '\\_', '\\`']))
     try:
         return s.translate(t)
     except AttributeError:

@@ -3376,7 +3376,7 @@ In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays
 </codeblock>
 </source>
 <markup>
-<p>In Rio Bravo, <phrase><annotation type="bold">the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays </annotation></phrase>an ex-Union colonel `out for revenge.</p>
+<p>In Rio Bravo, *the `Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.</p>
 </markup>
 <result>
 <codeblock language="xml">
