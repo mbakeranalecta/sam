@@ -725,7 +725,10 @@ class BlockInsert(Block):
             yield '>>>({0} {1})'.format(self.insert_type, self.item)
         for x in self.attributes:
             yield from x.regurgitate()
-        yield '\n\n'
+        yield '\n'
+        for c in self.children:
+            yield from c.regurgitate()
+        yield '\n'
 
 
 
@@ -2385,6 +2388,12 @@ class Citation:
             yield '*'
         elif self.citation_type == 'nameref':
             yield '#'
+        elif self.citation_type == 'keyref':
+            yield '%'
+        elif self.citation_type == 'fragmentref':
+            yield '~'
+        elif self.citation_type == 'stringref':
+            yield '$'
         else:
             yield '{0} '.format(self.citation_type)
         yield self.citation_value

@@ -2460,7 +2460,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <markup>
 <blockquote>
 <citation extra="page 22" idref="bing"/>
-<line name="foo2">You gotta walk that lonesome valley,<citation value="keyref bing page 22"/></line>
+<line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" keyref="bing"/></line>
 <line>You gotta walk it by yourself,</line>
 <line conditions="bar">Nobody here can walk it for you,</line>
 <line>   You gotta walk it by yourself.</line>
@@ -4126,8 +4126,10 @@ This sentence includes a string reference &gt;[$name].
 </codeblock>
 </source>
 <markup>
-<insert fragmentref="foobar"/>
-</markup>
+<insert fragmentref="foobar">
+<string name="a">apricot</string>
+<string name="b">breadfruit</string>
+</insert></markup>
 <result>
 <codeblock language="xml">
 &lt;insert fragmentref="foobar"&gt;
