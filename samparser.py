@@ -44,7 +44,10 @@ block_patterns = {
                 re.U),
             'grid-start': re.compile(re_indent + r'\+\+\+' + re_attributes, re.U),
             'blockquote-start': re.compile(
-                re_indent + r'("""|\'\'\')(' + re_remainder + r')?',
+                re_indent + r'"""(' + re_remainder + r')?',
+                re.U),
+            'alt-blockquote-start': re.compile(
+                re_indent + r"'''(" + re_remainder + r')?',
                 re.U),
             'fragment-start': re.compile(re_indent + r'~~~' + re_attributes, re.U),
             'paragraph-start': re.compile(r'\w*', re.U),
@@ -520,6 +523,10 @@ class SamParser:
             return "CODEBLOCK-START", (source, match)
 
         match = block_patterns['blockquote-start'].match(line)
+        if match is not None:
+            return "BLOCKQUOTE-START", (source, match)
+
+        match = block_patterns['alt-blockquote-start'].match(line)
         if match is not None:
             return "BLOCKQUOTE-START", (source, match)
 
@@ -1407,7 +1414,8 @@ block_pattern_replacements = {
     'block-start': ':',
     'codeblock-start': '`',
     'grid-start': '+',
-    'blockquote-start': ('"', "'"),
+    'blockquote-start': '"',
+    'alt-blockquote-start': "'",
     'fragment-start': '~',
     'line-start': '|',
     'record-start': ':',
