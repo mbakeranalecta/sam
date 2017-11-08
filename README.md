@@ -54,7 +54,11 @@ The meaning of each parameter is as follows:
 
 ### Validating with an XML schema
 
-Eventually, SAM is going to have its own schema language, but until that is available (and probably afteward) you can validate your document against an XML schema. Schema validation is done on the XML output format, not the input (because it is an XML schema, not a SAM schema). To invoke schema validation, use the `-xsd` option on the command line:
+Eventually, SAM is going to have its own schema language, but until that is available 
+(and probably afterward) you can validate your document against an XML schema. 
+Schema validation is done on the XML output format, not the input (because it is an XML 
+schema, not a SAM schema). To invoke schema validation, use the `-xsd` option 
+on the command line:
 
      -xsd <scehma.xsd>
 
@@ -87,7 +91,7 @@ the smartquotes declaration at the start of their document.
     !smart-quotes: on 
     
 By default, the parser supports two values for the smart quotes declaration, `on` 
-and `off` (the default). The build-on `on` setting supports the following
+and `off` (the default). The built-in `on` setting supports the following
 translations: 
 
 * single quotes to curly quotes 
@@ -114,8 +118,8 @@ To define a set of smart quote substitutions, create a XML file like the
 `sq.xml` file included with the parser. This file includes two alternate 
 sets of smart quote rules, `justquotes` and `justdashes`, which contains 
 rulesets which process just quotes and just dashes respectively. The dashes 
-and quotes rules in this file are the same as those build in to the parser.
-Note, however, that the parser does not use this file by default. 
+and quotes rules in this file are the same as those built in to the parser.
+Note, however, that the parser does not use these files by default. 
 
 To invoke the `justquotes` rule set:
 
@@ -128,7 +132,7 @@ in the same way.
 
 Note that the rules in each rule set are represented by regular expressions. 
 The rules detect characters based on their surroundings. They do not detect 
-quotations by finding the opening and closing quotes as a pair. They find 
+quotations by finding the opening and closing quotes as a pair. They find them
 separately. This means that the order of rules in the rule file may be 
 important. In the default rules, close quote rules are listed first. 
 Reversing the order might result in some close quotes being detected as 
@@ -185,6 +189,15 @@ used to output as "row". It is now output as "record".
 * Revision 1d16fd6d0544c32fa23930f303989b1b4a82c477 addressed #157 by changing the serialization of citations as described in #157 and adding support of the use of keys in citations.
 
 * Revision ad4365064bdfe61fa43228991a31b3174feb2957 removes the smart quotes parser option (the flag that turned smart quotes on and off on the command line) and introduced the `!smart-quotes` document declaration and the option to add custom smart quotes rules to the parser.
+
+* Revision b4ca40baa03233ff306ed20a59da92668e4e0872 changes the syntax for inserting a value by reference. 
+It used to be `>(#foo)` but this was confusing because parenthese are used to create names and ids, not
+to reference them. The syntax for referencing a name or id is [#foo]. So, the syntax for inserting a value by
+reference is now `>[#foo]`. This applies to strings, ids, names, fragments, and keys. Note that the syntax for
+inserting a value by URI still uses parentheses, since this is new information, not a reference to another
+internal value. Also note the difference between `[#foo]` which means generate a reference to the content with 
+the name `foo` and `>[#foo]` which means insert the content with the name foo at the current location. (These are 
+of course, operations performed at application layer, not by the parser.)
 
 Please report any other backward incompatibilities you find so they can be added to this list.
 
