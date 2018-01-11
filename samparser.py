@@ -582,6 +582,9 @@ class SamParser:
 
 
 class Block(ABC):
+
+    html_tag = "div"
+
     def __init__(self, name, indent, attributes=[], content=None, citations=[], namespace=None):
 
         # Test for a valid block name. Must be valid XML name.
@@ -721,7 +724,7 @@ class Block(ABC):
                 yield "</{0}>\n".format(self.name)
 
     def serialize_html(self):
-        yield '<div class="{0}"'.format(self.name)
+        yield '<{0} class="{1}"'.format(self.html_tag, self.name)
 
         if self.attributes:
             if any([x.value for x in self.attributes if x.type == 'condition']):
@@ -747,7 +750,7 @@ class Block(ABC):
                 heading_level = title_depth if title_depth < 6 else 6
                 yield "\n<h{0}>".format(heading_level)
                 yield from self.content.serialize_html()
-                yield "</h1>".format(self.content)
+                yield "</h{0}>".format(heading_level)
 
             if type(self.children[0]) is not Flow:
                 yield "\n"
@@ -755,14 +758,14 @@ class Block(ABC):
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html()
-            yield "</div>\n"
+            yield '</{0}>'.format(self.html_tag)
         else:
             if self.content is None:
                 yield "/>\n"
             else:
                 yield '>'
                 yield from self.content.serialize_html()
-                yield "</div>\n"
+                yield '</{0}>'.format(self.html_tag)
 
 
 class BlockInsert(Block):
@@ -841,6 +844,43 @@ class Codeblock(Block):
         for x in self.children:
             yield from x.regurgitate()
         yield '\n'
+
+    def serialize_html(self):
+        attrs = []
+        yield '<pre'
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+        if self.language:
+            attrs.append(Attribute('language', self.language))
+        if self.attributes:
+            attrs.extend(self.attributes)
+        if attrs:
+            if any([x.value for x in attrs if x.type == 'condition']):
+                conditions = Attribute('conditions',
+                                       ','.join([x.value for x in attrs if x.type == 'condition']))
+                attrs = [x for x in attrs if x.type != 'condition']
+                attrs.append(conditions)
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+            else:
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+
+        if self.citations or self.children:
+            yield ">\n"
+        if self.citations:
+            for x in self.citations:
+                yield from x.serialize_xml()
+                yield '\n'
+        if self.children:
+            for x in self.children:
+                if x is not None:
+                    yield from x.serialize_xml()
+            yield "</pre>\n"
+        else:
+            yield '/>'
 
     def serialize_xml(self):
         attrs = []
@@ -1082,6 +1122,7 @@ class Fragment(Block):
         yield '\n'
 
 class Blockquote(Block):
+    html_tag = "blockquote"
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='blockquote', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
@@ -1102,6 +1143,7 @@ class Blockquote(Block):
         yield '\n'
 
 class RecordSet(Block):
+    html_tag = "table"
     def __init__(self, name, field_names, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name=name, indent=indent, attributes=attributes,  citations=citations, namespace=namespace)
         self.field_names = field_names
@@ -1130,6 +1172,7 @@ class RecordSet(Block):
             self.children.append(b)
 
 class Record(Block):
+    html_tag = "tr"
     def __init__(self, field_values, indent, namespace=None):
         super().__init__(name='record', indent=indent, attributes=[],  citations=[], namespace=namespace)
         self.field_values = field_values
@@ -1181,6 +1224,7 @@ class List(Block):
             yield from x.regurgitate()
 
 class UnorderedList(List):
+    html_tag = "ul"
     def __init__(self, indent, namespace=None):
         super().__init__(name='ul', indent=indent, content=None, namespace=namespace)
 
@@ -1202,6 +1246,9 @@ class UnorderedList(List):
                 self.parent.add(b)
 
 class OrderedList(List):
+
+    html_tag = "ol"
+
     def __init__(self, indent, namespace=None):
         super().__init__(name='ol', indent=indent, namespace=namespace)
 
@@ -1227,6 +1274,7 @@ class OrderedList(List):
 
 
 class ListItem(Block):
+    html_tag = "li"
     @abstractmethod
     def __init__(self, name, indent, attributes=None, citations=None,  namespace=None):
         super().__init__(name=name, indent=indent, attributes=attributes, citations=citations, namespace=namespace)
@@ -1312,6 +1360,7 @@ class LabeledListItem(ListItem):
 
 
 class LabeledList(List):
+    html_tag = "dl"
     def __init__(self, indent, attributes=None, citations=None,  namespace=None):
         super().__init__(name='ll', indent=indent, attributes=attributes,  namespace=namespace)
 
@@ -1333,6 +1382,7 @@ class LabeledList(List):
                 self.parent.add(b)
 
 class Paragraph(Block):
+    html_tag = "p"
     def __init__(self, indent,  namespace=None):
         super().__init__(name='p', indent=indent, namespace=namespace)
 
@@ -1362,7 +1412,6 @@ class Paragraph(Block):
             for x in self.children:
                 yield from x.regurgitate()
             yield "\n\n"
-
 
     def _add_child(self, b):
         if type(b) is Flow:
@@ -1634,6 +1683,7 @@ annotation_lookup_modes = {
 
 
 class Pre(Flow):
+    html_tag = "pre"
     def __init__(self, text_block):
         raw_lines = []
         for line in text_block.lines:
@@ -2297,6 +2347,7 @@ class FlowParser:
 
 
 class Phrase:
+    html_tag = "span"
     def __init__(self, text):
         self.text = text
         self.annotations = []
@@ -2357,25 +2408,26 @@ class Phrase:
         yield '</phrase>'
 
     def serialize_html(self):
-        yield '<span class="phrase"'
+        yield '<span'
         if any([x.value for x in self.attributes if x.type == 'condition']):
             conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
             attrs = [x for x in self.attributes if x.type != 'condition']
             attrs.append(conditions)
             for att in sorted(attrs, key=lambda x: x.type):
-                yield from att.serialize_html()
+                yield from att.serialize_xml()
         else:
             for att in sorted(self.attributes, key=lambda x: x.type):
-                yield from att.serialize_html()
+                yield from att.serialize_xml()
         yield '>'
 
         #Nest attributes for serialization
         if self.annotations:
             ann, *rest = self.annotations
-            yield from ann.serialize_html(rest, escape_for_xml(self.text))
+            yield from ann.serialize_xml(rest, escape_for_xml(self.text))
         else:
             yield escape_for_xml(self.text)
         yield '</span>'
+
 
     def append(self, thing):
         if not self.child:
@@ -2420,7 +2472,7 @@ class Code(Phrase):
     def serialize_html(self):
 
         if any(x for x in self.attributes if x.type == "encoding"):
-            tag = "embed"
+            tag = "data-embed"
         else:
             tag = "code"
 
@@ -2636,7 +2688,7 @@ class Citation:
             yield '/>'
 
     def serialize_html(self, attrs=None, payload=None):
-        yield '<citation'
+        yield '<cite'
         if self.citation_extra:
             yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
         yield ' {0}="{1}"'.format(self.citation_type, escape_for_xml_attribute(self.citation_value))
@@ -2645,11 +2697,11 @@ class Citation:
             attr, *rest = attrs
             yield '>'
             yield from attr.serialize_html(rest, payload)
-            yield '</citation>'
+            yield '</cite>'
         elif payload:
             yield '>'
             yield payload
-            yield '</citation>'
+            yield '</cite>'
         else:
             yield '/>'
 
