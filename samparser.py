@@ -657,6 +657,20 @@ class Block(ABC):
             x=x.parent
         return ancestors_and_self
 
+    def preceding_sibling(self):
+        my_pos= [i for i,x in enumerate(self.parent.children) if x is self][0]
+        if my_pos > 0:
+            return self.parent.children[my_pos - 1]
+        else:
+            return None
+
+    def following_sibling(self):
+        my_pos= [i for i,x in enumerate(self.parent.children) if x is self][0]
+        if my_pos == len(self.parent.children)-1:
+            return None
+        else:
+            return self.parent.children[my_pos + 1]
+
     def __str__(self):
         return ''.join(self.regurgitate())
 
@@ -976,40 +990,8 @@ class Embedblock(Codeblock):
             yield '/>'
 
     def serialize_html(self):
-        attrs = []
-        yield '<embedblock'
-
-        if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
-        if self.language:
-            attrs.append(Attribute('encoding', self.language))
-        if self.attributes:
-            attrs.extend(self.attributes)
-        if attrs:
-            if any([x.value for x in attrs if x.type == 'condition']):
-                conditions = Attribute('conditions',
-                                       ','.join([x.value for x in attrs if x.type == 'condition']))
-                attrs = [x for x in attrs if x.type != 'condition']
-                attrs.append(conditions)
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_xml()
-            else:
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_xml()
-
-        if self.children:
-            yield ">"
-
-            if type(self.children[0]) is not Flow:
-                yield "\n"
-
-            for x in self.children:
-                if x is not None:
-                    yield from x.serialize_html()
-            yield "</embedblock>\n"
-        else:
-            yield '/>'
+        SAM_parser_warning("Embedded encodings are not supported in HTML output mode and will be omitted.")
+        yield ''
 
 
 class Remark(Block):
@@ -1032,6 +1014,7 @@ class Remark(Block):
 
 
 class Grid(Block):
+    html_tag = 'table'
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='grid', indent=indent, attributes=attributes,  citations=citations, namespace=namespace)
 
@@ -1049,6 +1032,7 @@ class Grid(Block):
         yield '\n'
 
 class Row(Block):
+    html_tag = 'tr'
     def __init__(self, indent,  namespace=None):
         super().__init__(name='row', indent=indent, namespace=namespace)
 
@@ -1078,6 +1062,8 @@ class Row(Block):
 
 
 class Cell(Block):
+    html_tag = 'td'
+
     def __init__(self, indent, namespace=None):
         super().__init__(name='cell', indent=indent, namespace=namespace)
 
@@ -1107,6 +1093,14 @@ class Line(Block):
             raise SAMParserStructureError('A Line cannot have children.')
         else:
             self.parent.add(b)
+
+    def serialize_html(self):
+        if self.preceding_sibling() is None:
+            yield '<p>'
+        yield from self.content.serialize_html()
+        yield '<br/>\n'
+        if self.following_sibling() is None:
+            yield '</p>'
 
 class Fragment(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
@@ -2351,7 +2345,7 @@ class FlowParser:
 
 
 class Phrase:
-    html_tag = "span"
+
     def __init__(self, text):
         self.text = text
         self.annotations = []
@@ -2412,22 +2406,22 @@ class Phrase:
         yield '</phrase>'
 
     def serialize_html(self):
-        yield '<span'
+        yield '<span class="phrase"'
         if any([x.value for x in self.attributes if x.type == 'condition']):
             conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
             attrs = [x for x in self.attributes if x.type != 'condition']
             attrs.append(conditions)
             for att in sorted(attrs, key=lambda x: x.type):
-                yield from att.serialize_xml()
+                yield from att.serialize_html()
         else:
             for att in sorted(self.attributes, key=lambda x: x.type):
-                yield from att.serialize_xml()
+                yield from att.serialize_html()
         yield '>'
 
         #Nest attributes for serialization
         if self.annotations:
             ann, *rest = self.annotations
-            yield from ann.serialize_xml(rest, escape_for_xml(self.text))
+            yield from ann.serialize_html(rest, escape_for_xml(self.text))
         else:
             yield escape_for_xml(self.text)
         yield '</span>'
@@ -2476,24 +2470,23 @@ class Code(Phrase):
     def serialize_html(self):
 
         if any(x for x in self.attributes if x.type == "encoding"):
-            tag = "data-embed"
+            SAM_parser_warning("Embedded encodings are not supported in HTML output mode and will be omitted.")
+            yield ''
         else:
-            tag = "code"
-
-        yield '<' + tag
-        if any([x.value for x in self.attributes if x.type == 'condition']):
-            conditions = Attribute('conditions',
-                                   ','.join([x.value for x in self.attributes if x.type == 'condition']))
-            attrs = [x for x in self.attributes if x.type != 'condition']
-            attrs.append(conditions)
-            for att in sorted(attrs, key=lambda x: x.type):
-                yield from att.serialize_html()
-        else:
-            for att in sorted(self.attributes, key=lambda x: x.type):
-                yield from att.serialize_html()
-        yield '>'
-        yield escape_for_xml(self.text)
-        yield '</' + tag + '>'
+            yield '<code'
+            if any([x.value for x in self.attributes if x.type == 'condition']):
+                conditions = Attribute('conditions',
+                                       ','.join([x.value for x in self.attributes if x.type == 'condition']))
+                attrs = [x for x in self.attributes if x.type != 'condition']
+                attrs.append(conditions)
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_html()
+            else:
+                for att in sorted(self.attributes, key=lambda x: x.type):
+                    yield from att.serialize_html()
+            yield '>'
+            yield escape_for_xml(self.text)
+            yield '</code>'
 
     def append(self, thing):
         raise SAMParserStructureError("Inline code cannot have typed annotations.")
@@ -2627,24 +2620,24 @@ class Annotation:
             yield '/>'
 
     def serialize_html(self, annotations=None, payload=None):
-        yield '<annotation'
+        yield '<span'
         if self.type:
-            yield ' type="{0}"'.format(self.type)
+            yield ' class="{0}"'.format(self.type)
         if self.specifically:
-            yield ' specifically="{0}"'.format(escape_for_xml_attribute(self.specifically))
+            yield ' data-specifically="{0}"'.format(escape_for_xml_attribute(self.specifically))
         if self.namespace:
-            yield ' namespace="{0}"'.format(self.namespace)
+            yield ' data-namespace="{0}"'.format(self.namespace)
 
         #Nest annotations for serialization
         if annotations:
             anns, *rest = annotations
             yield '>'
             yield from anns.serialize_html(rest, payload)
-            yield '</annotation>'
+            yield '</span>'
         elif payload:
             yield '>'
             yield payload
-            yield '</annotation>'
+            yield '</span>'
         else:
             yield '/>'
 
