@@ -728,7 +728,7 @@ class Block(ABC):
 
         if self.attributes:
             if any([x.value for x in self.attributes if x.type == 'condition']):
-                conditions = Attribute('data-conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
+                conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
                 attrs = [x for x in self.attributes if x.type != 'condition']
                 attrs.append(conditions)
                 for att in sorted(attrs, key=lambda x: x.type):
@@ -845,43 +845,6 @@ class Codeblock(Block):
             yield from x.regurgitate()
         yield '\n'
 
-    def serialize_html(self):
-        attrs = []
-        yield '<pre'
-
-        if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
-        if self.language:
-            attrs.append(Attribute('language', self.language))
-        if self.attributes:
-            attrs.extend(self.attributes)
-        if attrs:
-            if any([x.value for x in attrs if x.type == 'condition']):
-                conditions = Attribute('conditions',
-                                       ','.join([x.value for x in attrs if x.type == 'condition']))
-                attrs = [x for x in attrs if x.type != 'condition']
-                attrs.append(conditions)
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_xml()
-            else:
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_xml()
-
-        if self.citations or self.children:
-            yield ">\n"
-        if self.citations:
-            for x in self.citations:
-                yield from x.serialize_xml()
-                yield '\n'
-        if self.children:
-            for x in self.children:
-                if x is not None:
-                    yield from x.serialize_xml()
-            yield "</pre>\n"
-        else:
-            yield '/>'
-
     def serialize_xml(self):
         attrs = []
         yield '<codeblock'
@@ -918,6 +881,47 @@ class Codeblock(Block):
             yield "</codeblock>\n"
         else:
             yield '/>'
+
+    def serialize_html(self):
+        attrs = []
+        yield '<pre'
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+        if self.attributes:
+            attrs.extend(self.attributes)
+        if attrs:
+            if any([x.value for x in attrs if x.type == 'condition']):
+                conditions = Attribute('conditions',
+                                       ','.join([x.value for x in attrs if x.type == 'condition']))
+                attrs = [x for x in attrs if x.type != 'condition']
+                attrs.append(conditions)
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+            else:
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_xml()
+
+        if self.citations or self.children:
+            yield ">"
+
+        if self.citations:
+            for x in self.citations:
+                yield from x.serialize_xml()
+                yield '\n'
+        if self.children:
+            if self.language:
+                yield '<code data-language="{0}">'.format(self.language)
+            for x in self.children:
+                if x is not None:
+                    yield from x.serialize_xml()
+            if self.language:
+                yield '</code>'
+            yield "</pre>\n"
+        else:
+            yield '/>'
+
 
 class Embedblock(Codeblock):
 
@@ -2537,6 +2541,23 @@ class Attribute:
                          'fragmentref': '~',
                          'stringref': '$'}
 
+    html_attributes = {'language': 'data-language',
+                       'name': 'data-name',
+                       'condition': 'data-condition',
+                       'id': 'ID',
+                       'xml:lang': 'lang',
+                       'encoding': 'data-encoding',
+                       'attribution': 'data-attribution',
+                       'type': 'data-type',
+                       'item': 'data-item',
+                       'key': 'data-key',
+                       'nameref': 'data-nameref',
+                       'idref': 'IDREF',
+                       'keyref': 'data-keyref',
+                       'fragmentref': 'data-fragmentref',
+                       'stringref': 'data-fragmentref',
+                       'conditions': 'data-conditions'}
+
     def __init__(self, type, value, local=False):
         self.type = type
         self.value = value
@@ -2558,7 +2579,7 @@ class Attribute:
         yield ' %s="%s"' % (self.type, escape_for_xml_attribute(self.value))
 
     def serialize_html(self):
-        yield ' %s="%s"' % (self.type, escape_for_xml_attribute(self.value))
+        yield ' %s="%s"' % (Attribute.html_attributes[self.type], escape_for_xml_attribute(self.value))
 
 
 class Annotation:
