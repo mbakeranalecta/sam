@@ -774,6 +774,7 @@ specification: Semantic Authoring Markdown (SAM)
                 * audio
                 * feed
                 * app
+                * object
 
                 They should be used only with their natural semantics.
 
@@ -787,6 +788,7 @@ specification: Semantic Authoring Markdown (SAM)
                 |"audio"| Insert a playable audio clip into the output.
                 |"feed"| Insert the result of a feed into the output.
                 |"app"| Insert an embedded app into the output. 
+                |*object*| Inserts a generic object (per HTML5 'object' tag.)
 
                 The semantics of inserting by reference to an {ID}, {name}, {fragment}, or {string}, or {key} are as follows:
 

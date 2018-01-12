@@ -720,7 +720,7 @@ class Block(ABC):
             if self.content:
                 yield "\n<title>"
                 yield from self.content.serialize_xml()
-                yield "</title>".format(self.content)
+                yield "</title>\n".format(self.content)
 
             if type(self.children[0]) is not Flow:
                 yield "\n"
@@ -764,7 +764,7 @@ class Block(ABC):
                 heading_level = title_depth if title_depth < 6 else 6
                 yield "\n<h{0}>".format(heading_level)
                 yield from self.content.serialize_html()
-                yield "</h{0}>".format(heading_level)
+                yield "</h{0}>\n".format(heading_level)
 
             if type(self.children[0]) is not Flow:
                 yield "\n"
@@ -772,14 +772,14 @@ class Block(ABC):
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html()
-            yield '</{0}>'.format(self.html_tag)
+            yield '</{0}>\n'.format(self.html_tag)
         else:
             if self.content is None:
                 yield "/>\n"
             else:
                 yield '>'
                 yield from self.content.serialize_html()
-                yield '</{0}>'.format(self.html_tag)
+                yield '</{0}>\n'.format(self.html_tag)
 
 
 class BlockInsert(Block):
@@ -805,8 +805,6 @@ class BlockInsert(Block):
         for c in self.children:
             yield from c.regurgitate()
         yield '\n'
-
-
 
     def serialize_xml(self):
 
@@ -835,6 +833,58 @@ class BlockInsert(Block):
             yield '</insert>'
         else:
             yield '/>\n'
+
+    def serialize_html(self):
+
+        known_insert_types = ["image", "video", "audio", "feed", "app", "object"]
+        known_file_types = [".gif", ".jpeg", ".jpg", ".png",
+                           ".apng", ".bmp", ".svg", ".ico",
+                           ".ogv", ".ogg", ".mp4", ".m4a",
+                           ".m4p", ".m4b", ".m4r", ".m4v",
+                           ".webm", ".oga", ".l16", ".wav",
+                           ".aiff", ".au", ".pcm", ".mp3",
+                           ".m4a", ".mp4", ".3gp", ".m4a",
+                           ".m4b", ".m4p", ".m4r", ".m4v",
+                           ".aac", ".spx", ".opus", ".atom",
+                           ".rss", ".jar"]
+
+        # XML in not included in the above list because it can be used for indirect identification of resources
+
+        if self.ref_type:
+            attrs = [Attribute(self.ref_type, self.item)]
+        else:
+            attrs=[Attribute('type', self.insert_type), Attribute('item', self.item)]
+
+        yield '<div class="insert"'
+        if self.attributes:
+            if any([x.value for x in self.attributes if x.type == 'condition']):
+                conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
+                attrs.append(conditions)
+            attrs.extend([x for x in self.attributes if x.type != 'condition'])
+
+        for att in sorted(attrs, key=lambda x: x.type):
+            yield from att.serialize_html()
+        yield '>\n'
+
+        if self.citations or self.children:
+
+            for cit in self.citations:
+                yield from cit.serialize_html()
+
+            for c in self.children:
+                yield from c.serialize_html()
+
+        _, item_extension = os.path.splitext(self.item)
+        if self.insert_type in known_insert_types and item_extension.lower() in known_file_types:
+            yield '<object data="{0}">'.format(self.item)
+        else:
+            if not self.insert_type in known_insert_types:
+                SAM_parser_warning('HTML output mode does not support the "{0}" insert type.'.format(self.insert_type))
+            if not item_extension.lower() in known_file_types:
+                SAM_parser_warning('HTML output mode does not support the "{0}" file type.'.format(item_extension))
+
+        yield '</div>\n'
+
 
 
 class Codeblock(Block):
@@ -912,29 +962,29 @@ class Codeblock(Block):
                 attrs = [x for x in attrs if x.type != 'condition']
                 attrs.append(conditions)
                 for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_xml()
+                    yield from att.serialize_html()
             else:
                 for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_xml()
+                    yield from att.serialize_html()
 
         if self.citations or self.children:
             yield ">"
 
         if self.citations:
             for x in self.citations:
-                yield from x.serialize_xml()
+                yield from x.serialize_html()
                 yield '\n'
         if self.children:
             if self.language:
                 yield '<code data-language="{0}">'.format(self.language)
             for x in self.children:
                 if x is not None:
-                    yield from x.serialize_xml()
+                    yield from x.serialize_html()
             if self.language:
                 yield '</code>'
             yield "</pre>\n"
         else:
-            yield '/>'
+            yield '/>\n'
 
 
 class Embedblock(Codeblock):
@@ -987,7 +1037,7 @@ class Embedblock(Codeblock):
                     yield from x.serialize_xml()
             yield "</embedblock>\n"
         else:
-            yield '/>'
+            yield '/>\n'
 
     def serialize_html(self):
         SAM_parser_warning("Embedded encodings are not supported in HTML output mode and will be omitted.")
@@ -1374,6 +1424,35 @@ class LabeledListItem(ListItem):
             if x is not None:
                 yield from x.serialize_xml()
         yield "</{0}>\n".format(self.name)
+
+    def serialize_html(self):
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+
+
+        if self.attributes:
+            yield '<div class="li"'
+            if any([x.value for x in self.attributes if x.type == 'condition']):
+                conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
+                attrs = [x for x in self.attributes if x.type != 'condition']
+                attrs.append(conditions)
+                for att in sorted(attrs, key=lambda x: x.type):
+                    yield from att.serialize_html()
+            else:
+                for att in sorted(self.attributes, key=lambda x: x.type):
+                    yield from att.serialize_html()
+            yield '>\n'
+        yield "<dt>"
+        yield from self.label.serialize_html()
+        yield "</dt>\n<dd>"
+        for x in self.children:
+            if x is not None:
+                yield from x.serialize_html()
+        yield "</dd>\n"
+        if self.attributes:
+            yield "</div>\n"
 
 
 class LabeledList(List):
