@@ -1075,6 +1075,7 @@ class Cell(Block):
             yield from x.regurgitate()
 
 class Line(Block):
+    html_tag = 'pre'
     def __init__(self, indent, attributes, content, citations=None, namespace=None):
         super().__init__(name='line', indent=indent, attributes=attributes, content=content, citations=citations, namespace=namespace)
 
@@ -1094,13 +1095,13 @@ class Line(Block):
         else:
             self.parent.add(b)
 
-    def serialize_html(self):
-        if self.preceding_sibling() is None:
-            yield '<p>'
-        yield from self.content.serialize_html()
-        yield '<br/>\n'
-        if self.following_sibling() is None:
-            yield '</p>'
+    # def serialize_html(self):
+    #     if self.preceding_sibling() is None:
+    #         yield '<pre class="line">'
+    #     yield from self.content.serialize_html()
+    #     yield '\n'
+    #     if self.following_sibling() is None:
+    #         yield '</pre>'
 
 class Fragment(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
@@ -1170,12 +1171,9 @@ class RecordSet(Block):
             self.children.append(b)
 
 class Record(Block):
-    html_tag = "tr"
     def __init__(self, field_values, indent, namespace=None):
         super().__init__(name='record', indent=indent, attributes=[],  citations=[], namespace=namespace)
         self.field_values = field_values
-
-
 
     def __str__(self):
         return
@@ -1199,6 +1197,27 @@ class Record(Block):
                 yield from value.serialize_xml()
                 yield "</{0}>\n".format(name)
         yield "</record>\n"
+
+    def serialize_html(self):
+        if not self.preceding_sibling():
+            yield '<tr class="record">'
+            for fn in self.parent.field_names:
+                yield '<th class="record">{0}</th>'.format(fn)
+
+        record = list(zip(self.parent.field_names, self.field_values))
+        yield '<tr class="record"'
+
+        if self.namespace is not None:
+            if type(self.parent) is Root or self.namespace != self.parent.namespace:
+                yield ' xmlns="{0}"'.format(self.namespace)
+        yield ">\n"
+
+        if record:
+            for name, value in zip(self.parent.field_names, self.field_values):
+                yield '<td class="{0}">'.format(name)
+                yield from value.serialize_html()
+                yield "</td>\n"
+        yield "</tr>\n"
 
 
 class List(Block):
@@ -2702,23 +2721,20 @@ class Citation:
             yield '/>'
 
     def serialize_html(self, attrs=None, payload=None):
-        yield '<cite'
-        if self.citation_extra:
-            yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
-        yield ' {0}="{1}"'.format(self.citation_type, escape_for_xml_attribute(self.citation_value))
-        #Nest attributes for serialization
-        if attrs:
-            attr, *rest = attrs
-            yield '>'
-            yield from attr.serialize_html(rest, payload)
-            yield '</cite>'
-        elif payload:
-            yield '>'
-            yield payload
+        if self.citation_type == 'value':
+            yield '<cite>' + self.citation_value
+            if self.citation_extra:
+                yield ' {0}'.format(self.citation_extra)
             yield '</cite>'
         else:
-            yield '/>'
-
+            SAM_parser_warning("Citations using id, name, key, fragment, and id references are not supported in HTML output mode and will be omitted.")
+        if attrs:
+            attr, *rest = attrs
+            yield from attr.serialize_xml(rest, payload)
+        elif payload:
+            yield payload
+        else:
+            yield ''
 
     def append(self, thing):
         if not self.child:
