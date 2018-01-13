@@ -115,6 +115,19 @@ smart_quote_subs = {re.compile(re_double_quote_close):'”',
 
 smart_quote_sets = {'on': smart_quote_subs}
 
+known_insert_types = ["image", "video", "audio", "feed", "app", "object"]
+known_file_types = [".gif", ".jpeg", ".jpg", ".png",
+                    ".apng", ".bmp", ".svg", ".ico",
+                    ".ogv", ".ogg", ".mp4", ".m4a",
+                    ".m4p", ".m4b", ".m4r", ".m4v",
+                    ".webm", ".oga", ".l16", ".wav",
+                    ".aiff", ".au", ".pcm", ".mp3",
+                    ".m4a", ".mp4", ".3gp", ".m4a",
+                    ".m4b", ".m4p", ".m4r", ".m4v",
+                    ".aac", ".spx", ".opus", ".atom",
+                    ".rss", ".jar"]
+# XML in not included in the above list because it can be used for indirect identification of resources
+
 included_files = []
 
 class SamParser:
@@ -836,20 +849,6 @@ class BlockInsert(Block):
 
     def serialize_html(self):
 
-        known_insert_types = ["image", "video", "audio", "feed", "app", "object"]
-        known_file_types = [".gif", ".jpeg", ".jpg", ".png",
-                           ".apng", ".bmp", ".svg", ".ico",
-                           ".ogv", ".ogg", ".mp4", ".m4a",
-                           ".m4p", ".m4b", ".m4r", ".m4v",
-                           ".webm", ".oga", ".l16", ".wav",
-                           ".aiff", ".au", ".pcm", ".mp3",
-                           ".m4a", ".mp4", ".3gp", ".m4a",
-                           ".m4b", ".m4p", ".m4r", ".m4v",
-                           ".aac", ".spx", ".opus", ".atom",
-                           ".rss", ".jar"]
-
-        # XML in not included in the above list because it can be used for indirect identification of resources
-
         if self.ref_type:
             attrs = [Attribute(self.ref_type, self.item)]
         else:
@@ -876,7 +875,7 @@ class BlockInsert(Block):
 
         _, item_extension = os.path.splitext(self.item)
         if self.insert_type in known_insert_types and item_extension.lower() in known_file_types:
-            yield '<object data="{0}">'.format(self.item)
+            yield '<object data="{0}"></object>'.format(self.item)
         else:
             if not self.insert_type in known_insert_types:
                 SAM_parser_warning('HTML output mode does not support the "{0}" insert type.'.format(self.insert_type))
@@ -1431,9 +1430,9 @@ class LabeledListItem(ListItem):
             if type(self.parent) is Root or self.namespace != self.parent.namespace:
                 yield ' xmlns="{0}"'.format(self.namespace)
 
-
+        yield '<div class="li"'
         if self.attributes:
-            yield '<div class="li"'
+
             if any([x.value for x in self.attributes if x.type == 'condition']):
                 conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
                 attrs = [x for x in self.attributes if x.type != 'condition']
@@ -1443,7 +1442,7 @@ class LabeledListItem(ListItem):
             else:
                 for att in sorted(self.attributes, key=lambda x: x.type):
                     yield from att.serialize_html()
-            yield '>\n'
+        yield '>\n'
         yield "<dt>"
         yield from self.label.serialize_html()
         yield "</dt>\n<dd>"
@@ -1451,8 +1450,7 @@ class LabeledListItem(ListItem):
             if x is not None:
                 yield from x.serialize_html()
         yield "</dd>\n"
-        if self.attributes:
-            yield "</div>\n"
+        yield "</div>\n"
 
 
 class LabeledList(List):
@@ -1590,7 +1588,12 @@ class Root(Block):
 
     def serialize_html(self):
         yield '<!DOCTYPE html>\n'
-        yield '<html>\n<head>\n<meta charset = "UTF-8">\n</head >\n'
+        title = [x.content for x in self.children if type(x) is Block][0]
+        lang = [a.value for a in [x.attributes for x in self.children if type(x) is Block][0] if a.type == 'xml:lang'][0]
+        yield '<html'
+        if lang:
+            yield ' lang="{}"'.format(lang)
+        yield '>\n<head>\n<title>{0}</title>\n<meta charset = "UTF-8">\n</head >\n'.format(title)
 
         for x in self.children:
             yield from x.serialize_html()
@@ -1735,13 +1738,15 @@ class Flow(list):
             try:
                 yield from x.serialize_xml()
             except AttributeError:
+                assert type(x) is str
                 yield escape_for_xml(x)
 
     def serialize_html(self):
         for x in self:
             try:
                 yield from x.serialize_html()
-            except AttributeError:
+            except AttributeError as e:
+                assert type(x) is str
                 yield escape_for_xml(x)
 
 # Annotation lookup modes. Third parties can add additional lookup modes
@@ -2643,7 +2648,7 @@ class Attribute:
                        'item': 'data-item',
                        'key': 'data-key',
                        'nameref': 'data-nameref',
-                       'idref': 'IDREF',
+                       'idref': 'data-idref',
                        'keyref': 'data-keyref',
                        'fragmentref': 'data-fragmentref',
                        'stringref': 'data-fragmentref',
@@ -2809,7 +2814,7 @@ class Citation:
             SAM_parser_warning("Citations using id, name, key, fragment, and id references are not supported in HTML output mode and will be omitted.")
         if attrs:
             attr, *rest = attrs
-            yield from attr.serialize_xml(rest, payload)
+            yield from attr.serialize_html(rest, payload)
         elif payload:
             yield payload
         else:
@@ -2877,24 +2882,32 @@ class InlineInsert:
         else:
             attrs=[Attribute('type', self.insert_type), Attribute('item', self.item)]
 
-        yield '<inline-insert'
-
+        yield '<span class="insert"'
         if self.attributes:
             if any([x.value for x in self.attributes if x.type == 'condition']):
                 conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
                 attrs.append(conditions)
-                attrs.extend([x for x in self.attributes if x.type != 'condition'])
+            attrs.extend([x for x in self.attributes if x.type != 'condition'])
 
         for att in sorted(attrs, key=lambda x: x.type):
             yield from att.serialize_html()
+        yield '>\n'
 
         if self.citations:
-            yield '>'
-            for c in self.citations:
-                yield from c.serialize_html()
-            yield '</inline-insert>'
+
+            for cit in self.citations:
+                yield from cit.serialize_html()
+
+        _, item_extension = os.path.splitext(self.item)
+        if self.insert_type in known_insert_types and item_extension.lower() in known_file_types:
+            yield '<object data="{0}"></object>'.format(self.item)
         else:
-            yield '/>'
+            if not self.insert_type in known_insert_types:
+                SAM_parser_warning('HTML output mode does not support the "{0}" insert type.'.format(self.insert_type))
+            if not item_extension.lower() in known_file_types:
+                SAM_parser_warning('HTML output mode does not support the "{0}" file type.'.format(item_extension))
+
+        yield '</span>\n'
 
 
 class SAMParserError(Exception):
