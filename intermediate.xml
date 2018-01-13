@@ -5,6 +5,7 @@
 <!--  Need test for unicode characters and numbers in names. -->
 <tests xml:lang="en">
 <title>SAM Parser Tests</title>
+
 <description>
 <p>This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the <code language="sam">markup:</code> heading and comparing it to the text of the expected result as shown under the <code>result:</code> heading in the test file. This is not a perfect test. Two issues are known:</p>
 <ol>
@@ -23,11 +24,13 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 </description>
 <test>
 <title>Includes</title>
+
 <description>
 <p>Include content from another SAM file.</p>
 </description>
 <case>
 <title>Local only annotations</title>
+
 <description>
 <p>A local-only annotation is one which applies only to the current phrase. It is not taken into consideration in annotation lookup, so the lookup search will proceed to the next phrase with the same text. Annotation lookup will occur for a phrase with a local-only annotation, and the local annotation will be added to the looked up annotations, if any.</p>
 </description>
@@ -47,6 +50,7 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 </case>
 <case>
 <title>Simple include</title>
+
 <description>
 <p>An include statement.</p>
 </description>
@@ -58,6 +62,7 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 <markup>
 <message>
 <title>Hello World.</title>
+
 <p>This is the "include" test -- file.</p>
 <grid>
 <row>
@@ -94,6 +99,7 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 </case>
 <case>
 <title>Nested includes</title>
+
 <description>
 <p>Including a file that itself includes a file.</p>
 </description>
@@ -120,28 +126,30 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}.
 </test>
 <test>
 <title>Blocks</title>
+
 <description>
 <p>Blocks are the basic building block of a SAM file. This whole document is a test case for blocks.</p>
 </description>
 <case>
 <title>Language metadata</title>
+
 <description>
 <p>A block with language metadata.</p>
 </description>
 <source>
 <codeblock language="sam">
-section:(!sp)
+section:(!es)
     Feliz Navidad
 </codeblock>
 </source>
 <markup>
-<section xml:lang="sp">
+<section xml:lang="es">
 <p>Feliz Navidad</p>
 </section>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;section xml:lang="sp"&gt;
+&lt;section xml:lang="es"&gt;
     &lt;p&gt;Feliz Navidad&lt;/p&gt;
 &lt;/section&gt;
 </codeblock>
@@ -149,25 +157,27 @@ section:(!sp)
 </case>
 <case>
 <title>Citations</title>
+
 <description>
 <p>A citation on the block.</p>
 </description>
 <source>
 <codeblock language="sam">
-section:(!sp)[Mother McCree] Greeting
+section:(!es)[Mother McCree] Greeting
     Feliz Navidad
 </codeblock>
 </source>
 <markup>
-<section xml:lang="sp">
+<section xml:lang="es">
 <citation value="Mother McCree"/>
 <title>Greeting</title>
+
 <p>Feliz Navidad</p>
 </section>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;section xml:lang="sp"&gt;
+&lt;section xml:lang="es"&gt;
     &lt;citation value="Mother McCree"/&gt;
     &lt;title&gt;Greeting&lt;/title&gt;
     &lt;p&gt;Feliz Navidad&lt;/p&gt;
@@ -177,6 +187,7 @@ section:(!sp)[Mother McCree] Greeting
 </case>
 <case>
 <title>Escaping block syntax</title>
+
 <description>
 <p>Escape colon to prevent single word followed by colon being recognized as a block.</p>
 </description>
@@ -196,6 +207,7 @@ and\:
 </case>
 <case>
 <title>Complex block structure</title>
+
 <description>
 <p>A complex block with various structures inside.</p>
 </description>
@@ -249,6 +261,7 @@ document:
 </head>
 <body>
 <title>How Fragments Work</title>
+
 <p>Stuff on how fragments work.</p>
 </body>
 </document>
@@ -295,6 +308,7 @@ document:
 </case>
 <case>
 <title>Paragraph with colon in first word</title>
+
 <description>
 <p>Case related to issue #94.</p>
 </description>
@@ -310,6 +324,7 @@ article: Foo
 <markup>
 <article>
 <title>Foo</title>
+
 <p>foo<phrase><annotation type="link" specifically="http://www.example.com/">bar</annotation></phrase>.</p>
 <p><code>foo::bar</code> baz.</p>
 </article>
@@ -328,11 +343,13 @@ article: Foo
 <!--  FIXME: Need tests for comments. -->
 <test>
 <title>Remarks</title>
+
 <description>
 <p>Remarks are a type of comment that is attributed to an author and is used for commenting editorially on the document.</p>
 </description>
 <case>
 <title>Simple remark</title>
+
 <description>
 <p>Just a simple remark. Nothing fancy.</p>
 </description>
@@ -357,6 +374,7 @@ article: Foo
 </case>
 <case>
 <title>Complex remark</title>
+
 <description>
 <p>A little bit more complex.</p>
 </description>
@@ -382,11 +400,13 @@ article: Foo
 </test>
 <test>
 <title>Fields</title>
+
 <description>
 <p>A field is a block without children. A field value does not get wrapped in a title element. It is simple the value of the field.</p>
 </description>
 <case>
 <title>Nested fields</title>
+
 <description>
 <p>Nested fields. Anything with a child, of course, is a block, not a field.</p>
 </description>
@@ -418,11 +438,13 @@ address:
 </test>
 <test>
 <title>Paragraphs</title>
+
 <description>
 <p>A paragraph is a block of text over consecutive lines.</p>
 </description>
 <case>
 <title>Paragraph</title>
+
 <description>
 <p>A simple multi-line paragraph ending with a blank space.</p>
 </description>
@@ -444,6 +466,7 @@ Jumbo.
 </case>
 <case>
 <title>With annotated phrase</title>
+
 <description>
 <p>A paragraph over multiple lines with an annotated phrase.</p>
 </description>
@@ -466,11 +489,13 @@ multiple lines.
 </test>
 <test>
 <title>Ordered lists</title>
+
 <description>
 <p>Ordered lists are created by starting a line with a number followed by a period. Exact numbers are not retained.</p>
 </description>
 <case>
 <title>Ordered list with spaces</title>
+
 <description>
 <p>Ordered lists can have blank lines between the items.</p>
 </description>
@@ -514,6 +539,7 @@ multiple lines.
 </case>
 <case>
 <title>Ordered list no spaces</title>
+
 <description>
 <p>List are also recognized without space between items. List items can wrap to another line if more indented than the number. Additional paragraphs can be included if more indented than the number.</p>
 </description>
@@ -560,6 +586,7 @@ multiple lines.
 </case>
 <case>
 <title>Ordered list mixed spacing</title>
+
 <description>
 <p>Ordered list with inconsistent spacing.</p>
 </description>
@@ -610,6 +637,7 @@ multiple lines.
 </case>
 <case>
 <title>Nested ordered list with spaces</title>
+
 <description>
 <p>Ordered lists at different indents, with spaces between lines.</p>
 </description>
@@ -689,6 +717,7 @@ multiple lines.
 </case>
 <case>
 <title>Nested ordered lists with no spaces</title>
+
 <description>
 <p>Ordered lists at different indents, with no spaces between lines.</p>
 </description>
@@ -762,6 +791,7 @@ multiple lines.
 </case>
 <case>
 <title>Nested ordered list with mixed spacing</title>
+
 <description>
 <p>Ordered lists at different indents, with some spaces between lines.</p>
 </description>
@@ -839,11 +869,13 @@ multiple lines.
 </test>
 <test>
 <title>Unordered lists</title>
+
 <description>
 <p>Unordered lists are indicated by starting a line with <code>*</code>.</p>
 </description>
 <case>
 <title>Unordered list with spaces</title>
+
 <description>
 <p>A list with spaces between the lines.</p>
 </description>
@@ -887,6 +919,7 @@ multiple lines.
 </case>
 <case>
 <title>Unordered list no spaces</title>
+
 <description>
 <p>A list with no spaces between the lines.</p>
 </description>
@@ -928,6 +961,7 @@ multiple lines.
 </case>
 <case>
 <title>Unordered list mixed spacing</title>
+
 <description>
 <p>A list with mixed spacing between the lines.</p>
 </description>
@@ -977,6 +1011,7 @@ multiple lines.
 </case>
 <case>
 <title>Nested list with spaces</title>
+
 <description>
 <p>Nested lists separated by spaces.</p>
 </description>
@@ -1056,6 +1091,7 @@ multiple lines.
 </case>
 <case>
 <title>Nested unordered list with no spaces</title>
+
 <description>
 <p>Nested lists not separated by spaces.</p>
 </description>
@@ -1129,6 +1165,7 @@ multiple lines.
 </case>
 <case>
 <title>Nested unordered list with mixed spacing</title>
+
 <description>
 <p>Nested lists separated by some spaces.</p>
 </description>
@@ -1205,11 +1242,13 @@ multiple lines.
 </test>
 <test>
 <title>Mixed lists</title>
+
 <description>
 <p>You can nest ordered and unordered lists inside each other or follow a list of one type with a list of another type.</p>
 </description>
 <case>
 <title>Nested mixed lists with spaces</title>
+
 <description>
 <p>Unordered inside ordered list, spaces between lines.</p>
 </description>
@@ -1289,6 +1328,7 @@ multiple lines.
 </case>
 <case>
 <title>Nested mixed lists with no spaces</title>
+
 <description>
 <p>Unordered inside ordered list, no spaces between lines.</p>
 </description>
@@ -1362,6 +1402,7 @@ multiple lines.
 </case>
 <case>
 <title>Nested numbered lists with mixed spacing</title>
+
 <description>
 <p>Unordered inside ordered list, some spaces between lines.</p>
 </description>
@@ -1448,6 +1489,7 @@ multiple lines.
 </case>
 <case>
 <title>Space between lists</title>
+
 <description>
 <p>An ordered list can follow an unordered list directly and vice versa.</p>
 </description>
@@ -1515,6 +1557,7 @@ multiple lines.
 </case>
 <case>
 <title>No space between lists</title>
+
 <description>
 <p>An unordered list followed by an ordered list with no space between them.</p>
 </description>
@@ -1582,11 +1625,13 @@ multiple lines.
 </test>
 <test>
 <title>Literal lists</title>
+
 <description>
 <p>Ordered lists have the number stripped away and are renumbered on output. Unordered list have their <code>*</code> stripped away and replaced with the style of bullet specified on output processing. If you want to preserve actual numbers and bullets in your lists, you need to escape them so that the lines are not recognized as lists items.</p>
 </description>
 <case>
 <title>Literal numbered list using <code>\</code> to escape <code>.</code></title>
+
 <description>
 <p>To have a list number recognized as a literal, escape the period following the number (not the number itself). Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.</p>
 </description>
@@ -1614,6 +1659,7 @@ multiple lines.
 </case>
 <case>
 <title>Literal unordered list using <code>\</code> to escape <code>*</code></title>
+
 <description>
 <p>To have a list number recognized as a literal, escape the <code>*</code>. Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.</p>
 </description>
@@ -1642,11 +1688,13 @@ multiple lines.
 </test>
 <test>
 <title>Labeled lists</title>
+
 <description>
 <p>You can create lists with labels rather than bullets. The label is contained between two pipe characters. There must be no space between the opening pipe and the first character of the label (otherwise it will be parsed as a line).</p>
 </description>
 <case>
 <title>Simple labeled list</title>
+
 <description>
 <p>A labeled list.</p>
 </description>
@@ -1736,6 +1784,7 @@ multiple lines.
 </case>
 <case>
 <title>XML markup characters in list labels</title>
+
 <description>
 <p>Making sure that the contents of a list label are properly escaped when generating XML.</p>
 </description>
@@ -1784,11 +1833,13 @@ multiple lines.
 </test>
 <test>
 <title>Record sets</title>
+
 <description>
 <p>Record sets are a structure similar to a database table. They record data in rows with identical column names. Column names are specified in the records set header.</p>
 </description>
 <case>
 <title>Recordset</title>
+
 <description>
 <p>Test that recordsets are recognized correctly. Includes a test that character escapes are recognized in records and commas can be escaped.</p>
 </description>
@@ -1836,6 +1887,7 @@ history:: date, author, comment, status
 </case>
 <case>
 <title>Recordset with only one field name</title>
+
 <description>
 <p>Test that a recordset works correctly with only one field.</p>
 </description>
@@ -1872,11 +1924,13 @@ filmography:: film
 </test>
 <test>
 <title>Grids</title>
+
 <description>
 <p>Grids are a simple form of table. They are purely a layout device with no semantic value. They have no table heads or row or column spanning. More complex tables can be modeled using explicit blocks. Labeled lists can be modeled using the labeled list structure. Database-like tables can be modeled using record sets.</p>
 </description>
 <case>
 <title>Grid with heads</title>
+
 <description>
 <p>Table heads are simulated using bold in the top row of the grid.</p>
 </description>
@@ -1931,6 +1985,7 @@ filmography:: film
 </case>
 <case>
 <title>Grid with management domain attributes</title>
+
 <description>
 <p>The same grid only with management domain attributes attached to the grid header.</p>
 <p>Note that SAM Parser sorts block attributes alphabetically for output, which makes it possible to test them with a simple string comparison (such as that performed by test.xslt). However, this is behavior of this parser, not a SAM language requirement.</p>
@@ -1988,6 +2043,7 @@ filmography:: film
 </case>
 <case>
 <title>Grid with bold row</title>
+
 <description>
 <p>Make an lower row bold.</p>
 </description>
@@ -2042,6 +2098,7 @@ filmography:: film
 </case>
 <case>
 <title>Grid with side heads</title>
+
 <description>
 <p>Grid with row headings rather than column headings.</p>
 </description>
@@ -2097,11 +2154,13 @@ filmography:: film
 </test>
 <test>
 <title>Blockquotes</title>
+
 <description>
 <p>Blockquotes are introduced by three quotations marke (single or double). The content of a blockquote is normal SAM markup.</p>
 </description>
 <case>
 <title>Blockquote</title>
+
 <description>
 <p>A blockquote with management domain metadata.</p>
 </description>
@@ -2134,6 +2193,7 @@ After this paragraph, there is a blockquote:
 </case>
 <case>
 <title>Alternate block quote</title>
+
 <description>
 <p>Blockquote with single quotes. Includes multiple citations.</p>
 </description>
@@ -2178,11 +2238,13 @@ This is another paragraph. Then there is an alternate blockquote:
 </test>
 <test>
 <title>Codeblocks</title>
+
 <description>
 <p>A codeblock is a block of program code. A codeblock is treated as plain text and is not parsed as SAM markup. It will be copied to output exactly as it occurs in the source. Codeblocks are denoted by three back ticks at the start of a line. Codeblocks have a special annotation. The first word of an annotation on a codeblock is the language of the code.</p>
 </description>
 <case>
 <title>Simple codeblock</title>
+
 <description>
 <p>A simple codeblock.</p>
 </description>
@@ -2222,6 +2284,7 @@ def escape_for_xml(s):
 </case>
 <case>
 <title>Blank lines in codeblock</title>
+
 <description>
 <p>Blank lines in a code block. The display of the result will be confusing here because the result is whitespace normalized for ease of comparison with the generated XML.</p>
 </description>
@@ -2273,6 +2336,7 @@ warnings:
 </case>
 <case>
 <title>Codeblock with citation</title>
+
 <description>
 <p>A codeblock with a citation.</p>
 </description>
@@ -2314,6 +2378,7 @@ def escape_for_xml(s):
 </case>
 <case>
 <title>Invalid blockstart in codeblock</title>
+
 <description>
 <p>This is an construct that raise an error in an actual document. Curious because lots of valid block starts in other codeblocks did not cause a problem. But this one raised an invalid block name error. Turns out this was caused by tabs instead of spaces used to indent the line, which promoted it to a higher level of the document hierarchy and thus outside the codeblock. But the test is worth keeping to make sure that the contents of codeblocks are not being interpreted as SAM markup.</p>
 </description>
@@ -2348,11 +2413,13 @@ ordered-list-item =
 </test>
 <test>
 <title>Embedblock</title>
+
 <description>
 <p>An embed is a block of markup or code in another language that is intended to be interpreted rather than displayed. For instance, it can be used to include an equation using LaTeX or a diagram using SVG.</p>
 </description>
 <case>
 <title>Simple embed</title>
+
 <description>
 <p>Simple embed of an equation using LaTeX.</p>
 </description>
@@ -2375,6 +2442,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </case>
 <case>
 <title>Embedded XML</title>
+
 <description>
 <p>A chunk of XML.</p>
 </description>
@@ -2412,11 +2480,13 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </test>
 <test>
 <title>Lines</title>
+
 <description>
 <p>Lines allows you to create text with specific line breaks. Lines are created by beginning each line on a new line and starting with a <code>|</code> character. There must be one space after the <code>|</code>, which is discarded. All other spaces after <code>|</code> are retained. (Retained spaces are not tested for in text.xslt because the test normalize space.)</p>
 </description>
 <case>
 <title>Lines</title>
+
 <description>
 <p>Lines with various annotations:</p>
 </description>
@@ -2445,6 +2515,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </case>
 <case>
 <title>Lines inside a blockquote</title>
+
 <description>
 <p>Lines should work inside a block quote.</p>
 </description>
@@ -2481,6 +2552,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </test>
 <test>
 <title>Attributes</title>
+
 <description>
 <p>SAM supports four explicit attributes: ids, names, conditions, and language. There is no general attribute mechanism such as that in XML. You can generally encode the same data in SAM using fields or annotations.</p>
 <p>Attributes can be applied to blocks, phrases, and inserts. You cannot apply attributes to a paragraph, but you can wrap a paragraph in a fragment and apply attributes to the fragment.</p>
@@ -2503,6 +2575,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </description>
 <case>
 <title>Attributes on block</title>
+
 <description>Attributes on a block</description>
 <source>
 <codeblock language="sam">
@@ -2514,6 +2587,7 @@ block:(!en-CA)(*id2)(#name)(?a)(?b) Title
 <markup>
 <block conditions="a,b" id="id2" name="name" xml:lang="en-CA">
 <title>Title</title>
+
 <p>Content of the block.</p>
 </block>
 </markup>
@@ -2528,6 +2602,7 @@ block:(!en-CA)(*id2)(#name)(?a)(?b) Title
 </case>
 <case>
 <title>Attributes on field</title>
+
 <description>Attributes on a field</description>
 <source>
 <codeblock language="sam">
@@ -2545,6 +2620,7 @@ field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 </case>
 <case>
 <title>Attributes on fragment</title>
+
 <description>Attributes on a fragment</description>
 <source>
 <codeblock language="sam">
@@ -2568,6 +2644,7 @@ field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 </case>
 <case>
 <title>attributes on grid</title>
+
 <description>Attributes on a grid</description>
 <source>
 <codeblock language="sam">
@@ -2606,6 +2683,7 @@ field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 </case>
 <case>
 <title>attributes on record set</title>
+
 <description>Attributes on a record set</description>
 <source>
 <codeblock language="sam">
@@ -2644,6 +2722,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </case>
 <case>
 <title>Attributes on unordered list</title>
+
 <description>
 <p>Attributes on an unordered list item.</p>
 </description>
@@ -2689,6 +2768,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </case>
 <case>
 <title>Attributes on ordered list</title>
+
 <description>
 <p>Attributes on an ordered list item.</p>
 </description>
@@ -2732,6 +2812,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </case>
 <case>
 <title>Attributes on labeled list</title>
+
 <description>
 <p>Attributes on a labeled list item.</p>
 </description>
@@ -2822,6 +2903,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </case>
 <case>
 <title>Attributes on lines</title>
+
 <description>
 <p>Lines with annotations:</p>
 </description>
@@ -2850,6 +2932,7 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 </case>
 <case>
 <title>Attributes on blockquote</title>
+
 <description>
 <p>A blockquote with attributes and a citation.</p>
 </description>
@@ -2885,6 +2968,7 @@ After this paragraph, there is a blockquote:
 </case>
 <case>
 <title>Attributes on a phrase</title>
+
 <description>
 <p>Attributes on a phrase.</p>
 </description>
@@ -2904,6 +2988,7 @@ After this paragraph, there is a blockquote:
 </case>
 <case>
 <title>Attributes on a codeblock</title>
+
 <description>
 <p>Attributes on a codeblock.</p>
 </description>
@@ -2943,6 +3028,7 @@ def escape_for_xml(s):
 </case>
 <case>
 <title>Attributes on an embed</title>
+
 <description>
 <p>Attributes on a embed.</p>
 </description>
@@ -2967,6 +3053,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </case>
 <case>
 <title>Attributes on inserts</title>
+
 <description>
 <p>Attributes on inserts.</p>
 </description>
@@ -2986,6 +3073,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </case>
 <case>
 <title>Attributes on inserts</title>
+
 <description>
 <p>Attributes on inserts.</p>
 </description>
@@ -3006,11 +3094,13 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </test>
 <test>
 <title>Annotations</title>
+
 <description>
 <p>A phrase can have one or more annotations or citations attached to it. On output, the text of the phrase is wrapped in the annotations and citations in the order they were specified in source.</p>
 </description>
 <case>
 <title>Multiple annotations</title>
+
 <description>
 <p>Phrases with more than one attribute in a chain.</p>
 </description>
@@ -3040,6 +3130,7 @@ This `foo`(bar) baz.
 </case>
 <case>
 <title>Consecutive Annotations</title>
+
 <description>
 <p>Two separate annotations with no space between them.</p>
 </description>
@@ -3059,6 +3150,7 @@ This `foo`(bar) baz.
 </case>
 <case>
 <title>Consecutive Annotations on decorations</title>
+
 <description>
 <p>Two separate annotations with no space between them.</p>
 </description>
@@ -3078,6 +3170,7 @@ This `foo`(bar) baz.
 </case>
 <case>
 <title>Annotation followed by citation</title>
+
 <description>
 <p>Observed in the wild: When an annotated phrase was followed by a phrase with a citation, the end of the annotation was not found and the two structures were recognized as one long citation.</p>
 </description>
@@ -3114,6 +3207,7 @@ chapter}[#single_source].
 </case>
 <case>
 <title>Annotation with language metadata</title>
+
 <description>
 <p>You can add language metadata to a phrase.</p>
 </description>
@@ -3133,6 +3227,7 @@ Press {Enter}(key)(!fr-CA)
 </case>
 <case>
 <title>Annotation with a condition</title>
+
 <description>
 <p>You can add condition metadata to a phrase.</p>
 </description>
@@ -3152,6 +3247,7 @@ Press {Enter}(key)(?foo)
 </case>
 <case>
 <title>Prior annotation lookup</title>
+
 <description>
 <p>If a phrase has no annotation or citation attached to it, the parser will attempt to find a suitable annotation by searching back up the document for the most recent case of the same phrase. If it finds one, it will copy the annotations and citations from that phrase to the current one. This prevents writers from having to write the same annotation out over and over again. If not prior phrase is found, a warning is issued.</p>
 </description>
@@ -3171,6 +3267,7 @@ This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotat
 </case>
 <case>
 <title>Case insensitive lookup</title>
+
 <description>
 <p>Annotation lookup is case insensitive unless the annotation-lookup declaration is set to <code>case sensitive</code>.</p>
 </description>
@@ -3190,6 +3287,7 @@ This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {Annotat
 </case>
 <case>
 <title>Case insensitive lookup with multiple annotations</title>
+
 <description>
 <p>Make sure all annotations are copied</p>
 </description>
@@ -3209,6 +3307,7 @@ This {annotation}(foo)(https://en.wikipedia.org/wiki/Annotation) is repeated {An
 </case>
 <case>
 <title>Prior annotation lookup in included file</title>
+
 <description>
 <p>Look up annotations in included files.</p>
 </description>
@@ -3228,6 +3327,7 @@ Annotation lookup test: {test phrase}.
 </case>
 <case>
 <title>Earlier para</title>
+
 <description>
 <p>The marching annotation is in an earlier paragraph in the document. (In this case, in the preceding test case).</p>
 </description>
@@ -3247,6 +3347,7 @@ This {annotation} occurs previously.
 </case>
 <case>
 <title>Failure</title>
+
 <description>
 <p>There is no previous phrase. This should generate a warning when the test is run.</p>
 </description>
@@ -3266,6 +3367,7 @@ This {should be reported}.
 </case>
 <case>
 <title>Local only annotations</title>
+
 <description>
 <p>A local-only annotation is one which applies only to the current phrase. It is not taken into consideration in annotation lookup, so the lookup search will proceed to the next phrase with the same text. Annotation lookup will occur for a phrase with a local-only annotation, and the local annotation will be added to the looked up annotations, if any.</p>
 </description>
@@ -3285,6 +3387,7 @@ Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 </case>
 <case>
 <title>Attribute annotations</title>
+
 <description>
 <p>Attributes like ID should not be copied because they are supposed to be unique.</p>
 </description>
@@ -3304,6 +3407,7 @@ Testing {XML}+(*foot) testing {XML}+(index) testing {XML}.
 </case>
 <case>
 <title>Mix of local and global</title>
+
 <description>
 <p>A mix of local and global annotations.</p>
 </description>
@@ -3323,6 +3427,7 @@ Testing {XML}+(foo)(language) testing {XML}+(index) testing {XML}.
 </case>
 <case>
 <title>Multiple local</title>
+
 <description>
 <p>Multiple local annotations.</p>
 </description>
@@ -3343,11 +3448,13 @@ Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
 </test>
 <test>
 <title>Decorations</title>
+
 <description>
 <p>A decoration is a shortcut for a <phrase><annotation type="concept">media domain</annotation></phrase> annotation. Three decorations are supported, bold, italic, and code.</p>
 </description>
 <case>
 <title>Bold, italic, and code</title>
+
 <description>
 <p>One test case for all decorations.</p>
 </description>
@@ -3367,6 +3474,7 @@ This sentence contains decorations for *bold*, _italic_, and `code`.
 </case>
 <case>
 <title>Unbalanced decorations and escapes</title>
+
 <description>
 <p>Unbalanced decorations and escapes</p>
 </description>
@@ -3387,11 +3495,13 @@ In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays
 </test>
 <test>
 <title>Inline code</title>
+
 <description>
 <p>Inline code is a special form of phrase used for phrases that are in computer languages or other encodings other than the human language of the text.</p>
 </description>
 <case>
 <title>Inline latexmath</title>
+
 <description>
 <p>A selection of latex math to be printed.</p>
 </description>
@@ -3411,6 +3521,7 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the mi
 </case>
 <case>
 <title>Embedded latexmath</title>
+
 <description>
 <p>A selection of latex math to be embedded as an equation.</p>
 </description>
@@ -3431,6 +3542,7 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle
 </test>
 <test>
 <title>Links</title>
+
 <description>
 <p>Links are created with an annotation.</p>
 <p>You can specify a link as a <code>link</code> annotation.</p>
@@ -3445,6 +3557,7 @@ foo {bar}(http://example.com/bar) baz
 </description>
 <case>
 <title>Parens not escaped</title>
+
 <description>
 <p>The parens are not escaped, causing misreading of markup. This example should be interpreted incorrectly.</p>
 </description>
@@ -3467,6 +3580,7 @@ Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
 </case>
 <case>
 <title>Parens escaped with backslashes</title>
+
 <description>
 <p>The parens in the URL are escaped with blackslashes. This example should be interpreted correctly.</p>
 </description>
@@ -3489,6 +3603,7 @@ Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
 </case>
 <case>
 <title>Using explicit link annotation instead of shortcut</title>
+
 <description>
 <p>The link is specified using a specific link annotation so the URL is not in parens itself. This example should be interpreted correctly.</p>
 </description>
@@ -3512,11 +3627,13 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 </test>
 <test>
 <title>Citations</title>
+
 <description>
 <p>A citation is a reference to a source of information. You can cite with a phrase or by reference to an ID or a name.</p>
 </description>
 <case>
 <title>Citation on phrase</title>
+
 <description>
 <p>A citation on a phrase</p>
 </description>
@@ -3536,6 +3653,7 @@ You can {call me Ishmael}[Melville, 1851][Daffy, 2017].
 </case>
 <case>
 <title>Citation and annotation on one phrase</title>
+
 <description>
 <p>A citation on a phrase that also has an annotation.</p>
 </description>
@@ -3555,6 +3673,7 @@ You can {call me Ishmael}(quote)[Melville, 1851].
 </case>
 <case>
 <title>Literal square brackets</title>
+
 <description>
 <p>If you want to enter literal square brackets, rather than create a citation, escape the opening square bracket with a backslash.</p>
 </description>
@@ -3574,6 +3693,7 @@ Press \[Enter].
 </case>
 <case>
 <title>Multiple citations is a paragraph</title>
+
 <description>
 <p>Making sure that when there are multiple citations in a paragraph they are all detected separately.</p>
 </description>
@@ -3594,11 +3714,13 @@ Among its default processing steps, the SPFE process includes the subject-based 
 </test>
 <test>
 <title>Characters</title>
+
 <description>
 <p>All SAM documents are UTF-8 unicode documents. Therefore you should be able to enter any character directly. However, typing extended characters is not easy, so SAM supports character entities for entering characters that are not easy to type.</p>
 </description>
 <case>
 <title>HTML named entities</title>
+
 <description>
 <p>All of the HTML named character entities are supported.</p>
 </description>
@@ -3618,6 +3740,7 @@ The doggy in the window costs &amp;pound;5.00.
 </case>
 <case>
 <title>Numeric entities</title>
+
 <description>
 <p>XML-style decimal numeric character entities are supported.</p>
 </description>
@@ -3637,6 +3760,7 @@ The doggy in the window costs &amp;#163;5.00.
 </case>
 <case>
 <title>Hexadecimal entity</title>
+
 <description>
 <p>XML-style hexadecimal numeric character entities are supported.</p>
 </description>
@@ -3656,6 +3780,7 @@ The doggy in the window costs &amp;#xA3;5.00.
 </case>
 <case>
 <title>Character entities inside phrases and decorations</title>
+
 <description>
 <p>Make sure entities are recognized in phrases and decorations.</p>
 </description>
@@ -3679,6 +3804,7 @@ The doggy in the window costs {&amp;#xA3;5.00}(money).
 </case>
 <case>
 <title>In code annotation shortcut:</title>
+
 <description>
 <p>In a code decoration, character entities are not expanded.</p>
 </description>
@@ -3698,6 +3824,7 @@ The doggy in the window costs `&amp;#xA3;`5.00.
 </case>
 <case>
 <title>In bold decoration escaped:</title>
+
 <description>
 <p>Escaped version inside a bold decoration.</p>
 </description>
@@ -3717,6 +3844,7 @@ The doggy in the window costs *\&amp;#xA3;*5.00.
 </case>
 <case>
 <title>Ampersand in a sentence, escaped with \ and not escaped.</title>
+
 <description>
 <p>Unlike XML, SAM does not require that an ampersand be escaped if it is not part of a character entity. You can escape it if you want to using a backslash. Both should output in XML as <code>&amp;amp;</code></p>
 </description>
@@ -3741,11 +3869,13 @@ The cat \&amp; the dog.
 </test>
 <test>
 <title>Character escapes</title>
+
 <description>
 <p>Character escaping</p>
 </description>
 <case>
 <title>Escapes in explicit annotations</title>
+
 <description>
 <p>Escaping curly braces and backslashes inside a phrase.</p>
 </description>
@@ -3765,6 +3895,7 @@ There is a curly brace and two backslashes in {this \\\\\{ phrase}(bold).
 </case>
 <case>
 <title>Escapes in code decorations</title>
+
 <description>
 <p>Code decorations have different escaping rules. All characters are literal except that the backtick character can be escaped with a double back tick. Character entities are not translated in a code decoration. Smart quote transformations are not applied.</p>
 </description>
@@ -3792,6 +3923,7 @@ There is a backslash and a curly brace in `this \{ code` decoration.
 </case>
 <case>
 <title>Escapes in decorations</title>
+
 <description>
 <p>Escape sequences are recognized inside decorations.</p>
 </description>
@@ -3815,6 +3947,7 @@ There is a `_` in _this \_ italic_ decoration.
 </case>
 <case>
 <title>XML reserved characters in citation specifically attribute</title>
+
 <description>
 <p>XML reserved characters occurring within the text of a “specifically” attribute.</p>
 </description>
@@ -3835,11 +3968,13 @@ There is a `_` in _this \_ italic_ decoration.
 </test>
 <test>
 <title>Conditions</title>
+
 <description>
 <p>You can add conditions to block metadata using condition tokens. Condition tokens start with <code>?</code> and must not contain spaces. The application of conditions to text is up to the application layer. SAM just provided a mechanism for recording conditions.</p>
 </description>
 <case>
 <title>Conditions on unordered list shortcut</title>
+
 <description>
 <p>A condition on an unordered list item.</p>
 </description>
@@ -3885,6 +4020,7 @@ There is a `_` in _this \_ italic_ decoration.
 </case>
 <case>
 <title>Conditions on ordered list shortcut</title>
+
 <description>
 <p>Condition on an ordered list item.</p>
 </description>
@@ -3929,11 +4065,13 @@ There is a `_` in _this \_ italic_ decoration.
 </test>
 <test>
 <title>Block inserts</title>
+
 <description>
 <p>An insert creates an instruction to insert something into the document.</p>
 </description>
 <case>
 <title>Image insert</title>
+
 <description>
 <p>Insert an image.</p>
 </description>
@@ -3953,6 +4091,7 @@ There is a `_` in _this \_ italic_ decoration.
 </case>
 <case>
 <title>Key insert</title>
+
 <description>
 <p>Insert the value of a key. Syntax for creating keys is left to the language designer. Key resolution belongs to the application layer.</p>
 </description>
@@ -3973,17 +4112,19 @@ There is a `_` in _this \_ italic_ decoration.
 </test>
 <test>
 <title>Inline inserts</title>
+
 <description>
 <p>Inline inserts are an instructions to insert something into the middle of a paragraph.</p>
 </description>
 <case>
 <title>Inline inserts</title>
+
 <description>
 <p>Inline inserts.</p>
 </description>
 <source>
 <codeblock language="sam">
-Because you often want to &gt;(image "foo.gif")(#bar)(?baz)(?bat) change some part of a text when it is being
+Because you often want to &gt;(image "circle.png")(#bar)(?baz)(?bat) change some part of a text when it is being
 reused, &lt;fragments&gt; &amp; fragment references can both define local {strings}(feature).
 Any {string references}(feature) inside a fragment will be resolved by looking first
 at local-strings defined in the &gt;[*my-table] fragment reference, then at local strings defined
@@ -3992,16 +4133,17 @@ that you can define string substitutions whenever you insert a fragment into you
 </codeblock>
 </source>
 <markup>
-<p>Because you often want to <inline-insert conditions="baz,bat" item="foo.gif" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+<p>Because you often want to <inline-insert conditions="baz,bat" item="circle.png" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;Because you often want to &lt;inline-insert conditions="baz,bat" item="foo.gif" name="bar" type="image"/&gt; change some part of a text when it is being reused, &amp;lt;fragments&amp;gt; &amp;amp; fragment references can both define local &lt;phrase&gt;&lt;annotation type="feature"&gt;strings&lt;/annotation&gt;&lt;/phrase&gt;. Any &lt;phrase&gt;&lt;annotation type="feature"&gt;string references&lt;/annotation&gt;&lt;/phrase&gt; inside a fragment will be resolved by looking first at local-strings defined in the &lt;inline-insert idref="my-table"/&gt; fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.&lt;/p&gt;
+&lt;p&gt;Because you often want to &lt;inline-insert conditions="baz,bat" item="circle.png" name="bar" type="image"/&gt; change some part of a text when it is being reused, &amp;lt;fragments&amp;gt; &amp;amp; fragment references can both define local &lt;phrase&gt;&lt;annotation type="feature"&gt;strings&lt;/annotation&gt;&lt;/phrase&gt;. Any &lt;phrase&gt;&lt;annotation type="feature"&gt;string references&lt;/annotation&gt;&lt;/phrase&gt; inside a fragment will be resolved by looking first at local-strings defined in the &lt;inline-insert idref="my-table"/&gt; fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
 <case>
 <title>Paragraph that is just an inline insert</title>
+
 <description>
 <p>An inline insert on a line by itself creates a paragraph containing an insert, rather than a standalone insert instruction.</p>
 </description>
@@ -4022,11 +4164,13 @@ that you can define string substitutions whenever you insert a fragment into you
 </test>
 <test>
 <title>Strings</title>
+
 <description>
 <p>A string is a variable that can contain text, including annotations and citations.</p>
 </description>
 <case>
 <title>String definition</title>
+
 <description>
 <p>A string definition.</p>
 </description>
@@ -4046,6 +4190,7 @@ $foo = bar bar black sheep
 </case>
 <case>
 <title>String references</title>
+
 <description>
 <p>Inserting the value of a string.</p>
 </description>
@@ -4066,11 +4211,13 @@ This sentence includes a string reference &gt;[$name].
 </test>
 <test>
 <title>Fragments</title>
+
 <description>
 <p>Fragments are sequences of paragraphs that can have management metadata applied to them and that can be inserted in other places.</p>
 </description>
 <case>
 <title>Fragment</title>
+
 <description>
 <p>A fragment definition.</p>
 </description>
@@ -4115,6 +4262,7 @@ This sentence includes a string reference &gt;[$name].
 </case>
 <case>
 <title>Insert a fragment</title>
+
 <description>
 <p>An instruction to insert a fragment. Note that actually resolving an inserting the fragment is a job for the application layer.</p>
 </description>
@@ -4142,6 +4290,7 @@ This sentence includes a string reference &gt;[$name].
 </test>
 <test>
 <title>Smart quotes</title>
+
 <description>
 <p>Smart quotes is an optional feature of the parser, not a feature of the SAM language. It turns straight quotes into curly quotes. It raises a warning when it can’t figure out how to handle a case. The algorithm could be improved in the future to handle more cases correctly.</p>
 <p>The canonical way to handle quotes in SAM is to use real curly quotes to begin with. All SAM documents are UTF-8.</p>
@@ -4150,6 +4299,7 @@ This sentence includes a string reference &gt;[$name].
 </description>
 <case>
 <title>Smart quotes</title>
+
 <description>
 <p>Paragraphs illustrating most of the cases where smart quotes should be recognized in ordinary English.</p>
 </description>
@@ -4179,6 +4329,7 @@ For "the Duke", perhaps?
 </case>
 <case>
 <title>Following an annotation</title>
+
 <description>
 <p>Smart quotes also need to be recognized when they follow SAM markup.</p>
 </description>
@@ -4198,6 +4349,7 @@ interpretations of the `xref`'s instruction
 </case>
 <case>
 <title>Smart quotes with annotations</title>
+
 <description>
 <p>Smart quotes surrounding annotated phrases.</p>
 </description>
@@ -4223,6 +4375,7 @@ know what you mean by "glory,"' Alice said."
 </case>
 <case>
 <title>Adjacent to parentheses</title>
+
 <description>
 <p>Quotes inside parentheses.</p>
 </description>
@@ -4246,6 +4399,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 </case>
 <case>
 <title>Close quote followed by citation.</title>
+
 <description>
 <p>Close quote followed by citation.</p>
 </description>
@@ -4265,6 +4419,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 </case>
 <case>
 <title>Miscellaneous cases</title>
+
 <description>
 <p>A bunch of miscellaneous cases.</p>
 </description>
@@ -4292,6 +4447,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 </case>
 <case>
 <title>Escaped dumb quotes</title>
+
 <description>
 <p>If you want to enter straight quotes and have them stay straight when smart quotes are applied, you have to escape them with <code>\</code> or use the <code>&amp;quot;</code> character entity.</p>
 </description>
@@ -4311,6 +4467,7 @@ This para uses \"dumb\" quotes. Don\'t get them &amp;quot;mixed up&amp;quot;.
 </case>
 <case>
 <title>Em and en dashes</title>
+
 <description>
 <p>The smart quote feature will also transform double hyphens surrounded by spaces and triple hyphens surrounded by letters into en and em dashes respectively.</p>
 </description>

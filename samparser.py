@@ -773,6 +773,7 @@ class Block(ABC):
                     yield from x.serialize_html()
 
             if self.content:
+                print (list(x.content for x in self.ancestors_and_self() if x.content))
                 title_depth = len(list(x for x in self.ancestors_and_self() if x.content))
                 heading_level = title_depth if title_depth < 6 else 6
                 yield "\n<h{0}>".format(heading_level)
@@ -1826,6 +1827,7 @@ class DocStructure:
         self.default_namespace = None
         self.annotation_lookup = "case insensitive"
         self.ids = []
+        self.parent = None
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -2052,6 +2054,9 @@ class Include(Block):
     def __init__(self, doc, content, href, indent):
         super().__init__(name="include", indent=indent, attributes=[],  content = content, namespace=None)
         self.children=doc.root.children
+        for i in doc.root.children:
+            i.parent = self
+
         self.ids = doc.ids
         self.href= href
 
