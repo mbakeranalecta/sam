@@ -1602,8 +1602,14 @@ class Root(Block):
         yield '>\n<head>\n'
         if title:
             yield '<title>{0}</title>\n'.format(title)
-        yield '<meta charset = "UTF-8">\n</head >\n'
-
+        yield '<meta charset = "UTF-8">\n'
+        if self.parent.css:
+            for c in self.parent.css:
+                yield '<link rel="stylesheet" href="{0}">\n'.format(c)
+        if self.parent.javascript:
+            for j in self.parent.javascript:
+                yield '<script src="js/all.min.js"></script>\n'.format(j)
+        yield '</head >\n'
         for x in self.children:
             yield from x.serialize_html()
         yield '</html>'
@@ -1840,6 +1846,9 @@ class DocStructure:
         self.annotation_lookup = "case insensitive"
         self.ids = []
         self.parent = None
+        # Used by HTML output mode
+        self.css = None
+        self.javascript = None
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -3161,7 +3170,15 @@ if __name__ == "__main__":
                            action="store_true")
     argparser.add_argument("-smartquotes", "-sq", help="the path to a file containing smartquote patterns and substitutions")
     argparser.add_argument("-html", action="store_true", help="Output HTML instead of XML. Use with -css and -script")
+    argparser.add_argument("-css",  nargs='+', help="Add a call to a CSS stylesheet in HTML output mode.")
+    argparser.add_argument("-javascript", nargs='+', help="Add a call to a script in HTML output mode.")
+
     args = argparser.parse_args()
+
+    if not args.html:
+        if args.css or args.javascript:
+            raise SAMParserError("-css and -javascript can only be used with -html")
+
     transformed = None
     error_count = 0
 
@@ -3212,6 +3229,8 @@ if __name__ == "__main__":
                         intermediatefile=args.intermediatefile
 
                     if args.html:
+                        samParser.doc.css = args.css
+                        samParser.doc.javascript = args.javascript
                         html_string = "".join(samParser.serialize('html')).encode('utf-8')
                     else:
                         xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
