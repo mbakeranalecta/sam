@@ -1588,12 +1588,21 @@ class Root(Block):
 
     def serialize_html(self):
         yield '<!DOCTYPE html>\n'
-        title = [x.content for x in self.children if type(x) is Block][0]
-        lang = [a.value for a in [x.attributes for x in self.children if type(x) is Block][0] if a.type == 'xml:lang'][0]
+        try:
+            title = [x.content for x in self.children if type(x) is Block][0]
+        except IndexError:
+            title=None
+        try:
+            lang = [a.value for a in [x.attributes for x in self.children if type(x) is Block][0] if a.type == 'xml:lang'][0]
+        except IndexError:
+            lang=None
         yield '<html'
         if lang:
             yield ' lang="{}"'.format(lang)
-        yield '>\n<head>\n<title>{0}</title>\n<meta charset = "UTF-8">\n</head >\n'.format(title)
+        yield '>\n<head>\n'
+        if title:
+            yield '<title>{0}</title>\n'.format(title)
+        yield '<meta charset = "UTF-8">\n</head >\n'
 
         for x in self.children:
             yield from x.serialize_html()
@@ -1806,6 +1815,10 @@ class Pre(Flow):
             yield x
 
     def serialize_xml(self):
+        for x in self.lines:
+            yield escape_for_xml(x)
+
+    def serialize_html(self):
         for x in self.lines:
             yield escape_for_xml(x)
 
