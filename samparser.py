@@ -850,7 +850,7 @@ class BlockInsert(Block):
     def serialize_html(self):
 
         if self.ref_type:
-            SAM_parser_warning('HTML output mode does not support inserts that use id, name, key, string, or fragment references. They will be omitted.')
+            SAM_parser_warning('HTML output mode does not support inserts that use id, name, key, string, or fragment references. They will be omitted. At: ' + str(self).strip())
         else:
             attrs=[Attribute('type', self.insert_type), Attribute('item', self.item)]
 
@@ -878,9 +878,9 @@ class BlockInsert(Block):
                 yield '<object data="{0}"></object>'.format(self.item)
             else:
                 if not self.insert_type in known_insert_types:
-                    SAM_parser_warning('HTML output mode does not support the "{0}" insert type. They will be omitted.'.format(self.insert_type))
+                    SAM_parser_warning('HTML output mode does not support the "{0}" insert type. They will be omitted. At: {1}'.format(self.insert_type, str(self).strip()))
                 if not item_extension.lower() in known_file_types:
-                    SAM_parser_warning('HTML output mode does not support the "{0}" file type. They will be omitted.'.format(item_extension))
+                    SAM_parser_warning('HTML output mode does not support the "{0}" file type. They will be omitted.At: {1}'.format(item_extension, str(self).strip()))
 
             yield '</div>\n'
 
@@ -1039,7 +1039,7 @@ class Embedblock(Codeblock):
             yield '/>\n'
 
     def serialize_html(self):
-        SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted.")
+        SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted. At: " + str(self).strip())
         yield ''
 
 
@@ -2577,7 +2577,7 @@ class Code(Phrase):
     def serialize_html(self):
 
         if any(x for x in self.attributes if x.type == "encoding"):
-            SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted.")
+            SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted. At: " + str(self).strip())
             yield ''
         else:
             yield '<code'
@@ -2815,7 +2815,7 @@ class Citation:
                 yield ' {0}'.format(self.citation_extra)
             yield '</cite>'
         else:
-            SAM_parser_warning("HTML output mode does not support inserts that use id, name, key refernces. They will be omitted.")
+            SAM_parser_warning("HTML output mode does not support inserts that use id, name, key refernces. They will be omitted. At: " + str(self).strip())
         if attrs:
             attr, *rest = attrs
             yield from attr.serialize_html(rest, payload)
@@ -2882,7 +2882,7 @@ class InlineInsert:
     def serialize_html(self):
 
         if self.ref_type:
-            SAM_parser_warning('HTML output mode does not support inserts that use id, name, key, string, or fragment references. They will be omitted.')
+            SAM_parser_warning('HTML output mode does not support inserts that use id, name, key, string, or fragment references. They will be omitted.  At: ' + str(self).strip())
         else:
             attrs=[Attribute('type', self.insert_type), Attribute('item', self.item)]
 
