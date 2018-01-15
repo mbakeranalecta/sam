@@ -775,7 +775,7 @@ class Block(ABC):
             if self.content:
                 title_depth = len(list(x for x in self.ancestors_and_self() if x.content))
                 heading_level = title_depth if title_depth < 6 else 6
-                yield "\n<h{0}>".format(heading_level)
+                yield '\n<h{0} class="title">'.format(heading_level)
                 yield from self.content.serialize_html()
                 yield "</h{0}>\n".format(heading_level)
 
@@ -1609,10 +1609,10 @@ class Root(Block):
         if self.parent.javascript:
             for j in self.parent.javascript:
                 yield '<script src="js/all.min.js"></script>\n'.format(j)
-        yield '</head >\n'
+        yield '</head >\n<body>\n'
         for x in self.children:
             yield from x.serialize_html()
-        yield '</html>'
+        yield '</body>\n</html>'
 
     def _add_child(self, b):
         # This is a hack to catch the creation of a second root-level block.
