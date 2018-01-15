@@ -947,7 +947,7 @@ class Codeblock(Block):
 
     def serialize_html(self):
         attrs = []
-        yield '<pre'
+        yield '<pre class="codeblock"'
 
         if self.namespace is not None:
             if type(self.parent) is Root or self.namespace != self.parent.namespace:
@@ -975,7 +975,7 @@ class Codeblock(Block):
                 yield '\n'
         if self.children:
             if self.language:
-                yield '<code data-language="{0}">'.format(self.language)
+                yield '<code class="language-{0}">'.format(self.language)
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html()
@@ -2749,26 +2749,27 @@ class Annotation:
             yield '/>'
 
     def serialize_html(self, annotations=None, payload=None):
-        yield '<span'
-        if self.type:
-            yield ' class="{0}"'.format(self.type)
-        if self.specifically:
-            yield ' data-specifically="{0}"'.format(escape_for_xml_attribute(self.specifically))
-        if self.namespace:
-            yield ' data-namespace="{0}"'.format(self.namespace)
 
+        if self.type == 'link':
+            yield '<a href={0}>'.format(escape_for_xml_attribute(self.specifically))
+        else:
+            yield '<span'
+            if self.type:
+                yield ' class="annotation-{0}"'.format(self.type)
+            if self.specifically:
+                yield ' data-specifically="{0}"'.format(escape_for_xml_attribute(self.specifically))
+            if self.namespace:
+                yield ' data-namespace="{0}"'.format(self.namespace)
+            yield '>'
         #Nest annotations for serialization
+
         if annotations:
             anns, *rest = annotations
-            yield '>'
             yield from anns.serialize_html(rest, payload)
-            yield '</span>'
         elif payload:
-            yield '>'
             yield payload
-            yield '</span>'
-        else:
-            yield '/>'
+        yield '</a>' if self.type=='link' else '</span>'
+
 
     def append(self, thing):
         if not self.child:
@@ -2831,20 +2832,29 @@ class Citation:
             yield '/>'
 
     def serialize_html(self, attrs=None, payload=None):
+
+        def recurse():
+            if attrs:
+                attr, *rest = attrs
+                yield from attr.serialize_html(rest, payload)
+            elif payload:
+                yield payload
+            else:
+                yield ''
+
         if self.citation_type == 'value':
             yield '<cite>' + self.citation_value
             if self.citation_extra:
                 yield ' {0}'.format(self.citation_extra)
+                yield from recurse()
             yield '</cite>'
+        elif self.citation_type=='idref':
+            yield '<a href="#{0}">'.format(self.citation_value)
+            yield from recurse()
+            yield '</a>'
         else:
             SAM_parser_warning("HTML output mode does not support inserts that use id, name, key refernces. They will be omitted. At: " + str(self).strip())
-        if attrs:
-            attr, *rest = attrs
-            yield from attr.serialize_html(rest, payload)
-        elif payload:
-            yield payload
-        else:
-            yield ''
+
 
     def append(self, thing):
         if not self.child:

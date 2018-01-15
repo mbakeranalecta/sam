@@ -11,7 +11,7 @@ specification: Semantic Authoring Markdown (SAM)
         
         section: Why SAM?
         
-            Why is SAM needed? What are the limits of current semantic authoring solutions? The core of a semantic authoring solution is a markup language. There are, broadly, two kinds of markup languages: general and lightweight. Lightweight markup languages are easier to use, but less capable. XML is the only general languages in common use today (thought SGML is also still in use). There are many lightweight markup languages. The best known is Markdown.
+            Why is SAM needed? What are the limits of current semantic authoring solutions? The core of a semantic authoring solution is a markup language. There are, broadly, two kinds of markup languages: general and lightweight. Lightweight markup languages are easier to use, but less capable. {XML}(https://en.wikipedia.org/wiki/XML) is the only general languages in common use today (thought SGML is also still in use). There are many lightweight markup languages. The best known is Markdown.
             
             The key issue for real semantic authoring is extensibility: the ability to specify your own semantics. (To create new tag that are specific to what you are writing about.)
         
@@ -114,7 +114,7 @@ specification: Semantic Authoring Markdown (SAM)
 
             |remark| A remark is a comment on the text of the document, intended for editorial purposes. It must be attributed to a specific author.
 
-        section:(#nametoken) Name tokens
+        section:(*nametoken) Name tokens
 
             Several things in SAM have names. These names must be valid name tokens. A name token in a SAM document must be a valid XML local name. This is to allow ease of integration with XML tools and languages and for a straightforwards serialization of SAM documents to XML.
 
@@ -343,7 +343,7 @@ specification: Semantic Authoring Markdown (SAM)
 
                 Condition expressions must not include commas. 
 
-                Names must be SAM {name tokens}.
+                Names must be SAM {name tokens}[*nametoken].
 
                 IDs must be SAM {name tokens}.
 
@@ -1301,7 +1301,7 @@ specification: Semantic Authoring Markdown (SAM)
             semantics:
                 A grid is nothing more than a two dimensional grid of cells. If you want any more complex representation of a table, you need to find a different way to mark it up. 
 
-                Note that SAM is primarily intended for creating {subject domain} languages and as such it does not provide native support for complex tables, which are document domain objects. {Record sets} are the SAM-like way to represent real record data. To create document domain tables in SAM, you would need to create a table markup using {blocks} and {fields}. Another alternative would be to use {embedded}(feature "embedded markup) XML".
+                Note that SAM is primarily intended for creating {subject domain} languages and as such it does not provide native support for complex tables, which are document domain objects. {Record sets} are the SAM-like way to represent real record data. To create document domain tables in SAM, you would need to create a table markup using {blocks} and {fields}. Another alternative would be to use {embedded}(feature "embedded markup") XML.
 
             serialization:
                 Grids are serialized as follows: 
