@@ -190,7 +190,7 @@ specification: Semantic Authoring Markdown (SAM)
 
             The {document block} is the first structure declared in the document after any {declaration}s, {comment}s, {remark}s or {string definition}s. It is the container for all other blocks in the document. 
 
-            Any type of {block} can be the {docuemtn block}. However, choosing a structure other than a {named block} as the document block will be extremely limiting, as most {concrete block} types allow for little of no nesting of other blocks. For instance, nothing can be nested under a {paragraph} so while a paragraph can be the document block of a SAM document, it would also be the only structure in the document. 
+            Any type of {block} can be the {document block}. However, choosing a structure other than a {named block} as the document block will be extremely limiting, as most {concrete block} types allow for little or no nesting of other blocks. For instance, nothing can be nested under a {paragraph} so while a paragraph can be the document block of a SAM document, it would also be the only structure in the document. 
 
             syntax:
                 The {document block} is not indented. All other structures in the document (excluding {comments}, {declarations}, and {string definitions}) must be children of the {document block}, and therefore must be indented under it. In all other respects, the syntax of the document block is the syntax of it type. 
@@ -347,7 +347,7 @@ specification: Semantic Authoring Markdown (SAM)
 
                 IDs must be SAM {name tokens}.
 
-                Languages should be {BCP 47} language codes, but the parser is not required to enforce this. 
+                Languages should be {BCP 47}(https://www.w3.org/International/articles/language-tags/) language codes, but the parser is not required to enforce this. 
 
                 Certain block types take additional attributes with meanings specific to those block types. 
 
@@ -776,19 +776,20 @@ specification: Semantic Authoring Markdown (SAM)
                 * app
                 * object
 
-                They should be used only with their natural semantics.
+                They should be used only with their natural semantics. Note, however, that the spec does not prescribe a mechanism for identifying the object to insert. The item will, of course, be identified by a URL, but how that URL is to be interpreted is not specified. For instance, it could point to an XML file that contain information used to choose the appropriate object for a particular media. The SAM language spec does not specify the format or interpretation for such a file. (Perhaps another spec will get written to some point for that mechanism, if it proves useful for multiple projects.) 
+
 
 
             semantics:
 
                 The insert is an instruction to the application layer to insert the specified resource. While implementation is entirely up to the applications layer, SAM specifies the semantics of the reserved insert types as follows:
 
-                |"image"| Insert the graphic image into the output.
-                |"video"| Insert the video into the output.
-                |"audio"| Insert a playable audio clip into the output.
-                |"feed"| Insert the result of a feed into the output.
-                |"app"| Insert an embedded app into the output. 
-                |*object*| Inserts a generic object (per HTML5 'object' tag.)
+                |image| Insert the graphic image into the output.
+                |video| Insert the video into the output.
+                |audio| Insert a playable audio clip into the output.
+                |feed| Insert the result of a feed into the output.
+                |app| Insert an embedded app into the output. 
+                |object| Inserts a generic object (per HTML5 'object' tag.)
 
                 The semantics of inserting by reference to an {ID}, {name}, {fragment}, or {string}, or {key} are as follows:
 
