@@ -2750,8 +2750,26 @@ class Annotation:
 
     def serialize_html(self, annotations=None, payload=None):
 
+        def recurse():
+            #Nest annotations for serialization
+            if annotations:
+                anns, *rest = annotations
+                yield from anns.serialize_html(rest, payload)
+            elif payload:
+                yield payload
+
         if self.type == 'link':
-            yield '<a href={0}>'.format(escape_for_xml_attribute(self.specifically))
+            yield '<a href={0} class="link">'.format(escape_for_xml_attribute(self.specifically))
+            yield from recurse()
+            yield '</a>'
+        elif self.type == 'bold' :
+            yield '<b class="bold">'.format(escape_for_xml_attribute(self.specifically))
+            yield from recurse()
+            yield '</b>'
+        elif self.type == 'link':
+            yield '<i class="italic">'.format(escape_for_xml_attribute(self.specifically))
+            yield from recurse()
+            yield '</i>'
         else:
             yield '<span'
             if self.type:
@@ -2761,14 +2779,10 @@ class Annotation:
             if self.namespace:
                 yield ' data-namespace="{0}"'.format(self.namespace)
             yield '>'
-        #Nest annotations for serialization
+            yield from recurse()
+            yield '</span>'
 
-        if annotations:
-            anns, *rest = annotations
-            yield from anns.serialize_html(rest, payload)
-        elif payload:
-            yield payload
-        yield '</a>' if self.type=='link' else '</span>'
+
 
 
     def append(self, thing):
@@ -3219,8 +3233,10 @@ if __name__ == "__main__":
                         subs.update({r: y.find("replace").text})
                     smart_quote_sets.update({x.find("name").text: subs})
 
-
-        for inputfile in glob.glob(args.infile):
+        inputfiles=glob.glob(args.infile)
+        if not inputfiles:
+            raise SAMParserError("No input file(s) found.")
+        for inputfile in inputfiles:
             try:
                 with open(inputfile, "r", encoding="utf-8-sig") as inf:
 
