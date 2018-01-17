@@ -4,7 +4,7 @@
         <name>justquotes</name>
         <sub>
             <name>double_quote_close</name>
-            <pattern><![CDATA[(?<=[\w\.\,'\)\}\?-])"((?=[\.\s'\)},\?!:;\[-])|$)]]></pattern>
+            <pattern><![CDATA[(?<=[\w\.\,\'\)\}\?!:;-])\"((?=[\.\s\'\)},\?!:;\[-])|$)]]></pattern>
             <replace>”</replace>
         </sub>
         <sub>
@@ -14,7 +14,7 @@
         </sub>
         <sub>
             <name>single_quote_close</name>
-            <pattern><![CDATA[(?<=[\w\.\,"\)}\?-])'((?=[\.\s"},\?!:;\[])|$)]]></pattern>
+            <pattern><![CDATA[(?<=[\w\.\,\"!:;)}\?-])\'((?=[\.\s"},\?!:;\[])|$)]]></pattern>
             <replace>’</replace>
         </sub>
         <sub>

@@ -97,9 +97,9 @@ flow_patterns = {
         }
 
 #smart quote patterns
-re_single_quote_close = '(?<=[\w\.\,\"\)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
+re_single_quote_close = '(?<=[\w\.\,\"!:;)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
 re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{-])'
-re_double_quote_close = '(?<=[\w\.\,\'\)\}\?-])\"((?=[\.\s\'\)},\?!:;\[-])|$)'
+re_double_quote_close = '(?<=[\w\.\,\'\)\}\?!:;-])\"((?=[\.\s\'\)},\?!:;\[-])|$)'
 re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{-])'
 re_apostrophe = "(?<=[\w`\*_\}\)])'(?=\w)"
 re_en_dash = "(?<=[\w\*_`\"\'\.\)\}]\s)--(?=\s[\w\*_`\"\'\{\(])"
