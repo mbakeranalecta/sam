@@ -885,14 +885,14 @@ class BlockInsert(Block):
                     yield from [x.content for x in string_defs if x.name == self.item][0].serialize_html()
                 else:
                     SAM_parser_warning('String reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
-            elif self.ref_type == 'fragmentref':
-                fragments = self._doc().fragments()
-                if self.item in [x.name for x in fragments]:
-                    yield from [x.content for x in fragments if x.name == self.item][0].serialize_html()
-                else:
-                    SAM_parser_warning(
-                        'Fragment reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
-                            self.item))
+            # elif self.ref_type == 'fragmentref':
+            #     fragments = self._doc().fragments()
+            #     if self.item in [x.name for x in fragments]:
+            #         yield from [x.content for x in fragments if x.name == self.item][0].serialize_html()
+            #     else:
+            #         SAM_parser_warning(
+            #             'Fragment reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
+            #                 self.item))
             else:
                 SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
 
@@ -2557,8 +2557,14 @@ class Phrase:
 
     def regurgitate(self):
         yield u'{{{0:s}}}'.format(escape_for_sam(self.text))
-        for x in self.attributes:
-            yield from x.regurgitate()
+        for c in self.conditions:
+            yield '(?{0})'.format(c)
+        if self.ID:
+            yield '(*{0})'.format(self.value)
+        if self.name:
+            yield '(#{0})'.format(self.name)
+        if self.language_code:
+            yield '(!{0})'.format(self.language_code)
         for x in self.annotations:
             yield from x.regurgitate()
 
@@ -2599,21 +2605,20 @@ class Phrase:
 
     def serialize_html(self):
         yield '<span class="phrase"'
-        if any([x.value for x in self.attributes if x.type == 'condition']):
-            conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
-            attrs = [x for x in self.attributes if x.type != 'condition']
-            attrs.append(conditions)
-            for att in sorted(attrs, key=lambda x: x.type):
-                yield from att.serialize_html()
-        else:
-            for att in sorted(self.attributes, key=lambda x: x.type):
-                yield from att.serialize_html()
+        if self.conditions:
+            yield ' data-conditions="{0}"'.format(','.join(self.conditions))
+        if self.ID:
+            yield ' id="{0}"'.format(self.ID)
+        if self.name:
+            yield ' data-name="{0}"'.format(self.name)
+        if self.language_code:
+            yield ' lang="{0}"'.format(self.language_code)
         yield '>'
 
-        #Nest attributes for serialization
+        #Nest annotations for serialization
         if self.annotations:
             ann, *rest = self.annotations
-            yield from ann.serialize_html(rest, escape_for_xml(self.text))
+            yield from ann.serialize_xml(rest, escape_for_xml(self.text))
         else:
             yield escape_for_xml(self.text)
         yield '</span>'
@@ -2636,10 +2641,18 @@ class Code(Phrase):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
-        yield '`{0}`'.format(self.text.replace('`', '``'))
+        yield u'{{{0:s}}}'.format(escape_for_sam(self.text))
+        if self.encoding:
+            yield '(={0})'.format(self.encoding)
+        for c in self.conditions:
+            yield '(?{0})'.format(c)
+        if self.ID:
+            yield '(*{0})'.format(self.value)
+        if self.name:
+            yield '(#{0})'.format(self.name)
+        if self.language_code:
+            yield '(!{0})'.format(self.language_code)
         for x in self.annotations:
-            yield from x.regurgitate()
-        for x in self.attributes:
             yield from x.regurgitate()
 
     def serialize_xml(self):
@@ -2667,22 +2680,21 @@ class Code(Phrase):
         yield '</' + tag + '>'
 
     def serialize_html(self):
-
-        if any(x for x in self.attributes if x.type == "encoding"):
+        if self.encoding:
             SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted. At: " + str(self).strip())
             yield ''
         else:
             yield '<code'
-            if any([x.value for x in self.attributes if x.type == 'condition']):
-                conditions = Attribute('conditions',
-                                       ','.join([x.value for x in self.attributes if x.type == 'condition']))
-                attrs = [x for x in self.attributes if x.type != 'condition']
-                attrs.append(conditions)
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_html()
-            else:
-                for att in sorted(self.attributes, key=lambda x: x.type):
-                    yield from att.serialize_html()
+            if self.conditions:
+                yield ' data-conditions="{0}"'.format(','.join(self.conditions))
+            if self.code_language:
+                yield ' data-language="{0}"'.format(self.code_language)
+            if self.ID:
+                yield ' id="{0}"'.format(self.ID)
+            if self.name:
+                yield ' data-name="{0}"'.format(self.name)
+            if self.language_code:
+                yield ' lang="{0}"'.format(self.language_code)
             yield '>'
             yield escape_for_xml(self.text)
             yield '</code>'
