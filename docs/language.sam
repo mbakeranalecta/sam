@@ -851,7 +851,7 @@ specification: Semantic Authoring Markdown (SAM)
                 The string can then be inserted using a {block insert} or {inline insert}:
 
                 ```(sam)
-                    The sentence includes and string insert >[$foo].
+                    The sentence includes a string insert >[$foo].
 
                     >>>[$foo])
 

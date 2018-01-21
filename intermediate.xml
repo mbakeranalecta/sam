@@ -4264,7 +4264,7 @@ This sentence includes a string reference &gt;[$name].
 <title>Insert a fragment</title>
 
 <description>
-<p>An instruction to insert a fragment. Note that actually resolving an inserting the fragment is a job for the application layer.</p>
+<p>An instruction to insert a fragment. Note that actually resolving and inserting the fragment is a job for the application layer.</p>
 </description>
 <source>
 <codeblock language="sam">

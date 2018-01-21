@@ -3543,7 +3543,7 @@ tests:(!en) SAM Parser Tests
         case: Insert a fragment
 
             description:
-                An instruction to insert a fragment. Note that actually resolving an inserting
+                An instruction to insert a fragment. Note that actually resolving and inserting
                 the fragment is a job for the application layer.
 
             source:

@@ -593,7 +593,6 @@ class SamParser:
         yield from self.doc.serialize(serialize_format)
 
 
-
 class Block(ABC):
 
     html_tag = "div"
@@ -683,6 +682,36 @@ class Block(ABC):
             return None
         else:
             return self.parent.children[my_pos + 1]
+
+    def string_defs(self):
+        """
+        Generate a list of string defs in the document.
+        :return: A list of string def objects
+        """
+        sdfs = []
+        for x in self.children:
+            if type(x) is StringDef:
+                sdfs.append(x)
+            elif hasattr(x,'string_defs'):
+                sdfs.extend(x.string_defs())
+        return sdfs
+
+    def object_by_id(self, id):
+        """
+        Get an object with a given id.
+        :return: The object with the specified id or None.
+        """
+        ob = None
+        if self.id == id:
+            return self
+        else:
+            for x in self.children:
+                y = x.object_by_id(id)
+                if y is not None:
+                    return y
+
+    def _doc(self):
+        return self.parent._doc()
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -850,7 +879,23 @@ class BlockInsert(Block):
     def serialize_html(self):
 
         if self.ref_type:
-            SAM_parser_warning('HTML output mode does not support inserts that use id, name, key, string, or fragment references. They will be omitted. At: ' + str(self).strip())
+            if self.ref_type == 'stringref':
+                string_defs = self._doc().string_defs()
+                if self.item in [x.name for x in string_defs]:
+                    yield from [x.content for x in string_defs if x.name == self.item][0].serialize_html()
+                else:
+                    SAM_parser_warning('String reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
+            elif self.ref_type == 'fragmentref':
+                fragments = self._doc().fragments()
+                if self.item in [x.name for x in fragments]:
+                    yield from [x.content for x in fragments if x.name == self.item][0].serialize_html()
+                else:
+                    SAM_parser_warning(
+                        'Fragment reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
+                            self.item))
+            else:
+                SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
+
         else:
             attrs=[Attribute('type', self.insert_type), Attribute('item', self.item)]
 
@@ -1044,6 +1089,7 @@ class Embedblock(Codeblock):
 
 
 class Remark(Block):
+    html_name='div'
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
         super().__init__(name='remark', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
 
@@ -1143,14 +1189,6 @@ class Line(Block):
             raise SAMParserStructureError('A Line cannot have children.')
         else:
             self.parent.add(b)
-
-    # def serialize_html(self):
-    #     if self.preceding_sibling() is None:
-    #         yield '<pre class="line">'
-    #     yield from self.content.serialize_html()
-    #     yield '\n'
-    #     if self.following_sibling() is None:
-    #         yield '</pre>'
 
 class Fragment(Block):
     def __init__(self, indent, attributes=None, citations=None, namespace=None):
@@ -1311,8 +1349,8 @@ class UnorderedList(List):
             else:
                 self.parent.add(b)
 
-class OrderedList(List):
 
+class OrderedList(List):
     html_tag = "ol"
 
     def __init__(self, indent, namespace=None):
@@ -1564,6 +1602,8 @@ class StringDef(Block):
         yield from self.content.serialize_xml()
         yield "</string>\n"
 
+    def serialize_html(self):
+        yield '<div class="string-def" data-name="{0} data-value="{1}"></div>'.format(self.name, self.content)
 
 class Root(Block):
     def __init__(self, doc):
@@ -1691,8 +1731,15 @@ block_pattern_replacements = {
 
 
 class Flow(list):
+    def __init__(self):
+        super().__init__()
+        self.parent = None
+
     def __str__(self):
         return ''.join(self.regurgitate())
+
+    def _doc(self):
+        return self.parent._doc()
 
     def regurgitate(self):
 
@@ -1717,6 +1764,8 @@ class Flow(list):
 
 
     def append(self, thing):
+        if type(thing) is not str:
+            thing.parent=self
         if type(thing) is Attribute:
             for i in reversed(self):
                 if type(i is Phrase):
@@ -1750,19 +1799,18 @@ class Flow(list):
 
     def serialize_xml(self):
         for x in self:
-            try:
-                yield from x.serialize_xml()
-            except AttributeError:
-                assert type(x) is str
+            if type(x) is str:
                 yield escape_for_xml(x)
+            else:
+                yield from x.serialize_xml()
 
     def serialize_html(self):
         for x in self:
-            try:
-                yield from x.serialize_html()
-            except AttributeError as e:
-                assert type(x) is str
+            if type(x) is str:
                 yield escape_for_xml(x)
+            else:
+                yield from x.serialize_html()
+
 
 # Annotation lookup modes. Third parties can add additional lookup modes
 # by extending the annotation_lookup_modes dictionary with new annotation
@@ -1855,6 +1903,9 @@ class DocStructure:
 
     def regurgitate(self):
         yield from self.root.regurgitate()
+
+    def _doc(self):
+        return self
 
     def _cur_blk(self):
         """
@@ -1959,6 +2010,22 @@ class DocStructure:
         except(AttributeError):
             return None
 
+    def string_defs(self):
+        """
+        Generate a list of string defs in the document.
+        :return: A list of string def objects
+        """
+        string_defs = self.root.string_defs()
+        return string_defs
+
+    def object_by_id(self, id):
+        """
+        Get an object by ID.
+        :return: An object with the corresponding ID or none.
+        """
+        return self.root.object_by_id(id)
+
+
 
     def add_block(self, block):
         """
@@ -2013,13 +2080,14 @@ class DocStructure:
 
         # Check for duplicate IDs in the flow
         # Add any ids found to list of ids
-        ids=[f.id for f in flow if type(f) is Phrase and f.id is not None]
-        for id in ids:
-            if id in self.ids:
+        ids = [f.ID for f in flow if type(f) is Phrase and f.ID is not None]
+        for i in ids:
+            if i in self.ids:
                 raise SAMParserStructureError('Duplicate ID found "{0}".'.format(ids[0]))
-            self.ids.append(id)
+            self.ids.append(i)
 
         self.current_block._add_child(flow)
+
 
 
     def find_last_annotation(self, text, node=None):
@@ -2296,20 +2364,20 @@ class FlowParser:
 
             if annotation_type[0] == '=':
                 if type(phrase) is Code:
-                    phrase.add_attribute(Attribute('encoding', unescape(annotation_type[1:]), is_local))
+                    phrase.encoding = unescape(annotation_type[1:])
                 else:
                     raise SAMParserStructureError("Only code can have an embed attribute.")
             elif annotation_type[0] == '!':
-                phrase.add_attribute(Attribute('xml:lang', unescape(annotation_type[1:]), is_local))
+                phrase.language_code = unescape(annotation_type[1:])
             elif annotation_type[0] == '*':
-                phrase.add_attribute(Attribute('id', unescape(annotation_type[1:]), is_local))
+                phrase.ID = unescape(annotation_type[1:])
             elif annotation_type[0] == '#':
-                phrase.add_attribute(Attribute('name', unescape(annotation_type[1:]), is_local))
+                phrase.name = unescape(annotation_type[1:])
             elif annotation_type[0] == '?':
-                phrase.add_attribute(Attribute('condition', unescape(annotation_type[1:]), is_local))
+                phrase.conditions.append(unescape(annotation_type[1:]))
             else:
                 if type(self.flow[-1]) is Code:
-                    phrase.add_attribute(Attribute('language', unescape(annotation_type), is_local))
+                    phrase.code_language = unescape(annotation_type)
                 else:
                     phrase.annotations.append(Annotation(annotation_type, unescape(specifically), namespace, is_local))
             para.advance(len(match.group(0)))
@@ -2478,7 +2546,11 @@ class Phrase:
     def __init__(self, text):
         self.text = text
         self.annotations = []
-        self.attributes = []
+        self.parent=None
+        self.language_code = None
+        self.ID = None
+        self.name = None
+        self.conditions = []
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -2501,32 +2573,23 @@ class Phrase:
             self.attributes.append(attr)
 
     @property
-    def id(self):
-        for x in self.attributes:
-            if x.type == 'id':
-                return x.value
-        return None
-
-    @property
     def annotated(self):
-        return len([x for x in self.annotations if not x.local]) > 0 or \
-               len([x for x in self.attributes if not x.local]) > 0
+        return len([x for x in self.annotations if not x.local]) > 0
 
 
     def serialize_xml(self):
         yield '<phrase'
-        if any([x.value for x in self.attributes if x.type == 'condition']):
-            conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
-            attrs = [x for x in self.attributes if x.type != 'condition']
-            attrs.append(conditions)
-            for att in sorted(attrs, key=lambda x: x.type):
-                yield from att.serialize_xml()
-        else:
-            for att in sorted(self.attributes, key=lambda x: x.type):
-                yield from att.serialize_xml()
+        if self.conditions:
+            yield ' conditions="{0}"'.format(','.join(self.conditions))
+        if self.ID:
+            yield ' id="{0}"'.format(self.ID)
+        if self.name:
+            yield ' name="{0}"'.format(self.name)
+        if self.language_code:
+            yield ' xml:lang="{0}"'.format(self.language_code)
         yield '>'
 
-        #Nest attributes for serialization
+        #Nest annotations for serialization
         if self.annotations:
             ann, *rest = self.annotations
             yield from ann.serialize_xml(rest, escape_for_xml(self.text))
@@ -2564,6 +2627,11 @@ class Phrase:
 
 class Code(Phrase):
 
+    def __init__(self, text):
+        super().__init__(text)
+        self.code_language = None
+        self.encoding = None
+
     def __str__(self):
         return ''.join(self.regurgitate())
 
@@ -2576,22 +2644,24 @@ class Code(Phrase):
 
     def serialize_xml(self):
 
-        if any(x for x in self.attributes if x.type == "encoding"):
+        if self.encoding:
             tag = "embed"
         else:
             tag = "code"
 
         yield '<' + tag
-        if any([x.value for x in self.attributes if x.type == 'condition']):
-            conditions = Attribute('conditions',
-                                   ','.join([x.value for x in self.attributes if x.type == 'condition']))
-            attrs = [x for x in self.attributes if x.type != 'condition']
-            attrs.append(conditions)
-            for att in sorted(attrs, key=lambda x: x.type):
-                yield from att.serialize_xml()
-        else:
-            for att in sorted(self.attributes, key=lambda x: x.type):
-                yield from att.serialize_xml()
+        if self.conditions:
+            yield ' conditions="{0}"'.format(','.join(self.conditions))
+        if self.encoding:
+            yield ' encoding="{0}"'.format(self.encoding)
+        if self.code_language:
+            yield ' language="{0}"'.format(self.code_language)
+        if self.ID:
+            yield ' id="{0}"'.format(self.ID)
+        if self.name:
+            yield ' name="{0}"'.format(self.name)
+        if self.language_code:
+            yield ' xml:lang="{0}"'.format(self.language_code)
         yield '>'
         yield escape_for_xml(self.text)
         yield '</' + tag + '>'
@@ -2799,6 +2869,7 @@ class Citation:
         self.citation_extra = None if citation_extra is None else citation_extra.strip()
         self.local=True
         self.child = None
+        self.parent=None
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -2862,12 +2933,12 @@ class Citation:
                 yield ' {0}'.format(self.citation_extra)
                 yield from recurse()
             yield '</cite>'
-        elif self.citation_type=='idref':
+        elif self.citation_type == 'idref':
             yield '<a href="#{0}">'.format(self.citation_value)
             yield from recurse()
             yield '</a>'
         else:
-            SAM_parser_warning("HTML output mode does not support inserts that use id, name, key refernces. They will be omitted. At: " + str(self).strip())
+            SAM_parser_warning("HTML output mode does not support inserts that use name or key refernces. They will be omitted. At: " + str(self).strip())
 
 
     def append(self, thing):
@@ -2877,13 +2948,20 @@ class Citation:
             self.child.append(thing)
 
 
-class InlineInsert:
+class InlineInsert():
     def __init__(self, insert_type, ref_type, item, attributes=None, citations=None):
         self.insert_type = insert_type
-        self.ref_type =ref_type
+        if ref_type == 'fragmentref':
+            raise SAMParserStructureError("Fragment references are not permitted in inline inserts.")
+        else:
+            self.ref_type =ref_type
         self.item = item
         self.attributes = attributes
         self.citations = citations
+        self.parent=None
+
+    def _doc(self):
+        return self.parent._doc()
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -2928,7 +3006,15 @@ class InlineInsert:
     def serialize_html(self):
 
         if self.ref_type:
-            SAM_parser_warning('HTML output mode does not support inserts that use id, name, key, string, or fragment references. They will be omitted.  At: ' + str(self).strip())
+            if self.ref_type == 'stringref':
+                string_defs = self._doc().string_defs()
+                if self.item in [x.name for x in string_defs]:
+                    yield from [x.content for x in string_defs if x.name == self.item][0].serialize_html()
+                else:
+                    SAM_parser_warning('String reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
+            else:
+                SAM_parser_warning("HTML output mode does not support inline inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
+
         else:
             attrs=[Attribute('type', self.insert_type), Attribute('item', self.item)]
 
