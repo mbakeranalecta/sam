@@ -1717,31 +1717,38 @@ multiple lines.
 <ll>
 <li>
 <label>Do</label>
+
 <p>a deer, a female deer</p>
 </li>
 <li>
 <label>Re</label>
+
 <p>a drop of golden sun</p>
 <p>Is it a particle or a wave?</p>
 </li>
 <li>
 <label>Me</label>
+
 <p>a name I call myself</p>
 </li>
 <li>
 <label>Fa</label>
+
 <p>a long long way to run</p>
 </li>
 <li>
 <label>So</label>
+
 <p>a needle pulling thread</p>
 </li>
 <li>
 <label>La</label>
+
 <p>a note to follow so</p>
 </li>
 <li>
 <label>Te</label>
+
 <p>a drink with jam and bread</p>
 </li>
 </ll>
@@ -1799,14 +1806,17 @@ multiple lines.
 <ll>
 <li>
 <label>foo1 &amp; bar1</label>
+
 <p>foobar1</p>
 </li>
 <li>
 <label>foo2 &amp; bar2</label>
+
 <p>foobar2</p>
 </li>
 <li>
 <label>foo3 &amp; bar3</label>
+
 <p>foobar3</p>
 </li>
 </ll>
@@ -2836,31 +2846,38 @@ recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 <ll>
 <li conditions="bar,green" name="foo7">
 <label>Do</label>
+
 <p>a deer, a female deer</p>
 </li>
 <li>
 <label>Re</label>
+
 <p>a drop of golden sun</p>
 <p>Is it a particle or a wave?</p>
 </li>
 <li id="bananas">
 <label>Me</label>
+
 <p>a name I call myself</p>
 </li>
 <li>
 <label>Fa</label>
+
 <p>a long long way to run</p>
 </li>
 <li>
 <label>So</label>
+
 <p>a needle pulling thread</p>
 </li>
 <li>
 <label>La</label>
+
 <p>a note to follow so</p>
 </li>
 <li>
 <label>Te</label>
+
 <p>a drink with jam and bread</p>
 </li>
 </ll>
@@ -4101,7 +4118,7 @@ There is a `_` in _this \_ italic_ decoration.
 </codeblock>
 </source>
 <markup>
-<insert keyref="glug"/>
+<insert item="glug" type="keyref"/>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4133,7 +4150,7 @@ that you can define string substitutions whenever you insert a fragment into you
 </codeblock>
 </source>
 <markup>
-<p>Because you often want to <inline-insert conditions="baz,bat" item="circle.png" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+<p>Because you often want to <inline-insert conditions="baz,bat" item="circle.png" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert item="my-table" type="idref"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4153,7 +4170,7 @@ that you can define string substitutions whenever you insert a fragment into you
 </codeblock>
 </source>
 <markup>
-<p><inline-insert nameref="foo8"/></p>
+<p><inline-insert item="foo8" type="nameref"/></p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4200,7 +4217,7 @@ This sentence includes a string reference &gt;[$name].
 </codeblock>
 </source>
 <markup>
-<p>This sentence includes a string reference <inline-insert stringref="name"/>.</p>
+<p>This sentence includes a string reference <inline-insert item="name" type="stringref"/>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4274,7 +4291,7 @@ This sentence includes a string reference &gt;[$name].
 </codeblock>
 </source>
 <markup>
-<insert fragmentref="foobar">
+<insert item="foobar" type="fragmentref">
 <string name="a">apricot</string>
 <string name="b">breadfruit</string>
 </insert></markup>
