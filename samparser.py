@@ -856,12 +856,12 @@ class BlockInsert(Block):
             yield ' conditions="{0}"'.format(','.join(self.conditions))
         if self.ID:
             yield ' id="{0}"'.format(self.ID)
-        if self.item:
+        if self.item and self.insert_type:
             yield ' item="{0}"'.format(self.item)
         if self.name:
             yield ' name="{0}"'.format(self.name)
         if self.ref_type:
-            yield ' type="{0}"'.format(self.ref_type)
+            yield ' {0}="{1}"'.format(self.ref_type, self.item)
         if self.insert_type:
             yield ' type="{0}"'.format(self.insert_type)
         if self.namespace is not None:
@@ -3004,12 +3004,12 @@ class InlineInsert():
             yield ' conditions="{0}"'.format(','.join(self.conditions))
         if self.ID:
             yield ' id="{0}"'.format(self.ID)
-        if self.item:
+        if self.item and self.insert_type:
             yield ' item="{0}"'.format(self.item)
         if self.name:
             yield ' name="{0}"'.format(self.name)
         if self.ref_type:
-            yield ' type="{0}"'.format(self.ref_type)
+            yield ' {0}="{1}"'.format(self.ref_type, self.item)
         if self.insert_type:
             yield ' type="{0}"'.format(self.insert_type)
         if self.namespace is not None:
