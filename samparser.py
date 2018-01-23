@@ -782,16 +782,18 @@ class Block(ABC):
     def serialize_html(self):
         yield '<{0} class="{1}"'.format(self.html_tag, self.block_type)
 
-        if self.attributes:
-            if any([x.value for x in self.attributes if x.type == 'condition']):
-                conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
-                attrs = [x for x in self.attributes if x.type != 'condition']
-                attrs.append(conditions)
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_html()
-            else:
-                for att in sorted(self.attributes, key=lambda x: x.type):
-                    yield from att.serialize_html()
+        if hasattr(self, "attribution"):
+            yield ' data-attribution="{0}"'.format(escape_for_xml_attribute(self.attribution))
+        if self.conditions:
+            yield ' data-conditions="{0}"'.format(','.join(self.conditions))
+        if self.ID:
+            yield ' id="{0}"'.format(self.ID)
+        if self.name:
+            yield ' data-name="{0}"'.format(self.name)
+        if self.namespace is not None:
+            SAM_parser_warning("Namespaces are ignored in HTML output mode.")
+        if self.language_code:
+            yield ' lang="{0}"'.format(self.language_code)
 
         if self.children or self.citations:
             yield ">"
@@ -902,19 +904,18 @@ class BlockInsert(Block):
                 SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
 
         else:
-            attrs=[Attribute('type', self.insert_type), Attribute('item', self.item)]
-
             yield '<div class="insert"'
-            if self.attributes:
-                if any([x.value for x in self.attributes if x.type == 'condition']):
-                    conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
-                    attrs.append(conditions)
-                attrs.extend([x for x in self.attributes if x.type != 'condition'])
-
-            for att in sorted(attrs, key=lambda x: x.type):
-                yield from att.serialize_html()
-            yield '>\n'
-
+            if self.conditions:
+                yield ' data-conditions="{0}"'.format(','.join(self.conditions))
+            if self.ID:
+                yield ' id="{0}"'.format(self.ID)
+            if self.name:
+                yield ' data-name="{0}"'.format(self.name)
+            if self.namespace is not None:
+                SAM_parser_warning("Namespaces are ignored in HTML output mode.")
+            if self.language_code:
+                yield ' lang="{0}"'.format(self.language_code)
+            yield ">"
             if self.citations or self.children:
 
                 for cit in self.citations:
@@ -990,25 +991,19 @@ class Codeblock(Block):
             yield '/>'
 
     def serialize_html(self):
-        attrs = []
-        yield '<pre class="codeblock"'
-
+        yield "<pre"
+        if self.conditions:
+            yield ' data-conditions="{0}"'.format(','.join(self.conditions))
+        if self.ID:
+            yield ' id="{0}"'.format(self.ID)
+        if self.code_language:
+            yield ' data-language="{0}"'.format(self.code_language)
+        if self.name:
+            yield ' data-name="{0}"'.format(self.name)
         if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
-        if self.attributes:
-            attrs.extend(self.attributes)
-        if attrs:
-            if any([x.value for x in attrs if x.type == 'condition']):
-                conditions = Attribute('conditions',
-                                       ','.join([x.value for x in attrs if x.type == 'condition']))
-                attrs = [x for x in attrs if x.type != 'condition']
-                attrs.append(conditions)
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_html()
-            else:
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_html()
+            SAM_parser_warning("Namespaces are ignored in HTML output mode.")
+        if self.language_code:
+            yield ' lang="{0}"'.format(self.language_code)
 
         if self.citations or self.children:
             yield ">"
@@ -1018,12 +1013,12 @@ class Codeblock(Block):
                 yield from x.serialize_html()
                 yield '\n'
         if self.children:
-            if self.language:
-                yield '<code class="language-{0}">'.format(self.language)
+            if self.code_language:
+                yield '<code class="language-{0}">'.format(self.code_language)
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html()
-            if self.language:
+            if self.code_language:
                 yield '</code>'
             yield "</pre>\n"
         else:
@@ -1038,10 +1033,17 @@ class Embedblock(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '```'
-        if self.language:
-            yield "(={0})".format(self.language)
-        for x in self.attributes:
-            yield from x.regurgitate()
+        if self.encoding:
+            yield "(={0})".format(self.encoding)
+        if self.conditions:
+            for c in self.conditions:
+                yield '(?{0})'.format(c)
+        if self.ID:
+            yield '(*{0})'.format(self.ID)
+        if self.name:
+            yield '(#{0})'.format(self.name)
+        if self.language_code:
+            yield '(!{0})'.format(self.language_code)
         for x in self.citations:
             yield from x.regurgitate()
         yield '\n'
@@ -1470,23 +1472,17 @@ class LabeledListItem(ListItem):
 
 
     def serialize_html(self):
-
+        yield "<div"
+        if self.conditions:
+            yield ' data-conditions="{0}"'.format(','.join(self.conditions))
+        if self.ID:
+            yield ' id="{0}"'.format(self.ID)
+        if self.name:
+            yield ' data-name="{0}"'.format(self.name)
         if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
-
-        yield '<div class="li"'
-        if self.attributes:
-
-            if any([x.value for x in self.attributes if x.type == 'condition']):
-                conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
-                attrs = [x for x in self.attributes if x.type != 'condition']
-                attrs.append(conditions)
-                for att in sorted(attrs, key=lambda x: x.type):
-                    yield from att.serialize_html()
-            else:
-                for att in sorted(self.attributes, key=lambda x: x.type):
-                    yield from att.serialize_html()
+            SAM_parser_warning("Namespaces are not supported in HTML output mode.")
+        if self.language_code:
+            yield ' lang="{0}"'.format(self.language_code)
         yield '>\n'
         yield "<dt>"
         yield from self.label.serialize_html()
@@ -1605,7 +1601,7 @@ class StringDef(Block):
         yield "</string>\n"
 
     def serialize_html(self):
-        yield '<div class="string-def" data-name="{0} data-value="{1}"></div>'.format(self.block_type, self.content)
+        yield '<div class="string-def" data-name="{0}" data-value="{1}"></div>'.format(self.block_type, self.content)
 
 class Root(Block):
     def __init__(self, doc):
@@ -1635,7 +1631,7 @@ class Root(Block):
         except IndexError:
             title=None
         try:
-            lang = [a.value for a in [x.attributes for x in self.children if type(x) is Block][0] if a.type == 'xml:lang'][0]
+            lang = [x.language_code for x in self.children if x.language_code is not None][0]
         except IndexError:
             lang=None
         yield '<html'
@@ -1657,8 +1653,8 @@ class Root(Block):
         yield '</body>\n</html>'
 
     def _add_child(self, b):
-        # This is a hack to catch the creation of a second root-level block.
-        # It is not good because people can add to the children list without
+        # This is a test to catch the creation of a second root-level block.
+        # It is not foolproof because people can add to the children list without
         # calling this function. Not sure what the options are. Could detect
         # the error at the XML output stage, I suppose, but would rather
         # catch it earlier and give feedback.
@@ -2620,7 +2616,7 @@ class Phrase:
         #Nest annotations for serialization
         if self.annotations:
             ann, *rest = self.annotations
-            yield from ann.serialize_xml(rest, escape_for_xml(self.text))
+            yield from ann.serialize_html(rest, escape_for_xml(self.text))
         else:
             yield escape_for_xml(self.text)
         yield '</span>'
@@ -2970,7 +2966,6 @@ class InlineInsert():
         else:
             self.ref_type =ref_type
         self.item = item
-        self.attributes = attributes
         self.citations = citations
         self.parent=None
         self.namespace = None
@@ -3039,19 +3034,18 @@ class InlineInsert():
                 SAM_parser_warning("HTML output mode does not support inline inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
 
         else:
-            attrs=[Attribute('type', self.insert_type), Attribute('item', self.item)]
-
             yield '<span class="insert"'
-            if self.attributes:
-                if any([x.value for x in self.attributes if x.type == 'condition']):
-                    conditions = Attribute('conditions', ','.join([x.value for x in self.attributes if x.type == 'condition']))
-                    attrs.append(conditions)
-                attrs.extend([x for x in self.attributes if x.type != 'condition'])
-
-            for att in sorted(attrs, key=lambda x: x.type):
-                yield from att.serialize_html()
-            yield '>\n'
-
+            if self.conditions:
+                yield ' data-conditions="{0}"'.format(','.join(self.conditions))
+            if self.ID:
+                yield ' id="{0}"'.format(self.ID)
+            if self.name:
+                yield ' data-name="{0}"'.format(self.name)
+            if self.namespace is not None:
+                SAM_parser_warning("Namespaces are ignored in HTML output mode.")
+            if self.language_code:
+                yield ' lang="{0}"'.format(self.language_code)
+            yield ">"
             if self.citations:
 
                 for cit in self.citations:
