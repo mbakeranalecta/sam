@@ -591,7 +591,18 @@ class SamParser:
 
 
 class Block(ABC):
+    attribute_serialization_xml = [('attribution', 'attribution'),
+                                   ('conditions', 'conditions'),
+                                   ('ID', 'id'),
+                                   ('name', 'name'),
+                                   ('namespace', 'xmlns'),
+                                   ('language_code', 'xml:lang')]
 
+    attribute_serialization_html = [('attribution', 'data-attribution'),
+                                    ('conditions', 'data-conditions'),
+                                    ('ID', 'id'),
+                                    ('name', 'data-name'),
+                                    ('language_code', 'lang')]
     html_tag = "div"
 
     def __init__(self, block_type, indent, attributes={}, content=None, citations=[], namespace=None):
@@ -735,22 +746,24 @@ class Block(ABC):
             yield from z.regurgitate()
 
 
+    def _serialize_attributes(self, attribute_dict):
+        for attr_name, tag in attribute_dict:
+            try:
+                attr_value = getattr(self, attr_name)
+                if attr_value:
+                    if type(attr_value) is list:
+                        yield ' {0}="{1}"'.format(tag, ','.join([escape_for_xml_attribute(x) for x in attr_value]))
+                    else:
+                        yield ' {0}="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
+            except AttributeError:
+                pass
+
     def serialize_xml(self):
 
         yield '<{0}'.format(self.block_type)
-        if hasattr(self, "attribution"):
-            yield ' attribution="{0}"'.format(escape_for_xml_attribute(self.attribution))
-        if self.conditions:
-            yield ' conditions="{0}"'.format(','.join(self.conditions))
-        if self.ID:
-            yield ' id="{0}"'.format(self.ID)
-        if self.name:
-            yield ' name="{0}"'.format(self.name)
-        if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
-        if self.language_code:
-            yield ' xml:lang="{0}"'.format(self.language_code)
+
+        yield from self._serialize_attributes(self.attribute_serialization_xml)
+
         if self.children or self.citations:
             yield ">"
 
@@ -782,18 +795,7 @@ class Block(ABC):
     def serialize_html(self):
         yield '<{0} class="{1}"'.format(self.html_tag, self.block_type)
 
-        if hasattr(self, "attribution"):
-            yield ' data-attribution="{0}"'.format(escape_for_xml_attribute(self.attribution))
-        if self.conditions:
-            yield ' data-conditions="{0}"'.format(','.join(self.conditions))
-        if self.ID:
-            yield ' id="{0}"'.format(self.ID)
-        if self.name:
-            yield ' data-name="{0}"'.format(self.name)
-        if self.namespace is not None:
-            SAM_parser_warning("Namespaces are ignored in HTML output mode.")
-        if self.language_code:
-            yield ' lang="{0}"'.format(self.language_code)
+        yield from self._serialize_attributes(self.attribute_serialization_html)
 
         if self.children or self.citations:
             yield ">"
@@ -827,6 +829,19 @@ class Block(ABC):
 
 
 class BlockInsert(Block):
+    attribute_serialization_xml = [('attribution', 'attribution'),
+                                   ('conditions', 'conditions'),
+                                   ('ID', 'id'),
+                                   ('name', 'name'),
+                                   ('namespace', 'xmlns'),
+                                   ('language_code', 'xml:lang')]
+
+    attribute_serialization_html = [('attribution', 'data-attribution'),
+                                    ('conditions', 'data-conditions'),
+                                    ('ID', 'id'),
+                                    ('name', 'data-name'),
+                                    ('language_code', 'lang')]
+
     def __init__(self, indent, insert_type, ref_type, item, attributes={}, citations=None, namespace=None):
         super().__init__(block_type='insert', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
         self.insert_type = insert_type
@@ -852,8 +867,9 @@ class BlockInsert(Block):
 
     def serialize_xml(self):
 
-
         yield '<insert'
+
+        # Doing this the long way because of special rules for handling references.
         if self.conditions:
             yield ' conditions="{0}"'.format(','.join(self.conditions))
         if self.ID:
