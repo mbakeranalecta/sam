@@ -591,15 +591,13 @@ class SamParser:
 
 
 class Block(ABC):
-    attribute_serialization_xml = [('attribution', 'attribution'),
-                                   ('conditions', 'conditions'),
+    attribute_serialization_xml = [('conditions', 'conditions'),
                                    ('ID', 'id'),
                                    ('name', 'name'),
                                    ('namespace', 'xmlns'),
                                    ('language_code', 'xml:lang')]
 
-    attribute_serialization_html = [('attribution', 'data-attribution'),
-                                    ('conditions', 'data-conditions'),
+    attribute_serialization_html = [('conditions', 'data-conditions'),
                                     ('ID', 'id'),
                                     ('name', 'data-name'),
                                     ('language_code', 'lang')]
@@ -954,6 +952,18 @@ class BlockInsert(Block):
 
 
 class Codeblock(Block):
+    attribute_serialization_xml = [('conditions', 'conditions'),
+                                   ('ID', 'id'),
+                                   ('code_language', 'language'),
+                                   ('name', 'name'),
+                                   ('namespace', 'xmlns'),
+                                   ('language_code', 'xml:lang')]
+
+    attribute_serialization_html = [('conditions', 'data-conditions'),
+                                    ('ID', 'id'),
+                                    ('code_language', 'data-language'),
+                                    ('name', 'data-name'),
+                                    ('language_code', 'lang')]
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
         self.code_language=None
         super().__init__(block_type='codeblock', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
@@ -979,19 +989,8 @@ class Codeblock(Block):
 
     def serialize_xml(self):
         yield '<codeblock'
-        if self.conditions:
-            yield ' conditions="{0}"'.format(','.join(self.conditions))
-        if self.ID:
-            yield ' id="{0}"'.format(self.ID)
-        if self.code_language:
-            yield ' language="{0}"'.format(self.code_language)
-        if self.name:
-            yield ' name="{0}"'.format(self.name)
-        if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
-        if self.language_code:
-            yield ' xml:lang="{0}"'.format(self.language_code)
+        yield from self._serialize_attributes(self.attribute_serialization_xml)
+
         if self.citations or self.children:
             yield ">\n"
             if self.citations:
@@ -1008,19 +1007,7 @@ class Codeblock(Block):
 
     def serialize_html(self):
         yield "<pre"
-        if self.conditions:
-            yield ' data-conditions="{0}"'.format(','.join(self.conditions))
-        if self.ID:
-            yield ' id="{0}"'.format(self.ID)
-        if self.code_language:
-            yield ' data-language="{0}"'.format(self.code_language)
-        if self.name:
-            yield ' data-name="{0}"'.format(self.name)
-        if self.namespace is not None:
-            SAM_parser_warning("Namespaces are ignored in HTML output mode.")
-        if self.language_code:
-            yield ' lang="{0}"'.format(self.language_code)
-
+        yield from self._serialize_attributes(self.attribute_serialization_html)
         if self.citations or self.children:
             yield ">"
 
@@ -1042,6 +1029,15 @@ class Codeblock(Block):
 
 
 class Embedblock(Block):
+    attribute_serialization_xml = [('conditions', 'conditions'),
+                                   ('ID', 'id'),
+                                   ('encoding', 'encoding'),
+                                   ('name', 'name'),
+                                   ('namespace', 'xmlns'),
+                                   ('language_code', 'xml:lang')]
+
+    # No attribute_serialization_html because embedded data is not supported in HTML output mode
+
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
         self.encoding=None
         super().__init__(block_type='embedblock', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
@@ -1071,19 +1067,7 @@ class Embedblock(Block):
         attrs = []
         yield '<embedblock'
 
-        if self.conditions:
-            yield ' conditions="{0}"'.format(','.join(self.conditions))
-        if self.encoding:
-            yield ' encoding="{0}"'.format(self.encoding)
-        if self.ID:
-            yield ' id="{0}"'.format(self.ID)
-        if self.name:
-            yield ' name="{0}"'.format(self.name)
-        if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
-        if self.language_code:
-            yield ' xml:lang="{0}"'.format(self.language_code)
+        yield from self._serialize_attributes(self.attribute_serialization_xml)
         if self.children:
             yield ">"
 
@@ -1103,6 +1087,19 @@ class Embedblock(Block):
 
 
 class Remark(Block):
+    attribute_serialization_xml = [('attribution', 'attribution'),
+                                   ('conditions', 'conditions'),
+                                   ('ID', 'id'),
+                                   ('name', 'name'),
+                                   ('namespace', 'xmlns'),
+                                   ('language_code', 'xml:lang')]
+
+    attribute_serialization_html = [('attribution', 'data-attribution'),
+                                    ('conditions', 'data-conditions'),
+                                    ('ID', 'id'),
+                                    ('code_language', 'data-language'),
+                                    ('name', 'data-name'),
+                                    ('language_code', 'lang')]
     html_name='div'
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
         super().__init__(block_type='remark', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
@@ -1273,6 +1270,10 @@ class RecordSet(Block):
             self.children.append(b)
 
 class Record(Block):
+    attribute_serialization_xml = [('namespace', 'xmlns')]
+
+    attribute_serialization_html = []
+
     def __init__(self, field_values, indent, namespace=None):
         super().__init__(block_type='record', indent=indent, attributes={}, citations=[], namespace=namespace)
         self.field_values = field_values
@@ -1287,12 +1288,8 @@ class Record(Block):
     def serialize_xml(self):
         record = list(zip(self.parent.field_names, self.field_values))
         yield '<record'
-
-        if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
-        yield ">\n"
-
+        yield from self._serialize_attributes(self.attribute_serialization_xml)
+        yield ">"
         if record:
             for name, value in zip(self.parent.field_names, self.field_values):
                 yield "<{0}>".format(name)
@@ -1309,9 +1306,7 @@ class Record(Block):
         record = list(zip(self.parent.field_names, self.field_values))
         yield '<tr class="record"'
 
-        if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
+        yield from self._serialize_attributes(self.attribute_serialization_xml)
         yield ">\n"
 
         if record:
@@ -1344,6 +1339,7 @@ class List(Block):
 
 class UnorderedList(List):
     html_tag = "ul"
+
     def __init__(self, indent, namespace=None):
         super().__init__('ul', indent=indent, content=None, namespace=namespace)
 
@@ -1452,18 +1448,7 @@ class LabeledListItem(ListItem):
 
     def serialize_xml(self):
         yield '<{0}'.format(self.block_type)
-        if self.conditions:
-            yield ' conditions="{0}"'.format(','.join(self.conditions))
-        if self.ID:
-            yield ' id="{0}"'.format(self.ID)
-        if self.name:
-            yield ' name="{0}"'.format(self.name)
-        if self.namespace is not None:
-            if type(self.parent) is Root or self.namespace != self.parent.namespace:
-                yield ' xmlns="{0}"'.format(self.namespace)
-        if self.language_code:
-            yield ' xml:lang="{0}"'.format(self.language_code)
-
+        yield from self._serialize_attributes(self.attribute_serialization_xml)
         yield ">\n<label>"
         yield from self.label.serialize_xml()
         yield "</label>\n"
@@ -1489,16 +1474,7 @@ class LabeledListItem(ListItem):
 
     def serialize_html(self):
         yield "<div"
-        if self.conditions:
-            yield ' data-conditions="{0}"'.format(','.join(self.conditions))
-        if self.ID:
-            yield ' id="{0}"'.format(self.ID)
-        if self.name:
-            yield ' data-name="{0}"'.format(self.name)
-        if self.namespace is not None:
-            SAM_parser_warning("Namespaces are not supported in HTML output mode.")
-        if self.language_code:
-            yield ' lang="{0}"'.format(self.language_code)
+        yield from self._serialize_attributes(self.attribute_serialization_html)
         yield '>\n'
         yield "<dt>"
         yield from self.label.serialize_html()
