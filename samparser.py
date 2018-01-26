@@ -96,22 +96,10 @@ flow_patterns = {
                 re.U)
         }
 
-attribute_symbols = {'language': '',
-                     'name': '#',
-                     'condition': '?',
-                     'conditions': '?',
-                     'id': '*',
-                     'xml:lang': '!',
-                     'encoding': '=',
-                     'attribution': '',
-                     'type': '',
-                     'item': '',
-                     'key': '%',
-                     'nameref': '#',
-                     'idref': '*',
-                     'keyref': '%',
-                     'fragmentref': '~',
-                     'stringref': '$'}
+ref_symbols = {'nameref': '#',
+               'idref': '*',
+               'keyref': '%',
+               'stringref': '$'}
 
 #smart quote patterns
 re_single_quote_close = '(?<=[\w\.\,\"!:;)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
@@ -614,6 +602,11 @@ class Block(ABC):
                                    ('namespace', 'xmlns'),
                                    ('language_code', 'xml:lang')]
 
+    attribute_regurgitation = [('condition', '?'),
+                               ('ID', '*'),
+                               ('name', '#'),
+                               ('language_code', '!')]
+
     attribute_serialization_html = [('conditions', 'data-conditions'),
                                     ('ID', 'id'),
                                     ('name', 'data-name'),
@@ -747,7 +740,7 @@ class Block(ABC):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield "%s:" % (self.block_type)
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self.attribute_regurgitation)
         for y in [x for x in self.citations]:
             yield from y.regurgitate()
 
@@ -758,17 +751,15 @@ class Block(ABC):
             yield from z.regurgitate()
 
     def _regurgitate_attributes(self, attribute_dict):
-        for attr_name, tag in attribute_dict:
+        for attr_name, symbol in attribute_dict:
             try:
                 attr_value = getattr(self, attr_name)
                 if attr_value:
                     if type(attr_value) is list:
-                        #yield ' {0}="{1}"'.format(tag, ','.join([escape_for_xml_attribute(x) for x in attr_value]))
                         for x in attr_value:
-                            yield '(%s%s)' % (attribute_symbols[tag], x)
+                            yield '(%s%s)' % (symbol, x)
                     else:
-                        yield '(%s%s)' % (attribute_symbols[tag], attr_value)
-                        #yield ' {0}="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
+                        yield '(%s%s)' % (symbol, attr_value)
             except AttributeError:
                 pass
 
@@ -856,19 +847,6 @@ class Block(ABC):
 
 
 class BlockInsert(Block):
-    attribute_serialization_xml = [('attribution', 'attribution'),
-                                   ('conditions', 'conditions'),
-                                   ('ID', 'id'),
-                                   ('name', 'name'),
-                                   ('namespace', 'xmlns'),
-                                   ('language_code', 'xml:lang')]
-
-    attribute_serialization_html = [('attribution', 'data-attribution'),
-                                    ('conditions', 'data-conditions'),
-                                    ('ID', 'id'),
-                                    ('name', 'data-name'),
-                                    ('language_code', 'lang')]
-
     def __init__(self, indent, insert_type, ref_type, item, attributes={}, citations=None, namespace=None):
         super().__init__(block_type='insert', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
         self.insert_type = insert_type
@@ -881,7 +859,7 @@ class BlockInsert(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         if self.ref_type:
-            ref_symbol = attribute_symbols.get(self.ref_type)
+            ref_symbol = ref_symbols.get(self.ref_type)
             yield '>>>[{0}{1}]'.format(ref_symbol, self.item)
         else:
             yield '>>>({0} {1})'.format(self.insert_type, self.item)
@@ -987,6 +965,12 @@ class Codeblock(Block):
                                    ('namespace', 'xmlns'),
                                    ('language_code', 'xml:lang')]
 
+    attribute_regurgitation = [('code_language', ''),
+                               ('condition', '?'),
+                               ('ID', '*'),
+                               ('name', '#'),
+                               ('language_code', '!')]
+
     attribute_serialization_html = [('conditions', 'data-conditions'),
                                     ('ID', 'id'),
                                     ('code_language', 'data-language'),
@@ -1004,7 +988,7 @@ class Codeblock(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '```'
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self.attribute_regurgitation)
         for x in self.citations:
             yield from x.regurgitate()
         yield '\n'
@@ -1061,6 +1045,11 @@ class Embedblock(Block):
                                    ('namespace', 'xmlns'),
                                    ('language_code', 'xml:lang')]
 
+    attribute_regurgitation = [('encoding', '='),
+                               ('condition', '?'),
+                               ('ID', '*'),
+                               ('name', '#'),
+                               ('language_code', '!')]
     # No attribute_serialization_html because embedded data is not supported in HTML output mode
 
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
@@ -1070,19 +1059,7 @@ class Embedblock(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '```'
-        if self.encoding:
-            yield "(={0})".format(self.encoding)
-        if self.conditions:
-            for c in self.conditions:
-                yield '(?{0})'.format(c)
-        if self.ID:
-            yield '(*{0})'.format(self.ID)
-        if self.name:
-            yield '(#{0})'.format(self.name)
-        if self.language_code:
-            yield '(!{0})'.format(self.language_code)
-        for x in self.citations:
-            yield from x.regurgitate()
+        yield from self._regurgitate_attributes(self.attribute_regurgitation)
         yield '\n'
         for x in self.children:
             yield from x.regurgitate()
@@ -1119,6 +1096,12 @@ class Remark(Block):
                                    ('namespace', 'xmlns'),
                                    ('language_code', 'xml:lang')]
 
+    attribute_regurgitation = [('attribution', ''),
+                               ('condition', '?'),
+                               ('ID', '*'),
+                               ('name', '#'),
+                               ('language_code', '!')]
+
     attribute_serialization_html = [('attribution', 'data-attribution'),
                                     ('conditions', 'data-conditions'),
                                     ('ID', 'id'),
@@ -1136,7 +1119,7 @@ class Remark(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '!!!'
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self.attribute_regurgitation)
         yield '\n'
         for x in self.children:
             yield from x.regurgitate()
@@ -1323,7 +1306,7 @@ class Record(Block):
         record = list(zip(self.parent.field_names, self.field_values))
         yield '<tr class="record"'
 
-        yield from self._serialize_attributes(self.attribute_serialization_xml)
+        yield from self._serialize_attributes(self.attribute_serialization_html)
         yield ">\n"
 
         if record:
@@ -1439,7 +1422,7 @@ class UnorderedListItem(ListItem):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '*'
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self.attribute_regurgitation)
         yield ' '
         for x in self.children:
             yield from x.regurgitate()
@@ -1455,7 +1438,7 @@ class LabeledListItem(ListItem):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '|{0}|'.format(self.label)
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self.attribute_regurgitation)
         yield ' '
         for x in self.children:
             yield from x.regurgitate()
@@ -1770,13 +1753,7 @@ class Flow(list):
     def append(self, thing):
         if type(thing) is not str:
             thing.parent=self
-        if type(thing) is Attribute:
-            for i in reversed(self):
-                if type(i is Phrase):
-                    i.add_attribute(thing)
-                    break
-
-        elif isinstance(thing, Annotation):
+        if isinstance(thing, Annotation):
             if type(self[-1]) is Phrase:
                 self[-1].append(thing)
             else:
@@ -2551,6 +2528,11 @@ class Span(ABC):
                                    ('namespace', 'xmlns'),
                                    ('language_code', 'xml:lang')]
 
+    attribute_regurgitation = [('condition', '?'),
+                               ('ID', '*'),
+                               ('name', '#'),
+                               ('language_code', '!')]
+
     attribute_serialization_html = [('conditions', 'data-conditions'),
                                     ('ID', 'id'),
                                     ('name', 'data-name'),
@@ -2560,15 +2542,27 @@ class Span(ABC):
         return ''.join(self.regurgitate())
 
     def _regurgitate_attributes(self, attribute_dict):
-        for attr_name, tag in attribute_dict:
+        for attr_name, symbol in attribute_dict:
             try:
                 attr_value = getattr(self, attr_name)
                 if attr_value:
                     if type(attr_value) is list:
                         for x in attr_value:
-                            yield '(%s%s)' % (attribute_symbols[tag], x)
+                            yield '(%s%s)' % (symbol, x)
                     else:
-                        yield '(%s%s)' % (attribute_symbols[tag], attr_value)
+                        yield '(%s%s)' % (symbol, attr_value)
+            except AttributeError:
+                pass
+
+    def _serialize_attributes(self, attribute_dict):
+        for attr_name, tag in attribute_dict:
+            try:
+                attr_value = getattr(self, attr_name)
+                if attr_value:
+                    if type(attr_value) is list:
+                        yield ' {0}="{1}"'.format(tag, ','.join([escape_for_xml_attribute(x) for x in attr_value]))
+                    else:
+                        yield ' {0}="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
             except AttributeError:
                 pass
 
@@ -2588,9 +2582,7 @@ class Phrase(Span):
         yield u'{{{0:s}}}'.format(escape_for_sam(self.text))
         for x in self.annotations:
             yield from x.regurgitate()
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
-
-
+        yield from self._regurgitate_attributes(self.attribute_regurgitation)
 
     def add_attribute(self, attr):
         if attr.type == "condition":
@@ -2607,14 +2599,7 @@ class Phrase(Span):
 
     def serialize_xml(self):
         yield '<phrase'
-        if self.conditions:
-            yield ' conditions="{0}"'.format(','.join(self.conditions))
-        if self.ID:
-            yield ' id="{0}"'.format(self.ID)
-        if self.name:
-            yield ' name="{0}"'.format(self.name)
-        if self.language_code:
-            yield ' xml:lang="{0}"'.format(self.language_code)
+        yield from self._serialize_attributes(self.attribute_serialization_xml)
         yield '>'
 
         #Nest annotations for serialization
@@ -2653,15 +2638,24 @@ class Phrase(Span):
             self.child.append(thing)
 
 class Code(Phrase):
-
-    attribute_serialization_xml = [('conditions', 'conditions'),
+    attribute_serialization_xml = [('encoding', 'encoding'),
+                                   ('conditions', 'conditions'),
                                    ('ID', 'id'),
+                                   ('code_language', 'language'),
                                    ('name', 'name'),
                                    ('namespace', 'xmlns'),
                                    ('language_code', 'xml:lang')]
 
+    attribute_regurgitation = [('encoding', '='),
+                               ('code_language', ''),
+                               ('condition', '?'),
+                               ('ID', '*'),
+                               ('name', '#'),
+                               ('language_code', '!')]
+
     attribute_serialization_html = [('conditions', 'data-conditions'),
                                     ('ID', 'id'),
+                                    ('code_language', 'data-language'),
                                     ('name', 'data-name'),
                                     ('language_code', 'lang')]
     def __init__(self, text):
@@ -2674,18 +2668,7 @@ class Code(Phrase):
 
     def regurgitate(self):
         yield '`{0}`'.format(escape_for_sam_code(self.text))
-        if self.encoding:
-            yield '(={0})'.format(self.encoding)
-        if self.code_language:
-            yield '({0})'.format(self.code_language)
-        for c in self.conditions:
-            yield '(?{0})'.format(c)
-        if self.ID:
-            yield '(*{0})'.format(self.value)
-        if self.name:
-            yield '(#{0})'.format(self.name)
-        if self.language_code:
-            yield '(!{0})'.format(self.language_code)
+        yield from self._regurgitate_attributes(self.attribute_regurgitation)
         for x in self.annotations:
             yield from x.regurgitate()
 
@@ -2697,18 +2680,7 @@ class Code(Phrase):
             tag = "code"
 
         yield '<' + tag
-        if self.conditions:
-            yield ' conditions="{0}"'.format(','.join(self.conditions))
-        if self.encoding:
-            yield ' encoding="{0}"'.format(self.encoding)
-        if self.code_language:
-            yield ' language="{0}"'.format(self.code_language)
-        if self.ID:
-            yield ' id="{0}"'.format(self.ID)
-        if self.name:
-            yield ' name="{0}"'.format(self.name)
-        if self.language_code:
-            yield ' xml:lang="{0}"'.format(self.language_code)
+        yield from self._serialize_attributes(self.attribute_serialization_xml)
         yield '>'
         yield escape_for_xml(self.text)
         yield '</' + tag + '>'
@@ -2760,49 +2732,6 @@ class FlowSource:
 
     def retreat(self, count):
         self.currentCharNumber -= count
-
-
-class Attribute:
-
-    html_attributes = {'language': 'data-language',
-                       'name': 'data-name',
-                       'condition': 'data-condition',
-                       'id': 'ID',
-                       'xml:lang': 'lang',
-                       'encoding': 'data-encoding',
-                       'attribution': 'data-attribution',
-                       'type': 'data-type',
-                       'item': 'data-item',
-                       'key': 'data-key',
-                       'nameref': 'data-nameref',
-                       'idref': 'data-idref',
-                       'keyref': 'data-keyref',
-                       'fragmentref': 'data-fragmentref',
-                       'stringref': 'data-fragmentref',
-                       'conditions': 'data-conditions'}
-
-    def __init__(self, type, value, local=False):
-        self.type = type
-        self.value = value
-        self.local = local
-
-    def __str__(self):
-        return ''.join(self.regurgitate())
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def __ne__(self, other):
-        return self.__dict__ != other.__dict__
-
-    def regurgitate(self):
-        yield '(%s%s)' % (attribute_symbols[self.type], self.value)
-
-    def serialize_xml(self):
-        yield ' %s="%s"' % (self.type, escape_for_xml_attribute(self.value))
-
-    def serialize_html(self):
-        yield ' %s="%s"' % (Attribute.html_attributes[self.type], escape_for_xml_attribute(self.value))
 
 
 class Annotation:
@@ -2980,18 +2909,6 @@ class Citation:
 
 
 class InlineInsert(Span):
-    attribute_serialization_xml = [('attribution', 'attribution'),
-                                   ('conditions', 'conditions'),
-                                   ('ID', 'id'),
-                                   ('name', 'name'),
-                                   ('namespace', 'xmlns'),
-                                   ('language_code', 'xml:lang')]
-
-    attribute_serialization_html = [('attribution', 'data-attribution'),
-                                    ('conditions', 'data-conditions'),
-                                    ('ID', 'id'),
-                                    ('name', 'data-name'),
-                                    ('language_code', 'lang')]
     def __init__(self, insert_type, ref_type, item, attributes={}, citations=None):
         self.insert_type = insert_type
         if ref_type == 'fragmentref':
@@ -3017,15 +2934,16 @@ class InlineInsert(Span):
 
     def regurgitate(self):
         if self.ref_type:
-            ref_symbol = attribute_symbols.get(self.ref_type)
+            ref_symbol = ref_symbols.get(self.ref_type)
             yield '>[{0}{1}]'.format(ref_symbol, self.item)
         else:
             yield '>({0} {1})'.format(self.insert_type, self.item)
 
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self.attribute_regurgitation)
 
 
     def serialize_xml(self):
+        #Doing this the long way because of the special rules for handling references
         yield '<inline-insert'
         if self.conditions:
             yield ' conditions="{0}"'.format(','.join(self.conditions))
