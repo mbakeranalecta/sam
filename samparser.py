@@ -359,6 +359,8 @@ class SamParser:
         else:
             attributes, citations = {},[]
         type, ref, item = parse_insert(match.group("insert"), match.group("ref"))
+        if type is None and ref is None:
+            raise SAMParserError("Invalid block insert statement. Found: " + match.group(0))
         b = BlockInsert(indent, type, ref, item, attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
@@ -596,21 +598,21 @@ class SamParser:
 
 
 class Block(ABC):
-    attribute_serialization_xml = [('conditions', 'conditions'),
-                                   ('ID', 'id'),
-                                   ('name', 'name'),
-                                   ('namespace', 'xmlns'),
-                                   ('language_code', 'xml:lang')]
-
-    attribute_regurgitation = [('condition', '?'),
-                               ('ID', '*'),
-                               ('name', '#'),
-                               ('language_code', '!')]
-
-    attribute_serialization_html = [('conditions', 'data-conditions'),
+    _attribute_serialization_xml = [('conditions', 'conditions'),
                                     ('ID', 'id'),
-                                    ('name', 'data-name'),
-                                    ('language_code', 'lang')]
+                                    ('name', 'name'),
+                                    ('namespace', 'xmlns'),
+                                    ('language_code', 'xml:lang')]
+
+    _attribute_regurgitation = [('conditions', '?'),
+                                ('ID', '*'),
+                                ('name', '#'),
+                                ('language_code', '!')]
+
+    _attribute_serialization_html = [('conditions', 'data-conditions'),
+                                     ('ID', 'id'),
+                                     ('name', 'data-name'),
+                                     ('language_code', 'lang')]
     html_tag = "div"
 
     def __init__(self, block_type, indent, attributes={}, content=None, citations=[], namespace=None):
@@ -740,7 +742,7 @@ class Block(ABC):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield "%s:" % (self.block_type)
-        yield from self._regurgitate_attributes(self.attribute_regurgitation)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         for y in [x for x in self.citations]:
             yield from y.regurgitate()
 
@@ -780,7 +782,7 @@ class Block(ABC):
 
         yield '<{0}'.format(self.block_type)
 
-        yield from self._serialize_attributes(self.attribute_serialization_xml)
+        yield from self._serialize_attributes(self._attribute_serialization_xml)
 
         if self.children or self.citations:
             yield ">"
@@ -813,7 +815,7 @@ class Block(ABC):
     def serialize_html(self):
         yield '<{0} class="{1}"'.format(self.html_tag, self.block_type)
 
-        yield from self._serialize_attributes(self.attribute_serialization_html)
+        yield from self._serialize_attributes(self._attribute_serialization_html)
 
         if self.children or self.citations:
             yield ">"
@@ -863,7 +865,7 @@ class BlockInsert(Block):
             yield '>>>[{0}{1}]'.format(ref_symbol, self.item)
         else:
             yield '>>>({0} {1})'.format(self.insert_type, self.item)
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield '\n'
         for c in self.children:
             yield from c.regurgitate()
@@ -912,14 +914,7 @@ class BlockInsert(Block):
                     yield from [x.content for x in string_defs if x.name == self.item][0].serialize_html()
                 else:
                     SAM_parser_warning('String reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
-            # elif self.ref_type == 'fragmentref':
-            #     fragments = self._doc().fragments()
-            #     if self.item in [x.name for x in fragments]:
-            #         yield from [x.content for x in fragments if x.name == self.item][0].serialize_html()
-            #     else:
-            #         SAM_parser_warning(
-            #             'Fragment reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
-            #                 self.item))
+
             else:
                 SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
 
@@ -958,24 +953,24 @@ class BlockInsert(Block):
 
 
 class Codeblock(Block):
-    attribute_serialization_xml = [('conditions', 'conditions'),
-                                   ('ID', 'id'),
-                                   ('code_language', 'language'),
-                                   ('name', 'name'),
-                                   ('namespace', 'xmlns'),
-                                   ('language_code', 'xml:lang')]
-
-    attribute_regurgitation = [('code_language', ''),
-                               ('condition', '?'),
-                               ('ID', '*'),
-                               ('name', '#'),
-                               ('language_code', '!')]
-
-    attribute_serialization_html = [('conditions', 'data-conditions'),
+    _attribute_serialization_xml = [('conditions', 'conditions'),
                                     ('ID', 'id'),
-                                    ('code_language', 'data-language'),
-                                    ('name', 'data-name'),
-                                    ('language_code', 'lang')]
+                                    ('code_language', 'language'),
+                                    ('name', 'name'),
+                                    ('namespace', 'xmlns'),
+                                    ('language_code', 'xml:lang')]
+
+    _attribute_regurgitation = [('code_language', ''),
+                                ('conditions', '?'),
+                                ('ID', '*'),
+                                ('name', '#'),
+                                ('language_code', '!')]
+
+    _attribute_serialization_html = [('conditions', 'data-conditions'),
+                                     ('ID', 'id'),
+                                     ('code_language', 'data-language'),
+                                     ('name', 'data-name'),
+                                     ('language_code', 'lang')]
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
         self.code_language=None
         super().__init__(block_type='codeblock', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
@@ -988,7 +983,7 @@ class Codeblock(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '```'
-        yield from self._regurgitate_attributes(self.attribute_regurgitation)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         for x in self.citations:
             yield from x.regurgitate()
         yield '\n'
@@ -998,7 +993,7 @@ class Codeblock(Block):
 
     def serialize_xml(self):
         yield '<codeblock'
-        yield from self._serialize_attributes(self.attribute_serialization_xml)
+        yield from self._serialize_attributes(self._attribute_serialization_xml)
 
         if self.citations or self.children:
             yield ">\n"
@@ -1015,7 +1010,7 @@ class Codeblock(Block):
             yield '/>'
 
     def serialize_html(self):
-        yield "<pre"
+        yield '<pre class="codeblock"'
         yield from self._serialize_attributes(self.attribute_serialization_html)
         if self.citations or self.children:
             yield ">"
@@ -1026,7 +1021,7 @@ class Codeblock(Block):
                 yield '\n'
         if self.children:
             if self.code_language:
-                yield '<code class="language-{0}">'.format(self.code_language)
+                yield '<code class="codeblock">'.format(self.code_language)
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html()
@@ -1038,19 +1033,19 @@ class Codeblock(Block):
 
 
 class Embedblock(Block):
-    attribute_serialization_xml = [('conditions', 'conditions'),
-                                   ('encoding', 'encoding'),
-                                   ('ID', 'id'),
-                                   ('name', 'name'),
-                                   ('namespace', 'xmlns'),
-                                   ('language_code', 'xml:lang')]
+    _attribute_serialization_xml = [('conditions', 'conditions'),
+                                    ('encoding', 'encoding'),
+                                    ('ID', 'id'),
+                                    ('name', 'name'),
+                                    ('namespace', 'xmlns'),
+                                    ('language_code', 'xml:lang')]
 
-    attribute_regurgitation = [('encoding', '='),
-                               ('condition', '?'),
-                               ('ID', '*'),
-                               ('name', '#'),
-                               ('language_code', '!')]
-    # No attribute_serialization_html because embedded data is not supported in HTML output mode
+    _attribute_regurgitation = [('encoding', '='),
+                                ('conditions', '?'),
+                                ('ID', '*'),
+                                ('name', '#'),
+                                ('language_code', '!')]
+    # No _attribute_serialization_html because embedded data is not supported in HTML output mode
 
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
         self.encoding=None
@@ -1059,7 +1054,7 @@ class Embedblock(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '```'
-        yield from self._regurgitate_attributes(self.attribute_regurgitation)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield '\n'
         for x in self.children:
             yield from x.regurgitate()
@@ -1069,7 +1064,7 @@ class Embedblock(Block):
         attrs = []
         yield '<embedblock'
 
-        yield from self._serialize_attributes(self.attribute_serialization_xml)
+        yield from self._serialize_attributes(self._attribute_serialization_xml)
         if self.children:
             yield ">"
 
@@ -1089,25 +1084,25 @@ class Embedblock(Block):
 
 
 class Remark(Block):
-    attribute_serialization_xml = [('attribution', 'attribution'),
-                                   ('conditions', 'conditions'),
-                                   ('ID', 'id'),
-                                   ('name', 'name'),
-                                   ('namespace', 'xmlns'),
-                                   ('language_code', 'xml:lang')]
-
-    attribute_regurgitation = [('attribution', ''),
-                               ('condition', '?'),
-                               ('ID', '*'),
-                               ('name', '#'),
-                               ('language_code', '!')]
-
-    attribute_serialization_html = [('attribution', 'data-attribution'),
-                                    ('conditions', 'data-conditions'),
+    _attribute_serialization_xml = [('attribution', 'attribution'),
+                                    ('conditions', 'conditions'),
                                     ('ID', 'id'),
-                                    ('code_language', 'data-language'),
-                                    ('name', 'data-name'),
-                                    ('language_code', 'lang')]
+                                    ('name', 'name'),
+                                    ('namespace', 'xmlns'),
+                                    ('language_code', 'xml:lang')]
+
+    _attribute_regurgitation = [('attribution', ''),
+                                ('conditions', '?'),
+                                ('ID', '*'),
+                                ('name', '#'),
+                                ('language_code', '!')]
+
+    _attribute_serialization_html = [('attribution', 'data-attribution'),
+                                     ('conditions', 'data-conditions'),
+                                     ('ID', 'id'),
+                                     ('code_language', 'data-language'),
+                                     ('name', 'data-name'),
+                                     ('language_code', 'lang')]
     html_name='div'
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
         super().__init__(block_type='remark', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
@@ -1119,7 +1114,7 @@ class Remark(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '!!!'
-        yield from self._regurgitate_attributes(self.attribute_regurgitation)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield '\n'
         for x in self.children:
             yield from x.regurgitate()
@@ -1137,7 +1132,7 @@ class Grid(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield "+++"
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield "\n"
         for x in self.children:
             yield from x.regurgitate()
@@ -1196,7 +1191,7 @@ class Line(Block):
 
     def regurgitate(self):
         yield " " * int(self.indent) + '|'
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield ' {0}\n'.format(str(self.content))
 
     def add(self, b):
@@ -1215,7 +1210,7 @@ class Fragment(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '~~~'
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield '\n'
         for x in self.children:
             yield from x.regurgitate()
@@ -1232,7 +1227,7 @@ class Blockquote(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '"""'
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         if self.citations:
             for x in self.citations:
                 yield from x.regurgitate()
@@ -1252,7 +1247,7 @@ class RecordSet(Block):
 
     def regurgitate(self):
         yield '{0}{1}::'.format(" " * int(self.indent), self.block_type)
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield '{0}\n'.format(', '.join(self.field_names))
         for x in self.children:
             yield from x.regurgitate()
@@ -1270,9 +1265,9 @@ class RecordSet(Block):
             self.children.append(b)
 
 class Record(Block):
-    attribute_serialization_xml = [('namespace', 'xmlns')]
+    _attribute_serialization_xml = [('namespace', 'xmlns')]
 
-    attribute_serialization_html = []
+    _attribute_serialization_html = []
 
     def __init__(self, field_values, indent, namespace=None):
         super().__init__(block_type='record', indent=indent, attributes={}, citations=[], namespace=namespace)
@@ -1288,7 +1283,7 @@ class Record(Block):
     def serialize_xml(self):
         record = list(zip(self.parent.field_names, self.field_values))
         yield '<record'
-        yield from self._serialize_attributes(self.attribute_serialization_xml)
+        yield from self._serialize_attributes(self._attribute_serialization_xml)
         yield ">\n"
         if record:
             for name, value in zip(self.parent.field_names, self.field_values):
@@ -1405,7 +1400,7 @@ class OrderedListItem(ListItem):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '{0}.'.format(str(self.parent.children.index(self) + 1))
-        yield from self._regurgitate_attributes(self.attribute_serialization_xml)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield ' '
         for x in self.children:
             yield from x.regurgitate()
@@ -1422,7 +1417,7 @@ class UnorderedListItem(ListItem):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '*'
-        yield from self._regurgitate_attributes(self.attribute_regurgitation)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield ' '
         for x in self.children:
             yield from x.regurgitate()
@@ -1438,14 +1433,14 @@ class LabeledListItem(ListItem):
     def regurgitate(self):
         yield " " * int(self.indent)
         yield '|{0}|'.format(self.label)
-        yield from self._regurgitate_attributes(self.attribute_regurgitation)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield ' '
         for x in self.children:
             yield from x.regurgitate()
 
     def serialize_xml(self):
         yield '<{0}'.format(self.block_type)
-        yield from self._serialize_attributes(self.attribute_serialization_xml)
+        yield from self._serialize_attributes(self._attribute_serialization_xml)
         yield ">\n<label>"
         yield from self.label.serialize_xml()
         yield "</label>\n"
@@ -1470,12 +1465,12 @@ class LabeledListItem(ListItem):
 
 
     def serialize_html(self):
-        yield "<div"
-        yield from self._serialize_attributes(self.attribute_serialization_html)
+        yield '<div class="ll.li"'
+        yield from self._serialize_attributes(self._attribute_serialization_html)
         yield '>\n'
-        yield "<dt>"
+        yield '<dt class="ll.li.label">'
         yield from self.label.serialize_html()
-        yield "</dt>\n<dd>"
+        yield '</dt>\n<dd class="ll.li.item">'
         for x in self.children:
             if x is not None:
                 yield from x.serialize_html()
@@ -2497,6 +2492,8 @@ class FlowParser:
             else:
                 attributes, citations = {},[]
             type, ref, item =parse_insert(match.group("insert"), match.group("ref"))
+            if type is None and ref is None:
+                raise SAMParserError("Invalid inline insert statement. Found: " + match.group(0))
 
             self.flow.append(InlineInsert(type, ref, item, attributes, citations))
             para.advance(len(match.group(0)) - 1)
@@ -2528,7 +2525,7 @@ class Span(ABC):
                                    ('namespace', 'xmlns'),
                                    ('language_code', 'xml:lang')]
 
-    attribute_regurgitation = [('condition', '?'),
+    attribute_regurgitation = [('conditions', '?'),
                                ('ID', '*'),
                                ('name', '#'),
                                ('language_code', '!')]
@@ -2648,7 +2645,7 @@ class Code(Phrase):
 
     attribute_regurgitation = [('encoding', '='),
                                ('code_language', ''),
-                               ('condition', '?'),
+                               ('conditions', '?'),
                                ('ID', '*'),
                                ('name', '#'),
                                ('language_code', '!')]
@@ -2690,7 +2687,7 @@ class Code(Phrase):
             SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted. At: " + str(self).strip())
             yield ''
         else:
-            yield '<code'
+            yield '<code class="code"'
             if self.conditions:
                 yield ' data-conditions="{0}"'.format(','.join(self.conditions))
             if self.code_language:
@@ -2803,7 +2800,7 @@ class Annotation:
         else:
             yield '<span'
             if self.type:
-                yield ' class="annotation-{0}"'.format(self.type)
+                yield ' class="annotation" data-annotation-type="{0}"'.format(self.type)
             if self.specifically:
                 yield ' data-specifically="{0}"'.format(escape_for_xml_attribute(self.specifically))
             if self.namespace:
@@ -2844,8 +2841,6 @@ class Citation:
             yield '#'
         elif self.citation_type == 'keyref':
             yield '%'
-        elif self.citation_type == 'fragmentref':
-            yield '~'
         elif self.citation_type == 'stringref':
             yield '$'
         else:
@@ -2911,10 +2906,7 @@ class Citation:
 class InlineInsert(Span):
     def __init__(self, insert_type, ref_type, item, attributes={}, citations=None):
         self.insert_type = insert_type
-        if ref_type == 'fragmentref':
-            raise SAMParserStructureError("Fragment references are not permitted in inline inserts.")
-        else:
-            self.ref_type =ref_type
+        self.ref_type =ref_type
         self.item = item
         self.citations = citations
         self.parent=None
@@ -3138,9 +3130,6 @@ def parse_insert(insert, ref):
         elif ref[0] == '#':
             item = ref[1:]
             ref_type = 'nameref'
-        elif ref[0] == '~':
-            item = ref[1:]
-            ref_type = 'fragmentref'
         elif ref[0] == '%':
             item = ref[1:]
             ref_type = 'keyref'

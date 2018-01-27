@@ -3210,11 +3210,11 @@ techniques that don't involve maps at all -- to produce
 paper-like and hypertext outputs. This can help you
 to work around some of the design limitations that
 we talked about in the {single sourcing
-chapter}[#single_source].
+chapter}[#single_source bink].
 </codeblock>
 </source>
 <markup>
-<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation nameref="single_source">single sourcing chapter</citation></phrase>.</p>
+<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation extra="bink" nameref="single_source">single sourcing chapter</citation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4285,19 +4285,19 @@ This sentence includes a string reference &gt;[$name].
 </description>
 <source>
 <codeblock language="sam">
-&gt;&gt;&gt;[~foobar]
+&gt;&gt;&gt;[#fragment.foobar *nom]
     $a=apricot
     $b=breadfruit
 </codeblock>
 </source>
 <markup>
-<insert fragmentref="foobar">
+<insert nameref="fragment.foobar *nom">
 <string name="a">apricot</string>
 <string name="b">breadfruit</string>
 </insert></markup>
 <result>
 <codeblock language="xml">
-&lt;insert fragmentref="foobar"&gt;
+&lt;insert nameref="fragment.foobar *nom"&gt;
 &lt;string name="a"&gt;apricot&lt;/string&gt;
 &lt;string name="b"&gt;breadfruit&lt;/string&gt;
 &lt;/insert&gt;

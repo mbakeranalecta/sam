@@ -2595,7 +2595,7 @@ tests:(!en) SAM Parser Tests
                     paper-like and hypertext outputs. This can help you
                     to work around some of the design limitations that
                     we talked about in the {single sourcing
-                    chapter}[#single_source].
+                    chapter}[#single_source bink].
 
             markup:
                 When using the map approach, it is important to
@@ -2615,7 +2615,7 @@ tests:(!en) SAM Parser Tests
                 paper-like and hypertext outputs. This can help you
                 to work around some of the design limitations that
                 we talked about in the {single sourcing
-                chapter}[#single_source].
+                chapter}[#single_source bink].
 
             result:
                 ```(xml)
@@ -3548,18 +3548,18 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >>>[~foobar]
+                    >>>[#fragment.foobar *nom]
                         $a=apricot
                         $b=breadfruit
 
             markup:
-                >>>[~foobar]
+                >>>[#fragment.foobar *nom]
                     $a=apricot
                     $b=breadfruit
 
             result:
                 ```(xml)
-                    <insert fragmentref="foobar">
+                    <insert nameref="fragment.foobar *nom">
                     <string name="a">apricot</string>
                     <string name="b">breadfruit</string>
                     </insert>

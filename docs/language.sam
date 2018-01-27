@@ -864,7 +864,7 @@ specification: Semantic Authoring Markdown (SAM)
                     ~~~(?foo)
                         $foo = bar
 
-                But remember that the resolution of string is left to the {application layer} so if you do this make sure your {application layer} code handles it correctly.
+                But remember that the resolution of strings is left to the {application layer} so if you do this make sure your {application layer} code handles it correctly.
 
             semantics:
             
@@ -1505,7 +1505,7 @@ specification: Semantic Authoring Markdown (SAM)
                 The body of an inline code structure is not parsed for character escapes or other markup, so you can do this:
 
                 ```(sam)
-                    In SAM, and phrase looks like this: `{phrase}`.
+                    In SAM, a phrase looks like this: `{phrase}`.
 
                 The only character that can be escaped in inline code is the back tick, which is escaped using a double back tick: ````.
 
