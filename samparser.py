@@ -766,12 +766,14 @@ class Block(ABC):
                 pass
 
 
-    def _serialize_attributes(self, attribute_dict):
+    def _serialize_attributes(self, attribute_dict, duplicate=False):
         for attr_name, tag in attribute_dict:
             try:
                 attr_value = getattr(self, attr_name)
                 if attr_value:
-                    if type(attr_value) is list:
+                    if duplicate and attr_name == "ID":
+                        yield ' data-copied-from-id="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
+                    elif type(attr_value) is list:
                         yield ' {0}="{1}"'.format(tag, ','.join([escape_for_xml_attribute(x) for x in attr_value]))
                     else:
                         yield ' {0}="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
@@ -812,10 +814,10 @@ class Block(ABC):
                 yield from self.content.serialize_xml()
                 yield "</{0}>\n".format(self.block_type)
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         yield '<{0} class="{1}"'.format(self.html_tag, self.block_type)
 
-        yield from self._serialize_attributes(self._attribute_serialization_html)
+        yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
 
         if self.children or self.citations:
             yield ">"
@@ -905,7 +907,7 @@ class BlockInsert(Block):
         else:
             yield '/>\n'
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
 
         if self.ref_type:
             if self.ref_type == 'stringref':
@@ -917,7 +919,7 @@ class BlockInsert(Block):
             elif self.ref_type == 'idref':
                 ob = self._doc().object_by_id(self.item)
                 if ob:
-                    yield from ob.serialize_html()
+                    yield from ob.serialize_html(duplicate=True)
                 else:
                     SAM_parser_warning('ID reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
             else:
@@ -1014,9 +1016,9 @@ class Codeblock(Block):
         else:
             yield '/>'
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         yield '<pre class="codeblock"'
-        yield from self._serialize_attributes(self._attribute_serialization_html)
+        yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         if self.citations or self.children:
             yield ">"
 
@@ -1083,7 +1085,7 @@ class Embedblock(Block):
         else:
             yield '/>\n'
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted. At: " + str(self).strip())
         yield ''
 
@@ -1297,7 +1299,7 @@ class Record(Block):
                 yield "</{0}>\n".format(name)
         yield "</record>\n"
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         if not self.preceding_sibling():
             yield '<tr class="record">'
             for fn in self.parent.field_names:
@@ -1306,7 +1308,7 @@ class Record(Block):
         record = list(zip(self.parent.field_names, self.field_values))
         yield '<tr class="record"'
 
-        yield from self._serialize_attributes(self._attribute_serialization_html)
+        yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         yield ">\n"
 
         if record:
@@ -1469,9 +1471,9 @@ class LabeledListItem(ListItem):
         yield "</{0}>\n".format(self.block_type)
 
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         yield '<div class="ll.li"'
-        yield from self._serialize_attributes(self._attribute_serialization_html)
+        yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         yield '>\n'
         yield '<dt class="ll.li.label">'
         yield from self.label.serialize_html()
@@ -1570,7 +1572,7 @@ class Comment(Block):
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
 
 
@@ -1589,7 +1591,7 @@ class StringDef(Block):
         yield from self.content.serialize_xml()
         yield "</string>\n"
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         yield '<div class="string-def" data-name="{0}" data-value="{1}"></div>'.format(self.block_type, self.content)
 
 class Root(Block):
@@ -1610,7 +1612,7 @@ class Root(Block):
         for x in self.children:
             yield from x.serialize_xml()
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         yield '<!DOCTYPE html>\n'
         try:
             title = [x.content for x in self.children if type(x) is Block][0]
@@ -1798,7 +1800,7 @@ class Flow(list):
             else:
                 yield from x.serialize_xml()
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         for x in self:
             if type(x) is str:
                 yield escape_for_xml(x)
@@ -1868,7 +1870,7 @@ class Pre(Flow):
         for x in self.lines:
             yield escape_for_xml(x)
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         for x in self.lines:
             yield escape_for_xml(x)
 
@@ -2156,7 +2158,7 @@ class Include(Block):
         for x in self.children:
             yield from x.serialize_xml()
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         for x in self.children:
             yield from x.serialize_html()
 
@@ -2539,18 +2541,18 @@ class FlowParser:
         return "PARA", para
 
 class Span(ABC):
-    attribute_serialization_xml = [('conditions', 'conditions'),
+    _attribute_serialization_xml = [('conditions', 'conditions'),
                                    ('ID', 'id'),
                                    ('name', 'name'),
                                    ('namespace', 'xmlns'),
                                    ('language_code', 'xml:lang')]
 
-    attribute_regurgitation = [('conditions', '?'),
+    _attribute_regurgitation = [('conditions', '?'),
                                ('ID', '*'),
                                ('name', '#'),
                                ('language_code', '!')]
 
-    attribute_serialization_html = [('conditions', 'data-conditions'),
+    _attribute_serialization_html = [('conditions', 'data-conditions'),
                                     ('ID', 'id'),
                                     ('name', 'data-name'),
                                     ('language_code', 'lang')]
@@ -2582,12 +2584,14 @@ class Span(ABC):
             except AttributeError:
                 pass
 
-    def _serialize_attributes(self, attribute_dict):
+    def _serialize_attributes(self, attribute_dict, duplicate = False):
         for attr_name, tag in attribute_dict:
             try:
                 attr_value = getattr(self, attr_name)
                 if attr_value:
-                    if type(attr_value) is list:
+                    if duplicate and attr_name == "ID":
+                        yield ' data-copied-from-ID="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
+                    elif type(attr_value) is list:
                         yield ' {0}="{1}"'.format(tag, ','.join([escape_for_xml_attribute(x) for x in attr_value]))
                     else:
                         yield ' {0}="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
@@ -2610,7 +2614,7 @@ class Phrase(Span):
         yield u'{{{0:s}}}'.format(escape_for_sam(self.text))
         for x in self.annotations:
             yield from x.regurgitate()
-        yield from self._regurgitate_attributes(self.attribute_regurgitation)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
 
     def add_attribute(self, attr):
         if attr.type == "condition":
@@ -2627,7 +2631,7 @@ class Phrase(Span):
 
     def serialize_xml(self):
         yield '<phrase'
-        yield from self._serialize_attributes(self.attribute_serialization_xml)
+        yield from self._serialize_attributes(self._attribute_serialization_xml)
         yield '>'
 
         #Nest annotations for serialization
@@ -2638,16 +2642,9 @@ class Phrase(Span):
             yield escape_for_xml(self.text)
         yield '</phrase>'
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         yield '<span class="phrase"'
-        if self.conditions:
-            yield ' data-conditions="{0}"'.format(','.join(self.conditions))
-        if self.ID:
-            yield ' id="{0}"'.format(self.ID)
-        if self.name:
-            yield ' data-name="{0}"'.format(self.name)
-        if self.language_code:
-            yield ' lang="{0}"'.format(self.language_code)
+        yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         yield '>'
 
         #Nest annotations for serialization
@@ -2713,7 +2710,7 @@ class Code(Phrase):
         yield escape_for_xml(self.text)
         yield '</' + tag + '>'
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
         if self.encoding:
             SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted. At: " + str(self).strip())
             yield ''
@@ -2994,7 +2991,7 @@ class InlineInsert(Span):
         else:
             yield '/>'
 
-    def serialize_html(self):
+    def serialize_html(self, duplicate=False):
 
         if self.ref_type:
             if self.ref_type == 'stringref':
@@ -3006,7 +3003,7 @@ class InlineInsert(Span):
             elif self.ref_type == 'idref':
                 ob = self._doc().object_by_id(self.item)
                 if ob:
-                    yield from ob.serialize_html()
+                    yield from ob.serialize_html(duplicate=True)
                 else:
                     SAM_parser_warning(
                         'ID reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
@@ -3019,7 +3016,10 @@ class InlineInsert(Span):
             if self.conditions:
                 yield ' data-conditions="{0}"'.format(','.join(self.conditions))
             if self.ID:
-                yield ' id="{0}"'.format(self.ID)
+                if duplicate:
+                    yield ' data-copied-from-id="{0}"'.format(self.ID)
+                else:
+                    yield ' id="{0}"'.format(self.ID)
             if self.name:
                 yield ' data-name="{0}"'.format(self.name)
             if self.namespace is not None:

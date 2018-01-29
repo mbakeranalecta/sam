@@ -3894,7 +3894,7 @@ There is a `_` in _this \_ italic_ decoration.
 <div class="section" id="id99">
 <p class="p">Hello Mars!</p>
 </div>
-<div class="section" id="id99">
+<div class="section" data-copied-from-id="id99">
 <p class="p">Hello Mars!</p>
 </div>
 </div>
@@ -3964,8 +3964,9 @@ that you can define string substitutions whenever you insert a fragment into you
 </code></pre>
 </div>
 <div class="markup">
-<p class="p">There is a circle <span class="insert" data-conditions="baz,bat" id="circle"><object data="circle.png"></object></span>
+<p class="p">There is a circle <span class="insert" data-conditions="baz,bat" data-copied-from-id="circle"><object data="circle.png"></object></span>
  in this sentence.</p>
+<span class="insert" data-conditions="baz,bat" data-copied-from-id="circle"><object data="circle.png"></object></span>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;p&gt;There is a circle &lt;inline-insert idref="circle"/&gt; in this sentence.&lt;/p&gt;

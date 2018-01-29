@@ -3476,6 +3476,8 @@ tests:(!en) SAM Parser Tests
             markup:
                 There is a circle >[*circle] in this sentence.
 
+                >>>[*circle]
+
             result:
                 ```(xml)
                     <p>There is a circle <inline-insert idref="circle"/> in this sentence.</p>
