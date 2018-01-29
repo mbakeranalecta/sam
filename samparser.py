@@ -724,14 +724,14 @@ class Block(ABC):
         Get an object with a given id.
         :return: The object with the specified id or None.
         """
-        ob = None
-        if self.id == id:
+        if self.ID == id:
             return self
         else:
             for x in self.children:
                 y = x.object_by_id(id)
                 if y is not None:
                     return y
+        return None
 
     def _doc(self):
         return self.parent._doc()
@@ -914,7 +914,12 @@ class BlockInsert(Block):
                     yield from [x.content for x in string_defs if x.name == self.item][0].serialize_html()
                 else:
                     SAM_parser_warning('String reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
-
+            elif self.ref_type == 'idref':
+                ob = self._doc().object_by_id(self.item)
+                if ob:
+                    yield from ob.serialize_html()
+                else:
+                    SAM_parser_warning('ID reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
             else:
                 SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
 
@@ -1011,7 +1016,7 @@ class Codeblock(Block):
 
     def serialize_html(self):
         yield '<pre class="codeblock"'
-        yield from self._serialize_attributes(self.attribute_serialization_html)
+        yield from self._serialize_attributes(self._attribute_serialization_html)
         if self.citations or self.children:
             yield ">"
 
@@ -1301,7 +1306,7 @@ class Record(Block):
         record = list(zip(self.parent.field_names, self.field_values))
         yield '<tr class="record"'
 
-        yield from self._serialize_attributes(self.attribute_serialization_html)
+        yield from self._serialize_attributes(self._attribute_serialization_html)
         yield ">\n"
 
         if record:
@@ -1589,10 +1594,7 @@ class StringDef(Block):
 
 class Root(Block):
     def __init__(self, doc):
-        self.block_type = '/'
-        self.attributes = None
-        self.content = None
-        self.indent = -1
+        super().__init__(block_type='root', attributes = {}, content = None, indent = -1)
         self.parent = doc
         self.children = []
 
@@ -1714,8 +1716,24 @@ block_pattern_replacements = {
 
 class Flow(list):
     def __init__(self):
-        super().__init__()
+
         self.parent = None
+        self.ID = None
+
+    def object_by_id(self, id):
+        """
+        Get an object with a given id.
+        :return: The object with the specified id or None.
+        """
+        if self.ID == id:
+            return self
+        else:
+            for x in [y for y in self if isinstance(y, Span)]:
+                y = x.object_by_id(id)
+                if y is not None:
+                    return y
+        return None
+
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -1825,6 +1843,7 @@ annotation_lookup_modes = {
 class Pre(Flow):
     html_tag = "pre"
     def __init__(self, text_block):
+        super().__init__()
         raw_lines = []
         for line in text_block.lines:
             if not line.isspace():
@@ -1835,6 +1854,7 @@ class Pre(Flow):
             min_indent = 0
         self.lines = [x[min_indent:] if len(x) > min_indent else x for x in text_block.lines]
         self.indent = min_indent
+
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -2537,6 +2557,17 @@ class Span(ABC):
 
     def __str__(self):
         return ''.join(self.regurgitate())
+
+    def object_by_id(self, id):
+        """
+        Get an object with a given id.
+        :return: The object with the specified id or None.
+        """
+        if self.ID == id:
+            return self
+        else:
+            return None
+
 
     def _regurgitate_attributes(self, attribute_dict):
         for attr_name, symbol in attribute_dict:

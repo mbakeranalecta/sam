@@ -1,0 +1,63 @@
+sam-schema:
+    $namespace = sam-schema
+
+    template:
+        sam-schema:(?any)
+            $attributes = #
+            template:(?anything)
+            structures:
+                fragment:(#repeat)
+            annotations:(?anything)
+            decorations:(?any)
+                bold: >($pattern)
+                italic: >($pattern)
+                code: >($pattern)
+            rename:
+                ll:
+            patterns:
+                string-definition:
+
+
+    structures:
+        ~~~(#text-general)(?many)
+            p:
+            >>>(#ol)
+            >>>(#ul)
+
+        ~~~(#ol)
+            ol:
+                li:
+                    p:(?repeat)
+
+        ~~~(#ul)
+            ul:
+                li:
+                    p:(?repeat)
+
+    annotations:
+        ingredient: xs:string
+        tool: xs:string
+        task: xs:string
+
+    decorations:
+        bold: xs:string
+        italic: xs:string
+        code: xs:string
+
+    attributes:
+        id:
+        name:
+        condition:
+
+    citations:
+        value:
+        id:
+        key:
+        name:
+
+    rename:
+        |code| pre
+
+    patterns:
+        $unit = each|tsp|tbsp|oz
+

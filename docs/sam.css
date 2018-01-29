@@ -1,0 +1,124 @@
+:root
+{
+    --title-font: "Gill Sans", sans-serif;
+}
+
+body
+{
+    max-width: 42rem
+}
+
+.note
+{
+    box-sizing: border-box;
+    max-width: 42rem;
+    width: 100%;
+    display: table;
+    margin: 0 0 20px;
+    border-style: solid;
+    background: #fff3d4;
+    border-collapse: separate;
+    border-color: #f6b73c;
+    clear: left;
+    padding: 12px 32px 12px 12px;
+    border-width: 0 0 0 5px;
+}   
+
+.note::before
+{
+    display: inline-block;
+    width: 30px;
+    font-family: var(--title-font);
+    font-size: 12pt;
+    font-style: normal;
+    font-weight: 400;
+    content: 'NOTE:';
+    
+}
+
+pre.codeblock
+{
+    box-sizing: border-box;
+    max-width: 42rem;
+    width: 100%;
+    display: table;
+    margin: 0 0 20px;
+    border-style: solid;
+    background: #e4f0f5;
+    border-collapse: separate;
+    border-color: #3f87a6;
+    clear: left;
+    padding: 12px 32px 12px 12px;
+    border-width: 0 0 0 5px;
+}
+
+pre[data-language=sam] 
+{ 
+    background-color: yellow;
+}
+
+pre[data-language=sam]::before 
+{ 
+    float: left;
+    display: block;
+    background-color: cyan;
+    font-size: 10pt;
+    content: "SAM";
+    font-weight: bold;
+    transform: rotate(270deg);
+    transform-origin: left bottom 0;
+
+}
+
+.title
+{
+    font-family: var(--title-font);
+}
+
+.structures::before
+{
+    font-family: var(--title-font);
+    font-size: 18pt;
+    content: "Structures";
+    font-weight: bold;
+}
+.syntax::before
+{
+    font-family: var(--title-font);
+    font-size: 12pt;
+    content: "Syntax";
+    font-weight: bold;
+}
+.semantics::before
+{
+    font-family: var(--title-font);
+    font-size: 12pt;
+    content: "Semantics";
+    font-weight: bold;
+}
+.model::before
+{
+    font-family: var(--title-font);
+    font-size: 12pt;
+    content: "Model";
+    font-weight: bold;
+}
+.serialization::before
+{
+    font-family: var(--title-font);
+    font-size: 12pt;
+    content: "Serialization";
+    font-weight: bold;
+}
+.SOM::before
+{
+    font-family: var(--title-font);
+    font-size: 12pt;
+    content: "SAM Object Model";
+    font-weight: bold;
+}
+
+dt
+{
+    font-weight: bold;
+}

@@ -1,0 +1,7 @@
+List of Text Editors that work well with SAM
+
+* Notepad ++. Wraps lines to the indent of the first line. Some quirkiness in where the cursor goes when you hit return twice. 
+
+* Sublime Text. Wraps lines to the indent of the first line. Position correct after hitting return twice. 
+
+* Atom. Ditto.

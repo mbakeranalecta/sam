@@ -1,31 +1,16 @@
-﻿!annotation-lookup: case insensitive
-!smart-quotes: on
 # This file is part of the SPFE Open Toolkit. See the accompanying license.txt file
 # for applicable licenses.
 # (c) Copyright Analecta Communications Inc. 2015 All Rights Reserved.
-
 # Need test for unicode characters and numbers in names.
-
 tests:(!en) SAM Parser Tests
-
     description:
+        This document is the output of the test document processed by test.xslt. That stylesheet attempt to validate the outcome of tests by generating a string version of the markup under the `markup:`(sam) heading and comparing it to the text of the expected result as shown under the `result:` heading in the test file. This is not a perfect test. Two issues are known:
 
-        This document is the output of the test document processed by test.xslt.
-        That stylesheet attempt to validate the outcome of tests by generating a string
-        version of the markup under the `markup:`(sam) heading and comparing it to the
-        text of the expected result as shown under the `result:` heading in the
-        test file. This is not a perfect test. Two issues are known:
+        1. Test are done on whitespace normalized versions of the XML markup strings. As such, they do not validly test situations where whitespace should be retained, such as in codeblocks and at the beginning of lines.
 
-        1. Test are done on whitespace normalized versions of the XML markup
-           strings. As such, they do not validly test situations where whitespace
-           should be retained, such as in codeblocks and at the beginning of
-           lines.
 
-        2. The SAM parser outputs attributes in alphabetical order. (From an XML point of view,
-           the order of attributes does not matter.) Test should be written such
-           that the attributes in the `result:` section are in alphabetical
-           order. If not, the test will fail even though the XML is semantically
-           identical.
+        2. The SAM parser outputs attributes in alphabetical order. (From an XML point of view, the order of attributes does not matter.) Test should be written such that the attributes in the `result:` section are in alphabetical order. If not, the test will fail even though the XML is semantically identical.
+
 
         When running this test you should receive one SAM Parser Warning:
 
@@ -35,25 +20,19 @@ tests:(!en) SAM Parser Tests
         This is a test to make sure unannotated phrases are being reported correctly.
 
     test: Includes
-
         description:
             Include content from another SAM file.
 
         case: Local only annotations
-
             description:
-                A local-only annotation is one which applies only to the current phrase.
-                It is not taken into consideration in annotation lookup, so the lookup
-                search will proceed to the next phrase with the same text. Annotation lookup will
-                occur for a phrase with a local-only annotation, and the local annotation will
-                be added to the looked up annotations, if any.
+                A local-only annotation is one which applies only to the current phrase. It is not taken into consideration in annotation lookup, so the lookup search will proceed to the next phrase with the same text. Annotation lookup will occur for a phrase with a local-only annotation, and the local annotation will be added to the looked up annotations, if any.
 
             source:
                 ```(sam)
                     Testing {XML}(language) testing {XML}+(index) testing {XML}.
 
             markup:
-                Testing {XML}(language) testing {XML}+(index) testing {XML}.
+                Testing {XML}(language) testing {XML}(index)(language) testing {XML}(language).
 
             result:
                 ```(xml)
@@ -107,12 +86,10 @@ tests:(!en) SAM Parser Tests
                     </message>
 
     test: Blocks
-
         description:
-            Blocks are the basic building block of a SAM file. This whole document is a
-            test case for blocks.
-        case: Language metadata
+            Blocks are the basic building block of a SAM file. This whole document is a test case for blocks.
 
+        case: Language metadata
             description:
                 A block with language metadata.
 
@@ -132,7 +109,6 @@ tests:(!en) SAM Parser Tests
                     </section>
 
         case: Citations
-
             description:
                 A citation on the block.
 
@@ -154,13 +130,13 @@ tests:(!en) SAM Parser Tests
                     </section>
 
         case: Escaping block syntax
-
             description:
                 Escape colon to prevent single word followed by colon being recognized as a block.
 
             source:
                 ```(sam)
                     and\:
+
             markup:
                 and\:
 
@@ -168,10 +144,7 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>and:</p>
 
-
-
         case: Complex block structure
-
             description:
                 A complex block with various structures inside.
 
@@ -197,10 +170,10 @@ tests:(!en) SAM Parser Tests
                         foo: barney {and}(conjunction) betty
                         baz: bat
                         $name=fred {and}(conjunction) wilma
-                        history:: date, author, comment, status
+                        history::date, author, comment, status
                             2014-06-23, mbaker, New\, Topic, In progress
                             2016-07-01, mbaker, Revision, In progress
-                        index:: type, term
+                        index::type, term
                             feature, fragment
                             feature, fragments
                     body: How Fragments Work
@@ -245,22 +218,20 @@ tests:(!en) SAM Parser Tests
                     </document>
 
         case: Paragraph with colon in first word
-
             description:
                 Case related to issue #94.
 
             source:
                 ```(sam)
                     article: Foo
-
+                    
                         foo{bar}(http://www.example.com/).
-
+                    
                         `foo::bar` baz.
 
             markup:
                 article: Foo
-
-                    foo{bar}(http://www.example.com/).
+                    foo{bar}(link "http://www.example.com/").
 
                     `foo::bar` baz.
 
@@ -273,14 +244,11 @@ tests:(!en) SAM Parser Tests
                     </article>
 
     # FIXME: Need tests for comments.
-
     test: Remarks
         description:
-            Remarks are a type of comment that is attributed to an author and is used for
-            commenting editorially on the document.
+            Remarks are a type of comment that is attributed to an author and is used for commenting editorially on the document.
 
         case: Simple remark
-
             description:
                 Just a simple remark. Nothing fancy.
 
@@ -293,6 +261,7 @@ tests:(!en) SAM Parser Tests
                 !!!(mbaker)
                     This is a remark.
 
+
             result:
                 ```(xml)
                     <remark attribution="mbaker">
@@ -300,7 +269,6 @@ tests:(!en) SAM Parser Tests
                     </remark>
 
         case: Complex remark
-
             description:
                 A little bit more complex.
 
@@ -313,6 +281,7 @@ tests:(!en) SAM Parser Tests
                 !!!(Charles André Joseph Marie de Gaulle !@#$%^&*(((({}":<>)(*cdg1)(!fr)
                     This is a remark.
 
+
             result:
                 ```(xml)
                     <remark attribution="Charles André Joseph Marie de Gaulle !@#$%^&amp;*(((({}&quot;:&lt;&gt;" id="cdg1" xml:lang="fr">
@@ -321,9 +290,7 @@ tests:(!en) SAM Parser Tests
 
     test: Fields
         description:
-            A field is a block without children. A field value does not
-            get wrapped in a title element. It is simple the value of the
-            field.
+            A field is a block without children. A field value does not get wrapped in a title element. It is simple the value of the field.
 
         case: Nested fields
             description:
@@ -341,7 +308,6 @@ tests:(!en) SAM Parser Tests
                     name: Fred Flintstone
                     address: Bedrock
                     era: Stone Age
-
             result:
                 ```(xml)
                     <address>
@@ -351,7 +317,6 @@ tests:(!en) SAM Parser Tests
                     </address>
 
     test: Paragraphs
-
         description:
             A paragraph is a block of text over consecutive lines.
 
@@ -366,16 +331,13 @@ tests:(!en) SAM Parser Tests
                     Jumbo.
 
             markup:
-                Wafting zephyrs
-                quickly vexed
-                Jumbo.
+                Wafting zephyrs quickly vexed Jumbo.
 
             result:
                 ```(xml)
                     <p>Wafting zephyrs quickly vexed Jumbo.</p>
 
         case: With annotated phrase
-
             description:
                 A paragraph over multiple lines with an annotated phrase.
 
@@ -386,42 +348,37 @@ tests:(!en) SAM Parser Tests
                     multiple lines.
 
             markup:
-                This is a {paragraph}(foo)
-                that wraps across
-                multiple lines.
+                This is a {paragraph}(foo) that wraps across multiple lines.
 
             result:
                 ```(xml)
                     <p>This is a <phrase><annotation type="foo">paragraph</annotation></phrase> that wraps across multiple lines.</p>
 
     test: Ordered lists
-
         description:
-            Ordered lists are created by starting a line with a number followed by a period.
-            Exact numbers are not retained.
+            Ordered lists are created by starting a line with a number followed by a period. Exact numbers are not retained.
 
         case: Ordered list with spaces
-
             description:
                 Ordered lists can have blank lines between the items.
 
-
             source:
                 ```(sam)
-
                     0. One
-
+                    
                     0. Two
-
+                    
                     99999. Three
 
             markup:
+                1. One
 
-                0. One
 
-                0. Two
+                2. Two
 
-                99999. Three
+
+                3. Three
+
 
             result:
                 ```(xml)
@@ -437,31 +394,30 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
-
         case: Ordered list no spaces
-
             description:
-                List are also recognized without space between items. List items can wrap
-                to another line if more indented than the number. Additional paragraphs can be
-                included if more indented than the number.
+                List are also recognized without space between items. List items can wrap to another line if more indented than the number. Additional paragraphs can be included if more indented than the number.
 
             source:
                 ```(sam)
-
                     0. One
                     0. Two this
                        paragraph wraps.
-
+                    
                        This is another para in the list item.
                     99999. Three
 
             markup:
-                0. One
-                0. Two this
-                   paragraph wraps.
+                1. One
+
+
+                2. Two this paragraph wraps.
 
                    This is another para in the list item.
-                99999. Three
+
+
+                3. Three
+
 
             result:
                 ```(xml)
@@ -479,26 +435,30 @@ tests:(!en) SAM Parser Tests
                     </ol>
 
         case: Ordered list mixed spacing
-
             description:
                 Ordered list with inconsistent spacing.
 
             source:
                 ```(sam)
                     0. One
-
+                    
                     0. Two
                     99999. Three
-
+                    
                     7. Four
 
             markup:
-                0. One
+                1. One
 
-                0. Two
-                99999. Three
 
-                7. Four
+                2. Two
+
+
+                3. Three
+
+
+                4. Four
+
 
             result:
                 ```(xml)
@@ -518,40 +478,46 @@ tests:(!en) SAM Parser Tests
                     </ol>
 
         case: Nested ordered list with spaces
-
             description:
                 Ordered lists at different indents, with spaces between lines.
 
             source:
                 ```(sam)
                     0. One
-
+                    
                     0. Two x
-
+                    
                         5. Two and a quarter x
-
+                    
                         6. Two and a half
-
+                    
                         9. Two and three quarters
-
+                    
                     99999. Three
-
+                    
                     7. Four
 
             markup:
-                0. One
+                1. One
 
-                0. Two x
 
-                    5. Two and a quarter x
+                2. Two x
 
-                    6. Two and a half
+                    1. Two and a quarter x
 
-                    9. Two and three quarters
 
-                99999. Three
+                    2. Two and a half
 
-                7. Four
+
+                    3. Two and three quarters
+
+
+
+                3. Three
+
+
+                4. Four
+
 
             result:
                 ```(xml)
@@ -581,10 +547,7 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
-
-
         case: Nested ordered lists with no spaces
-
             description:
                 Ordered lists at different indents, with no spaces between lines.
 
@@ -599,13 +562,26 @@ tests:(!en) SAM Parser Tests
                     7. Four
 
             markup:
-                0. One
-                0. Two z
-                    5. Two and a quarter z
-                    6. Two and a half
-                    9. Two and three quarters
-                99999. Three
-                7. Four
+                1. One
+
+
+                2. Two z
+
+                    1. Two and a quarter z
+
+
+                    2. Two and a half
+
+
+                    3. Two and three quarters
+
+
+
+                3. Three
+
+
+                4. Four
+
 
             result:
                 ```(xml)
@@ -636,7 +612,6 @@ tests:(!en) SAM Parser Tests
                     </ol>
 
         case: Nested ordered list with mixed spacing
-
             description:
                 Ordered lists at different indents, with some spaces between lines.
 
@@ -645,25 +620,35 @@ tests:(!en) SAM Parser Tests
                     0. One
                     0. Two r
                         5. Two and a quarter r
-
+                    
                         6. Two and a half
                         9. Two and three quarters
-
+                    
                     99999. Three
-
+                    
                     7. Four
 
             markup:
-                0. One
-                0. Two r
-                    5. Two and a quarter r
+                1. One
 
-                    6. Two and a half
-                    9. Two and three quarters
 
-                99999. Three
+                2. Two r
 
-                7. Four
+                    1. Two and a quarter r
+
+
+                    2. Two and a half
+
+
+                    3. Two and three quarters
+
+
+
+                3. Three
+
+
+                4. Four
+
 
             result:
                 ```(xml)
@@ -694,26 +679,22 @@ tests:(!en) SAM Parser Tests
                     </ol>
 
     test: Unordered lists
-
         description:
             Unordered lists are indicated by starting a line with `*`.
 
         case: Unordered list with spaces
-
             description:
                 A list with spaces between the lines.
 
             source:
                 ```(sam)
-
                     * One
-
+                    
                     * Two t
-
+                    
                     * Three
 
             markup:
-
                 * One
 
                 * Two t
@@ -735,21 +716,20 @@ tests:(!en) SAM Parser Tests
                     </ul>
 
         case: Unordered list no spaces
-
             description:
                 A list with no spaces between the lines.
 
             source:
                 ```(sam)
-
                     * One
                     * Two y
                     * Three
 
             markup:
-
                 * One
+
                 * Two y
+
                 * Three
 
             result:
@@ -767,25 +747,24 @@ tests:(!en) SAM Parser Tests
                     </ul>
 
         case: Unordered list mixed spacing
-
             description:
                 A list with mixed spacing between the lines.
 
             source:
                 ```(sam)
-
                     * One
                     * Two u
-
+                    
                     * Three
                     * Four
 
             markup:
-
                 * One
+
                 * Two u
 
                 * Three
+
                 * Four
 
             result:
@@ -805,28 +784,24 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ul>
 
-
         case: Nested list with spaces
-
             description:
                 Nested lists separated by spaces.
 
             source:
                 ```(sam)
-
-
                     * One
-
+                    
                     * Two i
-
+                    
                         * Two and a quarter
-
+                    
                         * Two and a half
-
+                    
                         * Two and three quarters
-
+                    
                     * Three
-
+                    
                     * Four
 
             markup:
@@ -872,8 +847,6 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ul>
 
-
-
         case: Nested unordered list with no spaces
             description:
                 Nested lists not separated by spaces.
@@ -890,11 +863,17 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 * One
+
                 * Two k
+
                     * Two and a quarter
+
                     * Two and a half
+
                     * Two and three quarters
+
                 * Three
+
                 * Four
 
             result:
@@ -926,7 +905,6 @@ tests:(!en) SAM Parser Tests
                     </ul>
 
         case: Nested unordered list with mixed spacing
-
             description:
                 Nested lists separated by some spaces.
 
@@ -935,22 +913,26 @@ tests:(!en) SAM Parser Tests
                     * One
                     * Two p
                         * Two and a quarter p
-
+                    
                         * Two and a half
                         * Two and three quarters
-
+                    
                     * Three
                     * Four
 
             markup:
                 * One
+
                 * Two p
+
                     * Two and a quarter p
 
                     * Two and a half
+
                     * Two and three quarters
 
                 * Three
+
                 * Four
 
             result:
@@ -982,38 +964,34 @@ tests:(!en) SAM Parser Tests
                     </ul>
 
     test: Mixed lists
-
         description:
-
-            You can nest ordered and unordered lists inside each other or follow
-            a list of one type with a list of another type.
+            You can nest ordered and unordered lists inside each other or follow a list of one type with a list of another type.
 
         case: Nested mixed lists with spaces
-
             description:
-
                 Unordered inside ordered list, spaces between lines.
 
             source:
                 ```(sam)
                     0. One
-
+                    
                     0. Two a
-
+                    
                         * Two and a quarter
-
+                    
                         * Two and a half
-
+                    
                         * Two and three quarters
-
+                    
                     99999. Three
-
+                    
                     7. Four
 
             markup:
-                0. One
+                1. One
 
-                0. Two a
+
+                2. Two a
 
                     * Two and a quarter
 
@@ -1021,12 +999,14 @@ tests:(!en) SAM Parser Tests
 
                     * Two and three quarters
 
-                99999. Three
 
-                7. Four
+                3. Three
+
+
+                4. Four
+
 
             result:
-
                 ```(xml)
                     <ol>
                     <li>
@@ -1054,11 +1034,8 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
-
         case: Nested mixed lists with no spaces
-
             description:
-
                 Unordered inside ordered list, no spaces between lines.
 
             source:
@@ -1072,16 +1049,25 @@ tests:(!en) SAM Parser Tests
                     7. Four
 
             markup:
-                0. One
-                0. Two s
+                1. One
+
+
+                2. Two s
+
                     * Two and a quarter
+
                     * Two and a half
+
                     * Two and three quarters
-                99999. Three
-                7. Four
+
+
+                3. Three
+
+
+                4. Four
+
 
             result:
-
                 ```(xml)
                     <ol>
                     <li>
@@ -1110,49 +1096,52 @@ tests:(!en) SAM Parser Tests
                     </ol>
 
         case: Nested numbered lists with mixed spacing
-
             description:
-
                 Unordered inside ordered list, some spaces between lines.
 
             source:
                 ```(sam)
                     0. One
-
+                    
                     0. Two d
                         * Two and a quarter
-
+                    
                         * Two and a half
                         * Two and three quarters
                     99999. Three times
                            three is nine.
-
+                    
                            Four times four is sixteen.
-
+                    
                            Five time five is twenty five.
-
-
+                    
+                    
                     7. Four
 
             markup:
-                0. One
+                1. One
 
-                0. Two d
+
+                2. Two d
+
                     * Two and a quarter
 
                     * Two and a half
+
                     * Two and three quarters
-                99999. Three times
-                       three is nine.
 
-                       Four times four is sixteen.
 
-                       Five time five is twenty five.
+                3. Three times three is nine.
 
-                7. Four
+                   Four times four is sixteen.
+
+                   Five time five is twenty five.
+
+
+                4. Four
+
 
             result:
-
                 ```(xml)
                     <ol>
                     <li>
@@ -1182,35 +1171,38 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
-
-
         case: Space between lists
             description:
                 An ordered list can follow an unordered list directly and vice versa.
-
 
             source:
                 ```(sam)
                     * One
                     * Two f
                     * Three
-
+                    
                     1. One
                     2. Two g
                     3. Three
 
             markup:
                 * One
+
                 * Two f
+
                 * Three
 
                 1. One
+
+
                 2. Two g
+
+
                 3. Three
+
 
             result:
                 ```(xml)
-
                     <ul>
                     <li>
                     <p>One</p>
@@ -1234,9 +1226,7 @@ tests:(!en) SAM Parser Tests
                     </li>
                     </ol>
 
-
         case: No space between lists
-
             description:
                 An unordered list followed by an ordered list with no space between them.
 
@@ -1251,15 +1241,22 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 * One
+
                 * Two h
+
                 * Three
+
                 1. One
+
+
                 2. Two j
+
+
                 3. Three
+
 
             result:
                 ```(xml)
-
                     <ul>
                     <li>
                     <p>One</p>
@@ -1284,29 +1281,19 @@ tests:(!en) SAM Parser Tests
                     </ol>
 
     test: Literal lists
-
         description:
-            Ordered lists have the number stripped away and are renumbered on output.
-            Unordered list have their `*` stripped away and replaced with the style of
-            bullet specified on output processing. If you want to preserve actual
-            numbers and bullets in your lists, you need to escape them so that the
-            lines are not recognized as lists items.
+            Ordered lists have the number stripped away and are renumbered on output. Unordered list have their `*` stripped away and replaced with the style of bullet specified on output processing. If you want to preserve actual numbers and bullets in your lists, you need to escape them so that the lines are not recognized as lists items.
 
         case: Literal numbered list using `\` to escape `.`
-
             description:
-                To have a list number recognized as a literal, escape the period
-                following the number (not the number itself). Because these are
-                now paragraphs, not lists, you must put spaces between items or
-                they will be run together into one paragraph.
+                To have a list number recognized as a literal, escape the period following the number (not the number itself). Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.
 
             source:
                 ```(sam)
-
                     2\. This is just a paragraph
-
+                    
                     4\. This is just a paragraph
-
+                    
                     9\. This is just a paragraph
 
             markup:
@@ -1322,20 +1309,16 @@ tests:(!en) SAM Parser Tests
                     <p>4. This is just a paragraph</p>
                     <p>9. This is just a paragraph</p>
 
-
         case: Literal unordered list using `\` to escape `*`
-
             description:
-                To have a list number recognized as a literal, escape the `*`. Because these are
-                now paragraphs, not lists, you must put spaces between items or
-                they will be run together into one paragraph.
+                To have a list number recognized as a literal, escape the `*`. Because these are now paragraphs, not lists, you must put spaces between items or they will be run together into one paragraph.
 
             source:
                 ```(sam)
                     \* This is just a paragraph
-
+                    
                     \* This is just a paragraph
-
+                    
                     \* This is just a paragraph
 
             markup:
@@ -1353,13 +1336,9 @@ tests:(!en) SAM Parser Tests
 
     test: Labeled lists
         description:
-            You can create lists with labels rather than bullets. The label is
-            contained between two pipe characters. There must be no space between
-            the opening pipe and the first character of the label (otherwise it
-            will be parsed as a line).
+            You can create lists with labels rather than bullets. The label is contained between two pipe characters. There must be no space between the opening pipe and the first character of the label (otherwise it will be parsed as a line).
 
         case: Simple labeled list
-
             description:
                 A labeled list.
 
@@ -1369,7 +1348,7 @@ tests:(!en) SAM Parser Tests
                          a female deer
                     |Re| a drop of
                          golden sun
-
+                    
                          Is it a particle or a wave?
                     |Me| a name I call myself
                     |Fa| a long long way to run
@@ -1378,17 +1357,20 @@ tests:(!en) SAM Parser Tests
                     |Te| a drink with jam and bread
 
             markup:
-                |Do| a deer,
-                     a female deer
+                |Do| a deer, a female deer
 
-                |Re| a drop of
-                     golden sun
+                |Re| a drop of golden sun
 
-                     Is it a particle or a wave?
+                   Is it a particle or a wave?
+
                 |Me| a name I call myself
+
                 |Fa| a long long way to run
+
                 |So| a needle pulling thread
+
                 |La| a note to follow so
+
                 |Te| a drink with jam and bread
 
             result:
@@ -1426,7 +1408,6 @@ tests:(!en) SAM Parser Tests
                     </ll>
 
         case: XML markup characters in list labels
-
             description:
                 Making sure that the contents of a list label are properly escaped when generating XML.
 
@@ -1437,9 +1418,11 @@ tests:(!en) SAM Parser Tests
                   |foo3 & bar3| foobar3
 
             markup:
-                |foo1 & bar1| foobar1
-                |foo2 & bar2| foobar2
-                |foo3 & bar3| foobar3
+                |foo1 \& bar1| foobar1
+
+                |foo2 \& bar2| foobar2
+
+                |foo3 \& bar3| foobar3
 
             result:
                 ```(xml)
@@ -1459,18 +1442,12 @@ tests:(!en) SAM Parser Tests
                     </ll>
 
     test: Record sets
-
         description:
-            Record sets are a structure similar to a database table. They
-            record data in rows with identical column names. Column names
-            are specified in the records set header.
+            Record sets are a structure similar to a database table. They record data in rows with identical column names. Column names are specified in the records set header.
 
         case: Recordset
-
             description:
-                Test that recordsets are recognized correctly. Includes a
-                test that character escapes are recognized in records and
-                commas can be escaped.
+                Test that recordsets are recognized correctly. Includes a test that character escapes are recognized in records and commas can be escaped.
 
             source:
                 ```(sam)
@@ -1479,10 +1456,9 @@ tests:(!en) SAM Parser Tests
                         2016-07-01, mbaker, Revision, In progress
 
             markup:
-                history:: date, author, comment, status
+                history::date, author, comment, status
                     2014-06-23, mbaker, New\, Topic, In progress
                     2016-07-01, mbaker, Revision, In progress
-
             result:
                 ```(xml)
                     <history>
@@ -1501,7 +1477,6 @@ tests:(!en) SAM Parser Tests
                     </history>
 
         case: Recordset with only one field name
-
             description:
                 Test that a recordset works correctly with only one field.
 
@@ -1512,10 +1487,9 @@ tests:(!en) SAM Parser Tests
                         The Shootish
 
             markup:
-                filmography:: film
+                filmography::film
                     Rio Bravo
                     The Shootish
-
             result:
                 ```(xml)
                     <filmography>
@@ -1528,19 +1502,11 @@ tests:(!en) SAM Parser Tests
                     </filmography>
 
     test: Grids
-
         description:
-
-            Grids are a simple form of table. They are purely a layout device with
-            no semantic value. They have no table heads or row or
-            column spanning. More complex tables can be modeled using explicit
-            blocks. Labeled lists can be modeled using the labeled list structure.
-            Database-like tables can be modeled using record sets.
+            Grids are a simple form of table. They are purely a layout device with no semantic value. They have no table heads or row or column spanning. More complex tables can be modeled using explicit blocks. Labeled lists can be modeled using the labeled list structure. Database-like tables can be modeled using record sets.
 
         case: Grid with heads
-
             description:
-
                 Table heads are simulated using bold in the top row of the grid.
 
             source:
@@ -1552,8 +1518,8 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 +++
-                    *Type*  | *Term*    | *Notes*
-                    feature | fragment  | bing
+                    {Type}(bold) | {Term}(bold) | {Notes}(bold)
+                    feature | fragment | bing
                     feature | fragments | bang
 
             result:
@@ -1577,31 +1543,24 @@ tests:(!en) SAM Parser Tests
                     </grid>
 
         case: Grid with management domain attributes
-
             description:
-                The same grid only with management domain attributes attached
-                to the grid header.
+                The same grid only with management domain attributes attached to the grid header.
 
-                Note that SAM Parser sorts block attributes alphabetically for
-                output, which makes it possible to test them with a simple string
-                comparison (such as that performed by test.xslt). However, this
-                is behavior of this parser, not a SAM language requirement.
+                Note that SAM Parser sorts block attributes alphabetically for output, which makes it possible to test them with a simple string comparison (such as that performed by test.xslt). However, this is behavior of this parser, not a SAM language requirement.
 
             source:
                 ```(sam)
                     +++(*foom)(#bar)(?baz)
                         *Type*  | *Term*    | *Notes*
-
+                    
                         feature | fragment  | bing
-
+                    
                         feature | fragments | bang
 
             markup:
-                +++(*foom)(#bar)(?baz)
-                    *Type*  | *Term*    | *Notes*
-
-                    feature | fragment  | bing
-
+                +++(?baz)(*foom)(#bar)
+                    {Type}(bold) | {Term}(bold) | {Notes}(bold)
+                    feature | fragment | bing
                     feature | fragments | bang
 
             result:
@@ -1624,11 +1583,8 @@ tests:(!en) SAM Parser Tests
                     </row>
                     </grid>
 
-
         case: Grid with bold row
-
             description:
-
                 Make an lower row bold.
 
             source:
@@ -1637,11 +1593,12 @@ tests:(!en) SAM Parser Tests
                         *Type*    | *Term*      | *Notes*
                         feature   | fragment    | bing
                         *feature* | *fragments* | *bang*
+
             markup:
                 +++
-                    *Type*    | *Term*      | *Notes*
-                    feature   | fragment    | bing
-                    *feature* | *fragments* | *bang*
+                    {Type}(bold) | {Term}(bold) | {Notes}(bold)
+                    feature | fragment | bing
+                    {feature}(bold) | {fragments}(bold) | {bang}(bold)
 
             result:
                 ```(xml)
@@ -1663,11 +1620,8 @@ tests:(!en) SAM Parser Tests
                     </row>
                     </grid>
 
-
         case: Grid with side heads
-
             description:
-
                 Grid with row headings rather than column headings.
 
             source:
@@ -1676,11 +1630,12 @@ tests:(!en) SAM Parser Tests
                         *Type*    | Term      | Notes
                         *feature* | fragment  | bing
                         *feature* | fragments | bang
+
             markup:
                 +++
-                    *Type*    | Term      | Notes
-                    *feature* | fragment  | bing
-                    *feature* | fragments | bang
+                    {Type}(bold) | Term | Notes
+                    {feature}(bold) | fragment | bing
+                    {feature}(bold) | fragments | bang
 
             result:
                 ```(xml)
@@ -1704,30 +1659,29 @@ tests:(!en) SAM Parser Tests
 
     test: Blockquotes
         description:
-            Blockquotes are introduced by three quotations marke (single or double). The content of
-            a blockquote is normal SAM markup.
+            Blockquotes are introduced by three quotations marke (single or double). The content of a blockquote is normal SAM markup.
 
         case: Blockquote
             description:
                 A blockquote with management domain metadata.
 
-
             source:
                 ```(sam)
                     After this paragraph, there is a blockquote:
-
+                    
                     """(*foo)(#bar)(?baz)
                         The quick brown fox jumps over the lazy dog.
-
+                    
                         And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
 
             markup:
                 After this paragraph, there is a blockquote:
 
-                """(*foo)(#bar)(?baz)
+                """(?baz)(*foo)(#bar)
                     The quick brown fox jumps over the lazy dog.
 
                     And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
+
 
             result:
                 ```(xml)
@@ -1744,20 +1698,21 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     This is another paragraph. Then there is an alternate blockquote:
-
+                    
                     '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2]
                         The quick brown fox jumps over the lazy dog.
-
+                    
                     '''
                         This is a blockquote without a citation.
 
             markup:
                 This is another paragraph. Then there is an alternate blockquote:
 
-                '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2]
+                """(?bar)(?baz)(#foo5)[Mother Goose][Father Time][*foo page 2]
                     The quick brown fox jumps over the lazy dog.
 
-                '''
+
+                """
                     This is a blockquote without a citation.
 
 
@@ -1776,15 +1731,9 @@ tests:(!en) SAM Parser Tests
 
     test: Codeblocks
         description:
-            A codeblock is a block of program code. A codeblock is treated as
-            plain text and is not parsed as SAM markup. It will be copied to
-            output exactly as it occurs in the source. Codeblocks are denoted
-            by three back ticks at the start of a line. Codeblocks have a special
-            annotation. The first word of an annotation on a codeblock is
-            the language of the code.
+            A codeblock is a block of program code. A codeblock is treated as plain text and is not parsed as SAM markup. It will be copied to output exactly as it occurs in the source. Codeblocks are denoted by three back ticks at the start of a line. Codeblocks have a special annotation. The first word of an annotation on a codeblock is the language of the code.
 
         case: Simple codeblock
-
             description:
                 A simple codeblock.
 
@@ -1797,8 +1746,9 @@ tests:(!en) SAM Parser Tests
                                 return s.translate(t)
                             except AttributeError:
                                 return s
+
             markup:
-                ```(pyt&#x68;on)(?foo)(!en)
+                ```(python)(?foo)(!en)
                     def escape_for_xml(s):
                         t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
                         try:
@@ -1818,11 +1768,8 @@ tests:(!en) SAM Parser Tests
                     </codeblock>
 
         case: Blank lines in codeblock
-
             description:
-                Blank lines in a code block. The display of the result will be
-                confusing here because the result is whitespace normalized for
-                ease of comparison with the generated XML.
+                Blank lines in a code block. The display of the result will be confusing here because the result is whitespace normalized for ease of comparison with the generated XML.
 
             source:
                 ```(sam)
@@ -1830,42 +1777,43 @@ tests:(!en) SAM Parser Tests
                         warnings:
                             warning:(#warn_danger_domestic)
                                 title: Danger
-
+                    
                                 Be very very careful. This could kill you.
-
+                    
                             warning:(#warn_danger_foreign)
                                 title: Look out!
-
+                    
                                 Pay close attention. You could really hurt yourself.
+
             markup:
                 ```(sam)
                     warnings:
                         warning:(#warn_danger_domestic)
                             title: Danger
-
+                    
                             Be very very careful. This could kill you.
-
+                    
                         warning:(#warn_danger_foreign)
                             title: Look out!
-
+                    
                             Pay close attention. You could really hurt yourself.
+
             result:
                 ```(xml)
                     <codeblock language="sam">
                     warnings:
                         warning:(#warn_danger_domestic)
                             title: Danger
-
+                    
                             Be very very careful. This could kill you.
-
+                    
                         warning:(#warn_danger_foreign)
                             title: Look out!
-
+                    
                             Pay close attention. You could really hurt yourself.
                     </codeblock>
 
         case: Codeblock with citation
-
             description:
                 A codeblock with a citation.
 
@@ -1878,6 +1826,7 @@ tests:(!en) SAM Parser Tests
                                 return s.translate(t)
                             except AttributeError:
                                 return s
+
             markup:
                 ```(python)(?foo)[demos/foo.py]
                     def escape_for_xml(s):
@@ -1901,12 +1850,7 @@ tests:(!en) SAM Parser Tests
 
         case: Invalid blockstart in codeblock
             description:
-                This is an construct that raise an error in an actual document. Curious because
-                lots of valid block starts in other codeblocks did not cause a problem. But this
-                one raised an invalid block name error. Turns out this was caused by tabs instead
-                of spaces used to indent the line, which promoted it to a higher level of the
-                document hierarchy and thus outside the codeblock. But the test is worth keeping
-                to make sure that the contents of codeblocks are not being interpreted as SAM markup.
+                This is an construct that raise an error in an actual document. Curious because lots of valid block starts in other codeblocks did not cause a problem. But this one raised an invalid block name error. Turns out this was caused by tabs instead of spaces used to indent the line, which promoted it to a higher level of the document hierarchy and thus outside the codeblock. But the test is worth keeping to make sure that the contents of codeblocks are not being interpreted as SAM markup.
 
             source:
                 ```(sam)
@@ -1937,7 +1881,6 @@ tests:(!en) SAM Parser Tests
             An embed is a block of markup or code in another language that is intended to be interpreted rather than displayed. For instance, it can be used to include an equation using LaTeX or a diagram using SVG.
 
         case: Simple embed
-
             description:
                 Simple embed of an equation using LaTeX.
 
@@ -1947,15 +1890,14 @@ tests:(!en) SAM Parser Tests
                         n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             markup:
-                ```(=latexmathml)(*id13)(#name)(?a)(?b)
+                ```(=latexmathml)(?a)(?b)(*id13)(#name)
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             result:
                 ```(xml)
                     <embedblock conditions="a,b" encoding="latexmathml" id="id13" name="name"> n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k </embedblock>
 
-        case: Embedded XML 
-
+        case: Embedded XML
             description:
                 A chunk of XML.
 
@@ -1985,17 +1927,12 @@ tests:(!en) SAM Parser Tests
                         &lt;hoo/&gt; 
                         &lt;/foo&gt;
                     </embedblock>
-    test: Lines
 
+    test: Lines
         description:
-            Lines allows you to create text with specific line breaks. Lines are created by
-            beginning each line on a new line and starting with a `|` character. There must
-            be one space after the `|`, which is discarded. All other spaces after `|` are
-            retained. (Retained spaces are not tested for in text.xslt because the test
-            normalize space.)
+            Lines allows you to create text with specific line breaks. Lines are created by beginning each line on a new line and starting with a `|` character. There must be one space after the `|`, which is discarded. All other spaces after `|` are retained. (Retained spaces are not tested for in text.xslt because the test normalize space.)
 
         case: Lines
-
             description:
                 Lines with various annotations:
 
@@ -2005,12 +1942,12 @@ tests:(!en) SAM Parser Tests
                     | You gotta walk it by yourself,
                     |(?bar) Nobody here can walk it for you,
                     |    You gotta walk it by yourself.
+
             markup:
                 |(#foo2) You gotta walk that lonesome valley,[*bing page 22]
                 | You gotta walk it by yourself,
                 |(?bar) Nobody here can walk it for you,
                 |    You gotta walk it by yourself.
-
             result:
                 ```(xml)
                     <line name="foo2">You gotta walk that lonesome valley,<citation extra="page 22" idref="bing"/></line>
@@ -2019,7 +1956,6 @@ tests:(!en) SAM Parser Tests
                     <line>   You gotta walk it by yourself.</line>
 
         case: Lines inside a blockquote
-
             description:
                 Lines should work inside a block quote.
 
@@ -2049,44 +1985,33 @@ tests:(!en) SAM Parser Tests
                     </blockquote>
 
     test: Attributes
-
         description:
+            SAM supports four explicit attributes: ids, names, conditions, and language. There is no general attribute mechanism such as that in XML. You can generally encode the same data in SAM using fields or annotations.
 
-            SAM supports four explicit attributes: ids, names, conditions, and language. There is no
-            general attribute mechanism such as that in XML. You can generally encode the same data
-            in SAM using fields or annotations.
+            Attributes can be applied to blocks, phrases, and inserts. You cannot apply attributes to a paragraph, but you can wrap a paragraph in a fragment and apply attributes to the fragment.
 
-            Attributes can
-            be applied to blocks, phrases, and inserts. You cannot apply attributes to a paragraph,
-            but you can wrap a paragraph in a fragment and apply attributes to the fragment.
-
-            Attributes are applied using annotation markup, but with a specific initial character to
-            denote each kind of attribute:
+            Attributes are applied using annotation markup, but with a specific initial character to denote each kind of attribute:
 
             * `(*id)` creates an ID attribute.
+
             * `(#name)` creates a name attribute.
+
             * `(?condition)` creates a condition attribute.
+
             * `(!en-CA)` creates a language attribute.
 
-            You can only apply one id, name, or language attribute to a block or phrase. You can apply more
-            than one condition attribute. On output to XML, the condition attributes will be converted to
-            a single `conditions` attribute with the individual conditions separated by commas. (For which reason,
-            condition statements can't include commas.)
+            You can only apply one id, name, or language attribute to a block or phrase. You can apply more than one condition attribute. On output to XML, the condition attributes will be converted to a single `conditions` attribute with the individual conditions separated by commas. (For which reason, condition statements can’t include commas.)
 
         case: Attributes on block
-
             description: Attributes on a block
-
-
             source:
                 ```(sam)
                     block:(!en-CA)(*id2)(#name)(?a)(?b) Title
-
+                    
                         Content of the block.
 
             markup:
-                block:(!en-CA)(*id2)(#name)(?a)(?b) Title
-
+                block:(?a)(?b)(*id2)(#name)(!en-CA) Title
                     Content of the block.
 
             result:
@@ -2097,36 +2022,29 @@ tests:(!en) SAM Parser Tests
                     </block>
 
         case: Attributes on field
-
             description: Attributes on a field
-
-
             source:
                 ```(sam)
                     field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 
             markup:
-                field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
-
+                field:(?a)(?b)(*id3)(#name)(!en-CA) Value of the field.
             result:
                 ```(xml)
                     <field conditions="a,b" id="id3" name="name" xml:lang="en-CA">Value of the field.</field>
 
         case: Attributes on fragment
-
             description: Attributes on a fragment
-
-
             source:
                 ```(sam)
                     ~~~(!en-CA)(*id4)(#name)(?a)(?b)
-
+                    
                         Content of the fragment.
 
             markup:
-                ~~~(!en-CA)(*id4)(#name)(?a)(?b)
-
+                ~~~(?a)(?b)(*id4)(#name)(!en-CA)
                         Content of the fragment.
+
 
             result:
                 ```(xml)
@@ -2135,22 +2053,18 @@ tests:(!en) SAM Parser Tests
                     </fragment>
 
         case: attributes on grid
-
             description: Attributes on a grid
-
-
             source:
                 ```(sam)
                     +++(!en-CA)(*id5)(#name)(?a)(?b)
-
+                    
                         Content | of
                         the     | grid.
 
             markup:
-                +++(!en-CA)(*id5)(#name)(?a)(?b)
-
+                +++(?a)(?b)(*id5)(#name)(!en-CA)
                     Content | of
-                    the     | grid.
+                    the | grid.
 
             result:
                 ```(xml)
@@ -2166,23 +2080,18 @@ tests:(!en) SAM Parser Tests
                     </grid>
 
         case: attributes on record set
-
             description: Attributes on a record set
-
-
             source:
                 ```(sam)
                     recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
-
+                    
                         a, b
                         c, d
 
             markup:
-                recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
-
+                recordset::(?a)(?b)(*id6)(#name)(!en-CA)foo, bar
                     a, b
                     c, d
-
             result:
                 ```(xml)
                     <recordset conditions="a,b" id="id6" name="name" xml:lang="en-CA">
@@ -2196,30 +2105,24 @@ tests:(!en) SAM Parser Tests
                     </record>
                     </recordset>
 
-
         case: Attributes on unordered list
-
             description:
-
                 Attributes on an unordered list item.
 
             source:
                 ```(sam)
                     * Fred
-
+                    
                     *(!en-CA)(*id7)(#name)(?a)(?b) Barney and
                                                    Betty and
                                                    Bam Bam.
-
+                    
                     * Wilma
 
             markup:
-
                 * Fred
 
-                *(!en-CA)(*id7)(#name)(?a)(?b) Barney and
-                                               Betty and
-                                               Bam Bam.
+                *(?a)(?b)(*id7)(#name)(!en-CA) Barney and Betty and Bam Bam.
 
                 * Wilma
 
@@ -2251,10 +2154,13 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 1. Fred
-                2.(!en-CA)(*id8)(#name)(?a)(?b) Barney and
-                                                Betty and
-                                                Bam Bam.
+
+
+                2.(?a)(?b)(*id8)(#name)(!en-CA) Barney and Betty and Bam Bam.
+
+
                 3. Wilma
+
 
             result:
                 ```(xml)
@@ -2278,10 +2184,10 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     |Do|(#foo7)(?bar)(?green) a deer,
                                               a female deer
-
+                    
                     |Re| a drop of
                          golden sun
-
+                    
                          Is it a particle or a wave?
                     |Me|(*bananas) a name I call myself
                     |Fa| a long long way to run
@@ -2290,17 +2196,20 @@ tests:(!en) SAM Parser Tests
                     |Te| a drink with jam and bread
 
             markup:
-                |Do|(#foo7)(?bar)(?green) a deer,
-                                          a female deer
+                |Do|(?bar)(?green)(#foo7) a deer, a female deer
 
-                |Re| a drop of
-                     golden sun
+                |Re| a drop of golden sun
 
-                     Is it a particle or a wave?
+                   Is it a particle or a wave?
+
                 |Me|(*bananas) a name I call myself
+
                 |Fa| a long long way to run
+
                 |So| a needle pulling thread
+
                 |La| a note to follow so
+
                 |Te| a drink with jam and bread
 
             result:
@@ -2338,7 +2247,6 @@ tests:(!en) SAM Parser Tests
                     </ll>
 
         case: Attributes on lines
-
             description:
                 Lines with annotations:
 
@@ -2348,12 +2256,12 @@ tests:(!en) SAM Parser Tests
                     | You gotta walk it by yourself,
                     | Nobody here can walk it for you,
                     |    You gotta walk it by yourself.
+
             markup:
-                |(!en-CA)(*id9)(#name)(?a)(?b) You gotta walk that lonesome valley,[*bing page 22]
+                |(?a)(?b)(*id9)(#name)(!en-CA) You gotta walk that lonesome valley,[*bing page 22]
                 | You gotta walk it by yourself,
                 | Nobody here can walk it for you,
                 |    You gotta walk it by yourself.
-
             result:
                 ```(xml)
                     <line conditions="a,b" id="id9" name="name" xml:lang="en-CA">You gotta walk that lonesome valley,<citation extra="page 22" idref="bing"/></line>
@@ -2361,28 +2269,27 @@ tests:(!en) SAM Parser Tests
                     <line>Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
 
-
         case: Attributes on blockquote
             description:
                 A blockquote with attributes and a citation.
 
-
             source:
                 ```(sam)
                     After this paragraph, there is a blockquote:
-
+                    
                     """(!en-CA)(*id10)(#name)(?a)(?b)[*cit]
                         The quick brown fox jumps over the lazy dog.
-
+                    
                         And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
 
             markup:
                 After this paragraph, there is a blockquote:
 
-                """(!en-CA)(*id10)(#name)(?a)(?b)[*cit]
+                """(?a)(?b)(*id10)(#name)(!en-CA)[*cit]
                     The quick brown fox jumps over the lazy dog.
 
                     And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
+
 
             result:
                 ```(xml)
@@ -2390,13 +2297,11 @@ tests:(!en) SAM Parser Tests
                     <blockquote conditions="a,b" id="id10" name="name" xml:lang="en-CA">
                     <citation idref="cit"/>
                     <p>The quick brown fox jumps over the lazy dog.</p>
-
+                    
                     <p>And the <phrase><annotation type="beast" specifically="bovine"><citation value="Mother Goose">cow</citation></annotation></phrase> jumps over the moon.</p>
                     </blockquote>
 
-
         case: Attributes on a phrase
-
             description:
                 Attributes on a phrase.
 
@@ -2405,15 +2310,13 @@ tests:(!en) SAM Parser Tests
                     {The Duke}(actor "John Wayne")(!en-CA)(*id11)(#name)(?a)(?b)[*cit] plays Rooster Cogburn.
 
             markup:
-                {The Duke}(actor "John Wayne")(!en-CA)(*id11)(#name)(?a)(?b)[*cit] plays Rooster Cogburn.
+                {The Duke}(actor "John Wayne")[*cit](?a)(?b)(*id11)(#name)(!en-CA) plays Rooster Cogburn.
 
             result:
                 ```(xml)
                     <p><phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne"><citation idref="cit">The Duke</citation></annotation></phrase> plays Rooster Cogburn.</p>
 
-
         case: Attributes on a codeblock
-
             description:
                 Attributes on a codeblock.
 
@@ -2426,8 +2329,9 @@ tests:(!en) SAM Parser Tests
                                 return s.translate(t)
                             except AttributeError:
                                 return s
+
             markup:
-                ```(python)(*id12)(#name)(?a)(?b)
+                ```(python)(?a)(?b)(*id12)(#name)
                     def escape_for_xml(s):
                         t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
                         try:
@@ -2447,7 +2351,6 @@ tests:(!en) SAM Parser Tests
                     </codeblock>
 
         case: Attributes on an embed
-
             description:
                 Attributes on a embed.
 
@@ -2457,7 +2360,7 @@ tests:(!en) SAM Parser Tests
                         n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             markup:
-                ```(=latexmathml)(*id14)(#name)(?a)(?b)
+                ```(=latexmathml)(?a)(?b)(*id14)(#name)
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 
             result:
@@ -2465,7 +2368,6 @@ tests:(!en) SAM Parser Tests
                     <embedblock conditions="a,b" encoding="latexmathml" id="id14" name="name">
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
                     </embedblock>
-
 
         case: Attributes on inserts
             description:
@@ -2476,7 +2378,7 @@ tests:(!en) SAM Parser Tests
                     >>>(image foo.gif)(*id15)(#name)(?a)(?b)
 
             markup:
-                >>>(image foo.gif)(*id15)(#name)(?a)(?b)
+                >>>(image foo.gif)(?a)(?b)(*id15)(#name)
 
             result:
                 ```(xml)
@@ -2498,26 +2400,21 @@ tests:(!en) SAM Parser Tests
                     <insert item="bar.png" name="baz" type="image"/>
 
     test: Annotations
-
         description:
-
-            A phrase can have one or more annotations or citations attached to it.
-            On output, the text of the phrase is wrapped in the annotations and
-            citations in the order they were specified in source.
+            A phrase can have one or more annotations or citations attached to it. On output, the text of the phrase is wrapped in the annotations and citations in the order they were specified in source.
 
         case: Multiple annotations
-
             description:
                 Phrases with more than one attribute in a chain.
 
             source:
                 ```(sam)
                     This is {very}(bold) important.
-
+                    
                     This is {very}(bold)(italic) important.
-
+                    
                     This is {very}(bold)(italic)(green) important.
-
+                    
                     This `foo`(bar) baz.
 
             markup:
@@ -2527,16 +2424,13 @@ tests:(!en) SAM Parser Tests
 
                 This is {very}(bold)(italic)(green) important.
 
-
             result:
                 ```(xml)
                     <p>This is <phrase><annotation type="bold">very</annotation></phrase> important.</p>
                     <p>This is <phrase><annotation type="bold"><annotation type="italic">very</annotation></annotation></phrase> important.</p>
                     <p>This is <phrase><annotation type="bold"><annotation type="italic"><annotation type="green">very</annotation></annotation></annotation></phrase> important.</p>
 
-
         case: Consecutive Annotations
-
             description:
                 Two separate annotations with no space between them.
 
@@ -2552,7 +2446,6 @@ tests:(!en) SAM Parser Tests
                     <p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
 
         case: Consecutive Annotations on decorations
-
             description:
                 Two separate annotations with no space between them.
 
@@ -2567,14 +2460,9 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
 
-
-
         case: Annotation followed by citation
-
             description:
-                Observed in the wild: When an annotated phrase was followed by a
-                phrase with a citation, the end of the annotation was not found
-                and the two structures were recognized as one long citation.
+                Observed in the wild: When an annotated phrase was followed by a phrase with a citation, the end of the annotation was not found and the two structures were recognized as one long citation.
 
             source:
                 ```(sam)
@@ -2595,27 +2483,10 @@ tests:(!en) SAM Parser Tests
                     paper-like and hypertext outputs. This can help you
                     to work around some of the design limitations that
                     we talked about in the {single sourcing
-                    chapter}[#single_source bink].
+                    chapter}[#single_source].
 
             markup:
-                When using the map approach, it is important to
-                think about how your content will {single
-                source}(concept "single sourcing") to paper-like
-                media and hypertext-media. Some people will output
-                the same map to to both media. In hyper-text media
-                that usually results in the map being turned into
-                a table of contents, often displayed in a separate
-                pane as in a help system. This may be fine if you
-                are creating a help system, but it is not how Web
-                content is usually displayed. Another approach to
-                single sourcing content that uses the assemble from
-                pieces approach is to create completely separate maps
-                -- or even to use completely different assembly
-                techniques that don't involve maps at all -- to produce
-                paper-like and hypertext outputs. This can help you
-                to work around some of the design limitations that
-                we talked about in the {single sourcing
-                chapter}[#single_source bink].
+                When using the map approach, it is important to think about how your content will {single source}(concept "single sourcing") to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the {single sourcing chapter}[#single_source].
 
             result:
                 ```(xml)
@@ -2628,6 +2499,7 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     Press {Enter}(key)(!fr-CA)
+
             markup:
                 Press {Enter}(key)(!fr-CA)
 
@@ -2642,6 +2514,7 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     Press {Enter}(key)(?foo)
+
             markup:
                 Press {Enter}(key)(?foo)
 
@@ -2650,50 +2523,37 @@ tests:(!en) SAM Parser Tests
                     <p>Press <phrase conditions="foo"><annotation type="key">Enter</annotation></phrase></p>
 
         case: Prior annotation lookup
-
             description:
-
-                If a phrase has no annotation or citation attached to it, the parser will
-                attempt to find a suitable annotation by searching back up the document for
-                the most recent case of the same phrase. If it finds one, it will copy
-                the annotations and citations from that phrase to the current one. This
-                prevents writers from having to write the same annotation out over and
-                over again. If not prior phrase is found, a warning is issued.
-
+                If a phrase has no annotation or citation attached to it, the parser will attempt to find a suitable annotation by searching back up the document for the most recent case of the same phrase. If it finds one, it will copy the annotations and citations from that phrase to the current one. This prevents writers from having to write the same annotation out over and over again. If not prior phrase is found, a warning is issued.
 
             source:
                 ```(sam)
                     This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotation}.
 
             markup:
-                This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {annotation}.
+                This {annotation}(link "https://en.wikipedia.org/wiki/Annotation") is repeated {annotation}(link "https://en.wikipedia.org/wiki/Annotation").
 
             result:
                 ```(xml)
                     <p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase>.</p>
 
         case: Case insensitive lookup
-
             description:
-
                 Annotation lookup is case insensitive unless the annotation-lookup declaration is set to `case sensitive`.
-
 
             source:
                 ```(sam)
                     This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {Annotation}.
 
             markup:
-                This {annotation}(https://en.wikipedia.org/wiki/Annotation) is repeated {Annotation}.
+                This {annotation}(link "https://en.wikipedia.org/wiki/Annotation") is repeated {Annotation}(link "https://en.wikipedia.org/wiki/Annotation").
 
             result:
                 ```(xml)
                     <p>This <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></phrase> is repeated <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">Annotation</annotation></phrase>.</p>
 
         case: Case insensitive lookup with multiple annotations
-
             description:
-
                 Make sure all annotations are copied
 
             source:
@@ -2701,14 +2561,13 @@ tests:(!en) SAM Parser Tests
                     This {annotation}(foo)(https://en.wikipedia.org/wiki/Annotation) is repeated {Annotation}.
 
             markup:
-                This {annotation}(foo)(https://en.wikipedia.org/wiki/Annotation) is repeated {Annotation}.
+                This {annotation}(foo)(link "https://en.wikipedia.org/wiki/Annotation") is repeated {Annotation}(foo)(link "https://en.wikipedia.org/wiki/Annotation").
 
             result:
                 ```(xml)
                     <p>This <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></annotation></phrase> is repeated <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">Annotation</annotation></annotation></phrase>.</p>
 
         case: Prior annotation lookup in included file
-
             description:
                 Look up annotations in included files.
 
@@ -2717,30 +2576,26 @@ tests:(!en) SAM Parser Tests
                     Annotation lookup test: {test phrase}.
 
             markup:
-                Annotation lookup test: {test phrase}.
-
+                Annotation lookup test: {test phrase}(test).
 
             result:
                 ```(xml)
                     <p>Annotation lookup test: <phrase><annotation type="test">test phrase</annotation></phrase>.</p>
 
         case: Earlier para
-
             description:
-                The marching annotation is in an earlier paragraph in the document. (In this
-                case, in the preceding test case).
+                The marching annotation is in an earlier paragraph in the document. (In this case, in the preceding test case).
 
             source:
                 ```(sam)
                     This {annotation} occurs previously.
 
             markup:
-                This {annotation} occurs previously.
+                This {annotation}(foo)(link "https://en.wikipedia.org/wiki/Annotation") occurs previously.
 
             result:
                 ```(xml)
                     <p>This <phrase><annotation type="foo"><annotation type="link" specifically="https://en.wikipedia.org/wiki/Annotation">annotation</annotation></annotation></phrase> occurs previously.</p>
-
 
         case: Failure
             description:
@@ -2758,20 +2613,15 @@ tests:(!en) SAM Parser Tests
                     <p>This <phrase>should be reported</phrase>.</p>
 
         case: Local only annotations
-
             description:
-                A local-only annotation is one which applies only to the current phrase.
-                It is not taken into consideration in annotation lookup, so the lookup
-                search will proceed to the next phrase with the same text. Annotation lookup will
-                occur for a phrase with a local-only annotation, and the local annotation will
-                be added to the looked up annotations, if any.
+                A local-only annotation is one which applies only to the current phrase. It is not taken into consideration in annotation lookup, so the lookup search will proceed to the next phrase with the same text. Annotation lookup will occur for a phrase with a local-only annotation, and the local annotation will be added to the looked up annotations, if any.
 
             source:
                 ```(sam)
                     Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 
             markup:
-                Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
+                Testing {XML}(language) testing {XML}(index)(language) testing {XML}(language).
 
             result:
                 ```(xml)
@@ -2786,7 +2636,7 @@ tests:(!en) SAM Parser Tests
                     Testing {XML}+(*foot) testing {XML}+(index) testing {XML}.
 
             markup:
-                Testing {XML}+(*foot) testing {XML}+(index) testing {XML}.
+                Testing {XML}(language)(*foot) testing {XML}(index)(language) testing {XML}(language).
 
             result:
                 ```(xml)
@@ -2794,38 +2644,39 @@ tests:(!en) SAM Parser Tests
 
         case: Mix of local and global
             description:
-                A mix of local and global annotations. 
+                A mix of local and global annotations.
 
             source:
                 ```(sam)
                     Testing {XML}+(foo)(language) testing {XML}+(index) testing {XML}.
 
             markup:
-                Testing {XML}+(foo)(language) testing {XML}+(index) testing {XML}.
+                Testing {XML}(foo)(language) testing {XML}(index)(language) testing {XML}(language).
 
             result:
                 ```(xml)
                     <p>Testing <phrase><annotation type="foo"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+
         case: Multiple local
             description:
-                Multiple local annotations. 
+                Multiple local annotations.
 
             source:
                 ```(sam)
                     Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
 
             markup:
-                Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
+                Testing {XML}(foobar)(verbiage)(language) testing {XML}(index)(language) testing {XML}(language).
 
             result:
                 ```(xml)
                     <p>Testing <phrase><annotation type="foobar"><annotation type="verbiage"><annotation type="language">XML</annotation></annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+
     test: Decorations
         description:
             A decoration is a shortcut for a {media domain}(concept) annotation. Three decorations are supported, bold, italic, and code.
 
         case: Bold, italic, and code
-
             description:
                 One test case for all decorations.
 
@@ -2834,8 +2685,8 @@ tests:(!en) SAM Parser Tests
                     This sentence contains decorations for *bold*, _italic_, and `code`.
 
             markup:
-                This sentence contains decorations for *bold*, _italic_, and `code`.
-            
+                This sentence contains decorations for {bold}(bold), {italic}(italic), and `code`.
+
             result:
                 ```(xml)
                     <p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <code>code</code>.</p>
@@ -2843,12 +2694,13 @@ tests:(!en) SAM Parser Tests
         case: Unbalanced decorations and escapes
             description:
                 Unbalanced decorations and escapes
+
             source:
                 ```(sam)
                     In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.
 
             markup:
-                In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John_Wayne) plays *an ex-Union colonel `out for revenge.
+                In Rio Bravo, \*the \`Duke (see: https://en.wikipedia.org/wiki/John\_Wayne) plays \*an ex-Union colonel \`out for revenge.
 
             result:
                 ```(xml)
@@ -2856,47 +2708,40 @@ tests:(!en) SAM Parser Tests
 
     test: Inline code
         description:
-            Inline code is a special form of phrase used for phrases that are in computer languages or other encodings other than the human language of the text. 
+            Inline code is a special form of phrase used for phrases that are in computer languages or other encodings other than the human language of the text.
 
         case: Inline latexmath
-
             description:
-                A selection of latex math to be printed. 
+                A selection of latex math to be printed.
 
             source:
                 ```(sam)
                     This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the middle of a paragraph. 
 
             markup:
-                This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the middle of a paragraph. 
+                This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the middle of a paragraph.
 
             result:
                 ```(xml)
                     <p>This is an equation <code language="latexmath" xml:lang="en">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</code> in the middle of a paragraph.</p> 
 
         case: Embedded latexmath
-
             description:
-                A selection of latex math to be embedded as an equation. 
+                A selection of latex math to be embedded as an equation.
 
             source:
                 ```(sam)
                     This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
 
             markup:
-                This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
+                This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph.
 
             result:
                 ```(xml)
                     <p>This is an equation <embed encoding="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</embed> in the middle of a paragraph.</p> 
 
-
-
-
     test: Links
-
         description:
-
             Links are created with an annotation.
 
             You can specify a link as a `link` annotation.
@@ -2909,16 +2754,11 @@ tests:(!en) SAM Parser Tests
             ```
                 foo {bar}(http://example.com/bar) baz
 
-            However, use of the shortcut means you need to escape
-            any parens that occur in the URL.
-
+            However, use of the shortcut means you need to escape any parens that occur in the URL.
 
         case: Parens not escaped
-
             description:
-                The parens are not escaped, causing misreading of markup. This example
-                should be interpreted incorrectly.
-
+                The parens are not escaped, causing misreading of markup. This example should be interpreted incorrectly.
 
             source:
                 ```(sam)
@@ -2928,21 +2768,15 @@ tests:(!en) SAM Parser Tests
                     Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
 
             markup:
-                Rio Bravo refers to the movie
-                (and not to {the city in Texas or
-                the nature reserve in
-                Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)))
+                Rio Bravo refers to the movie (and not to {the city in Texas or the nature reserve in Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_" (disambiguation)))
 
             result:
                 ```(xml)
                     <p>Rio Bravo refers to the movie (and not to <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_" namespace="disambiguation">the city in Texas or the nature reserve in Belize</annotation></phrase>)</p>
 
-
         case: Parens escaped with backslashes
-
             description:
-                The parens in the URL are escaped with blackslashes. This example
-                should be interpreted correctly.
+                The parens in the URL are escaped with blackslashes. This example should be interpreted correctly.
 
             source:
                 ```(sam)
@@ -2952,21 +2786,15 @@ tests:(!en) SAM Parser Tests
                     Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
 
             markup:
-                Rio Bravo refers to the movie
-                (and not to {the city in Texas or
-                the nature reserve in
-                Belize}(https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_\(disambiguation\)))
+                Rio Bravo refers to the movie (and not to {the city in Texas or the nature reserve in Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 
             result:
                 ```(xml)
                     <p>Rio Bravo refers to the movie (and not to <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></phrase>)</p>
 
         case: Using explicit link annotation instead of shortcut
-
             description:
-                The link is specified using a specific link annotation so the
-                URL is not in parens itself. This example should be interpreted
-                correctly.
+                The link is specified using a specific link annotation so the URL is not in parens itself. This example should be interpreted correctly.
 
             source:
                 ```(sam)
@@ -2976,23 +2804,17 @@ tests:(!en) SAM Parser Tests
                     Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 
             markup:
-                Rio Bravo refers to the movie
-                (and not to {the city in Texas or
-                the nature reserve in
-                Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
+                Rio Bravo refers to the movie (and not to {the city in Texas or the nature reserve in Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 
             result:
                 ```(xml)
                     <p>Rio Bravo refers to the movie (and not to <phrase><annotation type="link" specifically="https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)">the city in Texas or the nature reserve in Belize</annotation></phrase>)</p>
 
     test: Citations
-
         description:
-            A citation is a reference to a source of information. You
-            can cite with a phrase or by reference to an ID or a name.
+            A citation is a reference to a source of information. You can cite with a phrase or by reference to an ID or a name.
 
         case: Citation on phrase
-
             description:
                 A citation on a phrase
 
@@ -3008,7 +2830,6 @@ tests:(!en) SAM Parser Tests
                     <p>You can <phrase><citation value="Melville, 1851"><citation value="Daffy, 2017">call me Ishmael</citation></citation></phrase>.</p>
 
         case: Citation and annotation on one phrase
-
             description:
                 A citation on a phrase that also has an annotation.
 
@@ -3025,8 +2846,7 @@ tests:(!en) SAM Parser Tests
 
         case: Literal square brackets
             description:
-                If you want to enter literal square brackets, rather than create a citation,
-                escape the opening square bracket with a backslash.
+                If you want to enter literal square brackets, rather than create a citation, escape the opening square bracket with a backslash.
 
             source:
                 ```(sam)
@@ -3040,7 +2860,6 @@ tests:(!en) SAM Parser Tests
                     <p>Press [Enter].</p>
 
         case: Multiple citations is a paragraph
-
             description:
                  Making sure that when there are multiple citations in a paragraph they are all detected separately.
 
@@ -3056,18 +2875,11 @@ tests:(!en) SAM Parser Tests
                     <p>Among its default processing steps, the SPFE process includes the subject-based linking algorithms described in <citation nameref="chapter.linking"/> and the subject-based composition and architecture algorithms described in <citation nameref="chapter.composition"/> and <citation nameref="chapter.architecture"/>, including bottom-up information architecture.</p>
 
     test: Characters
-
         description:
-
-            All SAM documents are UTF-8 unicode documents. Therefore you should
-            be able to enter any character directly. However, typing extended
-            characters is not easy, so SAM supports character entities for
-            entering characters that are not easy to type.
+            All SAM documents are UTF-8 unicode documents. Therefore you should be able to enter any character directly. However, typing extended characters is not easy, so SAM supports character entities for entering characters that are not easy to type.
 
         case: HTML named entities
-
             description:
-
                 All of the HTML named character entities are supported.
 
             source:
@@ -3075,19 +2887,14 @@ tests:(!en) SAM Parser Tests
                     The doggy in the window costs &pound;5.00.
 
             markup:
-                The doggy in the window costs &pound;5.00.
+                The doggy in the window costs £5.00.
 
             result:
                 ```(xml)
                     <p>The doggy in the window costs £5.00.</p>
 
-
-
-
         case: Numeric entities
-
             description:
-
                 XML-style decimal numeric character entities are supported.
 
             source:
@@ -3095,17 +2902,14 @@ tests:(!en) SAM Parser Tests
                     The doggy in the window costs &#163;5.00.
 
             markup:
-                The doggy in the window costs &#163;5.00.
+                The doggy in the window costs £5.00.
 
             result:
                 ```(xml)
                     <p>The doggy in the window costs £5.00.</p>
 
-
         case: Hexadecimal entity
-
             description:
-
                 XML-style hexadecimal numeric character entities are supported.
 
             source:
@@ -3113,39 +2917,34 @@ tests:(!en) SAM Parser Tests
                     The doggy in the window costs &#xA3;5.00.
 
             markup:
-                The doggy in the window costs &#xA3;5.00.
+                The doggy in the window costs £5.00.
 
             result:
                 ```(xml)
                     <p>The doggy in the window costs £5.00.</p>
 
         case: Character entities inside phrases and decorations
-
             description:
-                Make sure entities are recognized in phrases and
-                decorations.
+                Make sure entities are recognized in phrases and decorations.
 
             source:
                 ```(sam)
                     The doggy in the window costs *&#xA3;*5.00.
-
+                    
                     The doggy in the window costs {&#xA3;5.00}(money).
 
             markup:
-                The doggy in the window costs *&#xA3;*5.00.
+                The doggy in the window costs {£}(bold)5.00.
 
-                The doggy in the window costs {&#xA3;5.00}(money).
+                The doggy in the window costs {£5.00}(money).
 
             result:
                 ```(xml)
                     <p>The doggy in the window costs <phrase><annotation type="bold">£</annotation></phrase>5.00.</p>
                     <p>The doggy in the window costs <phrase><annotation type="money">£5.00</annotation></phrase>.</p>
 
-
         case: In code annotation shortcut:
-
             description:
-
                 In a code decoration, character entities are not expanded.
 
             source:
@@ -3159,10 +2958,7 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>The doggy in the window costs <code>&amp;#xA3;</code>5.00.</p>
 
-
-
         case: In bold decoration escaped:
-
             description:
                 Escaped version inside a bold decoration.
 
@@ -3171,28 +2967,24 @@ tests:(!en) SAM Parser Tests
                     The doggy in the window costs *\&#xA3;*5.00.
 
             markup:
-                The doggy in the window costs *\&#xA3;*5.00.
+                The doggy in the window costs {\&#xA3;}(bold)5.00.
 
             result:
                 ```(xml)
                     <p>The doggy in the window costs <phrase><annotation type="bold">&amp;#xA3;</annotation></phrase>5.00.</p>
 
-
-        case: Ampersand in a sentence, escaped with \ and not escaped.
-
+        case: Ampersand in a sentence, escaped with \\ and not escaped.
             description:
-
-                Unlike XML, SAM does not require that an ampersand be escaped if it is not part of a character entity. You
-                can escape it if you want to using a backslash. Both should output in XML as `&amp;`
+                Unlike XML, SAM does not require that an ampersand be escaped if it is not part of a character entity. You can escape it if you want to using a backslash. Both should output in XML as `&amp;`
 
             source:
                 ```(sam)
                     The cat & the dog.
-
+                    
                     The cat \& the dog.
 
             markup:
-                The cat & the dog.
+                The cat \& the dog.
 
                 The cat \& the dog.
 
@@ -3202,14 +2994,10 @@ tests:(!en) SAM Parser Tests
                     <p>The cat &amp; the dog.</p>
 
     test: Character escapes
-
         description:
             Character escaping
 
-
-
         case: Escapes in explicit annotations
-
             description:
                 Escaping curly braces and backslashes inside a phrase.
 
@@ -3225,19 +3013,15 @@ tests:(!en) SAM Parser Tests
                     <p>There is a curly brace and two backslashes in <phrase><annotation type="bold">this \\{ phrase</annotation></phrase>.</p>
 
         case: Escapes in code decorations
-
             description:
-                Code decorations have different escaping rules. All characters are literal
-                except that the backtick character can be escaped with a double back tick.
-                Character entities are not translated in a code decoration. Smart quote
-                transformations are not applied.
+                Code decorations have different escaping rules. All characters are literal except that the backtick character can be escaped with a double back tick. Character entities are not translated in a code decoration. Smart quote transformations are not applied.
 
             source:
                 ```(sam)
                     There is a backtick and two backslashes in `th\\is `` code` decoration.
-
+                    
                     There is a backslash and a curly brace in `this \{ code` decoration.
-
+                    
                     `pubwork="book"` is an attribute on the element `citetitle`.
 
             markup:
@@ -3253,24 +3037,20 @@ tests:(!en) SAM Parser Tests
                     <p>There is a backslash and a curly brace in <code>this \{ code</code> decoration.</p>
                     <p><code>pubwork="book"</code> is an attribute on the element <code>citetitle</code>.</p>
 
-
-
         case: Escapes in decorations
-
             description:
-
                 Escape sequences are recognized inside decorations.
 
             source:
                 ```(sam)
                     There is a `*` in *this \* bold* decoration.
-
+                    
                     There is a `_` in _this \_ italic_ decoration.
 
             markup:
-                There is a `*` in *this \* bold* decoration.
+                There is a `*` in {this \* bold}(bold) decoration.
 
-                There is a `_` in _this \_ italic_ decoration.
+                There is a `_` in {this \_ italic}(italic) decoration.
 
             result:
                 ```(xml)
@@ -3278,53 +3058,42 @@ tests:(!en) SAM Parser Tests
                     <p>There is a <code>_</code> in <phrase><annotation type="italic">this _ italic</annotation></phrase> decoration.</p>
 
         case: XML reserved characters in citation specifically attribute
-
             description:
-                XML reserved characters occurring within the text of a "specifically" attribute.
+                XML reserved characters occurring within the text of a “specifically” attribute.
 
             source:
                 ```(sam)
                     {Skimbleshanks}(animal '"Old  <>& Possum"' (Eliott)).
 
             markup:
-                {Skimbleshanks}(animal '"Old  <>& Possum"' (Eliott)).
+                {Skimbleshanks}(animal "\"Old  <>& Possum\"" (Eliott)).
 
             result:
                 ```(xml)
                     <p><phrase><annotation type="animal" specifically="&quot;Old  &lt;&gt;&amp; Possum&quot;" namespace="Eliott">Skimbleshanks</annotation></phrase>.</p>
 
     test: Conditions
-
         description:
-
-            You can add conditions to block metadata using condition tokens.
-            Condition tokens start with `?` and must not contain spaces. The
-            application of conditions to text is up to the application layer.
-            SAM just provided a mechanism for recording conditions.
+            You can add conditions to block metadata using condition tokens. Condition tokens start with `?` and must not contain spaces. The application of conditions to text is up to the application layer. SAM just provided a mechanism for recording conditions.
 
         case: Conditions on unordered list shortcut
-
             description:
-
                 A condition on an unordered list item.
 
             source:
                 ```(sam)
                     * Fred
-
+                    
                     *(?foo) Barney and
                             Betty and
                             Bam Bam.
-
+                    
                     * Wilma
 
             markup:
-
                 * Fred
 
-                *(?foo) Barney and
-                        Betty and
-                        Bam Bam.
+                *(?foo) Barney and Betty and Bam Bam.
 
                 * Wilma
 
@@ -3356,10 +3125,13 @@ tests:(!en) SAM Parser Tests
 
             markup:
                 1. Fred
-                2.(?foo) Barney and
-                         Betty and
-                         Bam Bam.
+
+
+                2.(?foo) Barney and Betty and Bam Bam.
+
+
                 3. Wilma
+
 
             result:
                 ```(xml)
@@ -3376,9 +3148,7 @@ tests:(!en) SAM Parser Tests
                     </ol>
 
     test: Block inserts
-
         description:
-
             An insert creates an instruction to insert something into the document.
 
         case: Image insert
@@ -3396,32 +3166,9 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <insert conditions="goo" item="foo.gif" type="image"/>
 
-        case: Insert by ID
-            description:
-                Insert an object by ID.
-
-            source:
-                ```(sam)
-                    section:(*id99)
-                        Hello Mars!
-                    >>>[*id99]
-
-            markup:
-                    section:(*id99)
-                        Hello Mars!
-                    >>>[*id99]
-
-            result:
-                ```(xml)
-                    <section id="1d99">
-                    <p>Hello Mars!</p>
-                    <insert idref="id99"/>
-
-
         case: Key insert
             description:
-                Insert the value of a key. Syntax for creating keys is left to the language designer.
-                Key resolution belongs to the application layer.
+                Insert the value of a key. Syntax for creating keys is left to the language designer. Key resolution belongs to the application layer.
 
             source:
                 ```(sam)
@@ -3435,7 +3182,6 @@ tests:(!en) SAM Parser Tests
                     <insert keyref="glug"/>
 
     test: Inline inserts
-
         description:
             Inline inserts are an instructions to insert something into the middle of a paragraph.
 
@@ -3453,13 +3199,7 @@ tests:(!en) SAM Parser Tests
                     that you can define string substitutions whenever you insert a fragment into your content.
 
             markup:
-
-                Because you often want to >(image "circle.png")(#bar)(?baz)(?bat) change some part of a text when it is being
-                reused, <fragments> & fragment references can both define local {strings}(feature).
-                Any {string references}(feature) inside a fragment will be resolved by looking first
-                at local-strings defined in the >[*my-table] fragment reference, then at local strings defined
-                in the fragment definition, and then at global strings. In effect, this means
-                that you can define string substitutions whenever you insert a fragment into your content.
+                Because you often want to >(image circle.png)(?baz)(?bat)(#bar) change some part of a text when it is being reused, <fragments> \& fragment references can both define local {strings}(feature). Any {string references}(feature) inside a fragment will be resolved by looking first at local-strings defined in the >[*my-table] fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.
 
             result:
                 ```(xml)
@@ -3467,8 +3207,7 @@ tests:(!en) SAM Parser Tests
 
         case: Paragraph that is just an inline insert
             description:
-                An inline insert on a line by itself creates a paragraph containing an insert, rather
-                than a standalone insert instruction.
+                An inline insert on a line by itself creates a paragraph containing an insert, rather than a standalone insert instruction.
 
             source:
                 ```(sam)
@@ -3482,7 +3221,6 @@ tests:(!en) SAM Parser Tests
                     <p><inline-insert nameref="foo8"/></p>
 
     test: Strings
-
         description:
             A string is a variable that can contain text, including annotations and citations.
 
@@ -3495,8 +3233,7 @@ tests:(!en) SAM Parser Tests
                     $foo = bar bar black sheep
 
             markup:
-                $foo = bar bar black sheep
-
+                $foo=bar bar black sheep
             result:
                 ```(xml)
                     <string name="foo">bar bar black sheep</string>
@@ -3518,8 +3255,7 @@ tests:(!en) SAM Parser Tests
 
     test: Fragments
         description:
-            Fragments are sequences of paragraphs that can have management metadata applied to them
-            and that can be inserted in other places.
+            Fragments are sequences of paragraphs that can have management metadata applied to them and that can be inserted in other places.
 
         case: Fragment
             description:
@@ -3530,25 +3266,25 @@ tests:(!en) SAM Parser Tests
                     ~~~(#foo3)(?gruz-natz)
                         $a=apple
                         $b=banana
-
+                    
                         This is a sentence inside a fragment.
-
+                    
                         ~~~(#gruznatz)
                             $p=peach
-
+                    
                             This is a nested fragment.
 
             markup:
-                ~~~(#foo3)(?gruz-natz)
+                ~~~(?gruz-natz)(#foo3)
                     $a=apple
                     $b=banana
-
                     This is a sentence inside a fragment.
 
                     ~~~(#gruznatz)
                         $p=peach
-
                         This is a nested fragment.
+
+
 
             result:
                 ```(xml)
@@ -3563,54 +3299,39 @@ tests:(!en) SAM Parser Tests
                     </fragment>
 
         case: Insert a fragment
-
             description:
-                An instruction to insert a fragment. Note that actually resolving and inserting
-                the fragment is a job for the application layer.
+                An instruction to insert a fragment. Note that actually resolving and inserting the fragment is a job for the application layer.
 
             source:
                 ```(sam)
-                    >>>[#fragment.foobar *nom]
+                    >>>[~foobar]
                         $a=apricot
                         $b=breadfruit
 
             markup:
-                >>>[#fragment.foobar *nom]
+                >>>[Nonefoobar]
                     $a=apricot
                     $b=breadfruit
 
             result:
                 ```(xml)
-                    <insert nameref="fragment.foobar *nom">
+                    <insert fragmentref="foobar">
                     <string name="a">apricot</string>
                     <string name="b">breadfruit</string>
                     </insert>
 
-
-
     test: Smart quotes
-
         description:
-            Smart quotes is an optional feature of the parser, not a
-            feature of the SAM language. It turns straight quotes into
-            curly quotes. It raises a warning when it can't figure out
-            how to handle a case. The algorithm could be improved in
-            the future to handle more cases correctly.
+            Smart quotes is an optional feature of the parser, not a feature of the SAM language. It turns straight quotes into curly quotes. It raises a warning when it can’t figure out how to handle a case. The algorithm could be improved in the future to handle more cases correctly.
 
-            The canonical way to handle quotes in SAM is to use real
-            curly quotes to begin with. All SAM documents are UTF-8.
+            The canonical way to handle quotes in SAM is to use real curly quotes to begin with. All SAM documents are UTF-8.
 
             Note: These tests will fail if smart quotes is not selected
-            using the `-q` option of the parser command line or by
-            setting the `smart_quotes` attribute of the SamParser
-            object to `True`.
+            using the `-q` option of the parser command line or by setting the `smart_quotes` attribute of the SamParser object to `True`.
 
         case: Smart quotes
-
             description:
-
-                Paragraphs illustrating most of the cases where smart quotes should
-                be recognized in ordinary English.
+                Paragraphs illustrating most of the cases where smart quotes should be recognized in ordinary English.
 
             source:
                 ```(sam)
@@ -3621,19 +3342,13 @@ tests:(!en) SAM Parser Tests
                     very 'friendly.'" '"I don’t know what you
                     mean by 'glory,'" Alice said.' "'I don’t
                     know what you mean by "glory,"' Alice said."
-
+                    
                     For "the Duke", perhaps?
 
             markup:
-                "For once, 'sir' adding, 'you're making a
-                scene.'" and "For once, 'sir' adding,
-                'you're making a scene.'" In the winter
-                of ’65. "Yes," he said, "I met her. She's
-                very 'friendly.'" '"I don’t know what you
-                mean by 'glory,'" Alice said.' "'I don’t
-                know what you mean by "glory,"' Alice said."
+                “For once, ‘sir’ adding, ‘you’re making a scene.’” and “For once, ‘sir’ adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”
 
-                For "the Duke", perhaps?
+                For “the Duke”, perhaps?
 
             result:
                 ```(xml)
@@ -3641,27 +3356,22 @@ tests:(!en) SAM Parser Tests
                     <p>For “the Duke”, perhaps?</p>
 
         case: Following an annotation
-
             description:
-                Smart quotes also need to be recognized when they follow
-                SAM markup.
+                Smart quotes also need to be recognized when they follow SAM markup.
 
             source:
                 ```(sam)
-
                     interpretations of the `xref`'s instruction
 
             markup:
-                interpretations of the `xref`'s instruction
+                interpretations of the `xref`’s instruction
 
             result:
                 ```(xml)
                     <p>interpretations of the <code>xref</code>’s instruction</p>
 
         case: Smart quotes with annotations
-
             description:
-
                 Smart quotes surrounding annotated phrases.
 
             source:
@@ -3675,13 +3385,7 @@ tests:(!en) SAM Parser Tests
                     know what you mean by "glory,"' Alice said."
 
             markup:
-                "For once, '{sir}(salutation)' adding, 'you're making a
-                scene.'" and "For once, {'sir'}(salutation) adding,
-                'you're making a scene.'" In the winter
-                of ’65. "Yes," he said, "I met her. She's
-                very 'friendly.'" '"I don’t know what you
-                mean by 'glory,'" Alice said.' "'I don’t
-                know what you mean by "glory,"' Alice said."
+                “For once, ‘{sir}(salutation)’ adding, ‘you’re making a scene.’” and “For once, {‘sir’}(salutation) adding, ‘you’re making a scene.’” In the winter of ’65. “Yes,” he said, “I met her. She’s very ‘friendly.’” ‘“I don’t know what you mean by ‘glory,’” Alice said.’ “‘I don’t know what you mean by “glory,”’ Alice said.”
 
             result:
                 ```(xml)
@@ -3694,19 +3398,18 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     A vector graphic program creates graphics as a collection of  objects ("vector" meaning the mathematical representation of a shape or line).
-
+                    
                     The shape of the characters (technically, "glyphs") that make up the font are stored separately in font files.
 
             markup:
-                A vector graphic program creates graphics as a collection of  objects ("vector" meaning the mathematical representation of a shape or line).
+                A vector graphic program creates graphics as a collection of  objects (“vector” meaning the mathematical representation of a shape or line).
 
-                The shape of the characters (technically, "glyphs") that make up the font are stored separately in font files.
+                The shape of the characters (technically, “glyphs”) that make up the font are stored separately in font files.
 
             result:
                 ```(xml)
                     <p>A vector graphic program creates graphics as a collection of  objects (“vector” meaning the mathematical representation of a shape or line).</p>
                     <p>The shape of the characters (technically, “glyphs”) that make up the font are stored separately in font files.</p>
-
 
         case: Close quote followed by citation.
             description:
@@ -3717,32 +3420,30 @@ tests:(!en) SAM Parser Tests
                     "What is truth?"[John 18:38]
 
             markup:
-                "What is truth?"[John 18:38]
+                “What is truth?”[John 18:38]
 
             result:
                 ```(xml)
                     <p>“What is truth?”<citation value="John 18:38"/></p>
 
         case: Miscellaneous cases
-
             description:
                 A bunch of miscellaneous cases.
-
 
             source:
                 ```(sam)
                     "title"?
-
+                    
                     {DocBook}(language)'s
-
+                    
                     {DITA}(language) and {DocBook}'s
 
             markup:
-                "title"?
+                “title”?
 
-                {DocBook}(language)'s
+                {DocBook}(language)’s
 
-                {DITA}(language) and {DocBook}'s
+                {DITA}(language) and {DocBook}(language)’s
 
             result:
                 ```(xml)
@@ -3750,21 +3451,16 @@ tests:(!en) SAM Parser Tests
                     <p><phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
                     <p><phrase><annotation type="language">DITA</annotation></phrase> and <phrase><annotation type="language">DocBook</annotation></phrase>’s</p>
 
-
-
-
         case: Escaped dumb quotes
             description:
-                If you want to enter straight quotes and have them stay straight when
-                smart quotes are applied, you have to escape them with `\` or use the
-                `&quot;` character entity.
+                If you want to enter straight quotes and have them stay straight when smart quotes are applied, you have to escape them with `\` or use the `&quot;` character entity.
 
             source:
                 ```(sam)
                     This para uses \"dumb\" quotes. Don\'t get them &quot;mixed up&quot;.
 
             markup:
-                This para uses \"dumb\" quotes. Don\'t get them &quot;mixed up&quot;.
+                This para uses "dumb" quotes. Don't get them "mixed up".
 
             result:
                 ```(xml)
@@ -3772,40 +3468,38 @@ tests:(!en) SAM Parser Tests
 
         case: Em and en dashes
             description:
-                The smart quote feature will also transform double hyphens surrounded
-                by spaces and triple hyphens surrounded by letters into en and em
-                dashes respectively.
+                The smart quote feature will also transform double hyphens surrounded by spaces and triple hyphens surrounded by letters into en and em dashes respectively.
 
             source:
                 ```(sam)
                     This para contains -- an en dash and an---em dash.
-
+                    
                     This para contains -- {an}(word) en dash and an---{em}(word) dash.
-
+                    
                     This para {contains}(word) -- an en dash and {an}(word)---em dash.
-
+                    
                     This para *contains* -- an en dash and _an_---em dash.
-
+                    
                     This para `contains` -- an en dash and "an"---em dash.
-
+                    
                     This para 'contains' -- an en dash and `an`---em dash.
-
+                    
                     x, y, z, etc. -- something else
 
             markup:
-                This para contains -- an en dash and an---em dash.
+                This para contains – an en dash and an—em dash.
 
-                This para contains -- {an}(word) en dash and an---{em}(word) dash.
+                This para contains – {an}(word) en dash and an—{em}(word) dash.
 
-                This para {contains}(word) -- an en dash and {an}(word)---em dash.
+                This para {contains}(word) – an en dash and {an}(word)—em dash.
 
-                This para *contains* -- an en dash and _an_---em dash.
+                This para {contains}(bold) – an en dash and {an}(italic)—em dash.
 
-                This para `contains` -- an en dash and "an"---em dash.
+                This para `contains` – an en dash and “an”—em dash.
 
-                This para 'contains' -- an en dash and `an`---em dash.
+                This para ‘contains’ – an en dash and `an`—em dash.
 
-                x, y, z, etc. -- something else
+                x, y, z, etc. – something else
 
             result:
                 ```(xml)
