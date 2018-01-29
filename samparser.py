@@ -3003,6 +3003,14 @@ class InlineInsert(Span):
                     yield from [x.content for x in string_defs if x.name == self.item][0].serialize_html()
                 else:
                     SAM_parser_warning('String reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
+            elif self.ref_type == 'idref':
+                ob = self._doc().object_by_id(self.item)
+                if ob:
+                    yield from ob.serialize_html()
+                else:
+                    SAM_parser_warning(
+                        'ID reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
+                            self.item))
             else:
                 SAM_parser_warning("HTML output mode does not support inline inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
 

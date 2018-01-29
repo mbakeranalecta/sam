@@ -3936,7 +3936,7 @@ There is a `_` in _this \_ italic_ decoration.
 <p class="p">Inline inserts.</p>
 </div>
 <div class="source">
-<pre class="codeblock" data-language="sam"><code class="codeblock">Because you often want to &gt;(image "circle.png")(#bar)(?baz)(?bat) change some part of a text when it is being
+<pre class="codeblock" data-language="sam"><code class="codeblock">Because you often want to &gt;(image "circle.png")(*circle)(?baz)(?bat) change some part of a text when it is being
 reused, &lt;fragments&gt; &amp; fragment references can both define local {strings}(feature).
 Any {string references}(feature) inside a fragment will be resolved by looking first
 at local-strings defined in the &gt;[*my-table] fragment reference, then at local strings defined
@@ -3945,11 +3945,30 @@ that you can define string substitutions whenever you insert a fragment into you
 </code></pre>
 </div>
 <div class="markup">
-<p class="p">Because you often want to <span class="insert" data-conditions="baz,bat" data-name="bar"><object data="circle.png"></object></span>
+<p class="p">Because you often want to <span class="insert" data-conditions="baz,bat" id="circle"><object data="circle.png"></object></span>
  change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <span class="phrase"><span class="annotation" data-annotation-type="feature">strings</span></span>. Any <span class="phrase"><span class="annotation" data-annotation-type="feature">string references</span></span> inside a fragment will be resolved by looking first at local-strings defined in the  fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;p&gt;Because you often want to &lt;inline-insert conditions="baz,bat" item="circle.png" name="bar" type="image"/&gt; change some part of a text when it is being reused, &amp;lt;fragments&amp;gt; &amp;amp; fragment references can both define local &lt;phrase&gt;&lt;annotation type="feature"&gt;strings&lt;/annotation&gt;&lt;/phrase&gt;. Any &lt;phrase&gt;&lt;annotation type="feature"&gt;string references&lt;/annotation&gt;&lt;/phrase&gt; inside a fragment will be resolved by looking first at local-strings defined in the &lt;inline-insert idref="my-table"/&gt; fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.&lt;/p&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;p&gt;Because you often want to &lt;inline-insert conditions="baz,bat" item="circle.png" ID="circle" type="image"/&gt; change some part of a text when it is being reused, &amp;lt;fragments&amp;gt; &amp;amp; fragment references can both define local &lt;phrase&gt;&lt;annotation type="feature"&gt;strings&lt;/annotation&gt;&lt;/phrase&gt;. Any &lt;phrase&gt;&lt;annotation type="feature"&gt;string references&lt;/annotation&gt;&lt;/phrase&gt; inside a fragment will be resolved by looking first at local-strings defined in the &lt;inline-insert idref="my-table"/&gt; fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.&lt;/p&gt;
+</code></pre>
+</div>
+</div>
+<div class="case">
+<h3 class="title">Inline insert by ID</h3>
+
+<div class="description">
+<p class="p">Inline insert by ID of an inline element. This is mostly for testing HTML output mode which tries to resolve these.</p>
+</div>
+<div class="source">
+<pre class="codeblock" data-language="sam"><code class="codeblock">There is a circle &gt;[*circle] in this sentence.
+</code></pre>
+</div>
+<div class="markup">
+<p class="p">There is a circle <span class="insert" data-conditions="baz,bat" id="circle"><object data="circle.png"></object></span>
+ in this sentence.</p>
+</div>
+<div class="result">
+<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;p&gt;There is a circle &lt;inline-insert idref="circle"/&gt; in this sentence.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
