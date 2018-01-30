@@ -257,5 +257,9 @@ changed. Instead of using as separate Attribute object, attributes became Python
 block or phrase object. This does not affect command line use but would affect programmatic access to 
 the document structure. 
 
+* Starting with revision dd07a4b798fcaa14a722a345b5ab8e07c3df42a1, the use of fragment references 
+with the syntax `[~foo]` was removed (see issue #166). Fragments can be inserted by name or ID just
+like any other block type. 
+
 Please report any other backward incompatibilities you find so they can be added to this list.
 
