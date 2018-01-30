@@ -75,7 +75,7 @@ way as the original. Some of the difference are:
 * Bold and italic decorations will be replaced with equivalent 
   annotations.
 * Some non-essential character escapes may be included.
-* Annoation lookups will be performed and any `!annotation-lookup` declaration
+* Annotation lookups will be performed and any `!annotation-lookup` declaration
   will be removed.
 * Smart quote processing will be performed and any `!smart-quotes` declaration
   will be removed. 
@@ -138,6 +138,59 @@ important. In the default rules, close quote rules are listed first.
 Reversing the order might result in some close quotes being detected as 
 open quotes. 
 
+### HTML Output Mode
+
+Normally SAM is serialized to XML which you can then process to produce HTML or any other 
+output you want. However, the parser also supports outputting HTML directly. The attraction
+of this is that it allows you to have a semantically constrained input format that can
+be validated with a schema but which can still output to HTML5 directly. 
+
+SAM structures are output to HTML as follows:
+
+* Named blocks are output as HTML `<div>` elements. The SAM block
+name is output as the `class` attribute of the DIV elements, allowing you to attach 
+specific CSS styling to each type of block. 
+
+* Codeblocks are output as `pre` elements with the language attribute output as a `data-language`
+and the `class` as `codeblock`. Code is wrapped in `code` tags, also with `class` as `codeblock`.
+
+* Embedded data is ignored and a warning is issued.  
+
+* Paragraphs, ordered lists, and unordered lists are output as their HTML equivalents.
+
+* Labelled lists are output as definition lists. 
+
+* Grids are output as tables.
+
+* Record sets are output as tables with the field names as table headers.
+
+* Inserts by URL become `object` elements. String inserts are resolved if the named string is available. 
+Inserts by ID are resolved by inserting the object with the specified ID. A warning will be raised and
+the insert will be ignored if you try to insert a block element with an inline insert or and inline
+element with a block insert. All other inserts are ignored and a warning is raised.
+
+* Phrases are output as spans with the `class` attribute `phrase`.
+
+* Annotations are output as spans nested within the phrase spans they annotate. The specifically and 
+namespace attributes of an annotation are output as `data-*` attributes.
+
+* Attributes are output as HTML attributes. ID attributes are output as HTML `id` attributes. Language-code 
+attributes are ouput as HTML `lang` attributes. Other attributes are output as HTML `data-*` attributes. 
+
+* An HTML `head` element is generated which includes the `title` elements if the root block of the 
+SAM document has a title. It also includes `<meta charset = "UTF-8">`.
+
+To generate HTML output, use the `-html` flag on the command line.
+
+To specify a stylesheet to be imported by the resulting HTML file, use the `-css` option with the 
+URL of the css file to be included (relative to the location of the HTML file). You can specify the
+`-css` option more than once.
+
+To specify a javascript file to be imported by the resulting HTML file, use the `-javascript` option 
+with the URL of the javascript file to be included (relative to the location of the HTML file). You 
+can specify the `-javascript` option more than once.
+
+
 
 
 ### Running SAM Parser on Windows
@@ -198,6 +251,11 @@ inserting a value by URI still uses parentheses, since this is new information, 
 internal value. Also note the difference between `[#foo]` which means generate a reference to the content with 
 the name `foo` and `>[#foo]` which means insert the content with the name foo at the current location. (These are 
 of course, operations performed at application layer, not by the parser.)
+
+* Starting with revision dd07a4b798fcaa14a722a345b5ab8e07c3df42a1 the way attributes were modeled internally
+changed. Instead of using as separate Attribute object, attributes became Python attributes on the relevant
+block or phrase object. This does not affect command line use but would affect programmatic access to 
+the document structure. 
 
 Please report any other backward incompatibilities you find so they can be added to this list.
 
