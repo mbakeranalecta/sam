@@ -1745,7 +1745,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     This is another paragraph. Then there is an alternate blockquote:
 
-                    '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2]
+                    '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2][%key.bar12 page 22]
                         The quick brown fox jumps over the lazy dog.
 
                     '''
@@ -1754,7 +1754,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 This is another paragraph. Then there is an alternate blockquote:
 
-                '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2]
+                '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2][%key.bar12 page 22]
                     The quick brown fox jumps over the lazy dog.
 
                 '''
@@ -1768,6 +1768,7 @@ tests:(!en) SAM Parser Tests
                     <citation value="Mother Goose"/>
                     <citation value="Father Time"/>
                     <citation extra="page 2" idref="foo"/>
+                    <citation extra="page 22" keyref="key.bar12"/>
                     <p>The quick brown fox jumps over the lazy dog.</p>
                     </blockquote>
                     <blockquote>
@@ -2998,14 +2999,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(SAM)
-                    You can {call me Ishmael}[Melville, 1851][Daffy, 2017].
+                    You can {call me Ishmael}[Melville, 1851][Daffy, 2017][%key.bar12 page 22].
 
             markup:
-                You can {call me Ishmael}[Melville, 1851][Daffy, 2017].
+                You can {call me Ishmael}[Melville, 1851][Daffy, 2017][%key.bar12 page 22].
 
             result:
                 ```(XML)
-                    <p>You can <phrase><citation value="Melville, 1851"><citation value="Daffy, 2017">call me Ishmael</citation></citation></phrase>.</p>
+                    <p>You can <phrase><citation value="Melville, 1851"><citation value="Daffy, 2017"><citation extra="page 22" keyref="key.bar12">call me Ishmael</citation></citation></citation></phrase>.</p>
 
         case: Citation and annotation on one phrase
 

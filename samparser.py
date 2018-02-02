@@ -3147,7 +3147,8 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     if conditions:
         attributes["conditions"] = conditions
 
-    re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*))|(\s*\#(?P<name>\S+)(?P<name_extra>.*))|(\s*(?P<citation>.*))'
+    re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*))|(\s*\%(?P<key>\S+)(?P<key_extra>.*))|(\s*\#(?P<name>\S+)(?P<name_extra>.*))|(\s*(?P<citation>.*))'
+
 
     for c in citations_list:
         match = re.compile(re_citbody).match(c)
@@ -3155,6 +3156,10 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
             idref = match.group('id')
         except IndexError:
             idref = None
+        try:
+            keyref = match.group('key')
+        except IndexError:
+            keyref = None
         try:
             nameref = match.group('name')
         except IndexError:
@@ -3168,6 +3173,10 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
             citation_type = 'idref'
             citation_value = idref.strip()
             extra = match.group('id_extra')
+        elif keyref:
+            citation_type = 'keyref'
+            citation_value = keyref.strip()
+            extra = match.group('key_extra')
         elif nameref:
             citation_type = 'nameref'
             citation_value = nameref.strip()

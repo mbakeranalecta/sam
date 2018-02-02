@@ -2211,7 +2211,7 @@ After this paragraph, there is a blockquote:
 <codeblock language="sam">
 This is another paragraph. Then there is an alternate blockquote:
 
-'''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2]
+'''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2][%key.bar12 page 22]
     The quick brown fox jumps over the lazy dog.
 
 '''
@@ -2224,6 +2224,7 @@ This is another paragraph. Then there is an alternate blockquote:
 <citation value="Mother Goose"/>
 <citation value="Father Time"/>
 <citation extra="page 2" idref="foo"/>
+<citation extra="page 22" keyref="key.bar12"/>
 <p>The quick brown fox jumps over the lazy dog.</p>
 </blockquote>
 <blockquote>
@@ -2237,6 +2238,7 @@ This is another paragraph. Then there is an alternate blockquote:
 &lt;citation value="Mother Goose"/&gt;
 &lt;citation value="Father Time"/&gt;
 &lt;citation extra="page 2" idref="foo"/&gt;
+&lt;citation extra="page 22" keyref="key.bar12"/&gt;
 &lt;p&gt;The quick brown fox jumps over the lazy dog.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;blockquote&gt;
@@ -3656,15 +3658,15 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 </description>
 <source>
 <codeblock language="SAM">
-You can {call me Ishmael}[Melville, 1851][Daffy, 2017].
+You can {call me Ishmael}[Melville, 1851][Daffy, 2017][%key.bar12 page 22].
 </codeblock>
 </source>
 <markup>
-<p>You can <phrase><citation value="Melville, 1851"><citation value="Daffy, 2017">call me Ishmael</citation></citation></phrase>.</p>
+<p>You can <phrase><citation value="Melville, 1851"><citation value="Daffy, 2017"><citation extra="page 22" keyref="key.bar12">call me Ishmael</citation></citation></citation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="XML">
-&lt;p&gt;You can &lt;phrase&gt;&lt;citation value="Melville, 1851"&gt;&lt;citation value="Daffy, 2017"&gt;call me Ishmael&lt;/citation&gt;&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;You can &lt;phrase&gt;&lt;citation value="Melville, 1851"&gt;&lt;citation value="Daffy, 2017"&gt;&lt;citation extra="page 22" keyref="key.bar12"&gt;call me Ishmael&lt;/citation&gt;&lt;/citation&gt;&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
