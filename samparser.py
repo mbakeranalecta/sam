@@ -191,8 +191,8 @@ class SamParser:
         indent = match.end("indent")
         block_name = match.group("name").strip()
         attributes, citations = parse_attributes(match.group("attributes"))
-        content = match.group("content")
-        parsed_content = None if content is None else self.flow_parser.parse(content.strip(), self.doc)
+        content = match.group("content").strip()
+        parsed_content = None if content == '' else self.flow_parser.parse(content, self.doc)
         b = Block(block_name, indent, attributes, parsed_content, citations)
         self.doc.add_block(b)
         return "SAM", context
@@ -358,10 +358,10 @@ class SamParser:
             attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?")
         else:
             attributes, citations = {},[]
-        type, ref, item = parse_insert(match.group("insert"), match.group("ref"))
+        type, ref, item, extra = parse_insert(match.group("insert"), match.group("ref"))
         if type is None and ref is None:
             raise SAMParserError("Invalid block insert statement. Found: " + match.group(0))
-        b = BlockInsert(indent, type, ref, item, attributes, citations)
+        b = BlockInsert(indent, type, ref, item, extra, attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -719,6 +719,21 @@ class Block(ABC):
                 sdfs.extend(x.string_defs())
         return sdfs
 
+    def string_def(self, name):
+        """
+        Get a string definition with a given name.
+        :return: A list of string def objects
+        """
+        if type(self) is StringDef and self.block_type == name:
+            return self.content
+        for x in self.children:
+            if type(x) is StringDef and x.block_type == name:
+                return x.content
+            elif hasattr(x,'string_def'):
+                return x.string_def(name)
+        return None
+
+
     def object_by_id(self, id):
         """
         Get an object with a given id.
@@ -851,11 +866,12 @@ class Block(ABC):
 
 
 class BlockInsert(Block):
-    def __init__(self, indent, insert_type, ref_type, item, attributes={}, citations=None, namespace=None):
+    def __init__(self, indent, insert_type, ref_type, item, extra, attributes={}, citations=None, namespace=None):
         super().__init__(block_type='insert', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
         self.insert_type = insert_type
         self.ref_type =ref_type
         self.item = item
+        self.extra = extra
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -864,7 +880,11 @@ class BlockInsert(Block):
         yield " " * int(self.indent)
         if self.ref_type:
             ref_symbol = ref_symbols.get(self.ref_type)
-            yield '>>>[{0}{1}]'.format(ref_symbol, self.item)
+            yield '>[{0}{1}'.format(ref_symbol, self.item)
+            if self.extra:
+                yield ' {0}]'.format(self.extra)
+            else:
+                yield ']'
         else:
             yield '>>>({0} {1})'.format(self.insert_type, self.item)
         yield from self._regurgitate_attributes(self._attribute_regurgitation)
@@ -884,6 +904,8 @@ class BlockInsert(Block):
             yield ' id="{0}"'.format(self.ID)
         if self.item and self.insert_type:
             yield ' item="{0}"'.format(self.item)
+        if self.extra:
+            yield ' extra="{0}"'.format(self.extra)
         if self.name:
             yield ' name="{0}"'.format(self.name)
         if self.ref_type:
@@ -910,6 +932,8 @@ class BlockInsert(Block):
     def serialize_html(self, duplicate=False):
 
         if self.ref_type:
+            if self.extra:
+                SAM_parser_warning("Extra information in a insert by reference is ignored in HTML output mode: {0}".format(self.extra))
             if self.ref_type == 'stringref':
                 string_defs = self._doc().string_defs()
                 if self.item in [x.name for x in string_defs]:
@@ -1716,9 +1740,9 @@ block_pattern_replacements = {
 }
 
 
-class Flow(list):
+class Flow():
     def __init__(self):
-
+        self.children=[]
         self.parent = None
         self.ID = None
 
@@ -1730,7 +1754,7 @@ class Flow(list):
         if self.ID == id:
             return self
         else:
-            for x in [y for y in self if isinstance(y, Span)]:
+            for x in [y for y in self.children if isinstance(y, Span)]:
                 y = x.object_by_id(id)
                 if y is not None:
                     return y
@@ -1745,7 +1769,7 @@ class Flow(list):
 
     def regurgitate(self):
 
-        for i, x in enumerate(self):
+        for i, x in enumerate(self.children):
             if hasattr(x, 'regurgitate'):
                 yield from x.regurgitate()
             elif i == 0:
@@ -1769,22 +1793,22 @@ class Flow(list):
         if type(thing) is not str:
             thing.parent=self
         if isinstance(thing, Annotation):
-            if type(self[-1]) is Phrase:
-                self[-1].append(thing)
+            if type(self.children[-1]) is Phrase:
+                self.children[-1].append(thing)
             else:
-                super().append(thing)
+                self.children.append(thing)
 
         elif type(thing) is Citation:
             try:
-                if type(self[-1]) is Phrase:
-                    self[-1].annotations.append(thing)
+                if type(self.children[-1]) is Phrase:
+                    self.children[-1].annotations.append(thing)
                 else:
-                    super().append(thing)
+                    self.children.append(thing)
             except IndexError:
-                super().append(thing)
+                self.children.append(thing)
 
         elif not thing == '':
-            super().append(thing)
+            self.children.append(thing)
 
     def find_last_annotation(self, text, mode):
 
@@ -1794,14 +1818,14 @@ class Flow(list):
             raise SAMParserError("Unknown annotation lookup mode: " + mode)
 
     def serialize_xml(self):
-        for x in self:
+        for x in self.children:
             if type(x) is str:
                 yield escape_for_xml(x)
             else:
                 yield from x.serialize_xml()
 
     def serialize_html(self, duplicate=False):
-        for x in self:
+        for x in self.children:
             if type(x) is str:
                 yield escape_for_xml(x)
             else:
@@ -1821,7 +1845,7 @@ def _annotation_lookup_case_sensitive(flow, text):
 
 
 def _annotation_lookup_case_insensitive(flow, text):
-    for i in reversed(flow):
+    for i in reversed(flow.children):
         if type(i) is Phrase:
             if [x for x in i.annotations if not x.local] and i.text.lower() == text.lower():
                 return [x for x in i.annotations if not x.local]
@@ -2078,7 +2102,7 @@ class DocStructure:
 
         # Check for duplicate IDs in the flow
         # Add any ids found to list of ids
-        ids = [f.ID for f in flow if type(f) is Phrase and f.ID is not None]
+        ids = [f.ID for f in flow.children if type(f) is Phrase and f.ID is not None]
         for i in ids:
             if i in self.ids:
                 raise SAMParserStructureError('Duplicate ID found "{0}".'.format(ids[0]))
@@ -2320,7 +2344,7 @@ class FlowParser:
             return "PARA", para
 
     def _phrase_end(self, para):
-        phrase = self.flow[-1]
+        phrase = self.flow.children[-1]
         if not phrase.annotated:
             # If there is a phrase with no annotation, look back
             # to see if it has been annotated already, and if so, copy the
@@ -2347,7 +2371,7 @@ class FlowParser:
 
     def _annotation_start(self, para):
         match = flow_patterns['annotation'].match(para.rest_of_para)
-        phrase = self.flow[-1]
+        phrase = self.flow.children[-1]
         if match:
             annotation_type = match.group('type')
             is_local = bool(match.group('plus'))
@@ -2374,7 +2398,7 @@ class FlowParser:
             elif annotation_type[0] == '?':
                 phrase.conditions.append(unescape(annotation_type[1:]))
             else:
-                if type(self.flow[-1]) is Code:
+                if type(self.flow.children[-1]) is Code:
                     phrase.code_language = unescape(annotation_type)
                 else:
                     phrase.annotations.append(Annotation(annotation_type, unescape(specifically), namespace, is_local))
@@ -2513,11 +2537,11 @@ class FlowParser:
                 attributes, citations = parse_attributes(match.group("attributes"))
             else:
                 attributes, citations = {},[]
-            type, ref, item =parse_insert(match.group("insert"), match.group("ref"))
+            type, ref, item, extra =parse_insert(match.group("insert"), match.group("ref"))
             if type is None and ref is None:
                 raise SAMParserError("Invalid inline insert statement. Found: " + match.group(0))
 
-            self.flow.append(InlineInsert(type, ref, item, attributes, citations))
+            self.flow.append(InlineInsert(type, ref, item, extra, attributes, citations))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '>'
@@ -2932,10 +2956,11 @@ class Citation:
 
 
 class InlineInsert(Span):
-    def __init__(self, insert_type, ref_type, item, attributes={}, citations=None):
+    def __init__(self, insert_type, ref_type, item, extra, attributes={}, citations=None):
         self.insert_type = insert_type
         self.ref_type =ref_type
         self.item = item
+        self.extra = extra
         self.citations = citations
         self.parent=None
         self.namespace = None
@@ -2955,7 +2980,11 @@ class InlineInsert(Span):
     def regurgitate(self):
         if self.ref_type:
             ref_symbol = ref_symbols.get(self.ref_type)
-            yield '>[{0}{1}]'.format(ref_symbol, self.item)
+            yield '>[{0}{1}'.format(ref_symbol, self.item)
+            if self.extra:
+                yield ' {0}]'.format(self.extra)
+            else:
+                yield ']'
         else:
             yield '>({0} {1})'.format(self.insert_type, self.item)
 
@@ -2975,6 +3004,8 @@ class InlineInsert(Span):
             yield ' name="{0}"'.format(self.name)
         if self.ref_type:
             yield ' {0}="{1}"'.format(self.ref_type, self.item)
+        if self.extra:
+            yield ' extra="{0}"'.format(self.extra)
         if self.insert_type:
             yield ' type="{0}"'.format(self.insert_type)
         if self.namespace is not None:
@@ -2994,10 +3025,16 @@ class InlineInsert(Span):
     def serialize_html(self, duplicate=False):
 
         if self.ref_type:
+            if self.extra:
+                SAM_parser_warning("Extra information in a insert by reference is ignored in HTML output mode: {0}".format(self.extra))
             if self.ref_type == 'stringref':
-                string_defs = self._doc().string_defs()
-                if self.item in [x.name for x in string_defs]:
-                    yield from [x.content for x in string_defs if x.name == self.item][0].serialize_html()
+                string_content = get_string_def(self.item, self)
+                if string_content:
+                    yield from string_content._serialize_html()
+
+#                string_defs = self._doc().string_defs()
+#                if self.item in [x.name for x in string_defs]:
+#                    yield from [x.content for x in string_defs if x.name == self.item][0].serialize_html()
                 else:
                     SAM_parser_warning('String reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
             elif self.ref_type == 'idref':
@@ -3150,6 +3187,7 @@ def parse_insert(insert, ref):
     insert_type = None
     ref_type = None
     item = None
+    extra = None
 
     if insert:
         insert_parts = insert.partition(' ')
@@ -3160,23 +3198,23 @@ def parse_insert(insert, ref):
         if item == '':
             raise SAMParserStructureError("Insert item not specified in: {0}".format(insert))
     elif ref:
+        item_extra = ref[1:].split(None, 1)
+        item = item_extra[0]
+        if len(item_extra) == 2:
+            extra = item_extra[1]
         if ref[0] == '$':
-            item = ref[1:]
             ref_type = 'stringref'
         elif ref[0] == '*':
-            item = ref[1:]
             ref_type = 'idref'
         elif ref[0] == '#':
-            item = ref[1:]
             ref_type = 'nameref'
         elif ref[0] == '%':
-            item = ref[1:]
             ref_type = 'keyref'
     else:
         raise SAMParserError("Unrecognized insert expression found.")
 
 
-    return insert_type, ref_type, item
+    return insert_type, ref_type, item, extra
 
 
 def escape_for_sam(s):
@@ -3257,6 +3295,18 @@ def replace_charref(match):
     if character == charref:  # Escape not recognized
         raise SAMParserStructureError("Unrecognized character entity found: {0}".format(charref))
     return character
+
+def get_string_def(name, context):
+    """
+    Get a string definition with a given name.
+    :return: The closest definition to the given context up the tree
+    """
+    if context.parent and type(context.parent) is not DocStructure:
+        for x in context.parent.children:
+            if type(x) is StringDef and x.block_type == name:
+                return x.content
+        return get_string_def(name, context.parent)
+    return None
 
 
 if __name__ == "__main__":

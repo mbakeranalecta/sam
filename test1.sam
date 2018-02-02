@@ -2595,7 +2595,7 @@ tests:(!en) SAM Parser Tests
                     paper-like and hypertext outputs. This can help you
                     to work around some of the design limitations that
                     we talked about in the {single sourcing
-                    chapter}[#single_source bink].
+                    chapter}[#single_source].
 
             markup:
                 When using the map approach, it is important to
@@ -2615,7 +2615,7 @@ tests:(!en) SAM Parser Tests
                 paper-like and hypertext outputs. This can help you
                 to work around some of the design limitations that
                 we talked about in the {single sourcing
-                chapter}[#single_source bink].
+                chapter}[#single_source].
 
             result:
                 ```(xml)
@@ -3413,8 +3413,9 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <section id="1d99">
+                    <section id="id99">
                     <p>Hello Mars!</p>
+                    </section>
                     <insert idref="id99"/>
 
 
@@ -3463,7 +3464,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>Because you often want to <inline-insert conditions="baz,bat" item="circle.png" ID="circle" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+                    <p>Because you often want to <inline-insert conditions="baz,bat" id="circle" item="circle.png" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 
         case: Inline insert by ID
             description:
@@ -3481,6 +3482,7 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <p>There is a circle <inline-insert idref="circle"/> in this sentence.</p>
+                    <insert idref="circle"/>
 
 
         case: Paragraph that is just an inline insert
@@ -3599,7 +3601,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <insert nameref="fragment.foobar *nom">
+                    <insert extra="*nom" nameref="fragment.foobar">
                     <string name="a">apricot</string>
                     <string name="b">breadfruit</string>
                     </insert>

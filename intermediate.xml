@@ -3210,11 +3210,11 @@ techniques that don't involve maps at all -- to produce
 paper-like and hypertext outputs. This can help you
 to work around some of the design limitations that
 we talked about in the {single sourcing
-chapter}[#single_source bink].
+chapter}[#single_source].
 </codeblock>
 </source>
 <markup>
-<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation extra="bink" nameref="single_source">single sourcing chapter</citation></phrase>.</p>
+<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation nameref="single_source">single sourcing chapter</citation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4107,6 +4107,34 @@ There is a `_` in _this \_ italic_ decoration.
 </result>
 </case>
 <case>
+<title>Insert by ID</title>
+
+<description>
+<p>Insert an object by ID.</p>
+</description>
+<source>
+<codeblock language="sam">
+section:(*id99)
+    Hello Mars!
+&gt;&gt;&gt;[*id99]
+</codeblock>
+</source>
+<markup>
+<section id="id99">
+<p>Hello Mars!</p>
+</section>
+<insert idref="id99"/>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;section id="id99"&gt;
+&lt;p&gt;Hello Mars!&lt;/p&gt;
+&lt;/section&gt;
+&lt;insert idref="id99"/&gt;
+</codeblock>
+</result>
+</case>
+<case>
 <title>Key insert</title>
 
 <description>
@@ -4141,7 +4169,7 @@ There is a `_` in _this \_ italic_ decoration.
 </description>
 <source>
 <codeblock language="sam">
-Because you often want to &gt;(image "circle.png")(#bar)(?baz)(?bat) change some part of a text when it is being
+Because you often want to &gt;(image "circle.png")(*circle)(?baz)(?bat) change some part of a text when it is being
 reused, &lt;fragments&gt; &amp; fragment references can both define local {strings}(feature).
 Any {string references}(feature) inside a fragment will be resolved by looking first
 at local-strings defined in the &gt;[*my-table] fragment reference, then at local strings defined
@@ -4150,11 +4178,33 @@ that you can define string substitutions whenever you insert a fragment into you
 </codeblock>
 </source>
 <markup>
-<p>Because you often want to <inline-insert conditions="baz,bat" item="circle.png" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+<p>Because you often want to <inline-insert conditions="baz,bat" id="circle" item="circle.png" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;Because you often want to &lt;inline-insert conditions="baz,bat" item="circle.png" name="bar" type="image"/&gt; change some part of a text when it is being reused, &amp;lt;fragments&amp;gt; &amp;amp; fragment references can both define local &lt;phrase&gt;&lt;annotation type="feature"&gt;strings&lt;/annotation&gt;&lt;/phrase&gt;. Any &lt;phrase&gt;&lt;annotation type="feature"&gt;string references&lt;/annotation&gt;&lt;/phrase&gt; inside a fragment will be resolved by looking first at local-strings defined in the &lt;inline-insert idref="my-table"/&gt; fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.&lt;/p&gt;
+&lt;p&gt;Because you often want to &lt;inline-insert conditions="baz,bat" id="circle" item="circle.png" type="image"/&gt; change some part of a text when it is being reused, &amp;lt;fragments&amp;gt; &amp;amp; fragment references can both define local &lt;phrase&gt;&lt;annotation type="feature"&gt;strings&lt;/annotation&gt;&lt;/phrase&gt;. Any &lt;phrase&gt;&lt;annotation type="feature"&gt;string references&lt;/annotation&gt;&lt;/phrase&gt; inside a fragment will be resolved by looking first at local-strings defined in the &lt;inline-insert idref="my-table"/&gt; fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Inline insert by ID</title>
+
+<description>
+<p>Inline insert by ID of an inline element. This is mostly for testing HTML output mode which tries to resolve these.</p>
+</description>
+<source>
+<codeblock language="sam">
+There is a circle &gt;[*circle] in this sentence.
+</codeblock>
+</source>
+<markup>
+<p>There is a circle <inline-insert idref="circle"/> in this sentence.</p>
+<insert idref="circle"/>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;p&gt;There is a circle &lt;inline-insert idref="circle"/&gt; in this sentence.&lt;/p&gt;
+&lt;insert idref="circle"/&gt;
 </codeblock>
 </result>
 </case>
@@ -4291,13 +4341,13 @@ This sentence includes a string reference &gt;[$name].
 </codeblock>
 </source>
 <markup>
-<insert nameref="fragment.foobar *nom">
+<insert extra="*nom" nameref="fragment.foobar">
 <string name="a">apricot</string>
 <string name="b">breadfruit</string>
 </insert></markup>
 <result>
 <codeblock language="xml">
-&lt;insert nameref="fragment.foobar *nom"&gt;
+&lt;insert extra="*nom" nameref="fragment.foobar"&gt;
 &lt;string name="a"&gt;apricot&lt;/string&gt;
 &lt;string name="b"&gt;breadfruit&lt;/string&gt;
 &lt;/insert&gt;
