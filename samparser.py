@@ -3030,7 +3030,7 @@ class InlineInsert(Span):
             if self.ref_type == 'stringref':
                 string_content = get_string_def(self.item, self)
                 if string_content:
-                    yield from string_content._serialize_html()
+                    yield from string_content.serialize_html()
 
 #                string_defs = self._doc().string_defs()
 #                if self.item in [x.name for x in string_defs]:

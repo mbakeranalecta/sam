@@ -3523,15 +3523,18 @@ tests:(!en) SAM Parser Tests
                     <string name="foo">bar bar black sheep</string>
 
         case: String references
+            $foo = bar bar black sheep
             description:
                 Inserting the value of a string.
 
             source:
                 ```(sam)
-                    This sentence includes a string reference >[$name].
+                    $foo = bar bar green sheep
+                    This sentence includes a string reference >[$foo].
 
             markup:
-                This sentence includes a string reference >[$name].
+                $foo = bar bar black sheep
+                This sentence includes a string reference >[$foo].
 
             result:
                 ```(xml)
