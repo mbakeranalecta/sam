@@ -3540,6 +3540,33 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                    <p>This sentence includes a string reference <inline-insert stringref="name"/>.</p>
 
+
+        case: String lookup
+            description:
+                This is a test for HTML output mode string lookup. It should be moved to a different test doc.
+
+            source:
+                ```(sam)
+
+            markup:
+                $str = One
+                section:(*section.foo) foo
+                    $str = Two
+
+                    This sentence should end with the word for 2: >[$str]
+
+                section: bar
+                    This sentence should end with the word for 1: >[$str]
+
+                >>>[*section.foo]
+                    $str = Three
+
+            result:
+                ```(xml)
+
+
+
+
     test: Fragments
         description:
             Fragments are sequences of paragraphs that can have management metadata applied to them

@@ -829,7 +829,7 @@ class Block(ABC):
                 yield from self.content.serialize_xml()
                 yield "</{0}>\n".format(self.block_type)
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         yield '<{0} class="{1}"'.format(self.html_tag, self.block_type)
 
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
@@ -846,7 +846,7 @@ class Block(ABC):
                 title_depth = len(list(x for x in self.ancestors_and_self() if x.content))
                 heading_level = title_depth if title_depth < 6 else 6
                 yield '\n<h{0} class="title">'.format(heading_level)
-                yield from self.content.serialize_html()
+                yield from self.content.serialize_html(duplicate, strings)
                 yield "</h{0}>\n".format(heading_level)
 
             if type(self.children[0]) is not Flow:
@@ -854,7 +854,7 @@ class Block(ABC):
 
             for x in self.children:
                 if x is not None:
-                    yield from x.serialize_html()
+                    yield from x.serialize_html(duplicate, strings)
             yield '</{0}>\n'.format(self.html_tag)
         else:
             if self.content is None:
@@ -880,7 +880,7 @@ class BlockInsert(Block):
         yield " " * int(self.indent)
         if self.ref_type:
             ref_symbol = ref_symbols.get(self.ref_type)
-            yield '>[{0}{1}'.format(ref_symbol, self.item)
+            yield '>>>[{0}{1}'.format(ref_symbol, self.item)
             if self.extra:
                 yield ' {0}]'.format(self.extra)
             else:
@@ -929,21 +929,18 @@ class BlockInsert(Block):
         else:
             yield '/>\n'
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, stings=[]):
 
         if self.ref_type:
             if self.extra:
                 SAM_parser_warning("Extra information in a insert by reference is ignored in HTML output mode: {0}".format(self.extra))
             if self.ref_type == 'stringref':
-                string_defs = self._doc().string_defs()
-                if self.item in [x.name for x in string_defs]:
-                    yield from [x.content for x in string_defs if x.name == self.item][0].serialize_html()
-                else:
-                    SAM_parser_warning('String reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
+                SAM_parser_warning('Inserting strings with block inserts is not supported in HTML output mode. String will be omitted from HTML output.'.format(self.item))
             elif self.ref_type == 'idref':
                 ob = self._doc().object_by_id(self.item)
+                strings = [x for x in self.children if type(x) is StringDef]
                 if ob:
-                    yield from ob.serialize_html(duplicate=True)
+                    yield from ob.serialize_html(duplicate=True, strings=strings)
                 else:
                     SAM_parser_warning('ID reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
             else:
@@ -1040,7 +1037,7 @@ class Codeblock(Block):
         else:
             yield '/>'
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         yield '<pre class="codeblock"'
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         if self.citations or self.children:
@@ -1055,7 +1052,7 @@ class Codeblock(Block):
                 yield '<code class="codeblock">'.format(self.code_language)
             for x in self.children:
                 if x is not None:
-                    yield from x.serialize_html()
+                    yield from x.serialize_html(duplicate, strings)
             if self.code_language:
                 yield '</code>'
             yield "</pre>\n"
@@ -1109,7 +1106,7 @@ class Embedblock(Block):
         else:
             yield '/>\n'
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted. At: " + str(self).strip())
         yield ''
 
@@ -1323,7 +1320,7 @@ class Record(Block):
                 yield "</{0}>\n".format(name)
         yield "</record>\n"
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         if not self.preceding_sibling():
             yield '<tr class="record">'
             for fn in self.parent.field_names:
@@ -1495,7 +1492,7 @@ class LabeledListItem(ListItem):
         yield "</{0}>\n".format(self.block_type)
 
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         yield '<div class="ll.li"'
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         yield '>\n'
@@ -1504,7 +1501,7 @@ class LabeledListItem(ListItem):
         yield '</dt>\n<dd class="ll.li.item">'
         for x in self.children:
             if x is not None:
-                yield from x.serialize_html()
+                yield from x.serialize_html(duplicate, strings)
         yield "</dd>\n"
         yield "</div>\n"
 
@@ -1596,7 +1593,7 @@ class Comment(Block):
     def serialize_xml(self):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
 
 
@@ -1615,7 +1612,7 @@ class StringDef(Block):
         yield from self.content.serialize_xml()
         yield "</string>\n"
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         yield '<div class="string-def" data-name="{0}" data-value="{1}"></div>'.format(self.block_type, self.content)
 
 class Root(Block):
@@ -1636,7 +1633,7 @@ class Root(Block):
         for x in self.children:
             yield from x.serialize_xml()
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         yield '<!DOCTYPE html>\n'
         try:
             title = [x.content for x in self.children if type(x) is Block][0]
@@ -1661,7 +1658,7 @@ class Root(Block):
                 yield '<script src="js/all.min.js"></script>\n'.format(j)
         yield '</head >\n<body>\n'
         for x in self.children:
-            yield from x.serialize_html()
+            yield from x.serialize_html(duplicate, strings)
         yield '</body>\n</html>'
 
     def _add_child(self, b):
@@ -1824,12 +1821,12 @@ class Flow():
             else:
                 yield from x.serialize_xml()
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         for x in self.children:
             if type(x) is str:
                 yield escape_for_xml(x)
             else:
-                yield from x.serialize_html()
+                yield from x.serialize_html(duplicate, strings)
 
 
 # Annotation lookup modes. Third parties can add additional lookup modes
@@ -1894,7 +1891,7 @@ class Pre(Flow):
         for x in self.lines:
             yield escape_for_xml(x)
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         for x in self.lines:
             yield escape_for_xml(x)
 
@@ -2182,7 +2179,7 @@ class Include(Block):
         for x in self.children:
             yield from x.serialize_xml()
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         for x in self.children:
             yield from x.serialize_html()
 
@@ -2666,7 +2663,7 @@ class Phrase(Span):
             yield escape_for_xml(self.text)
         yield '</phrase>'
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         yield '<span class="phrase"'
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         yield '>'
@@ -2734,7 +2731,7 @@ class Code(Phrase):
         yield escape_for_xml(self.text)
         yield '</' + tag + '>'
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
         if self.encoding:
             SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted. At: " + str(self).strip())
             yield ''
@@ -3022,13 +3019,13 @@ class InlineInsert(Span):
         else:
             yield '/>'
 
-    def serialize_html(self, duplicate=False):
+    def serialize_html(self, duplicate=False, strings=[]):
 
         if self.ref_type:
             if self.extra:
                 SAM_parser_warning("Extra information in a insert by reference is ignored in HTML output mode: {0}".format(self.extra))
             if self.ref_type == 'stringref':
-                string_content = get_string_def(self.item, self)
+                string_content = get_string_def(self.item, self, strings)
                 if string_content:
                     yield from string_content.serialize_html()
 
@@ -3305,11 +3302,15 @@ def replace_charref(match):
         raise SAMParserStructureError("Unrecognized character entity found: {0}".format(charref))
     return character
 
-def get_string_def(name, context):
+def get_string_def(name, context, strings=[]):
     """
     Get a string definition with a given name.
     :return: The closest definition to the given context up the tree
     """
+    if strings:
+        for x in strings:
+            if x.block_type == name:
+                return x.content
     if context.parent and type(context.parent) is not DocStructure:
         for x in context.parent.children:
             if type(x) is StringDef and x.block_type == name:

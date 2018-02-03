@@ -4038,6 +4038,36 @@ This sentence includes a string reference &gt;[$foo].
 </code></pre>
 </div>
 </div>
+<div class="case">
+<h3 class="title">String lookup</h3>
+
+<div class="description">
+<p class="p">This is a test for HTML output mode string lookup. It should be moved to a different test doc.</p>
+</div>
+<div class="source">
+<pre class="codeblock" data-language="sam"><code class="codeblock"></code></pre>
+</div>
+<div class="markup">
+<div class="string-def" data-name="str" data-value="One"></div><div class="section" id="section.foo">
+<h4 class="title">foo</h4>
+
+<div class="string-def" data-name="str" data-value="Two"></div><p class="p">This sentence should end with the word for 2: Two</p>
+</div>
+<div class="section">
+<h4 class="title">bar</h4>
+
+<p class="p">This sentence should end with the word for 1: One</p>
+</div>
+<div class="section" data-copied-from-id="section.foo">
+<h4 class="title">foo</h4>
+
+<div class="string-def" data-name="str" data-value="Two"></div><p class="p">This sentence should end with the word for 2: Three</p>
+</div>
+</div>
+<div class="result">
+<pre class="codeblock" data-language="xml"><code class="codeblock"></code></pre>
+</div>
+</div>
 </div>
 <div class="test">
 <h2 class="title">Fragments</h2>
