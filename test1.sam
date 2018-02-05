@@ -3547,19 +3547,44 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
+                    $str = One
+                    $str = Un
+                    section:(*section.foo) foo
+                        $str = Two
+
+                        This sentence should end with the word for 2: >[$str]
+
+                        $str = Four
+
+                    section: bar
+                        This sentence should end with the word for 1: >[$str]
+
+                        #$str = Six
+
+                    >>>[*section.foo]
+                        $str = Deux
+
+                    $str = Five
 
             markup:
                 $str = One
+                $str = Un
                 section:(*section.foo) foo
                     $str = Two
 
                     This sentence should end with the word for 2: >[$str]
 
+                    $str = Four
+
                 section: bar
                     This sentence should end with the word for 1: >[$str]
 
+                    #$str = Six
+
                 >>>[*section.foo]
-                    $str = Three
+                    $str = Deux
+
+                $str = Five
 
             result:
                 ```(xml)

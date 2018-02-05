@@ -3312,7 +3312,8 @@ def get_string_def(name, context, strings=[]):
             if x.block_type == name:
                 return x.content
     if context.parent and type(context.parent) is not DocStructure:
-        for x in context.parent.children:
+        starting_point = context.parent.children.index(context)
+        for x in reversed(context.parent.children[:starting_point]):
             if type(x) is StringDef and x.block_type == name:
                 return x.content
         return get_string_def(name, context.parent)
