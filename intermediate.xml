@@ -4118,7 +4118,7 @@ There is a `_` in _this \_ italic_ decoration.
 <codeblock language="sam">
 section:(*id99)
     Hello Mars!
-&gt;&gt;&gt;[*id99]
+&gt;&gt;&gt;(*id99)
 </codeblock>
 </source>
 <markup>
@@ -4144,7 +4144,7 @@ section:(*id99)
 </description>
 <source>
 <codeblock language="sam">
-&gt;&gt;&gt;[%glug]
+&gt;&gt;&gt;(%glug)
 </codeblock>
 </source>
 <markup>
@@ -4174,7 +4174,7 @@ section:(*id99)
 Because you often want to &gt;(image "circle.png")(*circle)(?baz)(?bat) change some part of a text when it is being
 reused, &lt;fragments&gt; &amp; fragment references can both define local {strings}(feature).
 Any {string references}(feature) inside a fragment will be resolved by looking first
-at local-strings defined in the &gt;[*my-table] fragment reference, then at local strings defined
+at local-strings defined in the &gt;(*my-table) fragment reference, then at local strings defined
 in the fragment definition, and then at global strings. In effect, this means
 that you can define string substitutions whenever you insert a fragment into your content.
 </codeblock>
@@ -4196,7 +4196,7 @@ that you can define string substitutions whenever you insert a fragment into you
 </description>
 <source>
 <codeblock language="sam">
-There is a circle &gt;[*circle] in this sentence.
+There is a circle &gt;(*circle) in this sentence.
 </codeblock>
 </source>
 <markup>
@@ -4218,7 +4218,7 @@ There is a circle &gt;[*circle] in this sentence.
 </description>
 <source>
 <codeblock language="sam">
-&gt;[#foo8]
+&gt;(#foo8)
 </codeblock>
 </source>
 <markup>
@@ -4260,20 +4260,77 @@ $foo = bar bar black sheep
 <case>
 <title>String references</title>
 
+<string name="foo">bar bar black sheep</string>
 <description>
 <p>Inserting the value of a string.</p>
 </description>
 <source>
 <codeblock language="sam">
-This sentence includes a string reference &gt;[$name].
+$foo = bar bar green sheep
+This sentence includes a string reference &gt;($foo).
 </codeblock>
 </source>
 <markup>
-<p>This sentence includes a string reference <inline-insert stringref="name"/>.</p>
+<string name="foo">bar bar black sheep</string>
+<p>This sentence includes a string reference <inline-insert stringref="foo"/>.</p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;This sentence includes a string reference &lt;inline-insert stringref="name"/&gt;.&lt;/p&gt;
+&lt;string name="foo"&gt;bar bar black sheep&lt;/string&gt;
+&lt;p&gt;This sentence includes a string reference &lt;inline-insert stringref="foo"/&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>String lookup</title>
+
+<description>
+<p>This is a test for HTML output mode string lookup. It should be moved to a different test doc.</p>
+</description>
+<source>
+<codeblock language="sam">
+$str = One
+$str = Un
+section:(*section.foo) foo
+    $str = Two
+
+    This sentence should end with the word for 2: &gt;($str)
+
+    $str = Four
+
+section: bar
+    This sentence should end with the word for 1: &gt;($str)
+
+    #$str = Six
+
+&gt;&gt;&gt;(*section.foo)
+    $str = Deux
+
+$str = Five
+</codeblock>
+</source>
+<markup>
+<string name="str">One</string>
+<string name="str">Un</string>
+<section id="section.foo">
+<title>foo</title>
+
+<string name="str">Two</string>
+<p>This sentence should end with the word for 2: <inline-insert stringref="str"/></p>
+<string name="str">Four</string>
+</section>
+<section>
+<title>bar</title>
+
+<p>This sentence should end with the word for 1: <inline-insert stringref="str"/></p>
+<!-- $str = Six -->
+</section>
+<insert idref="section.foo">
+<string name="str">Deux</string>
+</insert><string name="str">Five</string>
+</markup>
+<result>
+<codeblock language="xml">
 </codeblock>
 </result>
 </case>
@@ -4337,19 +4394,19 @@ This sentence includes a string reference &gt;[$name].
 </description>
 <source>
 <codeblock language="sam">
-&gt;&gt;&gt;[#fragment.foobar *nom]
+&gt;&gt;&gt;(#fragment.foobar)
     $a=apricot
     $b=breadfruit
 </codeblock>
 </source>
 <markup>
-<insert extra="*nom" nameref="fragment.foobar">
+<insert nameref="fragment.foobar">
 <string name="a">apricot</string>
 <string name="b">breadfruit</string>
 </insert></markup>
 <result>
 <codeblock language="xml">
-&lt;insert extra="*nom" nameref="fragment.foobar"&gt;
+&lt;insert nameref="fragment.foobar"&gt;
 &lt;string name="a"&gt;apricot&lt;/string&gt;
 &lt;string name="b"&gt;breadfruit&lt;/string&gt;
 &lt;/insert&gt;

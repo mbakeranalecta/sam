@@ -3405,12 +3405,12 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     section:(*id99)
                         Hello Mars!
-                    >>>[*id99]
+                    >>>(*id99)
 
             markup:
                     section:(*id99)
                         Hello Mars!
-                    >>>[*id99]
+                    >>>(*id99)
 
             result:
                 ```(xml)
@@ -3427,10 +3427,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >>>[%glug]
+                    >>>(%glug)
 
             markup:
-                >>>[%glug]
+                >>>(%glug)
 
             result:
                 ```(xml)
@@ -3450,7 +3450,7 @@ tests:(!en) SAM Parser Tests
                     Because you often want to >(image "circle.png")(*circle)(?baz)(?bat) change some part of a text when it is being
                     reused, <fragments> & fragment references can both define local {strings}(feature).
                     Any {string references}(feature) inside a fragment will be resolved by looking first
-                    at local-strings defined in the >[*my-table] fragment reference, then at local strings defined
+                    at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
                     in the fragment definition, and then at global strings. In effect, this means
                     that you can define string substitutions whenever you insert a fragment into your content.
 
@@ -3459,7 +3459,7 @@ tests:(!en) SAM Parser Tests
                 Because you often want to >(image "circle.png")(*circle)(?baz)(?bat) change some part of a text when it is being
                 reused, <fragments> & fragment references can both define local {strings}(feature).
                 Any {string references}(feature) inside a fragment will be resolved by looking first
-                at local-strings defined in the >[*my-table] fragment reference, then at local strings defined
+                at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
                 in the fragment definition, and then at global strings. In effect, this means
                 that you can define string substitutions whenever you insert a fragment into your content.
 
@@ -3473,12 +3473,12 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    There is a circle >[*circle] in this sentence.
+                    There is a circle >(*circle) in this sentence.
 
             markup:
-                There is a circle >[*circle] in this sentence.
+                There is a circle >(*circle) in this sentence.
 
-                >>>[*circle]
+                >>>(*circle)
 
             result:
                 ```(xml)
@@ -3493,10 +3493,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >[#foo8]
+                    >(#foo8)
 
             markup:
-                >[#foo8]
+                >(#foo8)
 
             result:
                 ```(xml)
@@ -3530,15 +3530,16 @@ tests:(!en) SAM Parser Tests
             source:
                 ```(sam)
                     $foo = bar bar green sheep
-                    This sentence includes a string reference >[$foo].
+                    This sentence includes a string reference >($foo).
 
             markup:
                 $foo = bar bar black sheep
-                This sentence includes a string reference >[$foo].
+                This sentence includes a string reference >($foo).
 
             result:
                 ```(xml)
-                   <p>This sentence includes a string reference <inline-insert stringref="name"/>.</p>
+                   <string name="foo">bar bar black sheep</string>
+                   <p>This sentence includes a string reference <inline-insert stringref="foo"/>.</p>
 
 
         case: String lookup
@@ -3552,16 +3553,16 @@ tests:(!en) SAM Parser Tests
                     section:(*section.foo) foo
                         $str = Two
 
-                        This sentence should end with the word for 2: >[$str]
+                        This sentence should end with the word for 2: >($str)
 
                         $str = Four
 
                     section: bar
-                        This sentence should end with the word for 1: >[$str]
+                        This sentence should end with the word for 1: >($str)
 
                         #$str = Six
 
-                    >>>[*section.foo]
+                    >>>(*section.foo)
                         $str = Deux
 
                     $str = Five
@@ -3572,16 +3573,16 @@ tests:(!en) SAM Parser Tests
                 section:(*section.foo) foo
                     $str = Two
 
-                    This sentence should end with the word for 2: >[$str]
+                    This sentence should end with the word for 2: >($str)
 
                     $str = Four
 
                 section: bar
-                    This sentence should end with the word for 1: >[$str]
+                    This sentence should end with the word for 1: >($str)
 
                     #$str = Six
 
-                >>>[*section.foo]
+                >>>(*section.foo)
                     $str = Deux
 
                 $str = Five
@@ -3646,18 +3647,18 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >>>[#fragment.foobar *nom]
+                    >>>(#fragment.foobar)
                         $a=apricot
                         $b=breadfruit
 
             markup:
-                >>>[#fragment.foobar *nom]
+                >>>(#fragment.foobar)
                     $a=apricot
                     $b=breadfruit
 
             result:
                 ```(xml)
-                    <insert extra="*nom" nameref="fragment.foobar">
+                    <insert nameref="fragment.foobar">
                     <string name="a">apricot</string>
                     <string name="b">breadfruit</string>
                     </insert>

@@ -90,7 +90,7 @@ flow_patterns = {
             'bold': re.compile(r'\*(?P<text>((?<=\\)\*|[^\*])*)(?<!\\)\*', re.U),
             'italic': re.compile(r'_(?P<text>((?<=\\)_|[^_])*)(?<!\\)_', re.U),
             'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
-            'inline-insert': re.compile(r'>((\((?P<insert>.+?)\))|(\[(?P<ref>.*?(?<!\\))\]))' + re_attributes, re.U),
+            'inline-insert': re.compile(r'>((\((?P<insert>.+?)\)))' + re_attributes, re.U),
             'citation': re.compile(
                 r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\%(?P<key>\S+?)(\s+(?P<key_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
                 re.U)
@@ -358,10 +358,10 @@ class SamParser:
             attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?")
         else:
             attributes, citations = {},[]
-        type, ref, item, extra = parse_insert(match.group("insert"), match.group("ref"))
+        type, ref, item = parse_insert(match.group("insert"))
         if type is None and ref is None:
             raise SAMParserError("Invalid block insert statement. Found: " + match.group(0))
-        b = BlockInsert(indent, type, ref, item, extra, attributes, citations)
+        b = BlockInsert(indent, type, ref, item, attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -866,12 +866,11 @@ class Block(ABC):
 
 
 class BlockInsert(Block):
-    def __init__(self, indent, insert_type, ref_type, item, extra, attributes={}, citations=None, namespace=None):
+    def __init__(self, indent, insert_type, ref_type, item, attributes={}, citations=None, namespace=None):
         super().__init__(block_type='insert', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
         self.insert_type = insert_type
         self.ref_type =ref_type
         self.item = item
-        self.extra = extra
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -880,11 +879,7 @@ class BlockInsert(Block):
         yield " " * int(self.indent)
         if self.ref_type:
             ref_symbol = ref_symbols.get(self.ref_type)
-            yield '>>>[{0}{1}'.format(ref_symbol, self.item)
-            if self.extra:
-                yield ' {0}]'.format(self.extra)
-            else:
-                yield ']'
+            yield '>>>({0}{1})'.format(ref_symbol, self.item)
         else:
             yield '>>>({0} {1})'.format(self.insert_type, self.item)
         yield from self._regurgitate_attributes(self._attribute_regurgitation)
@@ -904,8 +899,6 @@ class BlockInsert(Block):
             yield ' id="{0}"'.format(self.ID)
         if self.item and self.insert_type:
             yield ' item="{0}"'.format(self.item)
-        if self.extra:
-            yield ' extra="{0}"'.format(self.extra)
         if self.name:
             yield ' name="{0}"'.format(self.name)
         if self.ref_type:
@@ -932,8 +925,6 @@ class BlockInsert(Block):
     def serialize_html(self, duplicate=False, stings=[]):
 
         if self.ref_type:
-            if self.extra:
-                SAM_parser_warning("Extra information in a insert by reference is ignored in HTML output mode: {0}".format(self.extra))
             if self.ref_type == 'stringref':
                 SAM_parser_warning('Inserting strings with block inserts is not supported in HTML output mode. String will be omitted from HTML output.'.format(self.item))
             elif self.ref_type == 'idref':
@@ -2534,11 +2525,11 @@ class FlowParser:
                 attributes, citations = parse_attributes(match.group("attributes"))
             else:
                 attributes, citations = {},[]
-            type, ref, item, extra =parse_insert(match.group("insert"), match.group("ref"))
+            type, ref, item = parse_insert(match.group("insert"))
             if type is None and ref is None:
                 raise SAMParserError("Invalid inline insert statement. Found: " + match.group(0))
 
-            self.flow.append(InlineInsert(type, ref, item, extra, attributes, citations))
+            self.flow.append(InlineInsert(type, ref, item, attributes, citations))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '>'
@@ -2953,11 +2944,10 @@ class Citation:
 
 
 class InlineInsert(Span):
-    def __init__(self, insert_type, ref_type, item, extra, attributes={}, citations=None):
+    def __init__(self, insert_type, ref_type, item, attributes={}, citations=None):
         self.insert_type = insert_type
         self.ref_type =ref_type
         self.item = item
-        self.extra = extra
         self.citations = citations
         self.parent=None
         self.namespace = None
@@ -2977,11 +2967,7 @@ class InlineInsert(Span):
     def regurgitate(self):
         if self.ref_type:
             ref_symbol = ref_symbols.get(self.ref_type)
-            yield '>[{0}{1}'.format(ref_symbol, self.item)
-            if self.extra:
-                yield ' {0}]'.format(self.extra)
-            else:
-                yield ']'
+            yield '>({0}{1})'.format(ref_symbol, self.item)
         else:
             yield '>({0} {1})'.format(self.insert_type, self.item)
 
@@ -3001,8 +2987,6 @@ class InlineInsert(Span):
             yield ' name="{0}"'.format(self.name)
         if self.ref_type:
             yield ' {0}="{1}"'.format(self.ref_type, self.item)
-        if self.extra:
-            yield ' extra="{0}"'.format(self.extra)
         if self.insert_type:
             yield ' type="{0}"'.format(self.insert_type)
         if self.namespace is not None:
@@ -3022,8 +3006,6 @@ class InlineInsert(Span):
     def serialize_html(self, duplicate=False, strings=[]):
 
         if self.ref_type:
-            if self.extra:
-                SAM_parser_warning("Extra information in a insert by reference is ignored in HTML output mode: {0}".format(self.extra))
             if self.ref_type == 'stringref':
                 string_content = get_string_def(self.item, self, strings)
                 if string_content:
@@ -3189,38 +3171,31 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     return attributes, citations
 
 
-def parse_insert(insert, ref):
+def parse_insert(insert):
     insert_type = None
     ref_type = None
     item = None
-    extra = None
 
-    if insert:
-        insert_parts = insert.partition(' ')
-        insert_type = insert_parts[0]
-        item = insert_parts[2].strip()
-        # strip unnecessary quotes from insert item
-        item = re.sub(r'^(["\'])|(["\'])$', '', item)
-        if item == '':
-            raise SAMParserStructureError("Insert item not specified in: {0}".format(insert))
-    elif ref:
-        item_extra = ref[1:].split(None, 1)
-        item = item_extra[0]
-        if len(item_extra) == 2:
-            extra = item_extra[1]
-        if ref[0] == '$':
+    if insert[0] in "$*#%":
+        item = insert[1:]
+        if insert[0] == '$':
             ref_type = 'stringref'
-        elif ref[0] == '*':
+        elif insert[0] == '*':
             ref_type = 'idref'
-        elif ref[0] == '#':
+        elif insert[0] == '#':
             ref_type = 'nameref'
-        elif ref[0] == '%':
+        elif insert[0] == '%':
             ref_type = 'keyref'
     else:
-        raise SAMParserError("Unrecognized insert expression found.")
-
-
-    return insert_type, ref_type, item, extra
+        try:
+            insert_type, item = insert.split()
+        except IndexError:
+            raise SAMParserStructureError("Insert item not specified in: {0}".format(insert))
+        # strip unnecessary quotes from insert item
+        item = re.sub(r'^(["\'])|(["\'])$', '', item.strip())
+    if len(item.split())>1:
+        raise SAMParserStructureError("Extraneous content in insert: {0}".format(insert))
+    return insert_type, ref_type, item
 
 
 def escape_for_sam(s):
@@ -3302,13 +3277,13 @@ def replace_charref(match):
         raise SAMParserStructureError("Unrecognized character entity found: {0}".format(charref))
     return character
 
-def get_string_def(name, context, strings=[]):
+def get_string_def(name, context, before_strings=[], after_strings=[]):
     """
     Get a string definition with a given name.
     :return: The closest definition to the given context up the tree
     """
-    if strings:
-        for x in strings:
+    if before_strings:
+        for x in before_strings:
             if x.block_type == name:
                 return x.content
     if context.parent and type(context.parent) is not DocStructure:
@@ -3317,6 +3292,10 @@ def get_string_def(name, context, strings=[]):
             if type(x) is StringDef and x.block_type == name:
                 return x.content
         return get_string_def(name, context.parent)
+    if after_strings:
+        for x in after_strings:
+            if x.block_type == name:
+                return x.content
     return None
 
 
@@ -3482,7 +3461,7 @@ if __name__ == "__main__":
                         try:
                             xmlschema.assertValid(xml_doc)
                         except etree.DocumentInvalid as e:
-                            print('STRUCTURE ERROR: ' + str(e), file=sys.stderr)
+                            print('STRUCTURE ERROR in {0}: {1}'.format(intermediatefile, str(e)), file=sys.stderr)
                             error_count += 1
                         else:
                             SAM_parser_info("Validation successful.")
