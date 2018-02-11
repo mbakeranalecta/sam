@@ -918,7 +918,7 @@ class BlockInsert(Block):
 
             for c in self.children:
                 yield from c.serialize_xml()
-            yield '</insert>'
+            yield '</insert>\n'
         else:
             yield '/>\n'
 

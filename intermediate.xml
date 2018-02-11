@@ -4327,10 +4327,27 @@ $str = Five
 </section>
 <insert idref="section.foo">
 <string name="str">Deux</string>
-</insert><string name="str">Five</string>
+</insert>
+<string name="str">Five</string>
 </markup>
 <result>
 <codeblock language="xml">
+&lt;string name="str"&gt;One&lt;/string&gt;
+&lt;string name="str"&gt;Un&lt;/string&gt;
+&lt;section id="section.foo"&gt;
+&lt;title&gt;foo&lt;/title&gt;
+&lt;string name="str"&gt;Two&lt;/string&gt;
+&lt;p&gt;This sentence should end with the word for 2: &lt;inline-insert stringref="str"/&gt;&lt;/p&gt;
+&lt;string name="str"&gt;Four&lt;/string&gt;
+&lt;/section&gt;
+&lt;section&gt;
+&lt;title&gt;bar&lt;/title&gt;
+&lt;p&gt;This sentence should end with the word for 1: &lt;inline-insert stringref="str"/&gt;&lt;/p&gt;
+&lt;/section&gt;
+&lt;insert idref="section.foo"&gt;
+&lt;string name="str"&gt;Deux&lt;/string&gt;
+&lt;/insert&gt;
+&lt;string name="str"&gt;Five&lt;/string&gt;
 </codeblock>
 </result>
 </case>
@@ -4403,7 +4420,8 @@ $str = Five
 <insert nameref="fragment.foobar">
 <string name="a">apricot</string>
 <string name="b">breadfruit</string>
-</insert></markup>
+</insert>
+</markup>
 <result>
 <codeblock language="xml">
 &lt;insert nameref="fragment.foobar"&gt;

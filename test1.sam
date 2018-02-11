@@ -3589,7 +3589,22 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-
+                    <string name="str">One</string>
+                    <string name="str">Un</string>
+                    <section id="section.foo">
+                    <title>foo</title>
+                    <string name="str">Two</string>
+                    <p>This sentence should end with the word for 2: <inline-insert stringref="str"/></p>
+                    <string name="str">Four</string>
+                    </section>
+                    <section>
+                    <title>bar</title>
+                    <p>This sentence should end with the word for 1: <inline-insert stringref="str"/></p>
+                    </section>
+                    <insert idref="section.foo">
+                    <string name="str">Deux</string>
+                    </insert>
+                    <string name="str">Five</string>
 
 
 
