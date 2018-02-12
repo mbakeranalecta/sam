@@ -801,6 +801,9 @@ class Block(ABC):
 
         yield from self._serialize_attributes(self._attribute_serialization_xml)
 
+        if not self.children and not self.content:
+            SAM_parser_warning("Block with neither content not children detected. Are you sure this is what you meant? Perhaps this was intended as plain text:\n\n{0}".format(self))
+
         if self.children or self.citations:
             yield ">"
 
@@ -834,36 +837,31 @@ class Block(ABC):
 
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
 
-        if self.children or self.citations:
-            yield ">"
+        yield '>'
 
-            if self.citations:
-                for x in self.citations:
-                    yield '\n'
-                    yield from x.serialize_html()
+        if not self.children and not self.content:
+            SAM_parser_warning("Block with neither content not children detected. Are you sure this is what you meant? Perhaps this was intended as plain text:\n\n{0}".format(self))
 
-            if self.content:
-                title_depth = len(list(x for x in self.ancestors_and_self() if x.content))
-                heading_level = title_depth if title_depth < 6 else 6
-                yield '\n<h{0} class="title">'.format(heading_level)
-                yield from self.content.serialize_html(duplicate, strings)
-                yield "</h{0}>\n".format(heading_level)
+        if self.citations:
+            for x in self.citations:
+                yield '\n'
+                yield from x.serialize_html()
 
+        if self.content:
+            title_depth = len(list(x for x in self.ancestors_and_self() if x.content))
+            heading_level = title_depth if title_depth < 6 else 6
+            yield '\n<h{0} class="title">'.format(heading_level)
+            yield from self.content.serialize_html(duplicate, strings)
+            yield "</h{0}>\n".format(heading_level)
+
+        if self.children:
             if type(self.children[0]) is not Flow:
                 yield "\n"
 
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html(duplicate, strings)
-            yield '</{0}>\n'.format(self.html_tag)
-        else:
-            if self.content is None:
-                yield "/>\n"
-            else:
-                yield '>'
-                yield from self.content.serialize_html()
-                yield '</{0}>\n'.format(self.html_tag)
-
+        yield '</{0}>\n'.format(self.html_tag)
 
 class BlockInsert(Block):
     def __init__(self, indent, insert_type, ref_type, item, attributes={}, citations=None, namespace=None):
@@ -2971,7 +2969,7 @@ class InlineInsert(Span):
         else:
             yield '>({0} {1})'.format(self.insert_type, self.item)
 
-        yield from self._regurgitate_attributes(self.attribute_regurgitation)
+        yield from self._regurgitate_attributes(self._attribute_regurgitation)
 
 
     def serialize_xml(self):

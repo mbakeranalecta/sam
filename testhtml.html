@@ -3889,7 +3889,7 @@ There is a `_` in _this \_ italic_ decoration.
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">section:(*id99)
     Hello Mars!
-&gt;&gt;&gt;[*id99]
+&gt;&gt;&gt;(*id99)
 </code></pre>
 </div>
 <div class="markup">
@@ -3915,7 +3915,7 @@ There is a `_` in _this \_ italic_ decoration.
 <p class="p">Insert the value of a key. Syntax for creating keys is left to the language designer. Key resolution belongs to the application layer.</p>
 </div>
 <div class="source">
-<pre class="codeblock" data-language="sam"><code class="codeblock">&gt;&gt;&gt;[%glug]
+<pre class="codeblock" data-language="sam"><code class="codeblock">&gt;&gt;&gt;(%glug)
 </code></pre>
 </div>
 <div class="markup">
@@ -3942,7 +3942,7 @@ There is a `_` in _this \_ italic_ decoration.
 <pre class="codeblock" data-language="sam"><code class="codeblock">Because you often want to &gt;(image "circle.png")(*circle)(?baz)(?bat) change some part of a text when it is being
 reused, &lt;fragments&gt; &amp; fragment references can both define local {strings}(feature).
 Any {string references}(feature) inside a fragment will be resolved by looking first
-at local-strings defined in the &gt;[*my-table] fragment reference, then at local strings defined
+at local-strings defined in the &gt;(*my-table) fragment reference, then at local strings defined
 in the fragment definition, and then at global strings. In effect, this means
 that you can define string substitutions whenever you insert a fragment into your content.
 </code></pre>
@@ -3963,7 +3963,7 @@ that you can define string substitutions whenever you insert a fragment into you
 <p class="p">Inline insert by ID of an inline element. This is mostly for testing HTML output mode which tries to resolve these.</p>
 </div>
 <div class="source">
-<pre class="codeblock" data-language="sam"><code class="codeblock">There is a circle &gt;[*circle] in this sentence.
+<pre class="codeblock" data-language="sam"><code class="codeblock">There is a circle &gt;(*circle) in this sentence.
 </code></pre>
 </div>
 <div class="markup">
@@ -3984,7 +3984,7 @@ that you can define string substitutions whenever you insert a fragment into you
 <p class="p">An inline insert on a line by itself creates a paragraph containing an insert, rather than a standalone insert instruction.</p>
 </div>
 <div class="source">
-<pre class="codeblock" data-language="sam"><code class="codeblock">&gt;[#foo8]
+<pre class="codeblock" data-language="sam"><code class="codeblock">&gt;(#foo8)
 </code></pre>
 </div>
 <div class="markup">
@@ -4027,14 +4027,15 @@ that you can define string substitutions whenever you insert a fragment into you
 </div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">$foo = bar bar green sheep
-This sentence includes a string reference &gt;[$foo].
+This sentence includes a string reference &gt;($foo).
 </code></pre>
 </div>
 <div class="markup">
 <div class="string-def" data-name="foo" data-value="bar bar black sheep"></div><p class="p">This sentence includes a string reference bar bar black sheep.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;p&gt;This sentence includes a string reference &lt;inline-insert stringref="name"/&gt;.&lt;/p&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;string name="foo"&gt;bar bar black sheep&lt;/string&gt;
+&lt;p&gt;This sentence includes a string reference &lt;inline-insert stringref="foo"/&gt;.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -4050,16 +4051,16 @@ $str = Un
 section:(*section.foo) foo
     $str = Two
 
-    This sentence should end with the word for 2: &gt;[$str]
+    This sentence should end with the word for 2: &gt;($str)
 
     $str = Four
 
 section: bar
-    This sentence should end with the word for 1: &gt;[$str]
+    This sentence should end with the word for 1: &gt;($str)
 
     #$str = Six
 
-&gt;&gt;&gt;[*section.foo]
+&gt;&gt;&gt;(*section.foo)
     $str = Deux
 
 $str = Five
@@ -4084,7 +4085,23 @@ $str = Five
 <div class="string-def" data-name="str" data-value="Four"></div></div>
 <div class="string-def" data-name="str" data-value="Five"></div></div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock"></code></pre>
+<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;string name="str"&gt;One&lt;/string&gt;
+&lt;string name="str"&gt;Un&lt;/string&gt;
+&lt;section id="section.foo"&gt;
+&lt;title&gt;foo&lt;/title&gt;
+&lt;string name="str"&gt;Two&lt;/string&gt;
+&lt;p&gt;This sentence should end with the word for 2: &lt;inline-insert stringref="str"/&gt;&lt;/p&gt;
+&lt;string name="str"&gt;Four&lt;/string&gt;
+&lt;/section&gt;
+&lt;section&gt;
+&lt;title&gt;bar&lt;/title&gt;
+&lt;p&gt;This sentence should end with the word for 1: &lt;inline-insert stringref="str"/&gt;&lt;/p&gt;
+&lt;/section&gt;
+&lt;insert idref="section.foo"&gt;
+&lt;string name="str"&gt;Deux&lt;/string&gt;
+&lt;/insert&gt;
+&lt;string name="str"&gt;Five&lt;/string&gt;
+</code></pre>
 </div>
 </div>
 </div>
@@ -4141,7 +4158,7 @@ $str = Five
 <p class="p">An instruction to insert a fragment. Note that actually resolving and inserting the fragment is a job for the application layer.</p>
 </div>
 <div class="source">
-<pre class="codeblock" data-language="sam"><code class="codeblock">&gt;&gt;&gt;[#fragment.foobar *nom]
+<pre class="codeblock" data-language="sam"><code class="codeblock">&gt;&gt;&gt;(#fragment.foobar)
     $a=apricot
     $b=breadfruit
 </code></pre>
@@ -4149,7 +4166,7 @@ $str = Five
 <div class="markup">
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;insert extra="*nom" nameref="fragment.foobar"&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;insert nameref="fragment.foobar"&gt;
 &lt;string name="a"&gt;apricot&lt;/string&gt;
 &lt;string name="b"&gt;breadfruit&lt;/string&gt;
 &lt;/insert&gt;

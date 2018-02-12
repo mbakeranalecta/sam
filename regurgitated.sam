@@ -1699,7 +1699,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     This is another paragraph. Then there is an alternate blockquote:
                     
-                    '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2]
+                    '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2][%key.bar12 page 22]
                         The quick brown fox jumps over the lazy dog.
                     
                     '''
@@ -1708,7 +1708,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 This is another paragraph. Then there is an alternate blockquote:
 
-                """(?bar)(?baz)(#foo5)[Mother Goose][Father Time][*foo page 2]
+                """(?bar)(?baz)(#foo5)[Mother Goose][Father Time][*foo page 2][%key.bar12 page 22]
                     The quick brown fox jumps over the lazy dog.
 
 
@@ -1723,6 +1723,7 @@ tests:(!en) SAM Parser Tests
                     <citation value="Mother Goose"/>
                     <citation value="Father Time"/>
                     <citation extra="page 2" idref="foo"/>
+                    <citation extra="page 22" keyref="key.bar12"/>
                     <p>The quick brown fox jumps over the lazy dog.</p>
                     </blockquote>
                     <blockquote>
@@ -2820,14 +2821,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(SAM)
-                    You can {call me Ishmael}[Melville, 1851][Daffy, 2017].
+                    You can {call me Ishmael}[Melville, 1851][Daffy, 2017][%key.bar12 page 22].
 
             markup:
-                You can {call me Ishmael}[Melville, 1851][Daffy, 2017].
+                You can {call me Ishmael}[Melville, 1851][Daffy, 2017][%key.bar12 page 22].
 
             result:
                 ```(XML)
-                    <p>You can <phrase><citation value="Melville, 1851"><citation value="Daffy, 2017">call me Ishmael</citation></citation></phrase>.</p>
+                    <p>You can <phrase><citation value="Melville, 1851"><citation value="Daffy, 2017"><citation extra="page 22" keyref="key.bar12">call me Ishmael</citation></citation></citation></phrase>.</p>
 
         case: Citation and annotation on one phrase
             description:
@@ -3166,16 +3167,39 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <insert conditions="goo" item="foo.gif" type="image"/>
 
+        case: Insert by ID
+            description:
+                Insert an object by ID.
+
+            source:
+                ```(sam)
+                    section:(*id99)
+                        Hello Mars!
+                    >>>(*id99)
+
+            markup:
+                    section:(*id99)
+                        Hello Mars!
+
+                    >>>(*id99)
+
+            result:
+                ```(xml)
+                    <section id="id99">
+                    <p>Hello Mars!</p>
+                    </section>
+                    <insert idref="id99"/>
+
         case: Key insert
             description:
                 Insert the value of a key. Syntax for creating keys is left to the language designer. Key resolution belongs to the application layer.
 
             source:
                 ```(sam)
-                    >>>[%glug]
+                    >>>(%glug)
 
             markup:
-                >>>[%glug]
+                >>>(%glug)
 
             result:
                 ```(xml)
@@ -3191,19 +3215,37 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    Because you often want to >(image "circle.png")(#bar)(?baz)(?bat) change some part of a text when it is being
+                    Because you often want to >(image "circle.png")(*circle)(?baz)(?bat) change some part of a text when it is being
                     reused, <fragments> & fragment references can both define local {strings}(feature).
                     Any {string references}(feature) inside a fragment will be resolved by looking first
-                    at local-strings defined in the >[*my-table] fragment reference, then at local strings defined
+                    at local-strings defined in the >(*my-table) fragment reference, then at local strings defined
                     in the fragment definition, and then at global strings. In effect, this means
                     that you can define string substitutions whenever you insert a fragment into your content.
 
             markup:
-                Because you often want to >(image circle.png)(?baz)(?bat)(#bar) change some part of a text when it is being reused, <fragments> \& fragment references can both define local {strings}(feature). Any {string references}(feature) inside a fragment will be resolved by looking first at local-strings defined in the >[*my-table] fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.
+                Because you often want to >(image circle.png)(?baz)(?bat)(*circle) change some part of a text when it is being reused, <fragments> \& fragment references can both define local {strings}(feature). Any {string references}(feature) inside a fragment will be resolved by looking first at local-strings defined in the >(*my-table) fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.
 
             result:
                 ```(xml)
-                    <p>Because you often want to <inline-insert conditions="baz,bat" item="circle.png" name="bar" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+                    <p>Because you often want to <inline-insert conditions="baz,bat" id="circle" item="circle.png" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+
+        case: Inline insert by ID
+            description:
+                Inline insert by ID of an inline element. This is mostly for testing HTML output mode which tries to resolve these.
+
+            source:
+                ```(sam)
+                    There is a circle >(*circle) in this sentence.
+
+            markup:
+                There is a circle >(*circle) in this sentence.
+
+                >>>(*circle)
+
+            result:
+                ```(xml)
+                    <p>There is a circle <inline-insert idref="circle"/> in this sentence.</p>
+                    <insert idref="circle"/>
 
         case: Paragraph that is just an inline insert
             description:
@@ -3211,10 +3253,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >[#foo8]
+                    >(#foo8)
 
             markup:
-                >[#foo8]
+                >(#foo8)
 
             result:
                 ```(xml)
@@ -3239,19 +3281,83 @@ tests:(!en) SAM Parser Tests
                     <string name="foo">bar bar black sheep</string>
 
         case: String references
+            $foo=bar bar black sheep
             description:
                 Inserting the value of a string.
 
             source:
                 ```(sam)
-                    This sentence includes a string reference >[$name].
+                    $foo = bar bar green sheep
+                    This sentence includes a string reference >($foo).
 
             markup:
-                This sentence includes a string reference >[$name].
+                $foo=bar bar black sheep
+                This sentence includes a string reference >($foo).
 
             result:
                 ```(xml)
-                   <p>This sentence includes a string reference <inline-insert stringref="name"/>.</p>
+                   <string name="foo">bar bar black sheep</string>
+                   <p>This sentence includes a string reference <inline-insert stringref="foo"/>.</p>
+
+        case: String lookup
+            description:
+                This is a test for HTML output mode string lookup. It should be moved to a different test doc.
+
+            source:
+                ```(sam)
+                    $str = One
+                    $str = Un
+                    section:(*section.foo) foo
+                        $str = Two
+                    
+                        This sentence should end with the word for 2: >($str)
+                    
+                        $str = Four
+                    
+                    section: bar
+                        This sentence should end with the word for 1: >($str)
+                    
+                        #$str = Six
+                    
+                    >>>(*section.foo)
+                        $str = Deux
+                    
+                    $str = Five
+
+            markup:
+                $str=One
+                $str=Un
+                section:(*section.foo) foo
+                    $str=Two
+                    This sentence should end with the word for 2: >($str)
+
+                    $str=Four
+                section: bar
+                    This sentence should end with the word for 1: >($str)
+
+                    #$str = Six
+                >>>(*section.foo)
+                    $str=Deux
+
+                $str=Five
+            result:
+                ```(xml)
+                    <string name="str">One</string>
+                    <string name="str">Un</string>
+                    <section id="section.foo">
+                    <title>foo</title>
+                    <string name="str">Two</string>
+                    <p>This sentence should end with the word for 2: <inline-insert stringref="str"/></p>
+                    <string name="str">Four</string>
+                    </section>
+                    <section>
+                    <title>bar</title>
+                    <p>This sentence should end with the word for 1: <inline-insert stringref="str"/></p>
+                    </section>
+                    <insert idref="section.foo">
+                    <string name="str">Deux</string>
+                    </insert>
+                    <string name="str">Five</string>
 
     test: Fragments
         description:
@@ -3304,18 +3410,18 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    >>>[~foobar]
+                    >>>(#fragment.foobar)
                         $a=apricot
                         $b=breadfruit
 
             markup:
-                >>>[Nonefoobar]
+                >>>(#fragment.foobar)
                     $a=apricot
                     $b=breadfruit
 
             result:
                 ```(xml)
-                    <insert fragmentref="foobar">
+                    <insert nameref="fragment.foobar">
                     <string name="a">apricot</string>
                     <string name="b">breadfruit</string>
                     </insert>
