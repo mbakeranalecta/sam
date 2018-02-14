@@ -223,10 +223,20 @@
 <div class="markup">
 <div class="document">
 <div class="head" data-name="foo">
-<div class="foo">barney <span class="phrase"><span class="annotation" data-annotation-type="conjunction">and</span></span> betty</div>
-<div class="baz">bat</div>
+<div class="foo">
+<h4 class="title">barney <span class="phrase"><span class="annotation" data-annotation-type="conjunction">and</span></span> betty</h4>
+</div>
+<div class="baz">
+<h4 class="title">bat</h4>
+</div>
 <div class="string-def" data-name="name" data-value="fred {and}(conjunction) wilma"></div><table class="history">
-<tr class="record"><th class="record">date</th><th class="record">author</th><th class="record">comment</th><th class="record">status</th><tr class="record">
+<tr class="record">
+<th class ="record-set-field" data-field-name="date"></th >
+<th class ="record-set-field" data-field-name="author"></th >
+<th class ="record-set-field" data-field-name="comment"></th >
+<th class ="record-set-field" data-field-name="status"></th >
+</tr>
+<tr class="record">
 <td class="date">2014-06-23</td>
 <td class="author">mbaker</td>
 <td class="comment">New, Topic</td>
@@ -240,7 +250,11 @@
 </tr>
 </table>
 <table class="index">
-<tr class="record"><th class="record">type</th><th class="record">term</th><tr class="record">
+<tr class="record">
+<th class ="record-set-field" data-field-name="type"></th >
+<th class ="record-set-field" data-field-name="term"></th >
+</tr>
+<tr class="record">
 <td class="type">feature</td>
 <td class="term">fragment</td>
 </tr>
@@ -403,9 +417,15 @@
 </div>
 <div class="markup">
 <div class="address">
-<div class="name">Fred Flintstone</div>
-<div class="address">Bedrock</div>
-<div class="era">Stone Age</div>
+<div class="name">
+<h4 class="title">Fred Flintstone</h4>
+</div>
+<div class="address">
+<h4 class="title">Bedrock</h4>
+</div>
+<div class="era">
+<h4 class="title">Stone Age</h4>
+</div>
 </div>
 </div>
 <div class="result">
@@ -1797,7 +1817,13 @@ multiple lines.
 </div>
 <div class="markup">
 <table class="history">
-<tr class="record"><th class="record">date</th><th class="record">author</th><th class="record">comment</th><th class="record">status</th><tr class="record">
+<tr class="record">
+<th class ="record-set-field" data-field-name="date"></th >
+<th class ="record-set-field" data-field-name="author"></th >
+<th class ="record-set-field" data-field-name="comment"></th >
+<th class ="record-set-field" data-field-name="status"></th >
+</tr>
+<tr class="record">
 <td class="date">2014-06-23</td>
 <td class="author">mbaker</td>
 <td class="comment">New, Topic</td>
@@ -1843,7 +1869,10 @@ multiple lines.
 </div>
 <div class="markup">
 <table class="filmography">
-<tr class="record"><th class="record">film</th><tr class="record">
+<tr class="record">
+<th class ="record-set-field" data-field-name="film"></th >
+</tr>
+<tr class="record">
 <td class="film">Rio Bravo</td>
 </tr>
 <tr class="record">
@@ -2404,10 +2433,18 @@ ordered-list-item =
 </code></pre>
 </div>
 <div class="markup">
-<pre class="line" data-name="foo2">You gotta walk that lonesome valley,<a href="#bing"></a></pre>
-<pre class="line">You gotta walk it by yourself,</pre>
-<pre class="line" data-conditions="bar">Nobody here can walk it for you,</pre>
-<pre class="line">   You gotta walk it by yourself.</pre>
+<pre class="line" data-name="foo2">
+<h4 class="title">You gotta walk that lonesome valley,<a href="#bing"></a></h4>
+</pre>
+<pre class="line">
+<h4 class="title">You gotta walk it by yourself,</h4>
+</pre>
+<pre class="line" data-conditions="bar">
+<h4 class="title">Nobody here can walk it for you,</h4>
+</pre>
+<pre class="line">
+<h4 class="title">   You gotta walk it by yourself.</h4>
+</pre>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" idref="bing"/&gt;&lt;/line&gt;
@@ -2434,10 +2471,18 @@ ordered-list-item =
 <div class="markup">
 <blockquote class="blockquote">
 <a href="#bing"></a>
-<pre class="line" data-name="foo2">You gotta walk that lonesome valley,</pre>
-<pre class="line">You gotta walk it by yourself,</pre>
-<pre class="line" data-conditions="bar">Nobody here can walk it for you,</pre>
-<pre class="line">   You gotta walk it by yourself.</pre>
+<pre class="line" data-name="foo2">
+<h4 class="title">You gotta walk that lonesome valley,</h4>
+</pre>
+<pre class="line">
+<h4 class="title">You gotta walk it by yourself,</h4>
+</pre>
+<pre class="line" data-conditions="bar">
+<h4 class="title">Nobody here can walk it for you,</h4>
+</pre>
+<pre class="line">
+<h4 class="title">   You gotta walk it by yourself.</h4>
+</pre>
 </blockquote>
 </div>
 <div class="result">
@@ -2478,7 +2523,9 @@ ordered-list-item =
 <div class="case">
 <h3 class="title">Attributes on block</h3>
 
-<div class="description">Attributes on a block</div>
+<div class="description">
+<h4 class="title">Attributes on a block</h4>
+</div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">block:(!en-CA)(*id2)(#name)(?a)(?b) Title
 
@@ -2503,13 +2550,17 @@ ordered-list-item =
 <div class="case">
 <h3 class="title">Attributes on field</h3>
 
-<div class="description">Attributes on a field</div>
+<div class="description">
+<h4 class="title">Attributes on a field</h4>
+</div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 </code></pre>
 </div>
 <div class="markup">
-<div class="field" data-conditions="a,b" id="id3" data-name="name" lang="en-CA">Value of the field.</div>
+<div class="field" data-conditions="a,b" id="id3" data-name="name" lang="en-CA">
+<h4 class="title">Value of the field.</h4>
+</div>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;field conditions="a,b" id="id3" name="name" xml:lang="en-CA"&gt;Value of the field.&lt;/field&gt;
@@ -2519,7 +2570,9 @@ ordered-list-item =
 <div class="case">
 <h3 class="title">Attributes on fragment</h3>
 
-<div class="description">Attributes on a fragment</div>
+<div class="description">
+<h4 class="title">Attributes on a fragment</h4>
+</div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">~~~(!en-CA)(*id4)(#name)(?a)(?b)
 
@@ -2541,7 +2594,9 @@ ordered-list-item =
 <div class="case">
 <h3 class="title">attributes on grid</h3>
 
-<div class="description">Attributes on a grid</div>
+<div class="description">
+<h4 class="title">Attributes on a grid</h4>
+</div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">+++(!en-CA)(*id5)(#name)(?a)(?b)
 
@@ -2578,7 +2633,9 @@ ordered-list-item =
 <div class="case">
 <h3 class="title">attributes on record set</h3>
 
-<div class="description">Attributes on a record set</div>
+<div class="description">
+<h4 class="title">Attributes on a record set</h4>
+</div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 
@@ -2588,7 +2645,11 @@ ordered-list-item =
 </div>
 <div class="markup">
 <table class="recordset" data-conditions="a,b" id="id6" data-name="name" lang="en-CA">
-<tr class="record"><th class="record">foo</th><th class="record">bar</th><tr class="record">
+<tr class="record">
+<th class ="record-set-field" data-field-name="foo"></th >
+<th class ="record-set-field" data-field-name="bar"></th >
+</tr>
+<tr class="record">
 <td class="foo">a</td>
 <td class="bar">b</td>
 </tr>
@@ -2808,10 +2869,18 @@ ordered-list-item =
 </code></pre>
 </div>
 <div class="markup">
-<pre class="line" data-conditions="a,b" id="id9" data-name="name" lang="en-CA">You gotta walk that lonesome valley,<a href="#bing"></a></pre>
-<pre class="line">You gotta walk it by yourself,</pre>
-<pre class="line">Nobody here can walk it for you,</pre>
-<pre class="line">   You gotta walk it by yourself.</pre>
+<pre class="line" data-conditions="a,b" id="id9" data-name="name" lang="en-CA">
+<h4 class="title">You gotta walk that lonesome valley,<a href="#bing"></a></h4>
+</pre>
+<pre class="line">
+<h4 class="title">You gotta walk it by yourself,</h4>
+</pre>
+<pre class="line">
+<h4 class="title">Nobody here can walk it for you,</h4>
+</pre>
+<pre class="line">
+<h4 class="title">   You gotta walk it by yourself.</h4>
+</pre>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;line conditions="a,b" id="id9" name="name" xml:lang="en-CA"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" idref="bing"/&gt;&lt;/line&gt;
@@ -4180,7 +4249,9 @@ $str = Five
 <div class="description">
 <p class="p">Smart quotes is an optional feature of the parser, not a feature of the SAM language. It turns straight quotes into curly quotes. It raises a warning when it can’t figure out how to handle a case. The algorithm could be improved in the future to handle more cases correctly.</p>
 <p class="p">The canonical way to handle quotes in SAM is to use real curly quotes to begin with. All SAM documents are UTF-8.</p>
-<div class="Note">These tests will fail if smart quotes is not selected</div>
+<div class="Note">
+<h3 class="title">These tests will fail if smart quotes is not selected</h3>
+</div>
 <p class="p">using the <code class="code">-q</code> option of the parser command line or by setting the <code class="code">smart_quotes</code> attribute of the SamParser object to <code class="code">True</code>.</p>
 </div>
 <div class="case">

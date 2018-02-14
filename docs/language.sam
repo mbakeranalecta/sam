@@ -1,4 +1,4 @@
-specification: Semantic Authoring Markdown (SAM)
+specification:(!en) Semantic Authoring Markdown (SAM)
 
     introduction:
 
@@ -734,6 +734,26 @@ specification: Semantic Authoring Markdown (SAM)
             future:
                 If the proposal to allow the definition of patterns in the schema is accepted, it may be possible to define the format of a citation text and to have the parser break it down into its constituent parts. 
 
+        structure:(#record-set) Record set
+
+            A record set is a set of records (like a database table) inserted into the document.
+
+            syntax: 
+                A recordset consists of a set of records, one per line, with named fields. The recordset declaration consists of the record set name followed by two colons and then
+                the names of the fields, separated by commas. 
+
+                ```(sam)
+                    history:: date, author, status, notes
+
+                Each line indented below the 
+                record set declaration is a record, which contains field values separated by commas. 
+
+                ```(sam)
+                    2018-01-23, mbaker, draft, First draft
+                    2018-01-29, jsmith, draft, Added info on haggis
+                    2018-02-04, ajones, approved, Reviewed and approved with minor changes
+
+
         structure:(#insert) Insert
 
             An insert is an instruction to the {application layer} to insert a resource into the document output.
@@ -1421,7 +1441,7 @@ specification: Semantic Authoring Markdown (SAM)
                 * `_` is a decoration for italic
 
 
-                Examples:
+                Examples\:
 
                 ```(sam)
                     This text is in *bold* type.

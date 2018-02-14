@@ -1311,13 +1311,14 @@ class Record(Block):
 
     def serialize_html(self, duplicate=False, strings=[]):
         if not self.preceding_sibling():
-            yield '<tr class="record">'
+            yield '<tr class="record">\n'
             for fn in self.parent.field_names:
-                yield '<th class="record">{0}</th>'.format(fn)
+                #yield '<th class="record"></th>'.format(fn)
+                yield '<th class ="record-set-field" data-field-name="{0}"></th >\n'.format(fn)
+            yield '</tr>\n'
 
         record = list(zip(self.parent.field_names, self.field_values))
         yield '<tr class="record"'
-
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         yield ">\n"
 
