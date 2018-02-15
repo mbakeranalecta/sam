@@ -229,7 +229,8 @@
 <div class="baz">
 <h4 class="title">bat</h4>
 </div>
-<div class="string-def" data-name="name" data-value="fred {and}(conjunction) wilma"></div><table class="history">
+<div class="variable" data-name="name" hidden>fred <span class="phrase"><span class="annotation" data-annotation-type="conjunction">and</span></span> wilma</div>
+<table class="history">
 <tr class="record">
 <th class ="record-set-field" data-field-name="date"></th >
 <th class ="record-set-field" data-field-name="author"></th >
@@ -4082,7 +4083,8 @@ that you can define string substitutions whenever you insert a fragment into you
 </code></pre>
 </div>
 <div class="markup">
-<div class="string-def" data-name="foo" data-value="bar bar black sheep"></div></div>
+<div class="variable" data-name="foo" hidden>bar bar black sheep</div>
+</div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;string name="foo"&gt;bar bar black sheep&lt;/string&gt;
 </code></pre>
@@ -4091,7 +4093,8 @@ that you can define string substitutions whenever you insert a fragment into you
 <div class="case">
 <h3 class="title">String references</h3>
 
-<div class="string-def" data-name="foo" data-value="bar bar black sheep"></div><div class="description">
+<div class="variable" data-name="foo" hidden>bar bar black sheep</div>
+<div class="description">
 <p class="p">Inserting the value of a string.</p>
 </div>
 <div class="source">
@@ -4100,7 +4103,8 @@ This sentence includes a string reference &gt;($foo).
 </code></pre>
 </div>
 <div class="markup">
-<div class="string-def" data-name="foo" data-value="bar bar black sheep"></div><p class="p">This sentence includes a string reference bar bar black sheep.</p>
+<div class="variable" data-name="foo" hidden>bar bar black sheep</div>
+<p class="p">This sentence includes a string reference bar bar black sheep.</p>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;string name="foo"&gt;bar bar black sheep&lt;/string&gt;
@@ -4136,11 +4140,15 @@ $str = Five
 </code></pre>
 </div>
 <div class="markup">
-<div class="string-def" data-name="str" data-value="One"></div><div class="string-def" data-name="str" data-value="Un"></div><div class="section" id="section.foo">
+<div class="variable" data-name="str" hidden>One</div>
+<div class="variable" data-name="str" hidden>Un</div>
+<div class="section" id="section.foo">
 <h4 class="title">foo</h4>
 
-<div class="string-def" data-name="str" data-value="Two"></div><p class="p">This sentence should end with the word for 2: Two</p>
-<div class="string-def" data-name="str" data-value="Four"></div></div>
+<div class="variable" data-name="str" hidden>Two</div>
+<p class="p">This sentence should end with the word for 2: Two</p>
+<div class="variable" data-name="str" hidden>Four</div>
+</div>
 <div class="section">
 <h4 class="title">bar</h4>
 
@@ -4150,9 +4158,12 @@ $str = Five
 <div class="section" data-copied-from-id="section.foo">
 <h4 class="title">foo</h4>
 
-<div class="string-def" data-name="str" data-value="Two"></div><p class="p">This sentence should end with the word for 2: Deux</p>
-<div class="string-def" data-name="str" data-value="Four"></div></div>
-<div class="string-def" data-name="str" data-value="Five"></div></div>
+<div class="variable" data-name="str" hidden>Two</div>
+<p class="p">This sentence should end with the word for 2: Deux</p>
+<div class="variable" data-name="str" hidden>Four</div>
+</div>
+<div class="variable" data-name="str" hidden>Five</div>
+</div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;string name="str"&gt;One&lt;/string&gt;
 &lt;string name="str"&gt;Un&lt;/string&gt;
@@ -4201,9 +4212,12 @@ $str = Five
 </div>
 <div class="markup">
 <div class="fragment" data-conditions="gruz-natz" data-name="foo3">
-<div class="string-def" data-name="a" data-value="apple"></div><div class="string-def" data-name="b" data-value="banana"></div><p class="p">This is a sentence inside a fragment.</p>
+<div class="variable" data-name="a" hidden>apple</div>
+<div class="variable" data-name="b" hidden>banana</div>
+<p class="p">This is a sentence inside a fragment.</p>
 <div class="fragment" data-name="gruznatz">
-<div class="string-def" data-name="p" data-value="peach"></div><p class="p">This is a nested fragment.</p>
+<div class="variable" data-name="p" hidden>peach</div>
+<p class="p">This is a nested fragment.</p>
 </div>
 </div>
 </div>
