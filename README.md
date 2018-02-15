@@ -261,5 +261,16 @@ the document structure.
 with the syntax `[~foo]` was removed (see issue #166). Fragments can be inserted by name or ID just
 like any other block type. 
 
+* From revision 3e9b8f6fd8cddf9cbedb25c44ab48323216ce71e 
+
+   * The change to insert by reference in b4ca40baa03233ff306ed20a59da92668e4e0872
+   is reversed. It caused slightly more confusion than the old version. 
+   
+   * The `~` symbol or referencing an fragment is removed. Fragments should
+   be referenced by name or id.
+   
+   * The strings feature has been renamed variable. This chiefly affects
+   the serialization of variable definitions and references. 
+
 Please report any other backward incompatibilities you find so they can be added to this list.
 

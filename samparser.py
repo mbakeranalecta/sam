@@ -1313,7 +1313,6 @@ class Record(Block):
         if not self.preceding_sibling():
             yield '<tr class="record">\n'
             for fn in self.parent.field_names:
-                #yield '<th class="record"></th>'.format(fn)
                 yield '<th class ="record-set-field" data-field-name="{0}"></th >\n'.format(fn)
             yield '</tr>\n'
 
@@ -3009,10 +3008,6 @@ class InlineInsert(Span):
                 string_content = get_string_def(self.item, self, strings)
                 if string_content:
                     yield from string_content.serialize_html()
-
-#                string_defs = self._doc().string_defs()
-#                if self.item in [x.name for x in string_defs]:
-#                    yield from [x.content for x in string_defs if x.name == self.item][0].serialize_html()
                 else:
                     SAM_parser_warning('String reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
             elif self.ref_type == 'idref':
