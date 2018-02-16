@@ -4075,7 +4075,7 @@ This sentence includes a string reference &gt;($foo).
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">$str = One
 $str = Un
-section:(*section.foo) foo
+section:(#section.foo) foo
     $str = Two
 
     This sentence should end with the word for 2: &gt;($str)
@@ -4087,7 +4087,7 @@ section: bar
 
     #$str = Six
 
-&gt;&gt;&gt;(*section.foo)
+&gt;&gt;&gt;(#section.foo)
     $str = Deux
 
 $str = Five
@@ -4096,7 +4096,7 @@ $str = Five
 <div class="markup">
 <div class="variable" data-name="str" hidden>One</div>
 <div class="variable" data-name="str" hidden>Un</div>
-<div class="section" id="section.foo">
+<div class="section" data-name="section.foo">
 <h4 class="title">foo</h4>
 
 <div class="variable" data-name="str" hidden>Two</div>
@@ -4109,7 +4109,7 @@ $str = Five
 <p class="p">This sentence should end with the word for 1: Un</p>
 <!-- $str = Six -->
 </div>
-<div class="section" data-copied-from-id="section.foo">
+<div class="section" data-name="section.foo">
 <h4 class="title">foo</h4>
 
 <div class="variable" data-name="str" hidden>Two</div>
@@ -4121,7 +4121,7 @@ $str = Five
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;variable name="str"&gt;One&lt;/variable&gt;
 &lt;variable name="str"&gt;Un&lt;/variable&gt;
-&lt;section id="section.foo"&gt;
+&lt;section name="section.foo"&gt;
 &lt;title&gt;foo&lt;/title&gt;
 &lt;variable name="str"&gt;Two&lt;/variable&gt;
 &lt;p&gt;This sentence should end with the word for 2: &lt;inline-insert variableref="str"/&gt;&lt;/p&gt;
@@ -4131,7 +4131,7 @@ $str = Five
 &lt;title&gt;bar&lt;/title&gt;
 &lt;p&gt;This sentence should end with the word for 1: &lt;inline-insert variableref="str"/&gt;&lt;/p&gt;
 &lt;/section&gt;
-&lt;insert idref="section.foo"&gt;
+&lt;insert nameref="section.foo"&gt;
 &lt;variable name="str"&gt;Deux&lt;/variable&gt;
 &lt;/insert&gt;
 &lt;variable name="str"&gt;Five&lt;/variable&gt;

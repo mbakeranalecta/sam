@@ -4291,7 +4291,7 @@ This sentence includes a string reference &gt;($foo).
 <codeblock language="sam">
 $str = One
 $str = Un
-section:(*section.foo) foo
+section:(#section.foo) foo
     $str = Two
 
     This sentence should end with the word for 2: &gt;($str)
@@ -4303,7 +4303,7 @@ section: bar
 
     #$str = Six
 
-&gt;&gt;&gt;(*section.foo)
+&gt;&gt;&gt;(#section.foo)
     $str = Deux
 
 $str = Five
@@ -4312,7 +4312,7 @@ $str = Five
 <markup>
 <variable name="str">One</variable>
 <variable name="str">Un</variable>
-<section id="section.foo">
+<section name="section.foo">
 <title>foo</title>
 
 <variable name="str">Two</variable>
@@ -4325,7 +4325,7 @@ $str = Five
 <p>This sentence should end with the word for 1: <inline-insert variableref="str"/></p>
 <!-- $str = Six -->
 </section>
-<insert idref="section.foo">
+<insert nameref="section.foo">
 <variable name="str">Deux</variable>
 </insert>
 <variable name="str">Five</variable>
@@ -4334,7 +4334,7 @@ $str = Five
 <codeblock language="xml">
 &lt;variable name="str"&gt;One&lt;/variable&gt;
 &lt;variable name="str"&gt;Un&lt;/variable&gt;
-&lt;section id="section.foo"&gt;
+&lt;section name="section.foo"&gt;
 &lt;title&gt;foo&lt;/title&gt;
 &lt;variable name="str"&gt;Two&lt;/variable&gt;
 &lt;p&gt;This sentence should end with the word for 2: &lt;inline-insert variableref="str"/&gt;&lt;/p&gt;
@@ -4344,7 +4344,7 @@ $str = Five
 &lt;title&gt;bar&lt;/title&gt;
 &lt;p&gt;This sentence should end with the word for 1: &lt;inline-insert variableref="str"/&gt;&lt;/p&gt;
 &lt;/section&gt;
-&lt;insert idref="section.foo"&gt;
+&lt;insert nameref="section.foo"&gt;
 &lt;variable name="str"&gt;Deux&lt;/variable&gt;
 &lt;/insert&gt;
 &lt;variable name="str"&gt;Five&lt;/variable&gt;

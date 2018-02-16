@@ -721,6 +721,20 @@ class Block(ABC):
                     return y
         return None
 
+    def object_by_name(self, name):
+        """
+        Get an object with a given id.
+        :return: The object with the specified id or None.
+        """
+        if self.name == name:
+            return self
+        else:
+            for x in self.children:
+                y = x.object_by_name(name)
+                if y is not None:
+                    return y
+        return None
+
     def _doc(self):
         return self.parent._doc()
 
@@ -908,6 +922,15 @@ class BlockInsert(Block):
                     yield from ob.serialize_html(duplicate=True, variables=variables)
                 else:
                     SAM_parser_warning('ID reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
+            elif self.ref_type == 'nameref':
+                ob = self._doc().object_by_name(self.item)
+                if ob:
+                    variables = [x for x in self.children if type(x) is VariableDef]
+                    yield from ob.serialize_html(duplicate=True, variables=variables)
+                else:
+                    SAM_parser_warning(
+                        'Name reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
+                            self.item))
             else:
                 SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
 
@@ -1709,6 +1732,7 @@ class Flow():
         self.children=[]
         self.parent = None
         self.ID = None
+        self.name = None
 
     def object_by_id(self, id):
         """
@@ -1720,6 +1744,20 @@ class Flow():
         else:
             for x in [y for y in self.children if isinstance(y, Span)]:
                 y = x.object_by_id(id)
+                if y is not None:
+                    return y
+        return None
+
+    def object_by_name(self, name):
+        """
+        Get an object with a given id.
+        :return: The object with the specified id or None.
+        """
+        if self.name == name:
+            return self
+        else:
+            for x in [y for y in self.children if isinstance(y, Span)]:
+                y = x.object_by_name(name)
                 if y is not None:
                     return y
         return None
@@ -2002,6 +2040,13 @@ class DocStructure:
         :return: An object with the corresponding ID or none.
         """
         return self.root.object_by_id(id)
+
+    def object_by_name(self, name):
+        """
+        Get an object by name.
+        :return: An object with the corresponding name or none.
+        """
+        return self.root.object_by_name(name)
 
 
 
@@ -2525,6 +2570,16 @@ class Span(ABC):
         else:
             return None
 
+    def object_by_name(self, name):
+        """
+        Get an object with a given name.
+        :return: The object with the specified name or None.
+        """
+        if self.name == name:
+            return self
+        else:
+            return None
+
 
     def _regurgitate_attributes(self, attribute_dict):
         for attr_name, symbol in attribute_dict:
@@ -2963,8 +3018,16 @@ class InlineInsert(Span):
                     SAM_parser_warning(
                         'ID reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
                             self.item))
+            elif self.ref_type == 'nameref':
+                ob = self._doc().object_by_name(self.item)
+                if ob:
+                    yield from ob.serialize_html(duplicate=True)
+                else:
+                    SAM_parser_warning(
+                        'Name reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
+                            self.item))
             else:
-                SAM_parser_warning("HTML output mode does not support inline inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
+                SAM_parser_warning("HTML output mode does not support inline inserts that use key references. They will be omitted. At: [#chapter.architecture]")
 
         else:
             yield '<span class="insert"'

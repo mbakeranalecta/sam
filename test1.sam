@@ -3550,7 +3550,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     $str = One
                     $str = Un
-                    section:(*section.foo) foo
+                    section:(#section.foo) foo
                         $str = Two
 
                         This sentence should end with the word for 2: >($str)
@@ -3562,7 +3562,7 @@ tests:(!en) SAM Parser Tests
 
                         #$str = Six
 
-                    >>>(*section.foo)
+                    >>>(#section.foo)
                         $str = Deux
 
                     $str = Five
@@ -3570,7 +3570,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 $str = One
                 $str = Un
-                section:(*section.foo) foo
+                section:(#section.foo) foo
                     $str = Two
 
                     This sentence should end with the word for 2: >($str)
@@ -3582,7 +3582,7 @@ tests:(!en) SAM Parser Tests
 
                     #$str = Six
 
-                >>>(*section.foo)
+                >>>(#section.foo)
                     $str = Deux
 
                 $str = Five
@@ -3591,7 +3591,7 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <variable name="str">One</variable>
                     <variable name="str">Un</variable>
-                    <section id="section.foo">
+                    <section name="section.foo">
                     <title>foo</title>
                     <variable name="str">Two</variable>
                     <p>This sentence should end with the word for 2: <inline-insert variableref="str"/></p>
@@ -3601,7 +3601,7 @@ tests:(!en) SAM Parser Tests
                     <title>bar</title>
                     <p>This sentence should end with the word for 1: <inline-insert variableref="str"/></p>
                     </section>
-                    <insert idref="section.foo">
+                    <insert nameref="section.foo">
                     <variable name="str">Deux</variable>
                     </insert>
                     <variable name="str">Five</variable>
