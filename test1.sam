@@ -212,7 +212,7 @@ tests:(!en) SAM Parser Tests
                     <head name="foo">
                     <foo>barney <phrase><annotation type="conjunction">and</annotation></phrase> betty</foo>
                     <baz>bat</baz>
-                    <string name="name">fred <phrase><annotation type="conjunction">and</annotation></phrase> wilma</string>
+                    <variable name="name">fred <phrase><annotation type="conjunction">and</annotation></phrase> wilma</variable>
                     <history>
                     <record>
                     <date>2014-06-23</date>
@@ -3520,7 +3520,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <string name="foo">bar bar black sheep</string>
+                    <variable name="foo">bar bar black sheep</variable>
 
         case: String references
             $foo = bar bar black sheep
@@ -3538,8 +3538,8 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                   <string name="foo">bar bar black sheep</string>
-                   <p>This sentence includes a string reference <inline-insert stringref="foo"/>.</p>
+                   <variable name="foo">bar bar black sheep</variable>
+                   <p>This sentence includes a string reference <inline-insert variableref="foo"/>.</p>
 
 
         case: String lookup
@@ -3589,22 +3589,22 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <string name="str">One</string>
-                    <string name="str">Un</string>
+                    <variable name="str">One</variable>
+                    <variable name="str">Un</variable>
                     <section id="section.foo">
                     <title>foo</title>
-                    <string name="str">Two</string>
-                    <p>This sentence should end with the word for 2: <inline-insert stringref="str"/></p>
-                    <string name="str">Four</string>
+                    <variable name="str">Two</variable>
+                    <p>This sentence should end with the word for 2: <inline-insert variableref="str"/></p>
+                    <variable name="str">Four</variable>
                     </section>
                     <section>
                     <title>bar</title>
-                    <p>This sentence should end with the word for 1: <inline-insert stringref="str"/></p>
+                    <p>This sentence should end with the word for 1: <inline-insert variableref="str"/></p>
                     </section>
                     <insert idref="section.foo">
-                    <string name="str">Deux</string>
+                    <variable name="str">Deux</variable>
                     </insert>
-                    <string name="str">Five</string>
+                    <variable name="str">Five</variable>
 
 
 
@@ -3645,11 +3645,11 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <fragment conditions="gruz-natz" name="foo3">
-                    <string name="a">apple</string>
-                    <string name="b">banana</string>
+                    <variable name="a">apple</variable>
+                    <variable name="b">banana</variable>
                     <p>This is a sentence inside a fragment.</p>
                     <fragment name="gruznatz">
-                    <string name="p">peach</string>
+                    <variable name="p">peach</variable>
                     <p>This is a nested fragment.</p>
                     </fragment>
                     </fragment>
@@ -3674,8 +3674,8 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <insert nameref="fragment.foobar">
-                    <string name="a">apricot</string>
-                    <string name="b">breadfruit</string>
+                    <variable name="a">apricot</variable>
+                    <variable name="b">breadfruit</variable>
                     </insert>
 
 

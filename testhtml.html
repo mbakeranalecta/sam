@@ -223,12 +223,8 @@
 <div class="markup">
 <div class="document">
 <div class="head" data-name="foo">
-<div class="foo">
-<h4 class="title">barney <span class="phrase"><span class="annotation" data-annotation-type="conjunction">and</span></span> betty</h4>
-</div>
-<div class="baz">
-<h4 class="title">bat</h4>
-</div>
+<div class="foo">barney <span class="phrase"><span class="annotation" data-annotation-type="conjunction">and</span></span> betty</div>
+<div class="baz">bat</div>
 <div class="variable" data-name="name" hidden>fred <span class="phrase"><span class="annotation" data-annotation-type="conjunction">and</span></span> wilma</div>
 <table class="history">
 <tr class="record">
@@ -277,7 +273,7 @@
 &lt;head name="foo"&gt;
 &lt;foo&gt;barney &lt;phrase&gt;&lt;annotation type="conjunction"&gt;and&lt;/annotation&gt;&lt;/phrase&gt; betty&lt;/foo&gt;
 &lt;baz&gt;bat&lt;/baz&gt;
-&lt;string name="name"&gt;fred &lt;phrase&gt;&lt;annotation type="conjunction"&gt;and&lt;/annotation&gt;&lt;/phrase&gt; wilma&lt;/string&gt;
+&lt;variable name="name"&gt;fred &lt;phrase&gt;&lt;annotation type="conjunction"&gt;and&lt;/annotation&gt;&lt;/phrase&gt; wilma&lt;/variable&gt;
 &lt;history&gt;
 &lt;record&gt;
 &lt;date&gt;2014-06-23&lt;/date&gt;
@@ -418,15 +414,9 @@
 </div>
 <div class="markup">
 <div class="address">
-<div class="name">
-<h4 class="title">Fred Flintstone</h4>
-</div>
-<div class="address">
-<h4 class="title">Bedrock</h4>
-</div>
-<div class="era">
-<h4 class="title">Stone Age</h4>
-</div>
+<div class="name">Fred Flintstone</div>
+<div class="address">Bedrock</div>
+<div class="era">Stone Age</div>
 </div>
 </div>
 <div class="result">
@@ -2434,18 +2424,10 @@ ordered-list-item =
 </code></pre>
 </div>
 <div class="markup">
-<pre class="line" data-name="foo2">
-<h4 class="title">You gotta walk that lonesome valley,<a href="#bing"></a></h4>
-</pre>
-<pre class="line">
-<h4 class="title">You gotta walk it by yourself,</h4>
-</pre>
-<pre class="line" data-conditions="bar">
-<h4 class="title">Nobody here can walk it for you,</h4>
-</pre>
-<pre class="line">
-<h4 class="title">   You gotta walk it by yourself.</h4>
-</pre>
+<pre class="line" data-name="foo2">You gotta walk that lonesome valley,<a href="#bing"></a></pre>
+<pre class="line">You gotta walk it by yourself,</pre>
+<pre class="line" data-conditions="bar">Nobody here can walk it for you,</pre>
+<pre class="line">   You gotta walk it by yourself.</pre>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" idref="bing"/&gt;&lt;/line&gt;
@@ -2472,18 +2454,10 @@ ordered-list-item =
 <div class="markup">
 <blockquote class="blockquote">
 <a href="#bing"></a>
-<pre class="line" data-name="foo2">
-<h4 class="title">You gotta walk that lonesome valley,</h4>
-</pre>
-<pre class="line">
-<h4 class="title">You gotta walk it by yourself,</h4>
-</pre>
-<pre class="line" data-conditions="bar">
-<h4 class="title">Nobody here can walk it for you,</h4>
-</pre>
-<pre class="line">
-<h4 class="title">   You gotta walk it by yourself.</h4>
-</pre>
+<pre class="line" data-name="foo2">You gotta walk that lonesome valley,</pre>
+<pre class="line">You gotta walk it by yourself,</pre>
+<pre class="line" data-conditions="bar">Nobody here can walk it for you,</pre>
+<pre class="line">   You gotta walk it by yourself.</pre>
 </blockquote>
 </div>
 <div class="result">
@@ -2524,9 +2498,7 @@ ordered-list-item =
 <div class="case">
 <h3 class="title">Attributes on block</h3>
 
-<div class="description">
-<h4 class="title">Attributes on a block</h4>
-</div>
+<div class="description">Attributes on a block</div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">block:(!en-CA)(*id2)(#name)(?a)(?b) Title
 
@@ -2551,17 +2523,13 @@ ordered-list-item =
 <div class="case">
 <h3 class="title">Attributes on field</h3>
 
-<div class="description">
-<h4 class="title">Attributes on a field</h4>
-</div>
+<div class="description">Attributes on a field</div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">field:(!en-CA)(*id3)(#name)(?a)(?b) Value of the field.
 </code></pre>
 </div>
 <div class="markup">
-<div class="field" data-conditions="a,b" id="id3" data-name="name" lang="en-CA">
-<h4 class="title">Value of the field.</h4>
-</div>
+<div class="field" data-conditions="a,b" id="id3" data-name="name" lang="en-CA">Value of the field.</div>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;field conditions="a,b" id="id3" name="name" xml:lang="en-CA"&gt;Value of the field.&lt;/field&gt;
@@ -2571,9 +2539,7 @@ ordered-list-item =
 <div class="case">
 <h3 class="title">Attributes on fragment</h3>
 
-<div class="description">
-<h4 class="title">Attributes on a fragment</h4>
-</div>
+<div class="description">Attributes on a fragment</div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">~~~(!en-CA)(*id4)(#name)(?a)(?b)
 
@@ -2595,9 +2561,7 @@ ordered-list-item =
 <div class="case">
 <h3 class="title">attributes on grid</h3>
 
-<div class="description">
-<h4 class="title">Attributes on a grid</h4>
-</div>
+<div class="description">Attributes on a grid</div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">+++(!en-CA)(*id5)(#name)(?a)(?b)
 
@@ -2634,9 +2598,7 @@ ordered-list-item =
 <div class="case">
 <h3 class="title">attributes on record set</h3>
 
-<div class="description">
-<h4 class="title">Attributes on a record set</h4>
-</div>
+<div class="description">Attributes on a record set</div>
 <div class="source">
 <pre class="codeblock" data-language="sam"><code class="codeblock">recordset::(!en-CA)(*id6)(#name)(?a)(?b) foo, bar
 
@@ -2870,18 +2832,10 @@ ordered-list-item =
 </code></pre>
 </div>
 <div class="markup">
-<pre class="line" data-conditions="a,b" id="id9" data-name="name" lang="en-CA">
-<h4 class="title">You gotta walk that lonesome valley,<a href="#bing"></a></h4>
-</pre>
-<pre class="line">
-<h4 class="title">You gotta walk it by yourself,</h4>
-</pre>
-<pre class="line">
-<h4 class="title">Nobody here can walk it for you,</h4>
-</pre>
-<pre class="line">
-<h4 class="title">   You gotta walk it by yourself.</h4>
-</pre>
+<pre class="line" data-conditions="a,b" id="id9" data-name="name" lang="en-CA">You gotta walk that lonesome valley,<a href="#bing"></a></pre>
+<pre class="line">You gotta walk it by yourself,</pre>
+<pre class="line">Nobody here can walk it for you,</pre>
+<pre class="line">   You gotta walk it by yourself.</pre>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;line conditions="a,b" id="id9" name="name" xml:lang="en-CA"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" idref="bing"/&gt;&lt;/line&gt;
@@ -4086,7 +4040,7 @@ that you can define string substitutions whenever you insert a fragment into you
 <div class="variable" data-name="foo" hidden>bar bar black sheep</div>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;string name="foo"&gt;bar bar black sheep&lt;/string&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;variable name="foo"&gt;bar bar black sheep&lt;/variable&gt;
 </code></pre>
 </div>
 </div>
@@ -4107,8 +4061,8 @@ This sentence includes a string reference &gt;($foo).
 <p class="p">This sentence includes a string reference bar bar black sheep.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;string name="foo"&gt;bar bar black sheep&lt;/string&gt;
-&lt;p&gt;This sentence includes a string reference &lt;inline-insert stringref="foo"/&gt;.&lt;/p&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;variable name="foo"&gt;bar bar black sheep&lt;/variable&gt;
+&lt;p&gt;This sentence includes a string reference &lt;inline-insert variableref="foo"/&gt;.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -4165,22 +4119,22 @@ $str = Five
 <div class="variable" data-name="str" hidden>Five</div>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;string name="str"&gt;One&lt;/string&gt;
-&lt;string name="str"&gt;Un&lt;/string&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock">&lt;variable name="str"&gt;One&lt;/variable&gt;
+&lt;variable name="str"&gt;Un&lt;/variable&gt;
 &lt;section id="section.foo"&gt;
 &lt;title&gt;foo&lt;/title&gt;
-&lt;string name="str"&gt;Two&lt;/string&gt;
-&lt;p&gt;This sentence should end with the word for 2: &lt;inline-insert stringref="str"/&gt;&lt;/p&gt;
-&lt;string name="str"&gt;Four&lt;/string&gt;
+&lt;variable name="str"&gt;Two&lt;/variable&gt;
+&lt;p&gt;This sentence should end with the word for 2: &lt;inline-insert variableref="str"/&gt;&lt;/p&gt;
+&lt;variable name="str"&gt;Four&lt;/variable&gt;
 &lt;/section&gt;
 &lt;section&gt;
 &lt;title&gt;bar&lt;/title&gt;
-&lt;p&gt;This sentence should end with the word for 1: &lt;inline-insert stringref="str"/&gt;&lt;/p&gt;
+&lt;p&gt;This sentence should end with the word for 1: &lt;inline-insert variableref="str"/&gt;&lt;/p&gt;
 &lt;/section&gt;
 &lt;insert idref="section.foo"&gt;
-&lt;string name="str"&gt;Deux&lt;/string&gt;
+&lt;variable name="str"&gt;Deux&lt;/variable&gt;
 &lt;/insert&gt;
-&lt;string name="str"&gt;Five&lt;/string&gt;
+&lt;variable name="str"&gt;Five&lt;/variable&gt;
 </code></pre>
 </div>
 </div>
@@ -4223,11 +4177,11 @@ $str = Five
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;fragment conditions="gruz-natz" name="foo3"&gt;
-&lt;string name="a"&gt;apple&lt;/string&gt;
-&lt;string name="b"&gt;banana&lt;/string&gt;
+&lt;variable name="a"&gt;apple&lt;/variable&gt;
+&lt;variable name="b"&gt;banana&lt;/variable&gt;
 &lt;p&gt;This is a sentence inside a fragment.&lt;/p&gt;
 &lt;fragment name="gruznatz"&gt;
-&lt;string name="p"&gt;peach&lt;/string&gt;
+&lt;variable name="p"&gt;peach&lt;/variable&gt;
 &lt;p&gt;This is a nested fragment.&lt;/p&gt;
 &lt;/fragment&gt;
 &lt;/fragment&gt;
@@ -4250,8 +4204,8 @@ $str = Five
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock">&lt;insert nameref="fragment.foobar"&gt;
-&lt;string name="a"&gt;apricot&lt;/string&gt;
-&lt;string name="b"&gt;breadfruit&lt;/string&gt;
+&lt;variable name="a"&gt;apricot&lt;/variable&gt;
+&lt;variable name="b"&gt;breadfruit&lt;/variable&gt;
 &lt;/insert&gt;
 </code></pre>
 </div>
@@ -4263,9 +4217,7 @@ $str = Five
 <div class="description">
 <p class="p">Smart quotes is an optional feature of the parser, not a feature of the SAM language. It turns straight quotes into curly quotes. It raises a warning when it can’t figure out how to handle a case. The algorithm could be improved in the future to handle more cases correctly.</p>
 <p class="p">The canonical way to handle quotes in SAM is to use real curly quotes to begin with. All SAM documents are UTF-8.</p>
-<div class="Note">
-<h3 class="title">These tests will fail if smart quotes is not selected</h3>
-</div>
+<div class="Note">These tests will fail if smart quotes is not selected</div>
 <p class="p">using the <code class="code">-q</code> option of the parser command line or by setting the <code class="code">smart_quotes</code> attribute of the SamParser object to <code class="code">True</code>.</p>
 </div>
 <div class="case">

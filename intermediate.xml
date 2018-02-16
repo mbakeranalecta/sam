@@ -272,7 +272,7 @@ document:
 &lt;head name="foo"&gt;
 &lt;foo&gt;barney &lt;phrase&gt;&lt;annotation type="conjunction"&gt;and&lt;/annotation&gt;&lt;/phrase&gt; betty&lt;/foo&gt;
 &lt;baz&gt;bat&lt;/baz&gt;
-&lt;string name="name"&gt;fred &lt;phrase&gt;&lt;annotation type="conjunction"&gt;and&lt;/annotation&gt;&lt;/phrase&gt; wilma&lt;/string&gt;
+&lt;variable name="name"&gt;fred &lt;phrase&gt;&lt;annotation type="conjunction"&gt;and&lt;/annotation&gt;&lt;/phrase&gt; wilma&lt;/variable&gt;
 &lt;history&gt;
 &lt;record&gt;
 &lt;date&gt;2014-06-23&lt;/date&gt;
@@ -4253,7 +4253,7 @@ $foo = bar bar black sheep
 </markup>
 <result>
 <codeblock language="xml">
-&lt;string name="foo"&gt;bar bar black sheep&lt;/string&gt;
+&lt;variable name="foo"&gt;bar bar black sheep&lt;/variable&gt;
 </codeblock>
 </result>
 </case>
@@ -4276,8 +4276,8 @@ This sentence includes a string reference &gt;($foo).
 </markup>
 <result>
 <codeblock language="xml">
-&lt;string name="foo"&gt;bar bar black sheep&lt;/string&gt;
-&lt;p&gt;This sentence includes a string reference &lt;inline-insert stringref="foo"/&gt;.&lt;/p&gt;
+&lt;variable name="foo"&gt;bar bar black sheep&lt;/variable&gt;
+&lt;p&gt;This sentence includes a string reference &lt;inline-insert variableref="foo"/&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -4332,22 +4332,22 @@ $str = Five
 </markup>
 <result>
 <codeblock language="xml">
-&lt;string name="str"&gt;One&lt;/string&gt;
-&lt;string name="str"&gt;Un&lt;/string&gt;
+&lt;variable name="str"&gt;One&lt;/variable&gt;
+&lt;variable name="str"&gt;Un&lt;/variable&gt;
 &lt;section id="section.foo"&gt;
 &lt;title&gt;foo&lt;/title&gt;
-&lt;string name="str"&gt;Two&lt;/string&gt;
-&lt;p&gt;This sentence should end with the word for 2: &lt;inline-insert stringref="str"/&gt;&lt;/p&gt;
-&lt;string name="str"&gt;Four&lt;/string&gt;
+&lt;variable name="str"&gt;Two&lt;/variable&gt;
+&lt;p&gt;This sentence should end with the word for 2: &lt;inline-insert variableref="str"/&gt;&lt;/p&gt;
+&lt;variable name="str"&gt;Four&lt;/variable&gt;
 &lt;/section&gt;
 &lt;section&gt;
 &lt;title&gt;bar&lt;/title&gt;
-&lt;p&gt;This sentence should end with the word for 1: &lt;inline-insert stringref="str"/&gt;&lt;/p&gt;
+&lt;p&gt;This sentence should end with the word for 1: &lt;inline-insert variableref="str"/&gt;&lt;/p&gt;
 &lt;/section&gt;
 &lt;insert idref="section.foo"&gt;
-&lt;string name="str"&gt;Deux&lt;/string&gt;
+&lt;variable name="str"&gt;Deux&lt;/variable&gt;
 &lt;/insert&gt;
-&lt;string name="str"&gt;Five&lt;/string&gt;
+&lt;variable name="str"&gt;Five&lt;/variable&gt;
 </codeblock>
 </result>
 </case>
@@ -4392,11 +4392,11 @@ $str = Five
 <result>
 <codeblock language="xml">
 &lt;fragment conditions="gruz-natz" name="foo3"&gt;
-&lt;string name="a"&gt;apple&lt;/string&gt;
-&lt;string name="b"&gt;banana&lt;/string&gt;
+&lt;variable name="a"&gt;apple&lt;/variable&gt;
+&lt;variable name="b"&gt;banana&lt;/variable&gt;
 &lt;p&gt;This is a sentence inside a fragment.&lt;/p&gt;
 &lt;fragment name="gruznatz"&gt;
-&lt;string name="p"&gt;peach&lt;/string&gt;
+&lt;variable name="p"&gt;peach&lt;/variable&gt;
 &lt;p&gt;This is a nested fragment.&lt;/p&gt;
 &lt;/fragment&gt;
 &lt;/fragment&gt;
@@ -4425,8 +4425,8 @@ $str = Five
 <result>
 <codeblock language="xml">
 &lt;insert nameref="fragment.foobar"&gt;
-&lt;string name="a"&gt;apricot&lt;/string&gt;
-&lt;string name="b"&gt;breadfruit&lt;/string&gt;
+&lt;variable name="a"&gt;apricot&lt;/variable&gt;
+&lt;variable name="b"&gt;breadfruit&lt;/variable&gt;
 &lt;/insert&gt;
 </codeblock>
 </result>

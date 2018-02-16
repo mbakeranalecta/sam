@@ -821,11 +821,14 @@ class Block(ABC):
                 yield from x.serialize_html()
 
         if self.content:
-            title_depth = len(list(x for x in self.ancestors_and_self() if x.content))
-            heading_level = title_depth if title_depth < 6 else 6
-            yield '\n<h{0} class="title">'.format(heading_level)
-            yield from self.content.serialize_html(duplicate, variables)
-            yield "</h{0}>\n".format(heading_level)
+            if self.children:
+                title_depth = len(list(x for x in self.ancestors_and_self() if x.content))
+                heading_level = title_depth if title_depth < 6 else 6
+                yield '\n<h{0} class="title">'.format(heading_level)
+                yield from self.content.serialize_html(duplicate, variables)
+                yield "</h{0}>\n".format(heading_level)
+            else:
+                yield from self.content.serialize_html(duplicate, variables)
 
         if self.children:
             if type(self.children[0]) is not Flow:
