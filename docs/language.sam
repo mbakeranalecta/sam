@@ -786,7 +786,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 resource in parentheses:
 
                 ```(sam)
-                    My favorite flavor of ice cream is >[$favorite-flavor].
+                    My favorite flavor of ice cream is >($favorite-flavor).
 
 
                 The resource to be inserted may be identified either by type and URL as in the block example above or by
@@ -797,7 +797,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 the introduction to the deluxe version of a product, you could do this:
 
                 ```(sam)
-                    >>>[~deluxe-intro](?model=deluxe)
+                    >>>(~deluxe-intro)(?model=deluxe)
 
                 Remember that it is up to the application layer to implement such inserts.
 
