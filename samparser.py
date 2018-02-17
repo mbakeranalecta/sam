@@ -29,7 +29,8 @@ re_ll_marker = r'\|(?P<label>\S.*?)(?<!\\)\|'
 re_spaces = r'\s+'
 re_one_space = r'\s'
 re_comment = r'#(?P<comment>.*)'
-re_citation = r'(\[\s*\*(?P<id>\S+)(?P<id_extra>.*?)\])|(\[\s*\#(?P<name>\S+)(?P<name_extra>.*?)\])|(\[\s*(?P<citation>.*?)\])'
+re_citation = r'(\[\s*\*(?P<id>\S+)(?P<id_extra>.*?)\])|(\[\s*\#(?P<name>\S+)' \
+              r'(?P<name_extra>.*?)\])|(\[\s*(?P<citation>.*?)\])'
 
 
 block_patterns = {
@@ -38,7 +39,8 @@ block_patterns = {
                 re_indent + r'(?P<flag>!!!)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
                 re.U),
             'declaration': re.compile(re_indent + '!' + re_name + r'(?<!\\):' + re_content + r'?', re.U),
-            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes + '((\s' + re_content + r'?)|$)', re.U),
+            'block-start': re.compile(re_indent + re_name + r'(?<!\\):' + re_attributes +
+                                      '((\s' + re_content + r'?)|$)', re.U),
             'codeblock-start': re.compile(
                 re_indent + r'(?P<flag>```)(' + re_attributes + ')?\s*(?P<unexpected>.*)',
                 re.U),
@@ -53,11 +55,13 @@ block_patterns = {
             'paragraph-start': re.compile(r'\w*', re.U),
             'line-start': re.compile(re_indent + r'\|' + re_attributes + re_one_space + re_content, re.U),
             'blank-line': re.compile(r'^\s*$'),
-            'record-start': re.compile(re_indent + re_name + r'(?<!\\)::' + re_attributes + '(?P<field_names>.*)', re.U),
+            'record-start': re.compile(re_indent + re_name + r'(?<!\\)::' + re_attributes +
+                                       '(?P<field_names>.*)', re.U),
             'list-item': re.compile(re_indent + re_ul_marker + re_attributes + re_spaces + re_content, re.U),
             'num-list-item': re.compile(re_indent + re_ol_marker + re_attributes + re_spaces + re_content, re.U),
             'labeled-list-item': re.compile(re_indent + re_ll_marker + re_attributes + re_spaces + re_content, re.U),
-            'block-insert': re.compile(re_indent + r'>>>((\((?P<insert>.+?)\))|(\[(?P<ref>.*?(?<!\\))\]))(' + re_attributes + ')?\s*(?P<unexpected>.*)', re.U),
+            'block-insert': re.compile(re_indent + r'>>>((\((?P<insert>.+?)\))|(\[(?P<ref>.*?(?<!\\))\]))'
+                                                   r'(' + re_attributes + ')?\s*(?P<unexpected>.*)', re.U),
             'include': re.compile(re_indent + r'<<<' + re_attributes, re.U),
             'variable-def': re.compile(re_indent + r'\$' + re_name + '\s*=\s*' + re_content, re.U)
         }
@@ -92,7 +96,9 @@ flow_patterns = {
             'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
             'inline-insert': re.compile(r'>((\((?P<insert>.+?)\)))' + re_attributes, re.U),
             'citation': re.compile(
-                r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\%(?P<key>\S+?)(\s+(?P<key_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
+                r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\%(?P<key>\S+?)'
+                r'(\s+(?P<key_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)'
+                r'(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
                 re.U)
         }
 
@@ -181,7 +187,8 @@ class SamParser:
         try:
             self.stateMachine.run((self.source, None))
         except SAMParserStructureError as err:
-            raise SAMParserError("Structure error: {0} at line {1}:\n\n {2}\n".format(' '.join(err.args), self.source.current_line_number,  self.source.current_line))
+            raise SAMParserError("Structure error: {0} at line {1}:\n\n {2}\n".format(
+                ' '.join(err.args), self.source.current_line_number,  self.source.current_line))
         except EOFError:
             raise SAMParserError("Document ended before structure was complete.")
         return self.doc
@@ -200,7 +207,8 @@ class SamParser:
     def _codeblock_start(self, context):
         source, match = context
         if match.group("unexpected"):
-            raise SAMParserStructureError('Unexpected characters in codeblock header. Found "{0}"'.format(match.group("unexpected")))
+            raise SAMParserStructureError('Unexpected characters in codeblock header. '
+                                          'Found "{0}"'.format(match.group("unexpected")))
         indent = match.end("indent")
 
         attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?!=", unflagged="code_language")
@@ -789,7 +797,9 @@ class Block(ABC):
         yield from self._serialize_attributes(self._attribute_serialization_xml)
 
         if not self.children and not self.content:
-            SAM_parser_warning("Block with neither content not children detected. Are you sure this is what you meant? Perhaps this was intended as plain text:\n\n{0}".format(self))
+            SAM_parser_warning("Block with neither content not children detected. "
+                               "Are you sure this is what you meant? "
+                               "Perhaps this was intended as plain text:\n\n{0}".format(self))
 
         if self.children or self.citations:
             yield ">"
@@ -827,7 +837,9 @@ class Block(ABC):
         yield '>'
 
         if not self.children and not self.content:
-            SAM_parser_warning("Block with neither content not children detected. Are you sure this is what you meant? Perhaps this was intended as plain text:\n\n{0}".format(self))
+            SAM_parser_warning("Block with neither content not children detected. "
+                               "Are you sure this is what you meant? "
+                               "Perhaps this was intended as plain text:\n\n{0}".format(self))
 
         if self.citations:
             for x in self.citations:
@@ -855,7 +867,8 @@ class Block(ABC):
 
 class BlockInsert(Block):
     def __init__(self, indent, insert_type, ref_type, item, attributes={}, citations=None, namespace=None):
-        super().__init__(block_type='insert', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type='insert', indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
         self.insert_type = insert_type
         self.ref_type =ref_type
         self.item = item
@@ -931,7 +944,8 @@ class BlockInsert(Block):
                     yield from ob.serialize_html(duplicate=True, variables=variables)
                 else:
                     SAM_parser_warning(
-                        'Name reference "{0}" could not be resolved. It will be omitted from HTML output. At: '.format(
+                        'Name reference "{0}" could not be resolved. '
+                        'It will be omitted from HTML output. At: '.format(
                             self.item))
             else:
                 SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. "
@@ -963,9 +977,11 @@ class BlockInsert(Block):
                 yield '<object data="{0}"></object>'.format(self.item)
             else:
                 if not self.insert_type in known_insert_types:
-                    SAM_parser_warning('HTML output mode does not support the "{0}" insert type. They will be omitted. At: {1}'.format(self.insert_type, str(self).strip()))
+                    SAM_parser_warning('HTML output mode does not support the "{0}" insert type. '
+                                       'They will be omitted. At: {1}'.format(self.insert_type, str(self).strip()))
                 if not item_extension.lower() in known_file_types:
-                    SAM_parser_warning('HTML output mode does not support the "{0}" file type. They will be omitted.At: {1}'.format(item_extension, str(self).strip()))
+                    SAM_parser_warning('HTML output mode does not support the "{0}" file type. '
+                                       'They will be omitted.At: {1}'.format(item_extension, str(self).strip()))
 
             yield '</div>\n'
 
@@ -992,7 +1008,8 @@ class Codeblock(Block):
                                      ('language_code', 'lang')]
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
         self.code_language=None
-        super().__init__(block_type='codeblock', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type='codeblock', indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
 
 
 
@@ -1068,7 +1085,8 @@ class Embedblock(Block):
 
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
         self.encoding=None
-        super().__init__(block_type='embedblock', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type='embedblock', indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
 
     def regurgitate(self):
         yield " " * int(self.indent)
@@ -1098,7 +1116,8 @@ class Embedblock(Block):
             yield '/>\n'
 
     def serialize_html(self, duplicate=False, variables=[]):
-        SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted. At: " + str(self).strip())
+        SAM_parser_warning("HTML output mode does not support embedded encodings. "
+                           "They will be omitted. At: " + str(self).strip())
         yield ''
 
 
@@ -1124,7 +1143,8 @@ class Remark(Block):
                                      ('language_code', 'lang')]
     html_name='div'
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
-        super().__init__(block_type='remark', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type='remark', indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
         self.attribution=attributes['attribution']
 
     def __str__(self):
@@ -1143,7 +1163,8 @@ class Remark(Block):
 class Grid(Block):
     html_tag = 'table'
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
-        super().__init__(block_type='grid', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type='grid', indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -1203,7 +1224,8 @@ class Cell(Block):
 class Line(Block):
     html_tag = 'pre'
     def __init__(self, indent, attributes, content, citations=None, namespace=None):
-        super().__init__(block_type='line', indent=indent, attributes=attributes, content=content, citations=citations, namespace=namespace)
+        super().__init__(block_type='line', indent=indent, attributes=attributes, content=content,
+                         citations=citations, namespace=namespace)
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -1221,7 +1243,8 @@ class Line(Block):
 
 class Fragment(Block):
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
-        super().__init__(block_type='fragment', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type='fragment', indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -1238,7 +1261,8 @@ class Fragment(Block):
 class Blockquote(Block):
     html_tag = "blockquote"
     def __init__(self, indent, attributes={}, citations=None, namespace=None):
-        super().__init__(block_type='blockquote', indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type='blockquote', indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -1258,7 +1282,8 @@ class Blockquote(Block):
 class RecordSet(Block):
     html_tag = "table"
     def __init__(self, block_type, field_names, indent, attributes={}, citations=None, namespace=None):
-        super().__init__(block_type=block_type, indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type=block_type, indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
         self.field_names = field_names
 
     def __str__(self):
@@ -1406,12 +1431,14 @@ class ListItem(Block):
     html_tag = "li"
     @abstractmethod
     def __init__(self, block_type, indent, attributes={}, citations=None, namespace=None):
-        super().__init__(block_type=block_type, indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type=block_type, indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
 
 
 class OrderedListItem(ListItem):
     def __init__(self, indent, attributes={}, citations=None,  namespace=None):
-        super().__init__(block_type="li", indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type="li", indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -1443,7 +1470,8 @@ class UnorderedListItem(ListItem):
 
 class LabeledListItem(ListItem):
     def __init__(self, indent, label, attributes={}, citations=None,  namespace=None):
-        super().__init__(block_type="li", indent=indent, attributes=attributes, citations=citations, namespace=namespace)
+        super().__init__(block_type="li", indent=indent, attributes=attributes,
+                         citations=citations, namespace=namespace)
         self.label = label
 
     def __str__(self):
@@ -2725,7 +2753,8 @@ class Code(Phrase):
 
     def serialize_html(self, duplicate=False, variables=[]):
         if self.encoding:
-            SAM_parser_warning("HTML output mode does not support embedded encodings. They will be omitted. At: " + str(self).strip())
+            SAM_parser_warning("HTML output mode does not support embedded encodings. "
+                               "They will be omitted. At: " + str(self).strip())
             yield ''
         else:
             yield '<code class="code"'
@@ -2934,7 +2963,8 @@ class Citation:
             yield from recurse()
             yield '</a>'
         else:
-            SAM_parser_warning("HTML output mode does not support inserts that use name or key refernces. They will be omitted. At: " + str(self).strip())
+            SAM_parser_warning("HTML output mode does not support inserts that use name or key refernces. "
+                               "They will be omitted. At: " + str(self).strip())
 
 
     def append(self, thing):
@@ -3012,7 +3042,8 @@ class InlineInsert(Span):
                 if variable_content:
                     yield from variable_content.serialize_html()
                 else:
-                    SAM_parser_warning('Variable reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
+                    SAM_parser_warning('Variable reference "{0}" could not be resolved. '
+                                       'It will be omitted from HTML output.'.format(self.item))
             elif self.ref_type == 'idref':
                 ob = self._doc().object_by_id(self.item)
                 if ob:
@@ -3059,9 +3090,11 @@ class InlineInsert(Span):
                 yield '<object data="{0}"></object>'.format(self.item)
             else:
                 if not self.insert_type in known_insert_types:
-                    SAM_parser_warning('HTML output mode does not support the "{0}" insert type. They will be omitted.'.format(self.insert_type))
+                    SAM_parser_warning('HTML output mode does not support the "{0}" insert type. '
+                                       'They will be omitted.'.format(self.insert_type))
                 if not item_extension.lower() in known_file_types:
-                    SAM_parser_warning('HTML output mode does not support the "{0}" file type. They will be omitted.'.format(item_extension))
+                    SAM_parser_warning('HTML output mode does not support the "{0}" file type. '
+                                       'They will be omitted.'.format(item_extension))
 
             yield '</span>\n'
 
@@ -3090,14 +3123,16 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         elif x.group("cit") is not None:
             citations_list.append(x.group("cit").strip())
         else:
-            raise SAMParserStructureError('Unrecognized character "{0}" found in attributes list.'.format(x.group('bad')))
+            raise SAMParserStructureError('Unrecognized character "{0}" found in attributes list.'.format(
+                x.group('bad')))
 
     unflagged_attributes = [x for x in attributes_list if not (x[0] in '?#*!=')]
     if unflagged_attributes:
         if unflagged is None:
             raise SAMParserStructureError("Unexpected attribute(s). Found: {0}".format(', '.join(unflagged_attributes)))
         elif len(unflagged_attributes) > 1:
-            raise SAMParserStructureError("More than one {0} attribute specified. Found: {1}".format(unflagged, ', '.join(unflagged_attributes)))
+            raise SAMParserStructureError("More than one {0} attribute specified. Found: {1}".format(
+                unflagged, ', '.join(unflagged_attributes)))
         else:
             attributes[unflagged] = unescape(unflagged_attributes[0])
     ids = [x[1:] for x in attributes_list if x[0] == '*']
@@ -3112,12 +3147,15 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         raise SAMParserStructureError('More than one name specified. Found: #{0}'.format(", #".join(names)))
     language_tag = [x[1:] for x in attributes_list if x[0] == '!']
     if language_tag and not '!' in flagged:
-        raise SAMParserStructureError('Language tag not allowed in this context. Found: !{0}'.format(', !'.join(language_tag)))
+        raise SAMParserStructureError('Language tag not allowed in this context. Found: !{0}'.format(
+            ', !'.join(language_tag)))
     if len(language_tag) > 1:
-        raise SAMParserStructureError('More than one language tag specified. Found: !{0}'.format(", !".join(language_tag)))
+        raise SAMParserStructureError('More than one language tag specified. Found: !{0}'.format(
+            ", !".join(language_tag)))
     embed = [x[1:] for x in attributes_list if x[0] == '=']
     if embed and not '=' in flagged:
-        raise SAMParserStructureError('Embeded encoding specification not allowed in this context. Found: !{0}'.format(', !'.join(embed)))
+        raise SAMParserStructureError('Embeded encoding specification not allowed in this context. Found: !{0}'.format(
+            ', !'.join(embed)))
     if len(embed) > 1:
         raise SAMParserStructureError('More than one embedded encoding specified. Found: {0}.',format(", ".join(embed)))
     conditions = [unescape(x[1:]) for x in attributes_list if x[0] == '?']
@@ -3132,7 +3170,8 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     if conditions:
         attributes["conditions"] = conditions
 
-    re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*))|(\s*\%(?P<key>\S+)(?P<key_extra>.*))|(\s*\#(?P<name>\S+)(?P<name_extra>.*))|(\s*(?P<citation>.*))'
+    re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*))|(\s*\%(?P<key>\S+)(?P<key_extra>.*))|(\s*\#(?P<name>\S+)' \
+                 r'(?P<name_extra>.*))|(\s*(?P<citation>.*))'
 
 
     for c in citations_list:
@@ -3205,7 +3244,8 @@ def parse_insert(insert):
 
 
 def escape_for_sam(s):
-    t = dict(zip([ord('['), ord('{'), ord('&'), ord('\\'), ord('*'), ord('_'), ord('`')], ['\\[', '\\{', '\\&', '\\\\', '\\*', '\\_', '\\`']))
+    t = dict(zip([ord('['), ord('{'), ord('&'), ord('\\'), ord('*'), ord('_'), ord('`')],
+                 ['\\[', '\\{', '\\&', '\\\\', '\\*', '\\_', '\\`']))
     try:
         return s.translate(t)
     except AttributeError:
@@ -3317,14 +3357,17 @@ if __name__ == "__main__":
     outputgroup.add_argument("-outdir", "-od", help="the name of output directory")
     argparser.add_argument("-xslt", "-x", help="name of xslt file for postprocessing output")
     intermediategroup = argparser.add_mutually_exclusive_group()
-    intermediategroup.add_argument("-intermediatefile", "-i", help="name of file to dump intermediate XML to when using -xslt")
-    intermediategroup.add_argument("-intermediatedir", "-id", help="name of directory to dump intermediate XML to when using -xslt")
+    intermediategroup.add_argument("-intermediatefile", "-i",
+                                   help="name of file to dump intermediate XML to when using -xslt")
+    intermediategroup.add_argument("-intermediatedir", "-id",
+                                   help="name of directory to dump intermediate XML to when using -xslt")
     argparser.add_argument("-xsd", help="Specify an XSD schema to validate generated XML")
     argparser.add_argument("-outputextension", "-oext",  nargs='?', const='.xml', default='.xml')
     argparser.add_argument("-intermediateextension", "-iext",  nargs='?', const='.xml', default='.xml')
     argparser.add_argument("-regurgitate", "-r", help="regurgitate the input in normalized form",
                            action="store_true")
-    argparser.add_argument("-smartquotes", "-sq", help="the path to a file containing smartquote patterns and substitutions")
+    argparser.add_argument("-smartquotes", "-sq",
+                           help="the path to a file containing smartquote patterns and substitutions")
     argparser.add_argument("-html", action="store_true", help="Output HTML instead of XML. Use with -css and -script")
     argparser.add_argument("-css",  nargs='+', help="Add a call to a CSS stylesheet in HTML output mode.")
     argparser.add_argument("-javascript", nargs='+', help="Add a call to a script in HTML output mode.")
@@ -3377,12 +3420,14 @@ if __name__ == "__main__":
 
                     if args.outdir:
                         outputfile = os.path.join(args.outdir,
-                                                  os.path.splitext(os.path.basename(inputfile))[0] + args.outputextension)
+                                                  os.path.splitext(
+                                                      os.path.basename(inputfile))[0] + args.outputextension)
                     else:
                         outputfile = args.outfile
 
                     if args.intermediatedir:
-                        intermediatefile=os.path.join(args.intermediatedir, os.path.splitext(os.path.basename(inputfile))[0] + args.intermediateextension)
+                        intermediatefile=os.path.join(args.intermediatedir, os.path.splitext(
+                            os.path.basename(inputfile))[0] + args.intermediateextension)
                     else:
                         intermediatefile=args.intermediatefile
 
