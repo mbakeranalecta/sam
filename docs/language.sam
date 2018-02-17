@@ -175,7 +175,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 * The {root} block.
                 * One of more {comment}s, or {remark}s.
 
-            serialization:
+            xml-serialization:
 
                 None. Only the children of the root are serialized.
 
@@ -199,7 +199,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 The {document block} determines the type of the SAM document (just as the root element name in XML forms the type of an XML document). In all other respects, the semantics of the {document block} are no different from the semantics of that structure type. 
 
-            serialization:
+            xml-serialization:
 
                 The {document block} is serialized according to its block type. In addition, however, if a namespace is declared for the document, the appropriate namespace declaration will be added to the root element generated. 
 
@@ -236,7 +236,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                                * *off* (default) Smart quotes processing is not performed.
                                * <custom> Smart quotes processing is performed using a custom rule set provided by the parser. The default parser supports this via an XML file which is specified on the command line using the -sq option. Other parsers are free to support smart quotes or not, and to support custom smart quotes rules or not using a mechanism of their choice.
 
-            serialization:
+            xml-serialization:
                 The namespace declaration causes the namespace of a document to be set to the specified namespace. This will result in the appropriate namespace declaration in the serialized XML file. A parser may handle namespace prefixes in any way it sees fit. 
 
             SOM:
@@ -294,7 +294,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 Structurally, the title of a {block} is its value, in just the same way that the content of a field is its value. 
 
 
-            serialization:
+            xml-serialization:
             
                 Thus the SAM markup above would create the following XML output:
                 
@@ -405,7 +405,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 note:
                     It should be noted that the lack of arbitrary named attributes does not reduce the semantic flexibility of SAM as compared to XML. Any metadata that can be expressed by an attribute on a block can also be expressed by a field that is a child of that block. The reason for using attributes in XML is to preserve a pure distinction between text and metadata, but that is not a design consideration in SAM, which is meant for the creation of new text through structured writing, not for the annotation of existing texts for study.
 
-            serialization:
+            xml-serialization:
                 Attributes are represented in XML by XML attributes on the block element. 
 
                 * {language} is represented by and `xml:lang` attribute. 
@@ -437,7 +437,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 A {field} is essentially a way of creating a key-value pair in a document. 
 
-            serialization:
+            xml-serialization:
                     
                 A field is serialized as an XML element. The field content is the data content of the XML element. The name of the XML element matches the name of the field. Thus the example above would be serialized as:
                 
@@ -465,7 +465,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             semantics:
                 The text in a {flow} is simply text, along with any intra-textual structures it contains. 
 
-            serialization:
+            xml-serialization:
                 The flow object is not represented as an object in XML. Its content becomes the content of whatever element is created to represent the structure that contains the flow.
 
             SOM: 
@@ -510,7 +510,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             semantics:
                 A paragraph is block of text.
 
-            serialization:
+            xml-serialization:
                     
                 A paragraph is serialized as a XML `p` element. Thus the example above would be serialized as the following XML:
                 
@@ -545,7 +545,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             semantics:
                 A phrase has no semantics of its own. Its semantics are determined by any {annotation}s attached to it. 
 
-            serialization:
+            xml-serialization:
                 A phrase is serialized as a `phrase` element in XML.
 
                 ```(xml) 
@@ -591,7 +591,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 The key to using the annotation attributes correctly is simply to make sure that the attribute names apply in a reasonable fashion to the values they contain. If they don't, a different markup strategy should be used. 
 
-            serialization:
+            xml-serialization:
 
                 An annotation is serialized as an `<annotation>` element. The type, specifically, and namespace attributes become attributes with those names in XML. 
 
@@ -674,7 +674,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 Additional information in a citation is simply passed through to the application layer. SAM does not specify any semantics for it. 
 
-            serialization:
+            xml-serialization:
 
                 A {citation} is output as a `<citation>` element in XML. 
 
@@ -753,6 +753,20 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                     2018-01-29, jsmith, draft, Added info on haggis
                     2018-02-04, ajones, approved, Reviewed and approved with minor changes
 
+            semantics:
+                A record set is a simple database table. Its purpose is to provide a {subjet
+                domain} container for some of the classes of information that are commonly presented
+                as tables in the {document domain}, allowing greater freedom to query the 
+                information in the document or to present the information in various different ways.
+
+            xml-xml-serialization:
+
+
+            html-xml-serialization:
+
+            SOM:
+                A recordset is represented by a RecordSet object. Each record is represented by
+                Record object which is a child of the RecordSet object.
 
         structure:(#insert) Insert
 
@@ -776,7 +790,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
 
                 The resource to be inserted may be identified either by type and URL as in the block example above or by
-                reference to an {id}, {name}, {fragment}, {string}, or {key} as in the flow example.
+                reference to an {id}, {name}, {variable}, or {key} as in the flow example.
 
 
                 You can also assign {name}s, {condition}s, or {id}s to an insert. For example, to insert a fragment containing
@@ -811,18 +825,14 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 |app| Insert an embedded app into the output. 
                 |object| Inserts a generic object (per HTML5 'object' tag.)
 
-                The semantics of inserting by reference to an {ID}, {name}, {fragment}, or {string}, or {key} are as follows:
+                The semantics of inserting by reference to an {ID}, {name}, or {variable}, or {key} are as follows:
 
                 |a SAM {ID}| Insert the resource pointed to by the {ID} in a manner appropriate to its type.
                 |a SAM {name}| Insert the resource pointed to by the {name} in a manner appropriate to its type. 
-                |a SAM {fragment}| Insert the content of the {fragment} into this location in the document, and process any structures it contains. 
-                |a SAM {string}| Insert the value of the string variable into the document, and process any structures it contains.
+                |a SAM {variable}| Insert the value of the variable into the document, and process any structures it contains.
                 |a SAM {key}| Insert the resource pointed to by the {key} in a manner appropriate to its type.
 
                 Note that you are not obliged to use any of these types in order to do their assigned functions. You can devise any insert types you like, since responsibility for implementing them rests entirely with the application layer. The constraint is that you should not assign other semantics to these names. Having a standard set simply allows for editors to presume the semantics of the basic types and act on them if they wish.
-
-            future: 
-                It is currently possible to nest any structure as a child of an insert. This is to support the redefinition of {strings} in when inserting {fragments}. There does not seem to be any other use case for this, so it should probably be constrained at some level. Issue {120}(issue) tracks this.
 
         structure:(#include) Include
 
@@ -848,7 +858,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 For similar reasons, an include cannot have a {name}, {id}, or {language} attribute, since the include instruction itself is not present in the output. If you need to apply any of these things to the included content, you can wrap the include statement in another structure such as a {block} or a {fragment} and apply the attributes to that. This will
                 result in the included content being wrapped in that block or fragment in the output where the application layer can deal with it appropriately.
 
-            serialization:
+            xml-serialization:
                 Include instructions are not serialized on output. Their content resulting from processing the include is serialized as it would have been if it were entered inline. 
 
             SOM:
@@ -857,55 +867,61 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             future: 
                 There is a proposal to decorate the IDs occurring in an included file to ensure they do not overlap those of the including file. See issue {104}(issue). 
 
-        structure:(#string) String
+        structure:(#variable) Variable
 
-            A string is a way of defining a variable to represent a value. 
+            A variable is a way to store a value (specifically, a {Flow}) that can be inserted 
+            into any part of a document. Variable definitions are scoped, meaning that you can locally
+            override the value of a variable. This can be used to replace values in a block of
+            text that is reused by reference. 
 
             syntax:
 
-                A string definition is created by the appropriate indent followed by a `$` and a {name-like-string} followed by an `=` and the value of the string. The string value ends at the end of the current line:
+                A variable definition is created by the appropriate indent followed by a `$` and a {name-like-string} followed by an `=` and the value of the variable. The variable value ends at the end of the current line:
 
                 ```(sam)
                     $foo = bar
 
-                The string can then be inserted using a {block insert} or {inline insert}:
+                The variable can then be inserted using a {block insert} or {inline insert}:
 
                 ```(sam)
-                    The sentence includes a string insert >[$foo].
+                    The sentence includes a string insert >($foo).
 
-                    >>>[$foo])
+                    >>>($foo)
 
+                Variable definitions do not take any {attributes}. The variable name is a {name token}. 
 
+                In XML output mode, the resolution of variables is left to the {application layer}.
+                This allows the application layer to consider variables definitions from outside 
+                the local file. 
 
-                String definitions do not take any attributes. The string name is a {name token}. String ids are not supported. If
-                you want to make string definitions conditional, use fragments.
+                In HTML output mode, variables are resolved using definitions in the local file. 
+                A warning is issued if the variable cannot be resolved and the insertion is skipped. 
 
-                ```(sam)
-                    ~~~(?foo)
-                        $foo = bar
+            semantics: 
 
-                But remember that the resolution of strings is left to the {application layer} so if you do this make sure your {application layer} code handles it correctly.
+                Within a local file, variable are local to the scope in which they are defined.
+                
+                When resolving a variable, the application layer should first look at any variable definitions that are children of the insert statement. If no matching variable 
+                definition is found, it should then work its way up the tree, looking in the parent
+                structure and then the preceding siblings of the parent structure and so on to the 
+                document root. Note that this is not the same as searching in reverse document order,
+                since it does not look in children of preceding siblings. 
 
-            semantics:
-            
-                String handling occurs in the {application layer}.
-
-                The semantics of string definitions are: 
-
-                * Within a local file, strings are local to the scope in which they are defined.
-                * Within a local file, a later definition of a string overrides an earlier definition.
-                * Strings defined in a {fragment} insert override the strings defined in the {fragment}.
-                * Within a local file, a local definition of string overrides a more global definition of a string.
-
-                The application layer is entitled to introduce string definitions from outside the local file and to impose its own rules on precedence for such strings.
+                The application layer is entitled to introduce variable definitions from outside the local file. Such variables should always be last in the search order for variable 
+                definitions. In other words, the most local definition always wins. System designers 
+                may want to consider imposing variable naming conventions to avoid accidental 
+                variable name conflicts. 
 
         structure:(#fragment) Fragment 
 
-            A fragment is a chunk of content that is set off so that it can be managed separately from the rest of the document. Reasons for creating a fragment could include making a chunk of the document conditional or available for reuse. 
+            A fragment is a chunk of content that is set off so that it can be managed separately from the rest of the document. Reasons for creating a fragment could include making a chunk of the document conditional or available for reuse. A fragment is essentially a block of 
+            content that has no semantic identity of its own, but exists only to be managed arbitrarily, such as for ad hoc reuse of text that is not based on reusing a 
+            complete {semantic block}. Examples include passages that are conditionalized for 
+            use in different contexts. 
 
             syntax:            
 
-                Fragments are created by a token followed by an open curly brace at the start of a line: 
+                Fragments are created beginning a line with the `~` characters:
 
                 ```(sam)
 
@@ -917,23 +933,32 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                     This paragraph is outside the fragment again and will always be included.
 
-                You can define a string inside a fragment and use that string in the definition of the fragment text:
+                You can allow for the redefinition of parts of the text of a fragment by defining a variable inside a fragment and use that variable in the definition of the fragment text:
 
                 ```(sam) 
                     ~~~(#my-fragment) 
                         $color=black 
-                        Bar bar >[$color] sheep Have you any wool? 
+                         
 
                 To insert a fragment: 
 
                 ```(sam) 
-                    >>>[~my-fragment]
+                    >>>(#my-fragment)
                 
-                Any strings defined within a fragment are scoped to that fragment (per normal {string} scoping rules. You can override these strings when you insert the fragment. In fact, you can override any in-scope strings in a fragment insert. String definitions must each be on a line by themselves. 
+                As per the {variable} scoping rules, any redefinition of those variable as children 
+                of the insert will override the values in the fragment. Thus:
 
                 ```(sam)
-                    >>>[~my-fragment]
+                    >>>(#my-fragment)
                         $color=white
+
+                should be resolved to:
+
+                ```
+                    Bar bar white sheep Have you any wool?
+
+                (But remember that {variable} resolution is performed by the {application layer} in
+                {XML output mode} but by the SAM parser in {HTML output mode}.)
 
             semantics:
 
@@ -945,7 +970,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 Fragments can be nested inside other fragments. Fragments can contain {inserts} of other fragments. Circular fragment references are illegal but must be caught at the application layer. 
 
-            serialization:
+            xml-serialization:
 
                 A fragment is serialized to XML as follows:
 
@@ -1001,7 +1026,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                         ```(sam)
                             La Plume de ma Tante.
 
-            serialization:
+            xml-serialization:
 
                 A codeblock is serialized like this:
 
@@ -1037,7 +1062,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 Note that SAM knows nothing about the embedded markup and does not processes it in any way. It merely captures it and sends it on to the application layer.
 
-            serialization:
+            xml-serialization:
                 An {embed} is serialized as follows:
 
                 ```(xml)
@@ -1064,7 +1089,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             semantics:
                 A blockquote is just like any other block with the exception that it is allowed to have a citation. The material inside a blockquote is treated as regular SAM markup and is processed as such.
 
-            serialization:
+            xml-serialization:
                 A blockquote is serialized as follows:
 
                 ```(xml)
@@ -1108,7 +1133,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             semantics:
                 A line is a line of text with a fixed line break. Unlike a {codeblock}, the contents of a line are a regular SAM {flow}. 
 
-            serialization:
+            xml-serialization:
                 A line is serialized as follows.
 
                 ```(xml)
@@ -1182,7 +1207,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 Note that when an {unordered list} follows a {paragraph}, it is a sibling of that {paragraph}. A list cannot be the child of a {paragraph} since a paragraphs cannot have children. 
 
-            serialization:
+            xml-serialization:
                 An ordered list is serialized as follows. Note that the content of a list item is always wrapped in a `<p>` tag. 
 
                 ```(sam)
@@ -1268,7 +1293,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             semantics:
                 A {labeled list} is simply as list with a label instead of a bullet. There is no restriction built into the language as to what structures you can nest under a definition list item, but prudence would suggest that it would be appropriate to restrict things in the schema. 
 
-            serialization:
+            xml-serialization:
 
                 A {labeled list} is serialized as follows:
 
@@ -1324,7 +1349,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 Note that SAM is primarily intended for creating {subject domain} languages and as such it does not provide native support for complex tables, which are document domain objects. {Record sets} are the SAM-like way to represent real record data. To create document domain tables in SAM, you would need to create a table markup using {blocks} and {fields}. Another alternative would be to use {embedded}(feature "embedded markup") XML.
 
-            serialization:
+            xml-serialization:
                 Grids are serialized as follows: 
 
                 ```(xml)
@@ -1405,7 +1430,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             semantics:
                 Remarks are intended for communication between authors, editors, and reviewers during the preparation of the document. They may be presented in editors or in draft versions of output. They do not form part of the finished document.
 
-            serialization:
+            xml-serialization:
                 The XML representation of a {remark} is as follows:
 
                 ```(xml)
@@ -1500,7 +1525,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 ```(sam)
                     {Moby Dick}(italic) is a {very}(emphasis) good book.
 
-            serialization:
+            xml-serialization:
 
                 The bold and italic decoration are serialized as bold and italic elements respectively.
 
@@ -1559,7 +1584,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             semantics:
                 The application layer should interpret the inline embed according to its language type and display the result. 
 
-            serialization:
+            xml-serialization:
                 ```(xml)
                     <p>This is an equation <embed encoding="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</embed> in the middle of a paragraph.</p> 
 

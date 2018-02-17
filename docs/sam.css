@@ -103,11 +103,11 @@ pre[data-language=sam]::before
     content: "Model";
     font-weight: bold;
 }
-.serialization::before
+.xml-serialization::before
 {
     font-family: var(--title-font);
     font-size: 12pt;
-    content: "Serialization";
+    content: "XML Serialization";
     font-weight: bold;
 }
 .SOM::before
