@@ -914,14 +914,16 @@ class BlockInsert(Block):
 
         if self.ref_type:
             if self.ref_type == 'variableref':
-                SAM_parser_warning('Inserting variables with block inserts is not supported in HTML output mode. Variable will be omitted from HTML output.'.format(self.item))
+                SAM_parser_warning('Inserting variables with block inserts is not supported in HTML output mode. '
+                                   'Variable will be omitted from HTML output. At: {0}'.format(self.item))
             elif self.ref_type == 'idref':
                 ob = self._doc().object_by_id(self.item)
                 variables = [x for x in self.children if type(x) is VariableDef]
                 if ob:
                     yield from ob.serialize_html(duplicate=True, variables=variables)
                 else:
-                    SAM_parser_warning('ID reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(self.item))
+                    SAM_parser_warning('ID reference "{0}" could not be resolved. '
+                                       'It will be omitted from HTML output.'.format(self.item))
             elif self.ref_type == 'nameref':
                 ob = self._doc().object_by_name(self.item)
                 if ob:
@@ -929,10 +931,11 @@ class BlockInsert(Block):
                     yield from ob.serialize_html(duplicate=True, variables=variables)
                 else:
                     SAM_parser_warning(
-                        'Name reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
+                        'Name reference "{0}" could not be resolved. It will be omitted from HTML output. At: '.format(
                             self.item))
             else:
-                SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. They will be omitted. At: [#chapter.architecture]")
+                SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. "
+                                   "They will be omitted. At: {0}".format(self.item))
 
         else:
             yield '<div class="insert"'
@@ -3027,7 +3030,8 @@ class InlineInsert(Span):
                         'Name reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
                             self.item))
             else:
-                SAM_parser_warning("HTML output mode does not support inline inserts that use key references. They will be omitted. At: [#chapter.architecture]")
+                SAM_parser_warning("HTML output mode does not support inline inserts that use key references. "
+                                   "They will be omitted. At: {0}".format(self.item))
 
         else:
             yield '<span class="insert"'
