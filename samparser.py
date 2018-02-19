@@ -1338,10 +1338,10 @@ class Record(Block):
 
     def serialize_html(self, duplicate=False, variables=[]):
         if not self.preceding_sibling():
-            yield '<tr class="record">\n'
+            yield '<thead class="recordset-header">\n<tr class="recordset-header-row">\n'
             for fn in self.parent.field_names:
-                yield '<th class ="record-set-field" data-field-name="{0}"></th >\n'.format(fn)
-            yield '</tr>\n'
+                yield '<th class ="recordset-field" data-field-name="{0}"></th >\n'.format(fn)
+            yield '</tr>\n</thead>\n<tbody class="recordset-body">\n'
 
         record = list(zip(self.parent.field_names, self.field_values))
         yield '<tr class="record"'
@@ -1350,10 +1350,13 @@ class Record(Block):
 
         if record:
             for name, value in zip(self.parent.field_names, self.field_values):
-                yield '<td class="{0}">'.format(name)
+                yield '<td class="record-field" data-field-name="{0}">'.format(name)
                 yield from value.serialize_html()
                 yield "</td>\n"
         yield "</tr>\n"
+
+        if not self.following_sibling():
+            yield "</tbody>\n"
 
 
 class List(Block):

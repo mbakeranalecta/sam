@@ -227,38 +227,46 @@
 <div class="baz">bat</div>
 <div class="variable" data-name="name" hidden>fred <span class="phrase"><span class="annotation" data-annotation-type="conjunction">and</span></span> wilma</div>
 <table class="history">
+<thead class="recordset-header">
+<tr class="recordset-header-row">
+<th class ="recordset-field" data-field-name="date"></th >
+<th class ="recordset-field" data-field-name="author"></th >
+<th class ="recordset-field" data-field-name="comment"></th >
+<th class ="recordset-field" data-field-name="status"></th >
+</tr>
+</thead>
+<tbody class="recordset-body">
 <tr class="record">
-<th class ="record-set-field" data-field-name="date"></th >
-<th class ="record-set-field" data-field-name="author"></th >
-<th class ="record-set-field" data-field-name="comment"></th >
-<th class ="record-set-field" data-field-name="status"></th >
+<td class="record-field" data-field-name="date">2014-06-23</td>
+<td class="record-field" data-field-name="author">mbaker</td>
+<td class="record-field" data-field-name="comment">New, Topic</td>
+<td class="record-field" data-field-name="status">In progress</td>
 </tr>
 <tr class="record">
-<td class="date">2014-06-23</td>
-<td class="author">mbaker</td>
-<td class="comment">New, Topic</td>
-<td class="status">In progress</td>
+<td class="record-field" data-field-name="date">2016-07-01</td>
+<td class="record-field" data-field-name="author">mbaker</td>
+<td class="record-field" data-field-name="comment">Revision</td>
+<td class="record-field" data-field-name="status">In progress</td>
 </tr>
-<tr class="record">
-<td class="date">2016-07-01</td>
-<td class="author">mbaker</td>
-<td class="comment">Revision</td>
-<td class="status">In progress</td>
-</tr>
+</tbody>
 </table>
 <table class="index">
+<thead class="recordset-header">
+<tr class="recordset-header-row">
+<th class ="recordset-field" data-field-name="type"></th >
+<th class ="recordset-field" data-field-name="term"></th >
+</tr>
+</thead>
+<tbody class="recordset-body">
 <tr class="record">
-<th class ="record-set-field" data-field-name="type"></th >
-<th class ="record-set-field" data-field-name="term"></th >
+<td class="record-field" data-field-name="type">feature</td>
+<td class="record-field" data-field-name="term">fragment</td>
 </tr>
 <tr class="record">
-<td class="type">feature</td>
-<td class="term">fragment</td>
+<td class="record-field" data-field-name="type">feature</td>
+<td class="record-field" data-field-name="term">fragments</td>
 </tr>
-<tr class="record">
-<td class="type">feature</td>
-<td class="term">fragments</td>
-</tr>
+</tbody>
 </table>
 </div>
 <div class="body">
@@ -1808,24 +1816,28 @@ multiple lines.
 </div>
 <div class="markup">
 <table class="history">
+<thead class="recordset-header">
+<tr class="recordset-header-row">
+<th class ="recordset-field" data-field-name="date"></th >
+<th class ="recordset-field" data-field-name="author"></th >
+<th class ="recordset-field" data-field-name="comment"></th >
+<th class ="recordset-field" data-field-name="status"></th >
+</tr>
+</thead>
+<tbody class="recordset-body">
 <tr class="record">
-<th class ="record-set-field" data-field-name="date"></th >
-<th class ="record-set-field" data-field-name="author"></th >
-<th class ="record-set-field" data-field-name="comment"></th >
-<th class ="record-set-field" data-field-name="status"></th >
+<td class="record-field" data-field-name="date">2014-06-23</td>
+<td class="record-field" data-field-name="author">mbaker</td>
+<td class="record-field" data-field-name="comment">New, Topic</td>
+<td class="record-field" data-field-name="status">In progress</td>
 </tr>
 <tr class="record">
-<td class="date">2014-06-23</td>
-<td class="author">mbaker</td>
-<td class="comment">New, Topic</td>
-<td class="status">In progress</td>
+<td class="record-field" data-field-name="date">2016-07-01</td>
+<td class="record-field" data-field-name="author">mbaker</td>
+<td class="record-field" data-field-name="comment">Revision</td>
+<td class="record-field" data-field-name="status">In progress</td>
 </tr>
-<tr class="record">
-<td class="date">2016-07-01</td>
-<td class="author">mbaker</td>
-<td class="comment">Revision</td>
-<td class="status">In progress</td>
-</tr>
+</tbody>
 </table>
 </div>
 <div class="result">
@@ -1860,15 +1872,19 @@ multiple lines.
 </div>
 <div class="markup">
 <table class="filmography">
+<thead class="recordset-header">
+<tr class="recordset-header-row">
+<th class ="recordset-field" data-field-name="film"></th >
+</tr>
+</thead>
+<tbody class="recordset-body">
 <tr class="record">
-<th class ="record-set-field" data-field-name="film"></th >
+<td class="record-field" data-field-name="film">Rio Bravo</td>
 </tr>
 <tr class="record">
-<td class="film">Rio Bravo</td>
+<td class="record-field" data-field-name="film">The Shootish</td>
 </tr>
-<tr class="record">
-<td class="film">The Shootish</td>
-</tr>
+</tbody>
 </table>
 </div>
 <div class="result">
@@ -2608,18 +2624,22 @@ ordered-list-item =
 </div>
 <div class="markup">
 <table class="recordset" data-conditions="a,b" id="id6" data-name="name" lang="en-CA">
+<thead class="recordset-header">
+<tr class="recordset-header-row">
+<th class ="recordset-field" data-field-name="foo"></th >
+<th class ="recordset-field" data-field-name="bar"></th >
+</tr>
+</thead>
+<tbody class="recordset-body">
 <tr class="record">
-<th class ="record-set-field" data-field-name="foo"></th >
-<th class ="record-set-field" data-field-name="bar"></th >
+<td class="record-field" data-field-name="foo">a</td>
+<td class="record-field" data-field-name="bar">b</td>
 </tr>
 <tr class="record">
-<td class="foo">a</td>
-<td class="bar">b</td>
+<td class="record-field" data-field-name="foo">c</td>
+<td class="record-field" data-field-name="bar">d</td>
 </tr>
-<tr class="record">
-<td class="foo">c</td>
-<td class="bar">d</td>
-</tr>
+</tbody>
 </table>
 </div>
 <div class="result">
