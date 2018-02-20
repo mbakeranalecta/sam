@@ -1680,7 +1680,7 @@ class Root(Block):
         if self.parent.javascript:
             for j in self.parent.javascript:
                 yield '<script src="js/all.min.js"></script>\n'.format(j)
-        yield '</head >\n<body>\n'
+        yield '</head>\n<body>\n'
         for x in self.children:
             yield from x.serialize_html(duplicate, variables)
         yield '</body>\n</html>'
@@ -2959,14 +2959,19 @@ class Citation:
             yield '<cite>' + self.citation_value
             if self.citation_extra:
                 yield ' {0}'.format(self.citation_extra)
-                yield from recurse()
+            yield from recurse()
             yield '</cite>'
         elif self.citation_type == 'idref':
-            yield '<a href="#{0}">'.format(self.citation_value)
-            yield from recurse()
-            yield '</a>'
+            if payload:
+                yield '<a href="#{0}">'.format(self.citation_value)
+                yield from recurse()
+                yield '</a>'
+            else:
+                SAM_parser_warning("HTML output mode does not reference citations by ID except on phrases. "
+                               "They will be omitted. At: " + str(self).strip())
+
         else:
-            SAM_parser_warning("HTML output mode does not support inserts that use name or key refernces. "
+            SAM_parser_warning("HTML output mode does not suppor reference citations by name or key. "
                                "They will be omitted. At: " + str(self).strip())
 
 

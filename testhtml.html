@@ -3,7 +3,7 @@
 <head>
 <title>SAM Parser Tests</title>
 <meta charset = "UTF-8">
-</head >
+</head>
 <body>
 <!--  This file is part of the SPFE Open Toolkit. See the accompanying license.txt file -->
 <!--  for applicable licenses. -->
@@ -2147,7 +2147,7 @@ multiple lines.
 <p class="p">After this paragraph, there is a blockquote:</p>
 <blockquote class="blockquote" data-conditions="baz" id="foo" data-name="bar">
 <p class="p">The quick brown fox jumps over the lazy dog.</p>
-<p class="p">And the <span class="phrase"><span class="annotation" data-annotation-type="beast" data-specifically="bovine"><cite>Mother Goose</cite></span></span> jumps over the moon.</p>
+<p class="p">And the <span class="phrase"><span class="annotation" data-annotation-type="beast" data-specifically="bovine"><cite>Mother Goosecow</cite></span></span> jumps over the moon.</p>
 </blockquote>
 </div>
 <div class="result">
@@ -2180,7 +2180,7 @@ multiple lines.
 <blockquote class="blockquote" data-conditions="bar,baz" data-name="foo5">
 <cite>Mother Goose</cite>
 <cite>Father Time</cite>
-<a href="#foo"></a>
+
 
 <p class="p">The quick brown fox jumps over the lazy dog.</p>
 </blockquote>
@@ -2440,7 +2440,7 @@ ordered-list-item =
 </code></pre>
 </div>
 <div class="markup">
-<pre class="line" data-name="foo2">You gotta walk that lonesome valley,<a href="#bing"></a></pre>
+<pre class="line" data-name="foo2">You gotta walk that lonesome valley,</pre>
 <pre class="line">You gotta walk it by yourself,</pre>
 <pre class="line" data-conditions="bar">Nobody here can walk it for you,</pre>
 <pre class="line">   You gotta walk it by yourself.</pre>
@@ -2469,7 +2469,7 @@ ordered-list-item =
 </div>
 <div class="markup">
 <blockquote class="blockquote">
-<a href="#bing"></a>
+
 <pre class="line" data-name="foo2">You gotta walk that lonesome valley,</pre>
 <pre class="line">You gotta walk it by yourself,</pre>
 <pre class="line" data-conditions="bar">Nobody here can walk it for you,</pre>
@@ -2852,7 +2852,7 @@ ordered-list-item =
 </code></pre>
 </div>
 <div class="markup">
-<pre class="line" data-conditions="a,b" id="id9" data-name="name" lang="en-CA">You gotta walk that lonesome valley,<a href="#bing"></a></pre>
+<pre class="line" data-conditions="a,b" id="id9" data-name="name" lang="en-CA">You gotta walk that lonesome valley,</pre>
 <pre class="line">You gotta walk it by yourself,</pre>
 <pre class="line">Nobody here can walk it for you,</pre>
 <pre class="line">   You gotta walk it by yourself.</pre>
@@ -2883,9 +2883,9 @@ ordered-list-item =
 <div class="markup">
 <p class="p">After this paragraph, there is a blockquote:</p>
 <blockquote class="blockquote" data-conditions="a,b" id="id10" data-name="name" lang="en-CA">
-<a href="#cit"></a>
+
 <p class="p">The quick brown fox jumps over the lazy dog.</p>
-<p class="p">And the <span class="phrase"><span class="annotation" data-annotation-type="beast" data-specifically="bovine"><cite>Mother Goose</cite></span></span> jumps over the moon.</p>
+<p class="p">And the <span class="phrase"><span class="annotation" data-annotation-type="beast" data-specifically="bovine"><cite>Mother Goosecow</cite></span></span> jumps over the moon.</p>
 </blockquote>
 </div>
 <div class="result">
@@ -3513,7 +3513,7 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 </code></pre>
 </div>
 <div class="markup">
-<p class="p">You can <span class="phrase"><cite>Melville, 1851</cite></span>.</p>
+<p class="p">You can <span class="phrase"><cite>Melville, 1851<cite>Daffy, 2017</cite></cite></span>.</p>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="XML"><code class="codeblock">&lt;p&gt;You can &lt;phrase&gt;&lt;citation value="Melville, 1851"&gt;&lt;citation value="Daffy, 2017"&gt;&lt;citation extra="page 22" keyref="key.bar12"&gt;call me Ishmael&lt;/citation&gt;&lt;/citation&gt;&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
@@ -3531,7 +3531,7 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 </code></pre>
 </div>
 <div class="markup">
-<p class="p">You can <span class="phrase"><span class="annotation" data-annotation-type="quote"><cite>Melville, 1851</cite></span></span>.</p>
+<p class="p">You can <span class="phrase"><span class="annotation" data-annotation-type="quote"><cite>Melville, 1851call me Ishmael</cite></span></span>.</p>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="XML"><code class="codeblock">&lt;p&gt;You can &lt;phrase&gt;&lt;annotation type="quote"&gt;&lt;citation value="Melville, 1851"&gt;call me Ishmael&lt;/citation&gt;&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
