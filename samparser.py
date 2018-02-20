@@ -113,8 +113,8 @@ re_single_quote_open = '(^|(?<=[\s\"{]))\'(?=[\w"{-])'
 re_double_quote_close = '(?<=[\w\.\,\'\)\}\?!:;-])\"((?=[\.\s\'\)},\?!:;\[-])|$)'
 re_double_quote_open = '(^|(?<=[\s\'{\(]))"(?=[\w\'{-])'
 re_apostrophe = "(?<=[\w`\*_\}\)])'(?=\w)"
-re_en_dash = "(?<=[\w\*_`\"\'\.\)\}]\s)--(?=\s[\w\*_`\"\'\{\(])"
-re_em_dash = "(?<=[\w\*_`\"\'\.\)\}])---(?=[\w\*_`\"\'\{\(])"
+re_en_dash = "(?<=[\w\*_`\"\'\.\)\}\]]\s)--(?=\s[\w\*_`\"\'\{\(\[])"
+re_em_dash = "(?<=[\w\*_`\"\'\.\)\}\]])---(?=[\w\*_`\"\'\{\(\[])"
 
 smart_quote_subs = {re.compile(re_double_quote_close):'”',
                     re.compile(re_double_quote_open): '“',
@@ -1057,7 +1057,7 @@ class Codeblock(Block):
                 yield '\n'
         if self.children:
             if self.code_language:
-                yield '<code class="codeblock">'.format(self.code_language)
+                yield '<code class="{0}">'.format(self.code_language)
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html(duplicate, variables)

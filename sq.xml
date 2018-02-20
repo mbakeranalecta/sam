@@ -32,12 +32,12 @@
         <name>justdashes</name>
         <sub>
             <name>en_dash</name>
-            <pattern><![CDATA[(?<=[\w\*_`"'\.\)\}]\s)--(?=\s[\w\*_`"'\{\(])]]></pattern>
+            <pattern><![CDATA[(?<=[\w\*_`"'\.\)\}\]]\s)--(?=\s[\w\*_`"'\{\(\[])]]></pattern>
             <replace>–</replace>
         </sub>
         <sub>
             <name>em_dash</name>
-            <pattern><![CDATA[(?<=[\w\*_`"'\.\)\}])---(?=[\w\*_`"'\{\(])]]></pattern>
+            <pattern><![CDATA[(?<=[\w\*_`"'\.\)\}\]])---(?=[\w\*_`"'\{\(\[])]]></pattern>
             <replace>—</replace>
         </sub>
     </subset>
