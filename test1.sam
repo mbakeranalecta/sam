@@ -2857,7 +2857,7 @@ tests:(!en) SAM Parser Tests
 
     test: Inline code
         description:
-            Inline code is a special form of phrase used for phrases that are in computer languages or other encodings other than the human language of the text. 
+            Inline code is a form of phrase used for phrases that are in computer languages or other encodings other than the human language of the text.
 
         case: Inline latexmath
 
