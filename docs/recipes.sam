@@ -60,7 +60,7 @@ article: SAM Recipes
                 The Shootish
 
         Notice that while these two constructions capture the same data and the same semantics,
-        they are not the same structure, and therefore not to interchangeable. You have to decide
+        they are not the same structure, and are therefore not interchangeable. You have to decide
         which one you want in your markup language and provide processing for it accordingly.
 
         Also note the the XML representation of the two forms is different. The first outputs this:

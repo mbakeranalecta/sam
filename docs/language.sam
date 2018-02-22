@@ -956,6 +956,11 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
             xml-serialization:
 
+                In XML output mode the insert instruction is simply passed through to the application layer like this:
+
+                ```(xml)
+                    <insert item="foo.gif" type="image"/>
+
             html-serialization:
 
                 In HTML output mode, the parser will attempt to insert the inserted object in the output. 
@@ -1142,6 +1147,21 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 Note that nothing is done to indicate that the contents of the codeblock are to be treated as preformatted. That is up to the {application layer}.
 
+            html-serialization:
+
+                For HTML output, the content of a codeblock is wrapped in an HTML `pre` tag with the class attribute set to `codeblock`. If the codeblock has a `code_language` attribute, a `data-language` attribute is added to the `pre` tag containing the language value, and  the content is also wrapped in `code` tags with the `class` attribute set to the code language.
+
+                ```(html)
+                    <pre class="codeblock" data-language="python" lang="en"><code class="python">def escape_for_xml(s):
+                        t = dict(zip([ord('&lt;'), ord('&gt;'), ord('&amp;')], ['&amp;lt;', '&amp;gt;', '&amp;amp;']))
+                        try:
+                            return s.translate(t)
+                        except AttributeError:
+                            return s
+                    </code></pre>
+
+
+
             SOM:
                 A codeblock in represented in the SOM with a {Codeblock}(object) object. The contents of the codeblock are represented as an {Pre}(object) object. 
 
@@ -1170,8 +1190,22 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                     n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
                     </embed>
 
+            html-serialization:
+
+                In HTML output mode, the output of an embed is hidden by default. You could supply
+                a javascript program to display the embedded data is needed.
+
+                A block embed is serialized as a `div`:
+                
+                ```(html)
+                    <div class="embed" hidden  data-conditions="a,b" data-encoding="latexmathml" id="id13" data-name="name">
+                    n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
+                    </div>
+
             SOM:
-                An embed is represented in the SOM as an {Codebloack}(object) object with an {encoding}(attribute) attribute. The contents are represented as a {Pre} object.
+                A block embed is represented in the SOM as an {Embedblock}(object) object. The contents are represented as a {Pre} object.
+
+                An inline embed is represented in the SOM as a Code object with an  {encoding}(attribute) attribute.
 
         structure:(#blockquote) Blockquote 
 
@@ -1195,6 +1229,14 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 ```(xml)
                     <blockquote conditions="foo">
                     <citation type="citation" value="Mother Goose"/><p>The quick brown fox jumps over the lazy dog.</p>
+                    </blockquote>
+
+            html-serialization:
+
+                ```(xml)
+                    <blockquote data-conditions="foo" class="blockquote">
+                    <cite>Mother Goose</cite>
+                    <p>The quick brown fox jumps over the lazy dog.</p>
                     </blockquote>
 
             SOM:
@@ -1241,6 +1283,15 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                     <line>You gotta walk it by yourself,</line>
                     <line conditions="bar">Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
+
+            html-serialization:
+                A line is serialized as follows.
+
+                ```(html)
+                    <pre class="line" data-name="foo2">You gotta walk that lonesome valley,</pre>
+                    <pre class="line">You gotta walk it by yourself,</pre>
+                    <pre class="line" data-conditions="bar">Nobody here can walk it for you,</pre>
+                    <pre class="line">   You gotta walk it by yourself.</pre>
 
             SOM:
                 A line is represented in the {SOM} as a {Line}(object) object.
@@ -1310,7 +1361,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             xml-serialization:
                 An ordered list is serialized as follows. Note that the content of a list item is always wrapped in a `<p>` tag. 
 
-                ```(sam)
+                ```(xml)
                     <ul>
                         <li>
                             <p>Dogs</p>
@@ -1336,6 +1387,37 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                         </li>
                     </ul>
 
+            html-serialization:
+                An ordered list is serialized as follows. Note that the content of a list item is always wrapped in a `<p>` tag. 
+
+                ```(html)
+                    <ul class="ul">
+                        <li class="li">
+                            <p class="p">Dogs</p>
+                            <ul  class="ul">
+                                <li class="li">
+                                    <p class="p">Spot</p>
+                                </li>
+                                <li class="li">
+                                    <p class="p">Fang</p>
+                                </li>
+                            </ul>
+                        </li>
+                        <li>
+                            <p class="p">Cats</p>
+                            <ul class="ul">
+                                <li class="li">
+                                    <p class="p">Mittens</p>
+                                </li>
+                                <li class="li">
+                                    <p class="p">Skimbleshanks</p>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+
+
+
             SOM:
                 An {unordered list} is represented by an {UnorderedList}(object) object. Each list item is represented by a {UnorderedListItem}(object) object. 
 
@@ -1357,6 +1439,15 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
             semantics:
                 The semantics of ordered lists are the same as those of {unordered list}, except, of course that the list is ordered.
+
+            xml-serialization:
+
+                Identical to {Unordered List} except with a `ol` wrapper element.
+            
+
+            html-serialization:
+
+                Identical to {Unordered List} except with a `ol` wrapper element.
 
             SOM:
                 An unordered list is represented by an {OrderedList}(object) object. Each list item is represented by a {OrderedListItem}(object) object. 
@@ -1471,6 +1562,21 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                     </row>
                     </grid>
 
+            html-serialization:
+
+                Grids are serialized as tables:
+
+                ```(html)
+                    <table class="grid">
+                    <tr class="row">
+                    <td class="cell">foo</td>
+                    <td class="cell">bar</td>
+                    </tr>
+                    <tr class="row">
+                    <td class="cell">baz</td>
+                    <td class="cell">bat</td>
+                    </tr>
+                    </table>
 
             SOM:
                 Grids are represented in the SOM by a {Grid} object and rows by {Row} objects.
@@ -1493,12 +1599,21 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             semantics:
                 A comment is intended as a comment on the source file. To comment on the document as a document, use {remark}s.
 
-            serialiation:
+            xml-serialization:
 
                 A comment is represented in XML as an XML comment.
 
                 ```(xml)
                     <!-- This is a comment -->
+
+            html-serialization:
+
+                A comment is represented as an HTML comment:
+
+                ```(html)
+                    <!-- This is a comment -->
+
+
 
             SOM: 
                 A comment is represented in the SOM with a {Comment}(object) object.
@@ -1545,6 +1660,16 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                     <remark attribution="Charles André Joseph Marie de Gaulle" id="cdg1" xml:lang="fr">
                     <p>La Plume de ma tante.</p>
                     </remark>
+
+            html-serialization:
+                The HTML representation of a {remark} uses a `div` with the `class` attribute set to `remark`. The attribution is represented as a `data-attribution` element:
+
+                ```(html)
+                    <div class="remark" data-attribution="mbaker">
+                    <p class="p">This is a remark.</p>
+                    </div>
+
+                HTML output mode will not render a unanchored citations, so the remark will not be connected to the anchor point in the paragraph in HTML output. A warning will be issued for the unanchored citation. 
 
         structure:(#decoration) Bold and italic decorations
 
@@ -1634,9 +1759,20 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                     <p>This text is <italic>italic</italic> type.</p>
 
+            html-serialization:
+
+                The bold and italic decoration are serialized as bold and italic elements respectively.
+
+                ```(html)
+                    <p>This text is in <b class="bold">bold</b> type.</p>
+
+                    <p>This text is <i class="italic">italic</i> type.</p>
+
+
+
             SOM:
                 The bold and italic decorations are represented in the SOM as bold and italic annotations using {Annotation} objects. No distinction is made between what were decorations in the source and what were annotations of the same name. 
-               
+
         structure:(#inline-code) Inline code
 
             Inline code is used to include code or data samples in the body of a paragraph. 
@@ -1668,9 +1804,18 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             semantics:
                 The content of an inline code structure to presented as code, without interpretation. It may be formatted in accordance with its language. 
 
+            xml-serialization:
+
+                ```(xml)
+                    <code language="sam">markup:</code>
+
+             html-serialization:
+
+                ```(html)
+                    <code class="code" data-language="sam">markup:</code>
             SOM:
                 Inline code is represented in the SOM as an {Phrase} object with an {annotation} of "code". 
-        
+
         structure:(#inline-embed) Inline embed
 
             An inline embed is a piece of embedded code that is intended to be interpreted by the application layer. For example, an inline embed could be used to embed an equation in latexmath.
@@ -1687,6 +1832,13 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             xml-serialization:
                 ```(xml)
                     <p>This is an equation <embed encoding="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</embed> in the middle of a paragraph.</p> 
+
+            html-serialization:
+
+                An inline embed is serialized as a `span` with the `hidden` attribute:
+
+                ```(html)
+                    <span class="embed" hidden data-encoding="latexmath">\frac{ \sum_{t=0}^{N}f(t,k) }{N}</span>
 
             SOM:
                 An inline embed is represented in the SOM as a {Code} object with an {Encoding} attribute.
@@ -1735,6 +1887,24 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 definitions. In other words, the most local definition always wins. System designers 
                 may want to consider imposing variable naming conventions to avoid accidental 
                 variable name conflicts. 
+
+            xml-serialization:
+
+                Variables are serialized as `variable` elements:
+
+                ```(html)
+                    <variable name="foo">bar</variable>
+
+            html-serialization:
+
+                Variables are serialized as `span` elements with the `hidden` attribute:
+
+                ```(html)
+                    <div class="variable" data-name="foo" hidden>bar</div>
+
+
+            SOM:
+                Variables are represented as {Variable} objects.
 
         structure:(#fragment) Fragment 
 
@@ -1800,18 +1970,21 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 ```(xml)
                     <fragment conditions="gruz-natz" name="foo3">
-                    <string name="a">apple</string>
-                    <string name="b">banana</string>
+                    <variable name="a">apple</variable>
+                    <variable name="b">banana</variable>
                     <p>This is a sentence inside a fragment.</p>
                     </fragment>
 
-                A fragment insert is serialized like this:
+            html-serialization:
+
+                A fragment is serialized to HTML by wrapping it in a `div` element with the `class` attribute set to `fragment`:
 
                 ```(xml)
-                    <insert item="foobar" type="fragment">
-                    <string name="a">apricot</string>
-                    <string name="b">breadfruit</string>
-                    </insert>
+                    <span class="fragment" data-conditions="gruz-natz" data-name="foo3">
+                    <span class="variable" data-name="a">apple</span>
+                    <span class="variable" data-name="b">banana</span>
+                    <p>This is a sentence inside a fragment.</p>
+                    </span>
 
             SOM:
                 A {fragment} is represented in the {SOM} by a {Fragment} object.
@@ -1841,6 +2014,9 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 result in the included content being wrapped in that block or fragment in the output where the application layer can deal with it appropriately.
 
             xml-serialization:
+                Include instructions are not serialized on output. Their content resulting from processing the include is serialized as it would have been if it were entered inline. 
+
+            html-serialization:
                 Include instructions are not serialized on output. Their content resulting from processing the include is serialized as it would have been if it were entered inline. 
 
             SOM:

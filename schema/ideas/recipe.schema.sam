@@ -1,6 +1,7 @@
 sam-schema: 
     $namespace = http://example.com/ns/recipe
     $pattern.unit = each|tsp|tbsp|oz
+    $pattern.path = 
 
     templates:
         recipe: 

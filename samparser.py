@@ -1057,7 +1057,7 @@ class Codeblock(Block):
                 yield '\n'
         if self.children:
             if self.code_language:
-                yield '<code class="{0}">'.format(self.code_language)
+                yield '<code class="codeblock" data-language="{0}">'.format(self.code_language)
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html(duplicate, variables)
@@ -1075,6 +1075,12 @@ class Embedblock(Block):
                                     ('name', 'name'),
                                     ('namespace', 'xmlns'),
                                     ('language_code', 'xml:lang')]
+
+    _attribute_serialization_html = [('conditions', 'data-conditions'),
+                                    ('encoding', 'data-encoding'),
+                                    ('ID', 'id'),
+                                    ('name', 'data-name'),
+                                    ('language_code', 'lang')]
 
     _attribute_regurgitation = [('encoding', '='),
                                 ('conditions', '?'),
@@ -1116,9 +1122,21 @@ class Embedblock(Block):
             yield '/>\n'
 
     def serialize_html(self, duplicate=False, variables=[]):
-        SAM_parser_warning("HTML output mode does not support embedded encodings. "
-                           "They will be omitted. At: " + str(self).strip())
-        yield ''
+        yield '<div class="embed" hidden '
+
+        yield from self._serialize_attributes(self._attribute_serialization_html)
+        if self.children:
+            yield ">"
+
+            if type(self.children[0]) is not Flow:
+                yield "\n"
+
+            for x in self.children:
+                if x is not None:
+                    yield from x.serialize_html()
+            yield "</div>\n"
+        else:
+            yield '/>\n'
 
 
 class Remark(Block):
@@ -2723,6 +2741,7 @@ class Code(Phrase):
                                ('language_code', '!')]
 
     attribute_serialization_html = [('conditions', 'data-conditions'),
+                                    ('encoding', 'data-encoding'),
                                     ('ID', 'id'),
                                     ('code_language', 'data-language'),
                                     ('name', 'data-name'),
@@ -2756,23 +2775,15 @@ class Code(Phrase):
 
     def serialize_html(self, duplicate=False, variables=[]):
         if self.encoding:
-            SAM_parser_warning("HTML output mode does not support embedded encodings. "
-                               "They will be omitted. At: " + str(self).strip())
-            yield ''
+            yield '<span class="embed" hidden'
         else:
             yield '<code class="code"'
-            if self.conditions:
-                yield ' data-conditions="{0}"'.format(','.join(self.conditions))
-            if self.code_language:
-                yield ' data-language="{0}"'.format(self.code_language)
-            if self.ID:
-                yield ' id="{0}"'.format(self.ID)
-            if self.name:
-                yield ' data-name="{0}"'.format(self.name)
-            if self.language_code:
-                yield ' lang="{0}"'.format(self.language_code)
-            yield '>'
-            yield escape_for_xml(self.text)
+        yield from self._serialize_attributes(self.attribute_serialization_html)
+        yield '>'
+        yield escape_for_xml(self.text)
+        if self.encoding:
+            yield '</span>'
+        else:
             yield '</code>'
 
     def append(self, thing):
@@ -2866,7 +2877,7 @@ class Annotation:
             yield '<b class="bold">'.format(escape_for_xml_attribute(self.specifically))
             yield from recurse()
             yield '</b>'
-        elif self.type == 'link':
+        elif self.type == 'italic':
             yield '<i class="italic">'.format(escape_for_xml_attribute(self.specifically))
             yield from recurse()
             yield '</i>'
