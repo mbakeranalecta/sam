@@ -3398,7 +3398,8 @@ if __name__ == "__main__":
             raise SAMParserError("-css and -javascript can only be used with -html")
 
     transformed = None
-    error_count = 0
+    parser_error_count = 0
+    xml_error_count = 0
 
     try:
 
@@ -3531,8 +3532,8 @@ if __name__ == "__main__":
                         try:
                             xmlschema.assertValid(xml_doc)
                         except etree.DocumentInvalid as e:
-                            print('STRUCTURE ERROR in {0}: {1}'.format(intermediatefile, str(e)), file=sys.stderr)
-                            error_count += 1
+                            print('XML SCHEMA ERROR in {0}: {1}'.format(intermediatefile, str(e)), file=sys.stderr)
+                            xml_error_count += 1
                         else:
                             SAM_parser_info("Validation successful.")
 
@@ -3543,13 +3544,13 @@ if __name__ == "__main__":
 
             except SAMParserError as e:
                 sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
-                error_count += 1
+                parser_error_count += 1
                 continue
 
     except SAMParserError as e:
         sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
-        error_count += 1
+        parser_error_count += 1
 
-    print('Process completed with %d errors.' % error_count, file=sys.stderr)
-    if error_count > 0:
+    print('Process completed with {0} parser errors and {1} XML schema errors.'.format(parser_error_count, xml_error_count), file=sys.stderr)
+    if parser_error_count + xml_error_count > 0:
         sys.exit(1)
