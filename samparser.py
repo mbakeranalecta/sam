@@ -213,6 +213,8 @@ class SamParser:
 
         attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?!=", unflagged="code_language")
 
+        if "encoding" in attributes and "code_language" in attributes:
+            raise SAMParserError("A codeblock cannot have both an encoding attribute and a code_language attribute. At:{0}".format(match.group(0).strip()))
         if 'encoding' in attributes:
             b = Embedblock(indent, attributes, citations)
         else:
@@ -2678,18 +2680,9 @@ class Phrase(Span):
             yield from x.regurgitate()
         yield from self._regurgitate_attributes(self._attribute_regurgitation)
 
-    def add_attribute(self, attr):
-        if attr.type == "condition":
-            self.attributes.append(attr)
-        elif any(x.type == attr.type for x in self.attributes):
-            raise SAMParserStructureError("A phrase cannot have more than one {0}: {1}".format(attr.type, attr.value))
-        else:
-            self.attributes.append(attr)
-
     @property
     def annotated(self):
         return len([x for x in self.annotations if not x.local]) > 0
-
 
     def serialize_xml(self):
         yield '<phrase'
@@ -2746,13 +2739,24 @@ class Code(Phrase):
                                     ('code_language', 'data-language'),
                                     ('name', 'data-name'),
                                     ('language_code', 'lang')]
+
     def __init__(self, text):
         super().__init__(text)
-        self.code_language = None
-        self.encoding = None
 
     def __str__(self):
         return ''.join(self.regurgitate())
+
+    def __setattr__(self, name, value):
+        if name=='encoding' and value is not None:
+            #Change this to an Embed if it has an encoding attribute
+            self.__class__ = Embed
+        Phrase.__setattr__(self, name, value)
+        try:
+            if self.encoding and self.code_language:
+                raise SAMParserError(
+                    "Code cannot have both a code_langauge attribute and an embed attribute. At: {0}".format(self).strip())
+        except AttributeError:
+            pass
 
     def regurgitate(self):
         yield '`{0}`'.format(escape_for_sam_code(self.text))
@@ -2761,34 +2765,40 @@ class Code(Phrase):
             yield from x.regurgitate()
 
     def serialize_xml(self):
-
-        if self.encoding:
-            tag = "embed"
-        else:
-            tag = "code"
-
-        yield '<' + tag
+        yield '<code'
         yield from self._serialize_attributes(self.attribute_serialization_xml)
         yield '>'
         yield escape_for_xml(self.text)
-        yield '</' + tag + '>'
+        yield '</code>'
 
     def serialize_html(self, duplicate=False, variables=[]):
-        if self.encoding:
-            yield '<span class="embed" hidden'
-        else:
-            yield '<code class="code"'
+        yield '<code class="code"'
         yield from self._serialize_attributes(self.attribute_serialization_html)
         yield '>'
         yield escape_for_xml(self.text)
-        if self.encoding:
-            yield '</span>'
-        else:
-            yield '</code>'
+        yield '</code>'
 
     def append(self, thing):
         raise SAMParserStructureError("Inline code cannot have typed annotations.")
 
+class Embed(Code):
+
+    def __init__(self, text):
+        super().__init__(text)
+
+    def serialize_xml(self):
+        yield '<embed'
+        yield from self._serialize_attributes(self.attribute_serialization_xml)
+        yield '>'
+        yield escape_for_xml(self.text)
+        yield '</embed>'
+
+    def serialize_html(self, duplicate=False, variables=[]):
+        yield '<span class="embed" hidden'
+        yield from self._serialize_attributes(self.attribute_serialization_html)
+        yield '>'
+        yield escape_for_xml(self.text)
+        yield '</span>'
 
 class FlowSource:
     def __init__(self, para, strip=True):

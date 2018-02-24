@@ -3546,7 +3546,7 @@ This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the mi
 </description>
 <source>
 <codeblock language="sam">
-This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
+This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph.
 </codeblock>
 </source>
 <markup>

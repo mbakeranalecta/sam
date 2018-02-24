@@ -1,4 +1,5 @@
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:my="my:my">
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:my="my:my"
+exclude-result-prefixes="my">
 
     <xsl:output method="html" omit-xml-declaration="no" />
 
@@ -47,6 +48,7 @@
     </xsl:template>
 
     <xsl:template match="tests">
+        <xsl:text disable-output-escaping='yes'>&lt;!DOCTYPE html&gt;</xsl:text>
         <html>
             <head>
                 <meta charset="UTF-8"/>
