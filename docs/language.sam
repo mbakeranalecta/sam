@@ -1205,7 +1205,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             SOM:
                 A block embed is represented in the SOM as an {Embedblock}(object) object. The contents are represented as a {Pre} object.
 
-                An inline embed is represented in the SOM as a Code object with an  {encoding}(attribute) attribute.
+                An inline embed is represented in the SOM as a {Embed}(object) object.
 
         structure:(#blockquote) Blockquote 
 
