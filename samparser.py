@@ -102,10 +102,21 @@ flow_patterns = {
                 re.U)
         }
 
-ref_symbols = {'nameref': '#',
+insert_symbols = {'nameref': '#',
                'idref': '*',
                'keyref': '%',
                'variableref': '$'}
+
+insert_methods = {v:k for k, v in insert_symbols.items()}
+
+citation_symbols = {'nameref': '#',
+               'idref': '*',
+               'keyref': '%',
+               'value': ''}
+
+citation_methods = {'#':'nameref' ,
+               '*':'idref' ,
+               '%':'keyref'}
 
 #smart quote patterns
 re_single_quote_close = '(?<=[\w\.\,\"!:;)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
@@ -881,7 +892,7 @@ class BlockInsert(Block):
     def regurgitate(self):
         yield " " * int(self.indent)
         if self.ref_type:
-            ref_symbol = ref_symbols.get(self.ref_type)
+            ref_symbol = insert_symbols[self.ref_type]
             yield '>>>({0}{1})'.format(ref_symbol, self.item)
         else:
             yield '>>>({0} {1})'.format(self.insert_type, self.item)
@@ -2418,7 +2429,7 @@ class FlowParser:
                 if type(phrase) is Code:
                     phrase.encoding = unescape(annotation_type[1:])
                 else:
-                    raise SAMParserStructureError("Only code can have an embed attribute.")
+                    raise SAMParserStructureError("Only code can have an embed attribute. At: {0}".format(match.group(0)))
             elif annotation_type[0] == '!':
                 phrase.language_code = unescape(annotation_type[1:])
             elif annotation_type[0] == '*':
@@ -2450,41 +2461,29 @@ class FlowParser:
             self.flow.append(self.current_string)
             self.current_string = ''
 
-            try:
-                idref = match.group('id')
-            except IndexError:
-                idref = None
-            try:
-                nameref = match.group('name')
-            except IndexError:
-                nameref = None
-            try:
-                keyref = match.group('key')
-            except IndexError:
-                keyref = None
-            try:
-                citation = match.group('citation')
-            except IndexError:
-                citation = None
+            idref = match.group('id')
+            nameref = match.group('name')
+            keyref = match.group('key')
+            citation = match.group('citation')
 
             if idref:
-                citation_type = 'idref'
+                citation_method = 'idref'
                 citation_value = idref.strip()
                 extra = match.group('id_extra')
             elif nameref:
-                citation_type = 'nameref'
+                citation_method = 'nameref'
                 citation_value = nameref.strip()
                 extra = match.group('name_extra')
             elif keyref:
-                citation_type = 'keyref'
+                citation_method = 'keyref'
                 citation_value = keyref.strip()
                 extra = match.group('key_extra')
             else:
-                citation_type = 'value'
+                citation_method = 'value'
                 citation_value = citation.strip()
                 extra = None
 
-            self.flow.append(Citation(citation_type, citation_value, extra))
+            self.flow.append(Citation(citation_method, citation_value, extra))
             para.advance(len(match.group(0)))
             if flow_patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
@@ -2903,9 +2902,6 @@ class Annotation:
             yield from recurse()
             yield '</span>'
 
-
-
-
     def append(self, thing):
         if not self.child:
             self.child = thing
@@ -2914,8 +2910,8 @@ class Annotation:
 
 
 class Citation:
-    def __init__(self, citation_type, citation_value, citation_extra):
-        self.citation_type = citation_type
+    def __init__(self, citation_method, citation_value, citation_extra):
+        self.citation_method = citation_method
         self.citation_value = citation_value
         self.citation_extra = None if citation_extra is None else citation_extra.strip()
         self.local=True
@@ -2927,31 +2923,20 @@ class Citation:
 
     def regurgitate(self):
         yield '['
-        if self.citation_type == 'value':
-            pass
-        elif self.citation_type == 'idref':
-            yield '*'
-        elif self.citation_type == 'nameref':
-            yield '#'
-        elif self.citation_type == 'keyref':
-            yield '%'
-        elif self.citation_type == 'variableref':
-            yield '$'
+        if self.citation_method in citation_symbols:
+            yield citation_symbols[self.citation_method]
         else:
-            yield '{0} '.format(self.citation_type)
+            yield '{0} '.format(self.citation_method)
         yield self.citation_value
         if self.citation_extra:
             yield ' {0}'.format(self.citation_extra)
         yield ']'
 
-
-        #u'[{0:s} {1:s} {2:s}]'.format(self.citation_type, self.citation_value, cit_extra)
-
     def serialize_xml(self, attrs=None, payload=None):
         yield '<citation'
         if self.citation_extra:
             yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
-        yield ' {0}="{1}"'.format(self.citation_type, escape_for_xml_attribute(self.citation_value))
+        yield ' {0}="{1}"'.format(self.citation_method, escape_for_xml_attribute(self.citation_value))
         #Nest attributes for serialization
         if attrs:
             attr, *rest = attrs
@@ -2976,13 +2961,13 @@ class Citation:
             else:
                 yield ''
 
-        if self.citation_type == 'value':
+        if self.citation_method == 'value':
             yield '<cite>' + self.citation_value
             if self.citation_extra:
                 yield ' {0}'.format(self.citation_extra)
             yield from recurse()
             yield '</cite>'
-        elif self.citation_type == 'idref':
+        elif self.citation_method == 'idref':
             if payload:
                 yield '<a href="#{0}">'.format(self.citation_value)
                 yield from recurse()
@@ -3026,7 +3011,7 @@ class InlineInsert(Span):
 
     def regurgitate(self):
         if self.ref_type:
-            ref_symbol = ref_symbols.get(self.ref_type)
+            ref_symbol = insert_symbols[self.ref_type]
             yield '>({0}{1})'.format(ref_symbol, self.item)
         else:
             yield '>({0} {1})'.format(self.insert_type, self.item)
@@ -3199,49 +3184,17 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     if conditions:
         attributes["conditions"] = conditions
 
-    re_citbody = r'(\s*\*(?P<id>\S+)(?P<id_extra>.*))|(\s*\%(?P<key>\S+)(?P<key_extra>.*))|(\s*\#(?P<name>\S+)' \
-                 r'(?P<name_extra>.*))|(\s*(?P<citation>.*))'
-
-
     for c in citations_list:
-        match = re.compile(re_citbody).match(c)
-        try:
-            idref = match.group('id')
-        except IndexError:
-            idref = None
-        try:
-            keyref = match.group('key')
-        except IndexError:
-            keyref = None
-        try:
-            nameref = match.group('name')
-        except IndexError:
-            nameref = None
-        try:
-            citation = match.group('citation')
-        except IndexError:
-            citation = None
-
-        if idref:
-            citation_type = 'idref'
-            citation_value = idref.strip()
-            extra = match.group('id_extra')
-        elif keyref:
-            citation_type = 'keyref'
-            citation_value = keyref.strip()
-            extra = match.group('key_extra')
-        elif nameref:
-            citation_type = 'nameref'
-            citation_value = nameref.strip()
-            extra = match.group('name_extra')
-        elif citation:
-            citation_type = 'value'
-            citation_value = citation.strip()
-            extra=None
+        if c[0] in citation_methods:
+            citation_method = citation_methods[c[0]]
+            try:
+                citation_value, extra = c[1:].split(None, 1)
+            except ValueError:
+                citation_value, extra = c[1:], None
         else:
-            citation_type = None
-        if citation_type:
-            citations.append(Citation(citation_type, citation_value, extra))
+            citation_method, citation_value, extra = 'value', c, None
+        citations.append(Citation(citation_method, citation_value, extra))
+
     return attributes, citations
 
 
@@ -3249,21 +3202,13 @@ def parse_insert(insert):
     insert_type = None
     ref_type = None
     item = None
-
-    if insert[0] in "$*#%":
+    if insert[0] in insert_methods:
         item = insert[1:]
-        if insert[0] == '$':
-            ref_type = 'variableref'
-        elif insert[0] == '*':
-            ref_type = 'idref'
-        elif insert[0] == '#':
-            ref_type = 'nameref'
-        elif insert[0] == '%':
-            ref_type = 'keyref'
+        ref_type = insert_methods[insert[0]]
     else:
         try:
             insert_type, item = insert.split()
-        except IndexError:
+        except ValueError:
             raise SAMParserStructureError("Insert item not specified in: {0}".format(insert))
         # strip unnecessary quotes from insert item
         item = re.sub(r'^(["\'])|(["\'])$', '', item.strip())

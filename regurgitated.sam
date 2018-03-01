@@ -185,7 +185,7 @@ tests:(!en) SAM Parser Tests
                     <head name="foo">
                     <foo>barney <phrase><annotation type="conjunction">and</annotation></phrase> betty</foo>
                     <baz>bat</baz>
-                    <string name="name">fred <phrase><annotation type="conjunction">and</annotation></phrase> wilma</string>
+                    <variable name="name">fred <phrase><annotation type="conjunction">and</annotation></phrase> wilma</variable>
                     <history>
                     <record>
                     <date>2014-06-23</date>
@@ -1699,7 +1699,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     This is another paragraph. Then there is an alternate blockquote:
                     
-                    '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2][%key.bar12 page 22]
+                    '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][#do/*foo page 2][%key.bar12 page 22]
                         The quick brown fox jumps over the lazy dog.
                     
                     '''
@@ -1708,7 +1708,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 This is another paragraph. Then there is an alternate blockquote:
 
-                """(?bar)(?baz)(#foo5)[Mother Goose][Father Time][*foo page 2][%key.bar12 page 22]
+                """(?bar)(?baz)(#foo5)[Mother Goose][Father Time][#do/*foo page 2][%key.bar12 page 22]
                     The quick brown fox jumps over the lazy dog.
 
 
@@ -2709,7 +2709,7 @@ tests:(!en) SAM Parser Tests
 
     test: Inline code
         description:
-            Inline code is a special form of phrase used for phrases that are in computer languages or other encodings other than the human language of the text.
+            Inline code is a form of phrase used for phrases that are in computer languages or other encodings other than the human language of the text.
 
         case: Inline latexmath
             description:
@@ -2732,7 +2732,7 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph. 
+                    This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph.
 
             markup:
                 This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(=latexmath) in the middle of a paragraph.
@@ -3278,7 +3278,7 @@ tests:(!en) SAM Parser Tests
                 $foo=bar bar black sheep
             result:
                 ```(xml)
-                    <string name="foo">bar bar black sheep</string>
+                    <variable name="foo">bar bar black sheep</variable>
 
         case: String references
             $foo=bar bar black sheep
@@ -3296,8 +3296,8 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                   <string name="foo">bar bar black sheep</string>
-                   <p>This sentence includes a string reference <inline-insert stringref="foo"/>.</p>
+                   <variable name="foo">bar bar black sheep</variable>
+                   <p>This sentence includes a string reference <inline-insert variableref="foo"/>.</p>
 
         case: String lookup
             description:
@@ -3307,7 +3307,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     $str = One
                     $str = Un
-                    section:(*section.foo) foo
+                    section:(#section.foo) foo
                         $str = Two
                     
                         This sentence should end with the word for 2: >($str)
@@ -3319,7 +3319,7 @@ tests:(!en) SAM Parser Tests
                     
                         #$str = Six
                     
-                    >>>(*section.foo)
+                    >>>(#section.foo)
                         $str = Deux
                     
                     $str = Five
@@ -3327,7 +3327,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 $str=One
                 $str=Un
-                section:(*section.foo) foo
+                section:(#section.foo) foo
                     $str=Two
                     This sentence should end with the word for 2: >($str)
 
@@ -3336,28 +3336,28 @@ tests:(!en) SAM Parser Tests
                     This sentence should end with the word for 1: >($str)
 
                     #$str = Six
-                >>>(*section.foo)
+                >>>(#section.foo)
                     $str=Deux
 
                 $str=Five
             result:
                 ```(xml)
-                    <string name="str">One</string>
-                    <string name="str">Un</string>
-                    <section id="section.foo">
+                    <variable name="str">One</variable>
+                    <variable name="str">Un</variable>
+                    <section name="section.foo">
                     <title>foo</title>
-                    <string name="str">Two</string>
-                    <p>This sentence should end with the word for 2: <inline-insert stringref="str"/></p>
-                    <string name="str">Four</string>
+                    <variable name="str">Two</variable>
+                    <p>This sentence should end with the word for 2: <inline-insert variableref="str"/></p>
+                    <variable name="str">Four</variable>
                     </section>
                     <section>
                     <title>bar</title>
-                    <p>This sentence should end with the word for 1: <inline-insert stringref="str"/></p>
+                    <p>This sentence should end with the word for 1: <inline-insert variableref="str"/></p>
                     </section>
-                    <insert idref="section.foo">
-                    <string name="str">Deux</string>
+                    <insert nameref="section.foo">
+                    <variable name="str">Deux</variable>
                     </insert>
-                    <string name="str">Five</string>
+                    <variable name="str">Five</variable>
 
     test: Fragments
         description:
@@ -3395,11 +3395,11 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <fragment conditions="gruz-natz" name="foo3">
-                    <string name="a">apple</string>
-                    <string name="b">banana</string>
+                    <variable name="a">apple</variable>
+                    <variable name="b">banana</variable>
                     <p>This is a sentence inside a fragment.</p>
                     <fragment name="gruznatz">
-                    <string name="p">peach</string>
+                    <variable name="p">peach</variable>
                     <p>This is a nested fragment.</p>
                     </fragment>
                     </fragment>
@@ -3422,8 +3422,8 @@ tests:(!en) SAM Parser Tests
             result:
                 ```(xml)
                     <insert nameref="fragment.foobar">
-                    <string name="a">apricot</string>
-                    <string name="b">breadfruit</string>
+                    <variable name="a">apricot</variable>
+                    <variable name="b">breadfruit</variable>
                     </insert>
 
     test: Smart quotes
