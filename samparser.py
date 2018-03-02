@@ -376,10 +376,7 @@ class SamParser:
             attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?")
         else:
             attributes, citations = {},[]
-        type, ref, item = parse_insert(match.group("insert"))
-        if type is None and ref is None:
-            raise SAMParserError("Invalid block insert statement. Found: " + match.group(0))
-        b = BlockInsert(indent, type, ref, item, attributes, citations)
+        b = BlockInsert(indent, *parse_insert(match.group("insert")), attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -882,6 +879,8 @@ class BlockInsert(Block):
         self.insert_type = insert_type
         self.ref_type =ref_type
         self.item = item
+        if insert_type is None and ref_type is None:
+            raise SAMParserError("Invalid block insert statement. Found: {0}".format(self))
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -2540,11 +2539,7 @@ class FlowParser:
                 attributes, citations = parse_attributes(match.group("attributes"))
             else:
                 attributes, citations = {},[]
-            type, ref, item = parse_insert(match.group("insert"))
-            if type is None and ref is None:
-                raise SAMParserError("Invalid inline insert statement. Found: " + match.group(0))
-
-            self.flow.append(InlineInsert(type, ref, item, attributes, citations))
+            self.flow.append(InlineInsert(*parse_insert(match.group("insert")), attributes, citations))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '>'
@@ -2976,6 +2971,8 @@ class InlineInsert(Span):
         self.language_code = None
         for key, value in attributes.items():
             setattr(self, key, value)
+        if insert_type is None and ref_type is None:
+            raise SAMParserError("Invalid inline insert statement. Found: " + match.group(0))
 
     def _doc(self):
         return self.parent._doc()
@@ -3164,25 +3161,32 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     return attributes, citations
 
 def parse_citation(c):
+    citation_parts=[]
+    extra = None
     if c[0] in citation_methods:
-        citation_method = citation_methods[c[0]]
         try:
-            citation_value, extra = c[1:].split(None, 1)
+            cit, extra = c.split(None, 1)
         except ValueError:
-            citation_value, extra = c[1:], None
+            cit = c
+        for x in cit.split('/'):
+            if x[0] not in citation_methods:
+                raise SAMParserError('Invalid compound identifier at: {0}'.format(c))
+            citation_method = citation_methods[x[0]]
+            citation_value = x[1:]
+            citation_parts.append((citation_method, citation_value))
     else:
-        citation_method, citation_value, extra = 'value', c, None
+        citation_parts.append(('value', c))
 
-    return citation_method, citation_value, extra
+    return citation_parts[0][0], citation_parts[0][1], extra
 
 
 def parse_insert(insert):
     insert_type = None
-    ref_type = None
+    ref_method = None
     item = None
     if insert[0] in insert_methods:
         item = insert[1:]
-        ref_type = insert_methods[insert[0]]
+        ref_method = insert_methods[insert[0]]
     else:
         try:
             insert_type, item = insert.split()
@@ -3192,7 +3196,7 @@ def parse_insert(insert):
         item = re.sub(r'^(["\'])|(["\'])$', '', item.strip())
     if len(item.split())>1:
         raise SAMParserStructureError("Extraneous content in insert: {0}".format(insert))
-    return insert_type, ref_type, item
+    return insert_type, ref_method, item
 
 
 def escape_for_sam(s):
