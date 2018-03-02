@@ -2879,9 +2879,8 @@ class Annotation:
 
 
 class Citation:
-    def __init__(self, citation_method, citation_value, citation_extra):
-        self.citation_method = citation_method
-        self.citation_value = citation_value
+    def __init__(self, citation_parts, citation_extra):
+        self.citation_parts = citation_parts
         self.citation_extra = None if citation_extra is None else citation_extra.strip()
         self.local=True
         self.child = None
@@ -2892,20 +2891,25 @@ class Citation:
 
     def regurgitate(self):
         yield '['
-        if self.citation_method in citation_symbols:
-            yield citation_symbols[self.citation_method]
-        else:
-            yield '{0} '.format(self.citation_method)
-        yield self.citation_value
+        yield '/'.join(['{0}{1}'.format(citation_symbols[m], v) for m, v in self.citation_parts])
         if self.citation_extra:
             yield ' {0}'.format(self.citation_extra)
         yield ']'
 
     def serialize_xml(self, attrs=None, payload=None):
         yield '<citation'
+
         if self.citation_extra:
             yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
-        yield ' {0}="{1}"'.format(self.citation_method, escape_for_xml_attribute(self.citation_value))
+
+        if len(self.citation_parts) == 1:
+            yield ' {0}="{1}"'.format(self.citation_parts[0][0], escape_for_xml_attribute(self.citation_parts[0][1]))
+        else:
+            yield '<citation-elements>'
+            for method, value in self.citation_parts:
+                yield '<citation-element method="{0}" value="{1}"/>'.format(method, escape_for_xml(value))
+            yield '</citation-elements>'
+
         #Nest attributes for serialization
         if attrs:
             attr, *rest = attrs
@@ -2915,6 +2919,8 @@ class Citation:
         elif payload:
             yield '>'
             yield payload
+            yield '</citation>'
+        elif len(self.citation_parts) > 1:
             yield '</citation>'
         else:
             yield '/>'
@@ -2930,25 +2936,31 @@ class Citation:
             else:
                 yield ''
 
-        if self.citation_method == 'value':
-            yield '<cite>' + self.citation_value
-            if self.citation_extra:
-                yield ' {0}'.format(self.citation_extra)
-            yield from recurse()
-            yield '</cite>'
-        elif self.citation_method == 'idref':
-            if payload:
-                yield '<a href="#{0}">'.format(self.citation_value)
+        if len(self.citation_parts) == 1:
+            citation_method, citation_value = self.citation_parts[0]
+
+
+            if citation_method == 'value':
+                yield '<cite>' + citation_value
+                if self.citation_extra:
+                    yield ' {0}'.format(self.citation_extra)
                 yield from recurse()
-                yield '</a>'
+                yield '</cite>'
+            elif citation_method == 'idref':
+                if payload:
+                    yield '<a href="#{0}">'.format(citation_value)
+                    yield from recurse()
+                    yield '</a>'
+                else:
+                    SAM_parser_warning("HTML output mode does not support reference citations by ID except on phrases. "
+                                   "They will be omitted. At: " + str(self).strip())
+
             else:
-                SAM_parser_warning("HTML output mode does not reference citations by ID except on phrases. "
-                               "They will be omitted. At: " + str(self).strip())
-
+                SAM_parser_warning("HTML output mode does not support reference citations by name or key. "
+                                   "They will be omitted. At: " + str(self).strip())
         else:
-            SAM_parser_warning("HTML output mode does not suppor reference citations by name or key. "
+            SAM_parser_warning("HTML output mode does not support reference citations using compound identifiers. "
                                "They will be omitted. At: " + str(self).strip())
-
 
     def append(self, thing):
         if not self.child:
@@ -3177,7 +3189,7 @@ def parse_citation(c):
     else:
         citation_parts.append(('value', c))
 
-    return citation_parts[0][0], citation_parts[0][1], extra
+    return citation_parts, extra
 
 
 def parse_insert(insert):
@@ -3392,6 +3404,8 @@ if __name__ == "__main__":
                         samParser.doc.css = args.css
                         samParser.doc.javascript = args.javascript
                         html_string = "".join(samParser.serialize('html')).encode('utf-8')
+                    elif args.regurgitate:
+                        pass
                     else:
                         xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
 

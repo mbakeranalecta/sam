@@ -1699,7 +1699,7 @@ tests:(!en) SAM Parser Tests
                 ```(sam)
                     This is another paragraph. Then there is an alternate blockquote:
                     
-                    '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][#do/*foo page 2][%key.bar12 page 22]
+                    '''( #foo5)[Mother Goose](?bar)(?baz)[Father Time][*foo page 2][%key.bar12 page 22]
                         The quick brown fox jumps over the lazy dog.
                     
                     '''
@@ -1708,7 +1708,7 @@ tests:(!en) SAM Parser Tests
             markup:
                 This is another paragraph. Then there is an alternate blockquote:
 
-                """(?bar)(?baz)(#foo5)[Mother Goose][Father Time][#do/*foo page 2][%key.bar12 page 22]
+                """(?bar)(?baz)(#foo5)[Mother Goose][Father Time][*foo page 2][%key.bar12 page 22]
                     The quick brown fox jumps over the lazy dog.
 
 
