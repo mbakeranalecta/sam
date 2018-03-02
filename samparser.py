@@ -29,8 +29,7 @@ re_ll_marker = r'\|(?P<label>\S.*?)(?<!\\)\|'
 re_spaces = r'\s+'
 re_one_space = r'\s'
 re_comment = r'#(?P<comment>.*)'
-re_citation = r'(\[\s*\*(?P<id>\S+)(?P<id_extra>.*?)\])|(\[\s*\#(?P<name>\S+)' \
-              r'(?P<name_extra>.*?)\])|(\[\s*(?P<citation>.*?)\])'
+re_citation = r'(\[\s*(?P<citation>.*?)\])'
 
 
 block_patterns = {
@@ -96,9 +95,7 @@ flow_patterns = {
             'code': re.compile(r'`(?P<text>(``|[^`])*)`', re.U),
             'inline-insert': re.compile(r'>((\((?P<insert>.+?)\)))' + re_attributes, re.U),
             'citation': re.compile(
-                r'((\[\s*\*(?P<id>\S+?)(\s+(?P<id_extra>.+?))?\])|(\[\s*\%(?P<key>\S+?)'
-                r'(\s+(?P<key_extra>.+?))?\])|(\[\s*\#(?P<name>\S+?)'
-                r'(\s+(?P<name_extra>.+?))?\])|(\[\s*(?P<citation>.*?)\]))',
+                r'(\[\s*(?P<citation>.*?)\])',
                 re.U)
         }
 
@@ -2460,30 +2457,7 @@ class FlowParser:
         if match:
             self.flow.append(self.current_string)
             self.current_string = ''
-
-            idref = match.group('id')
-            nameref = match.group('name')
-            keyref = match.group('key')
-            citation = match.group('citation')
-
-            if idref:
-                citation_method = 'idref'
-                citation_value = idref.strip()
-                extra = match.group('id_extra')
-            elif nameref:
-                citation_method = 'nameref'
-                citation_value = nameref.strip()
-                extra = match.group('name_extra')
-            elif keyref:
-                citation_method = 'keyref'
-                citation_value = keyref.strip()
-                extra = match.group('key_extra')
-            else:
-                citation_method = 'value'
-                citation_value = citation.strip()
-                extra = None
-
-            self.flow.append(Citation(citation_method, citation_value, extra))
+            self.flow.append(Citation(*parse_citation(match.group('citation'))))
             para.advance(len(match.group(0)))
             if flow_patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
@@ -3185,17 +3159,21 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
         attributes["conditions"] = conditions
 
     for c in citations_list:
-        if c[0] in citation_methods:
-            citation_method = citation_methods[c[0]]
-            try:
-                citation_value, extra = c[1:].split(None, 1)
-            except ValueError:
-                citation_value, extra = c[1:], None
-        else:
-            citation_method, citation_value, extra = 'value', c, None
-        citations.append(Citation(citation_method, citation_value, extra))
+        citations.append(Citation(*parse_citation(c)))
 
     return attributes, citations
+
+def parse_citation(c):
+    if c[0] in citation_methods:
+        citation_method = citation_methods[c[0]]
+        try:
+            citation_value, extra = c[1:].split(None, 1)
+        except ValueError:
+            citation_value, extra = c[1:], None
+    else:
+        citation_method, citation_value, extra = 'value', c, None
+
+    return citation_method, citation_value, extra
 
 
 def parse_insert(insert):
