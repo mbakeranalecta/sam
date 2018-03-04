@@ -3024,6 +3024,21 @@ tests:(!en) SAM Parser Tests
                 ```(XML)
                     <p>You can <phrase><annotation type="quote"><citation value="Melville, 1851">call me Ishmael</citation></annotation></phrase>.</p>
 
+        case: Citations with compound identifiers
+
+            description:
+                A citation using a compound identifier (a name reference and an id reference) with extra text.
+
+            source:
+                ```(SAM)
+                    You can {call me Ishmael}[#Melville/*MobyDick page 1].
+
+            markup:
+                You can {call me Ishmael}[#Melville/*MobyDick page 1].
+
+            result:
+                ```(XML)
+                    <p>You can <phrase><citation extra="page 1"><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"/></reference-elements>call me Ishmael</citation></phrase>.</p>
         case: Literal square brackets
             description:
                 If you want to enter literal square brackets, rather than create a citation,

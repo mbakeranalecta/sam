@@ -99,21 +99,24 @@ flow_patterns = {
                 re.U)
         }
 
-insert_symbols = {'nameref': '#',
-               'idref': '*',
-               'keyref': '%',
-               'variableref': '$'}
+insert_reference_symbols = {'nameref': '#',
+                            'idref': '*',
+                            'keyref': '%',
+                            'variableref': '$'}
 
-insert_methods = {v:k for k, v in insert_symbols.items()}
+insert_reference_methods = {'#': 'nameref',
+                            '*': 'idref',
+                            '%': 'keyref',
+                            '$': 'variableref'}
 
-citation_symbols = {'nameref': '#',
-               'idref': '*',
-               'keyref': '%',
-               'value': ''}
+citation_reference_symbols = {'nameref': '#',
+                              'idref': '*',
+                              'keyref': '%',
+                              'value': ''}
 
-citation_methods = {'#':'nameref' ,
-               '*':'idref' ,
-               '%':'keyref'}
+citation_reference_methods = {'#': 'nameref' ,
+                              '*':'idref' ,
+                              '%':'keyref'}
 
 #smart quote patterns
 re_single_quote_close = '(?<=[\w\.\,\"!:;)}\?-])\'((?=[\.\s"},\?!:;\[])|$)'
@@ -376,7 +379,7 @@ class SamParser:
             attributes, citations = parse_attributes(match.group("attributes"), flagged="*#?")
         else:
             attributes, citations = {},[]
-        b = BlockInsert(indent, *parse_insert(match.group("insert")), attributes, citations)
+        b = BlockInsert(indent, parse_insert(match.group("insert")), attributes, citations)
         self.doc.add_block(b)
         return "SAM", context
 
@@ -873,25 +876,22 @@ class Block(ABC):
         yield '</{0}>\n'.format(self.html_tag)
 
 class BlockInsert(Block):
-    def __init__(self, indent, insert_type, ref_type, item, attributes={}, citations=None, namespace=None):
+    def __init__(self, indent, reference_parts, attributes={}, citations=None, namespace=None):
         super().__init__(block_type='insert', indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
-        self.insert_type = insert_type
-        self.ref_type =ref_type
-        self.item = item
-        if insert_type is None and ref_type is None:
-            raise SAMParserError("Invalid block insert statement. Found: {0}".format(self))
+        self.reference_parts = reference_parts
 
     def __str__(self):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
         yield " " * int(self.indent)
-        if self.ref_type:
-            ref_symbol = insert_symbols[self.ref_type]
-            yield '>>>({0}{1})'.format(ref_symbol, self.item)
+        if self.reference_parts[0][0] in insert_reference_symbols:
+            yield '>>>('
+            yield '/'.join(['{0}{1}'.format(insert_reference_symbols[m], v) for m, v in self.reference_parts])
+            yield ')'
         else:
-            yield '>>>({0} {1})'.format(self.insert_type, self.item)
+            yield '>>>({0} {1})'.format(self.reference_parts[0][0], self.reference_parts[0][1])
         yield from self._regurgitate_attributes(self._attribute_regurgitation)
         yield '\n'
         for c in self.children:
@@ -2539,7 +2539,7 @@ class FlowParser:
                 attributes, citations = parse_attributes(match.group("attributes"))
             else:
                 attributes, citations = {},[]
-            self.flow.append(InlineInsert(*parse_insert(match.group("insert")), attributes, citations))
+            self.flow.append(InlineInsert(parse_insert(match.group("insert")), attributes, citations))
             para.advance(len(match.group(0)) - 1)
         else:
             self.current_string += '>'
@@ -2879,9 +2879,9 @@ class Annotation:
 
 
 class Citation:
-    def __init__(self, citation_parts, citation_extra):
-        self.citation_parts = citation_parts
-        self.citation_extra = None if citation_extra is None else citation_extra.strip()
+    def __init__(self, reference_parts, reference_extra):
+        self.reference_parts = reference_parts
+        self.reference_extra = None if reference_extra is None else reference_extra.strip()
         self.local=True
         self.child = None
         self.parent=None
@@ -2891,36 +2891,43 @@ class Citation:
 
     def regurgitate(self):
         yield '['
-        yield '/'.join(['{0}{1}'.format(citation_symbols[m], v) for m, v in self.citation_parts])
-        if self.citation_extra:
-            yield ' {0}'.format(self.citation_extra)
+        yield '/'.join(['{0}{1}'.format(citation_reference_symbols[m], v) for m, v in self.reference_parts])
+        if self.reference_extra:
+            yield ' {0}'.format(self.reference_extra)
         yield ']'
 
     def serialize_xml(self, attrs=None, payload=None):
+        has_children= False
+
         yield '<citation'
 
-        if self.citation_extra:
-            yield ' extra="{0}"'.format(escape_for_xml_attribute(self.citation_extra))
+        if self.reference_extra:
+            yield ' extra="{0}"'.format(escape_for_xml_attribute(self.reference_extra))
 
-        if len(self.citation_parts) == 1:
-            yield ' {0}="{1}"'.format(self.citation_parts[0][0], escape_for_xml_attribute(self.citation_parts[0][1]))
-        else:
-            yield '<citation-elements>'
-            for method, value in self.citation_parts:
-                yield '<citation-element method="{0}" value="{1}"/>'.format(method, escape_for_xml(value))
-            yield '</citation-elements>'
+        if len(self.reference_parts) == 1:
+            yield ' {0}="{1}"'.format(self.reference_parts[0][0], escape_for_xml_attribute(self.reference_parts[0][1]))
+
+        if len(self.reference_parts) > 1:
+            has_children = True
+            yield '><reference-elements>'
+            for method, value in self.reference_parts:
+                yield '<reference-element method="{0}" value="{1}"/>'.format(method, escape_for_xml(value))
+            yield '</reference-elements>'
 
         #Nest attributes for serialization
         if attrs:
+            if not has_children:
+                yield '>'
+            has_children = True
             attr, *rest = attrs
-            yield '>'
             yield from attr.serialize_xml(rest, payload)
-            yield '</citation>'
         elif payload:
-            yield '>'
+            if not has_children:
+                yield '>'
+            has_children = True
             yield payload
-            yield '</citation>'
-        elif len(self.citation_parts) > 1:
+
+        if has_children:
             yield '</citation>'
         else:
             yield '/>'
@@ -2936,14 +2943,14 @@ class Citation:
             else:
                 yield ''
 
-        if len(self.citation_parts) == 1:
-            citation_method, citation_value = self.citation_parts[0]
+        if len(self.reference_parts) == 1:
+            citation_method, citation_value = self.reference_parts[0]
 
 
             if citation_method == 'value':
                 yield '<cite>' + citation_value
-                if self.citation_extra:
-                    yield ' {0}'.format(self.citation_extra)
+                if self.reference_extra:
+                    yield ' {0}'.format(self.reference_extra)
                 yield from recurse()
                 yield '</cite>'
             elif citation_method == 'idref':
@@ -2970,10 +2977,8 @@ class Citation:
 
 
 class InlineInsert(Span):
-    def __init__(self, insert_type, ref_type, item, attributes={}, citations=None):
-        self.insert_type = insert_type
-        self.ref_type =ref_type
-        self.item = item
+    def __init__(self, reference_parts, attributes={}, citations=None):
+        self.reference_parts = reference_parts
         self.citations = citations
         self.parent=None
         self.namespace = None
@@ -2983,8 +2988,6 @@ class InlineInsert(Span):
         self.language_code = None
         for key, value in attributes.items():
             setattr(self, key, value)
-        if insert_type is None and ref_type is None:
-            raise SAMParserError("Invalid inline insert statement. Found: " + match.group(0))
 
     def _doc(self):
         return self.parent._doc()
@@ -2993,14 +2996,13 @@ class InlineInsert(Span):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
-        if self.ref_type:
-            ref_symbol = insert_symbols[self.ref_type]
-            yield '>({0}{1})'.format(ref_symbol, self.item)
+        if self.reference_parts[0][0] in insert_reference_symbols:
+            yield '>('
+            yield '/'.join(['{0}{1}'.format(insert_reference_symbols[m], v) for m, v in self.reference_parts])
+            yield ')'
         else:
-            yield '>({0} {1})'.format(self.insert_type, self.item)
-
+            yield '>({0} {1})'.format(self.reference_parts[0][0], self.reference_parts[0][1])
         yield from self._regurgitate_attributes(self._attribute_regurgitation)
-
 
     def serialize_xml(self):
         #Doing this the long way because of the special rules for handling references
@@ -3173,42 +3175,47 @@ def parse_attributes(attributes_string, flagged="?#*!", unflagged=None):
     return attributes, citations
 
 def parse_citation(c):
-    citation_parts=[]
+    reference_parts=[]
     extra = None
-    if c[0] in citation_methods:
+    if c[0] in citation_reference_methods:
         try:
-            cit, extra = c.split(None, 1)
+            ref, extra = c.split(None, 1)
         except ValueError:
-            cit = c
-        for x in cit.split('/'):
-            if x[0] not in citation_methods:
+            ref = c
+        for x in ref.split('/'):
+            if x[0] not in citation_reference_methods:
                 raise SAMParserError('Invalid compound identifier at: {0}'.format(c))
-            citation_method = citation_methods[x[0]]
-            citation_value = x[1:]
-            citation_parts.append((citation_method, citation_value))
+            reference_method = citation_reference_methods[x[0]]
+            reference_value = x[1:]
+            reference_parts.append((reference_method, reference_value))
     else:
-        citation_parts.append(('value', c))
+        reference_parts.append(('value', c))
 
-    return citation_parts, extra
+    return reference_parts, extra
 
 
 def parse_insert(insert):
-    insert_type = None
-    ref_method = None
-    item = None
-    if insert[0] in insert_methods:
-        item = insert[1:]
-        ref_method = insert_methods[insert[0]]
+    reference_parts=[]
+    if insert[0] in insert_reference_methods:
+        if len(insert.split()) > 1:
+            raise SAMParserError("Extraneous characters in insert at: {0}".format(insert))
+        for x in insert.split('/'):
+            if x[0] not in insert_reference_methods:
+                raise SAMParserError('Invalid compound identifier at: {0}'.format(c))
+            reference_method = insert_reference_methods[x[0]]
+            reference_value = x[1:]
+            reference_parts.append((reference_method, reference_value))
     else:
         try:
-            insert_type, item = insert.split()
+            reference_method, reference_value = insert.split(None, 1)
         except ValueError:
             raise SAMParserStructureError("Insert item not specified in: {0}".format(insert))
         # strip unnecessary quotes from insert item
-        item = re.sub(r'^(["\'])|(["\'])$', '', item.strip())
-    if len(item.split())>1:
+        reference_value = re.sub(r'^(["\'])|(["\'])$', '', reference_value.strip())
+        reference_parts.append((reference_method, reference_value))
+    if len(reference_value.split())>1:
         raise SAMParserStructureError("Extraneous content in insert: {0}".format(insert))
-    return insert_type, ref_method, item
+    return reference_parts
 
 
 def escape_for_sam(s):

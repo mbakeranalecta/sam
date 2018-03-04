@@ -3691,6 +3691,26 @@ You can {call me Ishmael}(quote)[Melville, 1851].
 </result>
 </case>
 <case>
+<title>Citations with compound identifiers</title>
+
+<description>
+<p>A citation using a compound identifier (a name reference and an id reference) with extra text.</p>
+</description>
+<source>
+<codeblock language="SAM">
+You can {call me Ishmael}[#Melville/*MobyDick page 1].
+</codeblock>
+</source>
+<markup>
+<p>You can <phrase><citation extra="page 1"><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"/></reference-elements>call me Ishmael</citation></phrase>.</p>
+</markup>
+<result>
+<codeblock language="XML">
+&lt;p&gt;You can &lt;phrase&gt;&lt;citation extra="page 1"&gt;&lt;reference-elements&gt;&lt;reference-element method="nameref" value="Melville"/&gt;&lt;reference-element method="idref" value="MobyDick"/&gt;&lt;/reference-elements&gt;call me Ishmael&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
 <title>Literal square brackets</title>
 
 <description>
