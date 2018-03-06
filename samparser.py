@@ -942,68 +942,74 @@ class BlockInsert(Block):
             yield '/>\n'
 
 
-    def serialize_html(self, duplicate=False, stings=[]):
+    def serialize_html(self, duplicate=False, variables=[]):
 
-        if self.ref_type:
-            if self.ref_type == 'variableref':
-                SAM_parser_warning('Inserting variables with block inserts is not supported in HTML output mode. '
-                                   'Variable will be omitted from HTML output. At: {0}'.format(self.item))
-            elif self.ref_type == 'idref':
-                ob = self._doc().object_by_id(self.item)
-                variables = [x for x in self.children if type(x) is VariableDef]
-                if ob:
-                    yield from ob.serialize_html(duplicate=True, variables=variables)
-                else:
-                    SAM_parser_warning('ID reference "{0}" could not be resolved. '
-                                       'It will be omitted from HTML output.'.format(self.item))
-            elif self.ref_type == 'nameref':
-                ob = self._doc().object_by_name(self.item)
-                if ob:
+        if len(self.reference_parts) == 1:
+            reference_method, reverence_value = self.reference_parts[0]
+
+            if reference_method in insert_reference_symbols:
+                if reference_method == 'variableref':
+                    SAM_parser_warning('Inserting variables with block inserts is not supported in HTML output mode. '
+                                       'Variable will be omitted from HTML output. At: {0}'.format(reverence_value))
+                elif reference_method == 'idref':
+                    ob = self._doc().object_by_id(reverence_value)
                     variables = [x for x in self.children if type(x) is VariableDef]
-                    yield from ob.serialize_html(duplicate=True, variables=variables)
+                    if ob:
+                        yield from ob.serialize_html(duplicate=True, variables=variables)
+                    else:
+                        SAM_parser_warning('ID reference "{0}" could not be resolved. '
+                                           'It will be omitted from HTML output.'.format(reverence_value))
+                elif reference_method == 'nameref':
+                    ob = self._doc().object_by_name(reverence_value)
+                    if ob:
+                        variables = [x for x in self.children if type(x) is VariableDef]
+                        yield from ob.serialize_html(duplicate=True, variables=variables)
+                    else:
+                        SAM_parser_warning(
+                            'Name reference "{0}" could not be resolved. '
+                            'It will be omitted from HTML output. At: '.format(
+                                reverence_value))
                 else:
-                    SAM_parser_warning(
-                        'Name reference "{0}" could not be resolved. '
-                        'It will be omitted from HTML output. At: '.format(
-                            self.item))
+                    SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. "
+                                       "They will be omitted. At: {0}".format(reverence_value))
+
             else:
-                SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. "
-                                   "They will be omitted. At: {0}".format(self.item))
+                yield '<div class="insert"'
+                if self.conditions:
+                    yield ' data-conditions="{0}"'.format(','.join(self.conditions))
+                if self.ID:
+                    yield ' id="{0}"'.format(self.ID)
+                if self.name:
+                    yield ' data-name="{0}"'.format(self.name)
+                if self.namespace is not None:
+                    SAM_parser_warning("Namespaces are ignored in HTML output mode.")
+                if self.language_code:
+                    yield ' lang="{0}"'.format(self.language_code)
+                yield ">"
+                if self.citations or self.children:
+
+                    for cit in self.citations:
+                        yield from cit.serialize_html()
+
+                    for c in self.children:
+                        yield from c.serialize_html()
+
+                _, item_extension = os.path.splitext(reverence_value)
+                if reference_method in known_insert_types and item_extension.lower() in known_file_types:
+                    yield '<object data="{0}"></object>'.format(reverence_value)
+                else:
+                    if not reference_method in known_insert_types:
+                        SAM_parser_warning('HTML output mode does not support the "{0}" insert type. '
+                                           'They will be omitted. At: {1}'.format(reference_method, str(self).strip()))
+                    if not item_extension.lower() in known_file_types:
+                        SAM_parser_warning('HTML output mode does not support the "{0}" file type. '
+                                           'They will be omitted.At: {1}'.format(item_extension, str(self).strip()))
+
+                yield '</div>\n'
 
         else:
-            yield '<div class="insert"'
-            if self.conditions:
-                yield ' data-conditions="{0}"'.format(','.join(self.conditions))
-            if self.ID:
-                yield ' id="{0}"'.format(self.ID)
-            if self.name:
-                yield ' data-name="{0}"'.format(self.name)
-            if self.namespace is not None:
-                SAM_parser_warning("Namespaces are ignored in HTML output mode.")
-            if self.language_code:
-                yield ' lang="{0}"'.format(self.language_code)
-            yield ">"
-            if self.citations or self.children:
-
-                for cit in self.citations:
-                    yield from cit.serialize_html()
-
-                for c in self.children:
-                    yield from c.serialize_html()
-
-            _, item_extension = os.path.splitext(self.item)
-            if self.insert_type in known_insert_types and item_extension.lower() in known_file_types:
-                yield '<object data="{0}"></object>'.format(self.item)
-            else:
-                if not self.insert_type in known_insert_types:
-                    SAM_parser_warning('HTML output mode does not support the "{0}" insert type. '
-                                       'They will be omitted. At: {1}'.format(self.insert_type, str(self).strip()))
-                if not item_extension.lower() in known_file_types:
-                    SAM_parser_warning('HTML output mode does not support the "{0}" file type. '
-                                       'They will be omitted.At: {1}'.format(item_extension, str(self).strip()))
-
-            yield '</div>\n'
-
+            SAM_parser_warning("HTML output mode does not support block inserts that use compound identifiers. "
+                           "They will be omitted. At: {0}".format(str(self).strip()))
 
 
 class Codeblock(Block):

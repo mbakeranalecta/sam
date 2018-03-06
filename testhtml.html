@@ -3552,6 +3552,24 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 </div>
 </div>
 <div class="case">
+<h3 class="title">Citations with compound identifiers</h3>
+
+<div class="description">
+<p class="p">A citation using a compound identifier (a name reference and an id reference) with extra text.</p>
+</div>
+<div class="source">
+<pre class="codeblock" data-language="SAM"><code class="codeblock" data-language="SAM">You can {call me Ishmael}[#Melville/*MobyDick page 1].
+</code></pre>
+</div>
+<div class="markup">
+<p class="p">You can <span class="phrase"></span>.</p>
+</div>
+<div class="result">
+<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;citation extra="page 1"&gt;&lt;reference-elements&gt;&lt;reference-element method="nameref" value="Melville"/&gt;&lt;reference-element method="idref" value="MobyDick"/&gt;&lt;/reference-elements&gt;call me Ishmael&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</code></pre>
+</div>
+</div>
+<div class="case">
 <h3 class="title">Literal square brackets</h3>
 
 <div class="description">
