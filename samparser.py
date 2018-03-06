@@ -953,8 +953,8 @@ class BlockInsert(Block):
                                        'Variable will be omitted from HTML output. At: {0}'.format(reverence_value))
                 elif reference_method == 'idref':
                     ob = self._doc().object_by_id(reverence_value)
-                    variables = [x for x in self.children if type(x) is VariableDef]
                     if ob:
+                        variables = [x for x in self.children if type(x) is VariableDef]
                         yield from ob.serialize_html(duplicate=True, variables=variables)
                     else:
                         SAM_parser_warning('ID reference "{0}" could not be resolved. '
