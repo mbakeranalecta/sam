@@ -784,6 +784,11 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 The additional information is anything between the end of the {name} and the closing square bracket.
 
+                Citations can also use compound identifiers. For instance, if you want to cite a figure in a chapter, you can cite it by an identifier that is composed of the chapter name and the figure id joined by a `/`:
+
+                ```(sam)
+                    See [#chapter.moby/*fig.whale]
+
             
             semantics:
 
@@ -810,29 +815,29 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 |name| A SAM {name}.
                 |key| A SAM {key}.
 
-                The value of the citation is indicated by the `value` attribute.
+                For a direct citation, the value of the citation is indicated by the `value` attribute.
 
                 For example, 
 
                 ```(xml) 
-                    <p>Moby Dick<citation type="citation" value="Melville, 1851"> is about a big fish.
+                    <p>Moby Dick<citation value="Melville, 1851"> is about a big fish.
 
                 If the citation is attached to a phrase, then the citation will be wrapped around the text of the phrase and nested inside the `<phrase>` element:
 
                 ```(xml) 
-                    <p><phrase><citation type="citation" value="Melville, 1851"/>Moby Dick</phrase> is about a big fish.
+                    <p><phrase><citation value="Melville, 1851"/>Moby Dick</phrase> is about a big fish.
 
                 If a citation and an annotation are attached to the same phrase, then the citation will be nested within the `<phrase>` element and relative to any `<annotation>` elements, just as with {annotation} nesting.
 
                 ```(xml) 
-                    <phrase><annotation type="novel"><citation type="citation" value="Melville, 1851">Moby Dick</citation></annotation></phrase> is about a big fish.
+                    <phrase><annotation type="novel"><citation value="Melville, 1851">Moby Dick</citation></annotation></phrase> is about a big fish.
 
 
                 If the citation is attached to a {blockquote}, the citation element will be nested inside the `<blockquote>` element.
 
                 ```(sam)
                     <blockquote>
-                        <citation type="citation" value="Melville, 1851"/> 
+                        <citation value="Melville, 1851"/> 
                         <p>Call me Ishmael.</p>
                     </blockquote>
 
@@ -840,9 +845,14 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 ```(sam)
                     <blockquote>
-                        <citation type="nameref" value="Moby" extra="page 1"/> 
+                        <citation nameref="Moby" extra="page 1"/> 
                         <p>Call me Ishmael.</p>
                     </blockquote>
+
+                If a citation uses a compound identifier, the identifier is broken into pieces and serialized like this:
+
+                ```(sam)
+                    <phrase><citation extra="page 1"><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"/></reference-elements>call me Ishmael</citation></phrase>
 
                 note:
                     Unlike other blocks, the serialization of a {citation} does not include a line feed after the citation tag. This is because a citation can also occur inside a flow, where the addition of a line feed would introduce extra whitespace into the flow. The lack of a linefeed in a block context does not change the semantics of the resulting document, but can make a difference in tests that compare literal XML output to expected output. 
@@ -851,9 +861,9 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 A textual {citation} is output as a `<cite>` element in HTML. 
 
-                A reference citation by ID that is attached to a {phrase} it output as a link to the referenced structure. 
+                A reference citation by ID that is attached to a {phrase} is output as a link to the referenced structure. 
 
-                Other types of reference citations are not supported in HTML output mode. If you need to resolve reference citations, use XML output mode and process the XML output to produce the citation style you need for your output. 
+                Other types of reference citations, including those that use compound identifiers, are not supported in HTML output mode. If you need to resolve reference citations, use XML output mode and process the XML output to produce the citation style you need for your output. 
 
 
                 For example, 
@@ -934,6 +944,22 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 They should be used only with their natural semantics. Note, however, that the spec does not prescribe a mechanism for identifying the object to insert. The item will, of course, be identified by a URL, but how that URL is to be interpreted is not specified. For instance, it could point to an intermediate resource such as an XML file that contains information used to choose the appropriate object for a particular media. The SAM language spec does not specify the format or interpretation for such a file.  
 
+                Inserts may also be specified by {idref}, {nameref}, or {keyref}:
+
+                ```(sam)
+                    >>>(#foo)
+
+                Inserts by reference can use compound identifiers:
+
+                ```(sam)
+                    >(#foo/*bar)
+
+
+                Insert syntax is also used insert the value of variables using a {variableref}:
+
+                ```(sam)
+                    >($boz)
+
             semantics:
 
                 The insert is an instruction to the application layer to insert the specified resource. While implementation is entirely up to the applications layer, SAM specifies the semantics of the reserved insert types as follows:
@@ -960,6 +986,17 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 ```(xml)
                     <insert item="foo.gif" type="image"/>
+
+                Inserts by reference are serialized like this:
+
+                ```(xml)
+                    <insert idref="foo"/>
+
+                Inserts by reference with compound identifiers serialize like this:
+
+                ```(xml)
+                    <insert><reference-elements><reference-element method="nameref" value="foo"/><reference-element method="idref" value="bar"/></reference-elements></insert>
+
 
             html-serialization:
 
@@ -996,7 +1033,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 * Inserts by ID.
                 * Inserts by name if the named structure is found in the current document.
 
-                Block inserts of strings and inserts by key are not supported. If these insert types are found, or if the referenced structure cannot be found, a warning is issued and the insert is ignored. 
+                Block inserts of {variables}, inserts by {key}, and inserts with {compound identifiers} are not supported. If these insert types are found, or if the referenced structure cannot be found, a warning is issued and the insert is ignored. 
 
             SOM:
                 A block insert is represented by a {BlockInsert} object. An inline-insert is represented by an {InlineInsert} object. 

@@ -1880,7 +1880,7 @@ class Flow():
         elif type(thing) is Citation:
             try:
                 if type(self.children[-1]) is Phrase:
-                    self.children[-1].annotations.append(thing)
+                    self.children[-1].citations.append(thing)
                 else:
                     self.children.append(thing)
             except IndexError:
@@ -2651,6 +2651,7 @@ class Phrase(Span):
     def __init__(self, text):
         self.text = text
         self.annotations = []
+        self.citations = []
         self.parent=None
         self.language_code = None
         self.ID = None
@@ -2667,11 +2668,15 @@ class Phrase(Span):
     @property
     def annotated(self):
         return len([x for x in self.annotations if not x.local]) > 0
+    # FIXME Should the citation count be included here? Don't think so as citations are local.
 
     def serialize_xml(self):
         yield '<phrase'
         yield from self._serialize_attributes(self._attribute_serialization_xml)
         yield '>'
+
+        for i in self.citations:
+            yield from i.serialize_xml()
 
         #Nest annotations for serialization
         if self.annotations:
@@ -2685,6 +2690,9 @@ class Phrase(Span):
         yield '<span class="phrase"'
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         yield '>'
+
+        for i in self.citations:
+            yield from i.serialize_html()
 
         #Nest annotations for serialization
         if self.annotations:
@@ -2912,16 +2920,10 @@ class Citation:
             yield ' {0}'.format(self.reference_extra)
         yield ']'
 
-    def serialize_xml(self, attrs=None, payload=None):
+    def serialize_xml(self):
         has_children= False
 
         yield '<citation'
-
-        if self.reference_extra:
-            yield ' extra="{0}"'.format(escape_for_xml_attribute(self.reference_extra))
-
-        if len(self.reference_parts) == 1:
-            yield ' {0}="{1}"'.format(self.reference_parts[0][0], escape_for_xml_attribute(self.reference_parts[0][1]))
 
         if len(self.reference_parts) > 1:
             has_children = True
@@ -2929,19 +2931,20 @@ class Citation:
             for method, value in self.reference_parts:
                 yield '<reference-element method="{0}" value="{1}"/>'.format(method, escape_for_xml(value))
             yield '</reference-elements>'
+            if self.reference_extra:
+                has_children = True
+                yield '{0}'.format(escape_for_xml(self.reference_extra))
 
-        #Nest attributes for serialization
-        if attrs:
-            if not has_children:
-                yield '>'
-            has_children = True
-            attr, *rest = attrs
-            yield from attr.serialize_xml(rest, payload)
-        elif payload:
-            if not has_children:
-                yield '>'
-            has_children = True
-            yield payload
+        if len(self.reference_parts) == 1:
+            if self.reference_parts[0][0] != 'value':
+                yield ' {0}="{1}"'.format(self.reference_parts[0][0], escape_for_xml_attribute(self.reference_parts[0][1]))
+
+                if self.reference_extra:
+                    has_children = True
+                    yield '>{0}'.format(escape_for_xml(self.reference_extra))
+            else:
+                has_children = True
+                yield '>{0}'.format(escape_for_xml(self.reference_parts[0][1]))
 
         if has_children:
             yield '</citation>'
