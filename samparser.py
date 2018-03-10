@@ -202,6 +202,18 @@ class SamParser:
                 ' '.join(err.args), self.source.current_line_number,  self.source.current_line))
         except EOFError:
             raise SAMParserError("Document ended before structure was complete.")
+
+        def get_idrefs(this):
+            result=[]
+            if hasattr(this, 'idrefs'):
+                result.extend(this.idrefs)
+            if hasattr(this, 'citations'):
+                for x in this.citations:
+                    result.extend(x.idrefs)
+            return result
+
+        all_id_refs = self.doc.find_in_doc(get_idrefs)
+        print('All idrefs:', all_id_refs)
         return self.doc
 
     def _block(self, context):
@@ -695,6 +707,12 @@ class Block(ABC):
         b.parent = self
         self.children.append(b)
 
+    def find_in_doc(self, find_function):
+        result = []
+        result.extend(find_function(self))
+        for x in self.children:
+            result.extend(x.find_in_doc(find_function))
+        return result
 
     def ancestor_at_indent(self, indent):
         x = self.parent
@@ -711,7 +729,7 @@ class Block(ABC):
         return ancestors_and_self
 
     def preceding_sibling(self):
-        my_pos= [i for i,x in enumerate(self.parent.children) if x is self][0]
+        my_pos= [i for i, x in enumerate(self.parent.children) if x is self][0]
         if my_pos > 0:
             return self.parent.children[my_pos - 1]
         else:
@@ -876,13 +894,17 @@ class Block(ABC):
         yield '</{0}>\n'.format(self.html_tag)
 
 class BlockInsert(Block):
-    def __init__(self, indent, reference_parts, attributes={}, citations=None, namespace=None):
+    def __init__(self, indent, reference_parts, attributes={}, citations=[], namespace=None):
         super().__init__(block_type='insert', indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
         self.reference_parts = reference_parts
 
     def __str__(self):
         return ''.join(self.regurgitate())
+
+    @property
+    def idrefs(self):
+        return [x[1] for x in self.reference_parts if x[0] == 'idref']
 
     def regurgitate(self):
         yield " " * int(self.indent)
@@ -899,7 +921,6 @@ class BlockInsert(Block):
         yield '\n'
 
     def serialize_xml(self, attrs=None, payload=None):
-
         attributes = {}
         if self.reference_parts[0][0] in insert_reference_symbols:
             attributes[self.reference_parts[0][0]] = escape_for_xml_attribute(self.reference_parts[0][1])
@@ -945,33 +966,33 @@ class BlockInsert(Block):
     def serialize_html(self, duplicate=False, variables=[]):
 
         if len(self.reference_parts) == 1:
-            reference_method, reverence_value = self.reference_parts[0]
+            reference_method, reference_value = self.reference_parts[0]
 
             if reference_method in insert_reference_symbols:
                 if reference_method == 'variableref':
                     SAM_parser_warning('Inserting variables with block inserts is not supported in HTML output mode. '
-                                       'Variable will be omitted from HTML output. At: {0}'.format(reverence_value))
+                                       'Variable will be omitted from HTML output. At: {0}'.format(reference_value))
                 elif reference_method == 'idref':
-                    ob = self._doc().object_by_id(reverence_value)
+                    ob = self._doc().object_by_id(reference_value)
                     if ob:
                         variables = [x for x in self.children if type(x) is VariableDef]
                         yield from ob.serialize_html(duplicate=True, variables=variables)
                     else:
                         SAM_parser_warning('ID reference "{0}" could not be resolved. '
-                                           'It will be omitted from HTML output.'.format(reverence_value))
+                                           'It will be omitted from HTML output. At: {1}'.format(reference_value, str(self).strip()))
                 elif reference_method == 'nameref':
-                    ob = self._doc().object_by_name(reverence_value)
+                    ob = self._doc().object_by_name(reference_value)
                     if ob:
                         variables = [x for x in self.children if type(x) is VariableDef]
                         yield from ob.serialize_html(duplicate=True, variables=variables)
                     else:
                         SAM_parser_warning(
                             'Name reference "{0}" could not be resolved. '
-                            'It will be omitted from HTML output. At: '.format(
-                                reverence_value))
+                            'It will be omitted from HTML output. At: {1}'.format(
+                                reference_value, str(self).strip()))
                 else:
                     SAM_parser_warning("HTML output mode does not support block inserts that use name or key references. "
-                                       "They will be omitted. At: {0}".format(reverence_value))
+                                       "They will be omitted. At: {0}".format(str(self).strip))
 
             else:
                 yield '<div class="insert"'
@@ -994,9 +1015,9 @@ class BlockInsert(Block):
                     for c in self.children:
                         yield from c.serialize_html()
 
-                _, item_extension = os.path.splitext(reverence_value)
+                _, item_extension = os.path.splitext(reference_value)
                 if reference_method in known_insert_types and item_extension.lower() in known_file_types:
-                    yield '<object data="{0}"></object>'.format(reverence_value)
+                    yield '<object data="{0}"></object>'.format(reference_value)
                 else:
                     if not reference_method in known_insert_types:
                         SAM_parser_warning('HTML output mode does not support the "{0}" insert type. '
@@ -1031,7 +1052,7 @@ class Codeblock(Block):
                                      ('code_language', 'data-language'),
                                      ('name', 'data-name'),
                                      ('language_code', 'lang')]
-    def __init__(self, indent, attributes={}, citations=None, namespace=None):
+    def __init__(self, indent, attributes={}, citations=[], namespace=None):
         self.code_language=None
         super().__init__(block_type='codeblock', indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
@@ -1114,7 +1135,7 @@ class Embedblock(Block):
                                 ('language_code', '!')]
     # No _attribute_serialization_html because embedded data is not supported in HTML output mode
 
-    def __init__(self, indent, attributes={}, citations=None, namespace=None):
+    def __init__(self, indent, attributes={}, citations=[], namespace=None):
         self.encoding=None
         super().__init__(block_type='embedblock', indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
@@ -1185,7 +1206,7 @@ class Remark(Block):
                                      ('name', 'data-name'),
                                      ('language_code', 'lang')]
     html_name='div'
-    def __init__(self, indent, attributes={}, citations=None, namespace=None):
+    def __init__(self, indent, attributes={}, citations=[], namespace=None):
         super().__init__(block_type='remark', indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
         self.attribution=attributes['attribution']
@@ -1205,7 +1226,7 @@ class Remark(Block):
 
 class Grid(Block):
     html_tag = 'table'
-    def __init__(self, indent, attributes={}, citations=None, namespace=None):
+    def __init__(self, indent, attributes={}, citations=[], namespace=None):
         super().__init__(block_type='grid', indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
 
@@ -1266,7 +1287,7 @@ class Cell(Block):
 
 class Line(Block):
     html_tag = 'pre'
-    def __init__(self, indent, attributes, content, citations=None, namespace=None):
+    def __init__(self, indent, attributes, content, citations=[], namespace=None):
         super().__init__(block_type='line', indent=indent, attributes=attributes, content=content,
                          citations=citations, namespace=namespace)
 
@@ -1285,7 +1306,7 @@ class Line(Block):
             self.parent.add(b)
 
 class Fragment(Block):
-    def __init__(self, indent, attributes={}, citations=None, namespace=None):
+    def __init__(self, indent, attributes={}, citations=[], namespace=None):
         super().__init__(block_type='fragment', indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
 
@@ -1303,7 +1324,7 @@ class Fragment(Block):
 
 class Blockquote(Block):
     html_tag = "blockquote"
-    def __init__(self, indent, attributes={}, citations=None, namespace=None):
+    def __init__(self, indent, attributes={}, citations=[], namespace=None):
         super().__init__(block_type='blockquote', indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
 
@@ -1324,7 +1345,7 @@ class Blockquote(Block):
 
 class RecordSet(Block):
     html_tag = "table"
-    def __init__(self, block_type, field_names, indent, attributes={}, citations=None, namespace=None):
+    def __init__(self, block_type, field_names, indent, attributes={}, citations=[], namespace=None):
         super().__init__(block_type=block_type, indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
         self.field_names = field_names
@@ -1476,13 +1497,13 @@ class OrderedList(List):
 class ListItem(Block):
     html_tag = "li"
     @abstractmethod
-    def __init__(self, block_type, indent, attributes={}, citations=None, namespace=None):
+    def __init__(self, block_type, indent, attributes={}, citations=[], namespace=None):
         super().__init__(block_type=block_type, indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
 
 
 class OrderedListItem(ListItem):
-    def __init__(self, indent, attributes={}, citations=None,  namespace=None):
+    def __init__(self, indent, attributes={}, citations=[],  namespace=None):
         super().__init__(block_type="li", indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
 
@@ -1500,7 +1521,7 @@ class OrderedListItem(ListItem):
 
 
 class UnorderedListItem(ListItem):
-    def __init__(self, indent, attributes={}, citations=None,  namespace=None):
+    def __init__(self, indent, attributes={}, citations=[],  namespace=None):
         super().__init__(block_type="li", indent = indent, attributes = attributes, namespace = namespace)
 
     def __str__(self):
@@ -1515,7 +1536,7 @@ class UnorderedListItem(ListItem):
             yield from x.regurgitate()
 
 class LabeledListItem(ListItem):
-    def __init__(self, indent, label, attributes={}, citations=None,  namespace=None):
+    def __init__(self, indent, label, attributes={}, citations=[],  namespace=None):
         super().__init__(block_type="li", indent=indent, attributes=attributes,
                          citations=citations, namespace=namespace)
         self.label = label
@@ -1573,7 +1594,7 @@ class LabeledListItem(ListItem):
 
 class LabeledList(List):
     html_tag = "dl"
-    def __init__(self, indent, attributes={}, citations=None,  namespace=None):
+    def __init__(self, indent, attributes={}, citations=[],  namespace=None):
         super().__init__('ll', indent=indent, attributes=attributes,  namespace=namespace)
 
     def add(self, b):
@@ -1811,6 +1832,16 @@ class Flow():
         self.ID = None
         self.name = None
 
+    def find_in_doc(self, find_function):
+        result = []
+        x=find_function(self)
+        result.extend(x)
+        for x in self.children:
+            if hasattr(x, 'find_in_doc'):
+                result.extend(x.find_in_doc(find_function))
+        return result
+
+
     def object_by_id(self, id):
         """
         Get an object with a given id.
@@ -1994,6 +2025,7 @@ class DocStructure:
         self.default_namespace = None
         self.annotation_lookup = "case insensitive"
         self.ids = []
+        self.idrefs = []
         self.parent = None
         # Used by HTML output mode
         self.css = None
@@ -2007,6 +2039,9 @@ class DocStructure:
 
     def _doc(self):
         return self
+
+    def find_in_doc(self, find_function):
+        return self.root.find_in_doc(find_function)
 
     def _cur_blk(self):
         """
@@ -2156,6 +2191,7 @@ class DocStructure:
             if overlapping_ids:
                 raise SAMParserStructureError('Duplicate ID found "{0}".'.format(', '.join(overlapping_ids)))
             self.ids.extend(block.ids)
+            self.idrefs.extend(block.idrefs)
         except (TypeError, AttributeError):
             pass
 
@@ -2598,6 +2634,9 @@ class Span(ABC):
     def __str__(self):
         return ''.join(self.regurgitate())
 
+    def find_in_doc(self, find_function):
+        return list(find_function(self))
+
     def object_by_id(self, id):
         """
         Get an object with a given id.
@@ -2691,8 +2730,17 @@ class Phrase(Span):
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         yield '>'
 
-        for i in self.citations:
-            yield from i.serialize_html()
+        link_made = False
+        for cit in self.citations:
+            if len(cit.reference_parts) == 1 and cit.reference_parts[0][0] == 'idref':
+                if link_made:
+                    SAM_parser_warning('HTML output mode does not support multiple citations by ID on a phrase. '
+                                       'Only the first ID was made into a link. At: {0}'.format(str(self).strip()))
+                else:
+                    link_made = True
+                    yield '<a href="#{0}">'.format(cit.reference_parts[0][1])
+            else:
+                yield from cit.serialize_html()
 
         #Nest annotations for serialization
         if self.annotations:
@@ -2700,6 +2748,8 @@ class Phrase(Span):
             yield from ann.serialize_html(rest, escape_for_xml(self.text))
         else:
             yield escape_for_xml(self.text)
+        if link_made:
+            yield '</a>'
         yield '</span>'
 
 
@@ -2902,7 +2952,7 @@ class Annotation:
             self.child.append(thing)
 
 
-class Citation:
+class Citation(Span):
     def __init__(self, reference_parts, reference_extra):
         self.reference_parts = reference_parts
         self.reference_extra = None if reference_extra is None else reference_extra.strip()
@@ -2913,6 +2963,10 @@ class Citation:
     def __str__(self):
         return ''.join(self.regurgitate())
 
+    @property
+    def idrefs(self):
+        return [x[1] for x in self.reference_parts if x[0] == 'idref']
+
     def regurgitate(self):
         yield '['
         yield '/'.join(['{0}{1}'.format(citation_reference_symbols[m], v) for m, v in self.reference_parts])
@@ -2922,7 +2976,6 @@ class Citation:
 
     def serialize_xml(self):
         has_children= False
-
         yield '<citation'
 
         if len(self.reference_parts) > 1:
@@ -2951,38 +3004,16 @@ class Citation:
         else:
             yield '/>'
 
-    def serialize_html(self, attrs=None, payload=None):
-
-        def recurse():
-            if attrs:
-                attr, *rest = attrs
-                yield from attr.serialize_html(rest, payload)
-            elif payload:
-                yield payload
-            else:
-                yield ''
+    def serialize_html(self, duplicate=False, variables=[]):
 
         if len(self.reference_parts) == 1:
             citation_method, citation_value = self.reference_parts[0]
 
-
             if citation_method == 'value':
-                yield '<cite>' + citation_value
-                if self.reference_extra:
-                    yield ' {0}'.format(self.reference_extra)
-                yield from recurse()
-                yield '</cite>'
-            elif citation_method == 'idref':
-                if payload:
-                    yield '<a href="#{0}">'.format(citation_value)
-                    yield from recurse()
-                    yield '</a>'
-                else:
-                    SAM_parser_warning("HTML output mode does not support reference citations by ID except on phrases. "
-                                   "They will be omitted. At: " + str(self).strip())
-
+                yield '<cite>{0}</cite>'.format(citation_value)
             else:
-                SAM_parser_warning("HTML output mode does not support reference citations by name or key. "
+                SAM_parser_warning("HTML output mode does not support citations by reference except for citations "
+                                   "by ID that are attached to a phrase. "
                                    "They will be omitted. At: " + str(self).strip())
         else:
             SAM_parser_warning("HTML output mode does not support reference citations using compound identifiers. "
@@ -2996,7 +3027,7 @@ class Citation:
 
 
 class InlineInsert(Span):
-    def __init__(self, reference_parts, attributes={}, citations=None):
+    def __init__(self, reference_parts, attributes={}, citations=[]):
         self.reference_parts = reference_parts
         self.citations = citations
         self.parent=None
@@ -3014,6 +3045,10 @@ class InlineInsert(Span):
     def __str__(self):
         return ''.join(self.regurgitate())
 
+    @property
+    def idrefs(self):
+        return [x[1] for x in self.reference_parts if x[0] == 'idref']
+
     def regurgitate(self):
         if self.reference_parts[0][0] in insert_reference_symbols:
             yield '>('
@@ -3024,7 +3059,6 @@ class InlineInsert(Span):
         yield from self._regurgitate_attributes(self._attribute_regurgitation)
 
     def serialize_xml(self, attrs=None, payload=None):
-
         attributes = {}
         if len(self.reference_parts) == 1:
             if self.reference_parts[0][0] in insert_reference_symbols:
@@ -3067,32 +3101,32 @@ class InlineInsert(Span):
     def serialize_html(self, duplicate=False, variables=[]):
 
         if len(self.reference_parts) == 1:
-            reference_method, reverence_value = self.reference_parts[0]
+            reference_method, reference_value = self.reference_parts[0]
 
             if reference_method in insert_reference_symbols:
                 if reference_method == 'variableref':
-                    variable_content = get_variable_def(reverence_value, self, variables)
+                    variable_content = get_variable_def(reference_value, self, variables)
                     if variable_content:
                         yield from variable_content.serialize_html()
                     else:
                         SAM_parser_warning('Variable reference "{0}" could not be resolved. '
                                            'It will be omitted from HTML output.'.format(self.item))
                 elif reference_method == 'idref':
-                    ob = self._doc().object_by_id(reverence_value)
+                    ob = self._doc().object_by_id(reference_value)
                     if ob:
                         yield from ob.serialize_html(duplicate=True)
                     else:
                         SAM_parser_warning(
-                            'ID reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
-                                reverence_value))
+                            'ID reference "{0}" could not be resolved. It will be omitted from HTML output. At: {1}'.format(
+                                reference_value, str(self).strip()))
                 elif reference_method == 'nameref':
-                    ob = self._doc().object_by_name(reverence_value)
+                    ob = self._doc().object_by_name(reference_value)
                     if ob:
                         yield from ob.serialize_html(duplicate=True)
                     else:
                         SAM_parser_warning(
-                            'Name reference "{0}" could not be resolved. It will be omitted from HTML output.'.format(
-                                self))
+                            'Name reference "{0}" could not be resolved. It will be omitted from HTML output. At: {1}'.format(
+                                reference_value, str(self).strip()))
                 else:
                     SAM_parser_warning("HTML output mode does not support inline inserts that use key references. "
                                        "They will be omitted. At: {0}".format(self))
@@ -3118,9 +3152,9 @@ class InlineInsert(Span):
                     for cit in self.citations:
                         yield from cit.serialize_html()
 
-                _, item_extension = os.path.splitext(reverence_value)
+                _, item_extension = os.path.splitext(reference_value)
                 if reference_method in known_insert_types and item_extension.lower() in known_file_types:
-                    yield '<object data="{0}"></object>'.format(reverence_value)
+                    yield '<object data="{0}"></object>'.format(reference_value)
                 else:
                     if not reference_method in known_insert_types:
                         SAM_parser_warning('HTML output mode does not support the "{0}" insert type. '
@@ -3292,10 +3326,13 @@ def multi_replace(string, subs):
 
 
 def SAM_parser_warning(warning):
-    print("SAM parser warning: " + warning, file=sys.stderr)
+    print("SAM parser warning: {0}".format(warning), file=sys.stderr)
 
 def SAM_parser_info(info):
-    print("SAM parser information: " + info, file=sys.stderr)
+    print("SAM parser information: {0}".format(info), file=sys.stderr)
+
+def SAM_parser_debug(message):
+    print("SAM parser debug: {0}".format(message), file=sys.stderr)
 
 
 re_escaped_chars = re.compile('[:\\\(\)\{\}\[\]_\*,\.\*`"&\<\>' + "']", re.U)

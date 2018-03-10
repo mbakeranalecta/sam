@@ -173,7 +173,7 @@
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;section xml:lang="es"&gt;
-    &lt;citation value="Mother McCree"/&gt;
+    &lt;citation&gt;Mother McCree&lt;/citation&gt;
     &lt;title&gt;Greeting&lt;/title&gt;
     &lt;p&gt;Feliz Navidad&lt;/p&gt;
 &lt;/section&gt;
@@ -2147,14 +2147,14 @@ multiple lines.
 <p class="p">After this paragraph, there is a blockquote:</p>
 <blockquote class="blockquote" data-conditions="baz" id="foo" data-name="bar">
 <p class="p">The quick brown fox jumps over the lazy dog.</p>
-<p class="p">And the <span class="phrase"><span class="annotation" data-annotation-type="beast" data-specifically="bovine"><cite>Mother Goosecow</cite></span></span> jumps over the moon.</p>
+<p class="p">And the <span class="phrase"><cite>Mother Goose</cite><span class="annotation" data-annotation-type="beast" data-specifically="bovine">cow</span></span> jumps over the moon.</p>
 </blockquote>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;After this paragraph, there is a blockquote:&lt;/p&gt;
 &lt;blockquote conditions="baz" id="foo" name="bar"&gt;
 &lt;p&gt;The quick brown fox jumps over the lazy dog.&lt;/p&gt;
-&lt;p&gt;And the &lt;phrase&gt;&lt;annotation type="beast" specifically="bovine"&gt;&lt;citation value="Mother Goose"&gt;cow&lt;/citation&gt;&lt;/annotation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
+&lt;p&gt;And the &lt;phrase&gt;&lt;citation&gt;Mother Goose&lt;/citation&gt;&lt;annotation type="beast" specifically="bovine"&gt;cow&lt;/annotation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
 &lt;/blockquote&gt;
 </code></pre>
 </div>
@@ -2191,10 +2191,10 @@ multiple lines.
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;This is another paragraph. Then there is an alternate blockquote:&lt;/p&gt;
 &lt;blockquote conditions="bar,baz" name="foo5"&gt;
-&lt;citation value="Mother Goose"/&gt;
-&lt;citation value="Father Time"/&gt;
-&lt;citation extra="page 2" idref="foo"/&gt;
-&lt;citation extra="page 22" keyref="key.bar12"/&gt;
+&lt;citation&gt;Mother Goose&lt;/citation&gt;
+&lt;citation&gt;Father Time&lt;/citation&gt;
+&lt;citation idref="foo"&gt;page 2&lt;/citation&gt;
+&lt;citation keyref="key.bar12"&gt;page 22&lt;/citation&gt;
 &lt;p&gt;The quick brown fox jumps over the lazy dog.&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;blockquote&gt;
@@ -2324,7 +2324,7 @@ warnings:
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;codeblock conditions="foo" language="python"&gt;
-&lt;citation value="demos/foo.py"/&gt;
+&lt;citation&gt;demos/foo.py&lt;/citation&gt;
 def escape_for_xml(s):
     t = dict(zip([ord('&amp;lt;'), ord('&amp;gt;'), ord('&amp;amp;')], ['&amp;amp;lt;', '&amp;amp;gt;', '&amp;amp;amp;']))
     try:
@@ -2456,7 +2456,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <pre class="line">   You gotta walk it by yourself.</pre>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" idref="bing"/&gt;&lt;/line&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation idref="bing"&gt;page 22&lt;/citation&gt;&lt;/line&gt;
 &lt;line&gt;You gotta walk it by yourself,&lt;/line&gt;
 &lt;line conditions="bar"&gt;Nobody here can walk it for you,&lt;/line&gt;
 &lt;line&gt;   You gotta walk it by yourself.&lt;/line&gt;
@@ -2488,8 +2488,8 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;blockquote&gt;
-&lt;citation extra="page 22" idref="bing"/&gt;
-&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" keyref="bing"/&gt;&lt;/line&gt;
+&lt;citation idref="bing"&gt;page 22&lt;/citation&gt;
+&lt;line name="foo2"&gt;You gotta walk that lonesome valley,&lt;citation keyref="bing"&gt;page 22&lt;/citation&gt;&lt;/line&gt;
 &lt;line&gt;You gotta walk it by yourself,&lt;/line&gt;
 &lt;line conditions="bar"&gt;Nobody here can walk it for you,&lt;/line&gt;
 &lt;line&gt;   You gotta walk it by yourself.&lt;/line&gt;
@@ -2868,7 +2868,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <pre class="line">   You gotta walk it by yourself.</pre>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;line conditions="a,b" id="id9" name="name" xml:lang="en-CA"&gt;You gotta walk that lonesome valley,&lt;citation extra="page 22" idref="bing"/&gt;&lt;/line&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;line conditions="a,b" id="id9" name="name" xml:lang="en-CA"&gt;You gotta walk that lonesome valley,&lt;citation idref="bing"&gt;page 22&lt;/citation&gt;&lt;/line&gt;
 &lt;line&gt;You gotta walk it by yourself,&lt;/line&gt;
 &lt;line&gt;Nobody here can walk it for you,&lt;/line&gt;
 &lt;line&gt;   You gotta walk it by yourself.&lt;/line&gt;
@@ -2895,7 +2895,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <blockquote class="blockquote" data-conditions="a,b" id="id10" data-name="name" lang="en-CA">
 
 <p class="p">The quick brown fox jumps over the lazy dog.</p>
-<p class="p">And the <span class="phrase"><span class="annotation" data-annotation-type="beast" data-specifically="bovine"><cite>Mother Goosecow</cite></span></span> jumps over the moon.</p>
+<p class="p">And the <span class="phrase"><cite>Mother Goose</cite><span class="annotation" data-annotation-type="beast" data-specifically="bovine">cow</span></span> jumps over the moon.</p>
 </blockquote>
 </div>
 <div class="result">
@@ -2904,7 +2904,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 &lt;citation idref="cit"/&gt;
 &lt;p&gt;The quick brown fox jumps over the lazy dog.&lt;/p&gt;
 
-&lt;p&gt;And the &lt;phrase&gt;&lt;annotation type="beast" specifically="bovine"&gt;&lt;citation value="Mother Goose"&gt;cow&lt;/citation&gt;&lt;/annotation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
+&lt;p&gt;And the &lt;phrase&gt;&lt;citation&gt;Mother Goose&lt;/citation&gt;&lt;annotation type="beast" specifically="bovine"&gt;cow&lt;/annotation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
 &lt;/blockquote&gt;
 </code></pre>
 </div>
@@ -2920,10 +2920,10 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </code></pre>
 </div>
 <div class="markup">
-<p class="p"><span class="phrase" data-conditions="a,b" id="id11" data-name="name" lang="en-CA"><span class="annotation" data-annotation-type="actor" data-specifically="John Wayne"><a href="#cit">The Duke</a></span></span> plays Rooster Cogburn.</p>
+<p class="p"><span class="phrase" data-conditions="a,b" id="id11" data-name="name" lang="en-CA"><a href="#cit"><span class="annotation" data-annotation-type="actor" data-specifically="John Wayne">The Duke</span></a></span> plays Rooster Cogburn.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;&lt;phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;&lt;citation idref="cit"&gt;The Duke&lt;/citation&gt;&lt;/annotation&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;&lt;phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"&gt;&lt;citation idref="cit"/&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;The Duke&lt;/annotation&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -3122,10 +3122,10 @@ chapter}[#single_source].
 </code></pre>
 </div>
 <div class="markup">
-<p class="p">When using the map approach, it is important to think about how your content will <span class="phrase"><span class="annotation" data-annotation-type="concept" data-specifically="single sourcing">single source</span></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span class="phrase"></span>.</p>
+<p class="p">When using the map approach, it is important to think about how your content will <span class="phrase"><span class="annotation" data-annotation-type="concept" data-specifically="single sourcing">single source</span></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span class="phrase">single sourcing chapter</span>.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;When using the map approach, it is important to think about how your content will &lt;phrase&gt;&lt;annotation type="concept" specifically="single sourcing"&gt;single source&lt;/annotation&gt;&lt;/phrase&gt; to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the &lt;phrase&gt;&lt;citation nameref="single_source"&gt;single sourcing chapter&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;When using the map approach, it is important to think about how your content will &lt;phrase&gt;&lt;annotation type="concept" specifically="single sourcing"&gt;single source&lt;/annotation&gt;&lt;/phrase&gt; to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the &lt;phrase&gt;&lt;citation nameref="single_source"/&gt;single sourcing chapter&lt;/phrase&gt;.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -3526,10 +3526,10 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 </code></pre>
 </div>
 <div class="markup">
-<p class="p">You can <span class="phrase"><cite>Melville, 1851<cite>Daffy, 2017</cite></cite></span>.</p>
+<p class="p">You can <span class="phrase"><cite>Melville, 1851</cite><cite>Daffy, 2017</cite>call me Ishmael</span>.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;citation value="Melville, 1851"&gt;&lt;citation value="Daffy, 2017"&gt;&lt;citation extra="page 22" keyref="key.bar12"&gt;call me Ishmael&lt;/citation&gt;&lt;/citation&gt;&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;citation&gt;Melville, 1851&lt;/citation&gt;&lt;citation&gt;Daffy, 2017&lt;/citation&gt;&lt;citation keyref="key.bar12"&gt;page 22&lt;/citation&gt;call me Ishmael&lt;/phrase&gt;.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -3544,10 +3544,10 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 </code></pre>
 </div>
 <div class="markup">
-<p class="p">You can <span class="phrase"><span class="annotation" data-annotation-type="quote"><cite>Melville, 1851call me Ishmael</cite></span></span>.</p>
+<p class="p">You can <span class="phrase"><cite>Melville, 1851</cite><span class="annotation" data-annotation-type="quote">call me Ishmael</span></span>.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;annotation type="quote"&gt;&lt;citation value="Melville, 1851"&gt;call me Ishmael&lt;/citation&gt;&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;citation&gt;Melville, 1851&lt;/citation&gt;&lt;annotation type="quote"&gt;call me Ishmael&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -3562,10 +3562,10 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 </code></pre>
 </div>
 <div class="markup">
-<p class="p">You can <span class="phrase"></span>.</p>
+<p class="p">You can <span class="phrase">call me Ishmael</span>.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;citation extra="page 1"&gt;&lt;reference-elements&gt;&lt;reference-element method="nameref" value="Melville"/&gt;&lt;reference-element method="idref" value="MobyDick"/&gt;&lt;/reference-elements&gt;call me Ishmael&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;citation&gt;&lt;reference-elements&gt;&lt;reference-element method="nameref" value="Melville"/&gt;&lt;reference-element method="idref" value="MobyDick"/&gt;&lt;/reference-elements&gt;page 1&lt;/citation&gt;call me Ishmael&lt;/phrase&gt;.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -4377,7 +4377,7 @@ The shape of the characters (technically, "glyphs") that make up the font are st
 <p class="p">“What is truth?”<cite>John 18:38</cite></p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;“What is truth?”&lt;citation value="John 18:38"/&gt;&lt;/p&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;“What is truth?”&lt;citation&gt;John 18:38&lt;/citation&gt;&lt;/p&gt;
 </code></pre>
 </div>
 </div>
