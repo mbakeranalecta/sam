@@ -212,8 +212,19 @@ class SamParser:
                     result.extend(x.idrefs)
             return result
 
+        def get_object_with_id(this, ID):
+            result = []
+            if hasattr(this, 'ID'):
+                if this.ID == ID:
+                    result.extend([this])
+            return result
+
         all_id_refs = self.doc.find_in_doc(get_idrefs)
         print('All idrefs:', all_id_refs)
+        print('Object with id foo:', self.doc.find_in_doc(get_object_with_id, ID="bing"))
+        unmatched_idrefs = set(all_id_refs) - set(self.doc.ids)
+        if unmatched_idrefs:
+            raise SAMParserError("Idrefs found with no corresponding IDs: {0}".format(", ".join(unmatched_idrefs)))
         return self.doc
 
     def _block(self, context):
@@ -707,12 +718,13 @@ class Block(ABC):
         b.parent = self
         self.children.append(b)
 
-    def find_in_doc(self, find_function):
+    def find_in_doc(self, find_function, **kwargs):
         result = []
-        result.extend(find_function(self))
+        result.extend(find_function(self, **kwargs))
         for x in self.children:
-            result.extend(x.find_in_doc(find_function))
+            result.extend(x.find_in_doc(find_function, **kwargs))
         return result
+
 
     def ancestor_at_indent(self, indent):
         x = self.parent
@@ -1832,13 +1844,13 @@ class Flow():
         self.ID = None
         self.name = None
 
-    def find_in_doc(self, find_function):
+    def find_in_doc(self, find_function, **kwargs):
         result = []
-        x=find_function(self)
+        x=find_function(self, **kwargs)
         result.extend(x)
         for x in self.children:
             if hasattr(x, 'find_in_doc'):
-                result.extend(x.find_in_doc(find_function))
+                result.extend(x.find_in_doc(find_function, **kwargs))
         return result
 
 
@@ -2040,8 +2052,8 @@ class DocStructure:
     def _doc(self):
         return self
 
-    def find_in_doc(self, find_function):
-        return self.root.find_in_doc(find_function)
+    def find_in_doc(self, find_function, **kwargs):
+        return self.root.find_in_doc(find_function, **kwargs)
 
     def _cur_blk(self):
         """
@@ -2634,8 +2646,8 @@ class Span(ABC):
     def __str__(self):
         return ''.join(self.regurgitate())
 
-    def find_in_doc(self, find_function):
-        return list(find_function(self))
+    def find_in_doc(self, find_function, **kwargs):
+        return list(find_function(self, **kwargs))
 
     def object_by_id(self, id):
         """
