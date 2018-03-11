@@ -260,8 +260,6 @@ class SamParser:
         except EOFError:
             raise SAMParserError("Document ended before structure was complete.")
         all_id_refs = self.doc.find_all(get_idrefs)
-        print('self.doc.ids: {0}'.format(self.doc.ids))
-        print('get_ids:     ', self.doc.find_all(get_ids))
         unmatched_idrefs = set(all_id_refs) - set(self.doc.ids)
         if unmatched_idrefs:
             raise SAMParserError("Idrefs found with no corresponding IDs: {0}".format(", ".join(unmatched_idrefs)))

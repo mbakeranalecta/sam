@@ -21,6 +21,11 @@
 SAM parser warning: Unannotated phrase found: {should be reported} If you are trying to insert curly braces into the document, use \{should be reported}.
 </codeblock>
 <p>This is a test to make sure unannotated phrases are being reported correctly.</p>
+<p>The following lines exist to anchor ids used for idref examples in the tests:</p>
+<line id="cit">Cit</line>
+<line id="MobyDick">Moby Dick</line>
+<line id="bing">bing</line>
+<line id="my-table">my-table</line>
 </description>
 <test>
 <title>Includes</title>

@@ -34,6 +34,13 @@ tests:(!en) SAM Parser Tests
 
         This is a test to make sure unannotated phrases are being reported correctly.
 
+        The following lines exist to anchor ids used for idref examples in the tests:
+
+        |(*cit) Cit
+        |(*MobyDick) Moby Dick
+        |(*bing) bing
+        |(*my-table) my-table
+
     test: Includes
 
         description:
