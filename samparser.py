@@ -150,6 +150,63 @@ known_file_types = [".gif", ".jpeg", ".jpg", ".png",
                     ".rss", ".jar"]
 # XML in not included in the above list because it can be used for indirect identification of resources
 
+# The following functions are intended for use with the find_all() or find_(first) functions.
+# The find_all and find_first functions iterate over the document tree executing a find function
+# on each node. The find_first function returns at the first non-None item returned by the find function.
+# The find_all function returns a list of all the items returned by the execution of the find funciton.
+
+def get_ids(this):
+    """
+    Gets a list of the ids present in the document. Designed to be called using the
+    find_all() function of the DocStructure object or of any object in the document tree.
+    :param this: The 'self' variable of the object to be searched. This is passed to the get_ids()
+    function by find_all()
+    :return: Returns a list of the id found in the document as strings. This list is concatenated with
+    lists returned by executing get_ids() on other objects to compile a complete list of ids in
+    the document or the part of the tree the find_all() function is called on.
+    """
+    result = []
+    if hasattr(this, 'ID'):
+        if this.ID:
+            result.append(this.ID)
+    return result
+
+def get_idrefs(this):
+    """
+    Gets a list of the idrefs present in the document. Designed to be called using the
+    find_all() function of the DocStructure object or of any object in the document tree.
+    :param this: The 'self' variable of the object to be searched. This is passed to the get_idrefs()
+    function by find_all()
+    :return: Returns a list of the idrefs found in the document as strings. This list is concatenated with
+    lists returned by executing get_idrefs() on other objects to compile a complete list of idrefs in
+    the document or the part of the tree the find_all() function is called on.
+    """
+    result = []
+    if hasattr(this, 'idrefs'):
+        result.extend(this.idrefs)
+    if hasattr(this, 'citations'):
+        for x in this.citations:
+            result.extend(x.idrefs)
+    return result
+
+
+def get_object_with_id(this, ID):
+    """
+    Gets the first object in the document structure with the id matching the ID parameter.
+    Designed to be called using the
+    find_first() function of the DocStructure object or of any object in the document tree.
+    :param this: The 'self' variable of the object to be searched. This is passed to the get_object_with_id()
+    function by find_all()
+    :param ID: The id of the object to be returned.
+    :return: The first object found with the corresponding ID.
+    """
+    result = None
+    if hasattr(this, 'ID'):
+        if this.ID == ID:
+            result = this
+    return result
+
+
 included_files = []
 
 class SamParser:
@@ -202,26 +259,9 @@ class SamParser:
                 ' '.join(err.args), self.source.current_line_number,  self.source.current_line))
         except EOFError:
             raise SAMParserError("Document ended before structure was complete.")
-
-        def get_idrefs(this):
-            result=[]
-            if hasattr(this, 'idrefs'):
-                result.extend(this.idrefs)
-            if hasattr(this, 'citations'):
-                for x in this.citations:
-                    result.extend(x.idrefs)
-            return result
-
-        def get_object_with_id(this, ID):
-            result = None
-            if hasattr(this, 'ID'):
-                if this.ID == ID:
-                    result = this
-            return result
-
         all_id_refs = self.doc.find_all(get_idrefs)
-        print('All idrefs:', all_id_refs)
-        print('Object with id foo:\n\n', self.doc.find_first(get_object_with_id, ID="foo"))
+        print('self.doc.ids: {0}'.format(self.doc.ids))
+        print('get_ids:     ', self.doc.find_all(get_ids))
         unmatched_idrefs = set(all_id_refs) - set(self.doc.ids)
         if unmatched_idrefs:
             raise SAMParserError("Idrefs found with no corresponding IDs: {0}".format(", ".join(unmatched_idrefs)))
