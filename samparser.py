@@ -2292,7 +2292,7 @@ class DocStructure:
 
         # Check for duplicate IDs in the flow
         # Add any ids found to list of ids
-        ids = [f.ID for f in flow.children if type(f) is Phrase and f.ID is not None]
+        ids = [f.ID for f in flow.children if hasattr(f, 'ID') and f.ID is not None]
         for i in ids:
             if i in self.ids:
                 raise SAMParserStructureError('Duplicate ID found "{0}".'.format(ids[0]))
