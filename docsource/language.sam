@@ -41,7 +41,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
         section: SAM Structure
 
-            Like most other markup languages, a SAM document is essentially a set a set of nested blocks of various types. In concrete markup languages like markdown there are a fixed set of block types, each with a specific meaning, and each with a corresponding piece of syntax that allows the parser to identify them. In an abstract markup language like XML, there are a few abstract block types that have no inherent meaning, but can be named so that a processing application can attach meaning to the name in specific markup languages. Thus a paragraph is represented with a `<p>` element in HTML but by a `<para>` element in DocBook.
+            Like all other markup languages, a SAM document is essentially a set a set of nested blocks of various types. In concrete markup languages like markdown there are a fixed set of block types, each with a specific meaning, and each with a corresponding piece of syntax that allows the parser to identify them. In an abstract markup language like XML, there are a few abstract block types that have no inherent meaning, but can be named so that a processing application can attach meaning to the name in specific markup languages. Thus a paragraph is represented with a `<p>` element in HTML but by a `<para>` element in DocBook. 
 
             As a hybrid language, SAM has a set of concrete block types, each with its own semantics and syntax, and a set of abstract nameable block types that can be used to define additional semantics for specific SAM-based markup languages. Thus in SAM a {paragraph} is always created as a block of text, but you can create named blocks to capture things like `author-name:`.  
 
@@ -808,51 +808,42 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 A {citation} is output as a `<citation>` element in XML. 
 
-                The type of the citation is indicated by a `type` attribute. The supported types are:
-
-                |citation| A textual citation. 
-                |id| A SAM {ID}.
-                |name| A SAM {name}.
-                |key| A SAM {key}.
-
-                For a direct citation, the value of the citation is indicated by the `value` attribute.
-
                 For example, 
 
                 ```(xml) 
-                    <p>Moby Dick<citation value="Melville, 1851"> is about a big fish.
+                    <p>Moby Dick<citation>Melville, 1851</citation> is about a big fish.
 
                 If the citation is attached to a phrase, then the citation will be wrapped around the text of the phrase and nested inside the `<phrase>` element:
 
                 ```(xml) 
-                    <p><phrase><citation value="Melville, 1851"/>Moby Dick</phrase> is about a big fish.
+                    <p><phrase><citation>Melville, 1851</citation>Moby Dick</phrase> is about a big fish.
 
-                If a citation and an annotation are attached to the same phrase, then the citation will be nested within the `<phrase>` element and relative to any `<annotation>` elements, just as with {annotation} nesting.
+                If citations and annotations are attached to the same phrase, then the citations will be serialized first and then the annotations will be wrapped around the text of the phrase.
 
                 ```(xml) 
-                    <phrase><annotation type="novel"><citation value="Melville, 1851">Moby Dick</citation></annotation></phrase> is about a big fish.
+                    <phrase><citation>Melville, 1851</citation><annotation type="novel">Moby Dick</annotation></phrase> is about a big fish.
 
 
                 If the citation is attached to a {blockquote}, the citation element will be nested inside the `<blockquote>` element.
 
                 ```(sam)
                     <blockquote>
-                        <citation value="Melville, 1851"/> 
+                        <citation>Melville, 1851</citation> 
                         <p>Call me Ishmael.</p>
                     </blockquote>
 
-                If a citation contains additional information, it is included as an `extra` attribute. 
+                If a citation by reference has extra information, it is output as the body of the citation. 
 
                 ```(sam)
                     <blockquote>
-                        <citation nameref="Moby" extra="page 1"/> 
+                        <citation nameref="Moby">page 1</citation> 
                         <p>Call me Ishmael.</p>
                     </blockquote>
 
                 If a citation uses a compound identifier, the identifier is broken into pieces and serialized like this:
 
                 ```(sam)
-                    <phrase><citation extra="page 1"><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"/></reference-elements>call me Ishmael</citation></phrase>
+                    <phrase><citation><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"></reference-elements>page 1</citation>call me Ishmael</phrase>
 
                 note:
                     Unlike other blocks, the serialization of a {citation} does not include a line feed after the citation tag. This is because a citation can also occur inside a flow, where the addition of a line feed would introduce extra whitespace into the flow. The lack of a linefeed in a block context does not change the semantics of the resulting document, but can make a difference in tests that compare literal XML output to expected output. 
@@ -1265,7 +1256,8 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
                 ```(xml)
                     <blockquote conditions="foo">
-                    <citation type="citation" value="Mother Goose"/><p>The quick brown fox jumps over the lazy dog.</p>
+                    <citation>Mother Goose</citation>
+                    <p>The quick brown fox jumps over the lazy dog.</p>
                     </blockquote>
 
             html-serialization:
@@ -1316,7 +1308,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 A line is serialized as follows.
 
                 ```(xml)
-                    <line name="foo2">You gotta walk that lonesome valley,<citation type="idref" value="bing" extra="page 22"/></line>
+                    <line name="foo2">You gotta walk that lonesome valley,<citation idref="bing">page 22</citation></line>
                     <line>You gotta walk it by yourself,</line>
                     <line conditions="bar">Nobody here can walk it for you,</line>
                     <line>   You gotta walk it by yourself.</line>
@@ -1693,7 +1685,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 Remarks anchored with a citation are serialized like this:
 
                 ```(xml)
-                    <p>This requires a remark<citation type="id" value="*cdg1"/>, but the paragraph continues.
+                    <p>This requires a remark<citation idref="*cdg1"/>, but the paragraph continues.
                     <remark attribution="Charles André Joseph Marie de Gaulle" id="cdg1" xml:lang="fr">
                     <p>La Plume de ma tante.</p>
                     </remark>
