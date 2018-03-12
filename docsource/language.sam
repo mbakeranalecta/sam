@@ -41,7 +41,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
         section: SAM Structure
 
-            Like all other markup languages, a SAM document is essentially a set a set of nested blocks of various types. In concrete markup languages like markdown there are a fixed set of block types, each with a specific meaning, and each with a corresponding piece of syntax that allows the parser to identify them. In an abstract markup language like XML, there are a few abstract block types that have no inherent meaning, but can be named so that a processing application can attach meaning to the name in specific markup languages. Thus a paragraph is represented with a `<p>` element in HTML but by a `<para>` element in DocBook. 
+            Like most other markup languages, a SAM document is essentially a set a set of nested blocks of various types. In concrete markup languages like markdown there are a fixed set of block types, each with a specific meaning, and each with a corresponding piece of syntax that allows the parser to identify them. In an abstract markup language like XML, there are a few abstract block types that have no inherent meaning, but can be named so that a processing application can attach meaning to the name in specific markup languages. Thus a paragraph is represented with a `<p>` element in HTML but by a `<para>` element in DocBook.
 
             As a hybrid language, SAM has a set of concrete block types, each with its own semantics and syntax, and a set of abstract nameable block types that can be used to define additional semantics for specific SAM-based markup languages. Thus in SAM a {paragraph} is always created as a block of text, but you can create named blocks to capture things like `author-name:`.  
 
