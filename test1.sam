@@ -1741,7 +1741,7 @@ tests:(!en) SAM Parser Tests
                     <p>After this paragraph, there is a blockquote:</p>
                     <blockquote conditions="baz" id="foo" name="bar">
                     <p>The quick brown fox jumps over the lazy dog.</p>
-                    <p>And the <phrase><citation>Mother Goose</citation><annotation type="beast" specifically="bovine">cow</annotation></phrase> jumps over the moon.</p>
+                    <p>And the <phrase><annotation type="beast" specifically="bovine">cow</annotation><citation>Mother Goose</citation></phrase> jumps over the moon.</p>
                     </blockquote>
 
         case: Alternate block quote
@@ -2399,7 +2399,7 @@ tests:(!en) SAM Parser Tests
                     <citation idref="cit"/>
                     <p>The quick brown fox jumps over the lazy dog.</p>
 
-                    <p>And the <phrase><citation>Mother Goose</citation><annotation type="beast" specifically="bovine">cow</annotation></phrase> jumps over the moon.</p>
+                    <p>And the <phrase><annotation type="beast" specifically="bovine">cow</annotation><citation>Mother Goose</citation></phrase> jumps over the moon.</p>
                     </blockquote>
 
 
@@ -2417,7 +2417,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p><phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"><citation idref="cit"/><annotation type="actor" specifically="John Wayne">The Duke</annotation></phrase> plays Rooster Cogburn.</p>
+                    <p><phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne">The Duke</annotation><citation idref="cit"/></phrase> plays Rooster Cogburn.</p>
 
 
         case: Attributes on a codeblock
@@ -2627,7 +2627,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(xml)
-                    <p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation nameref="single_source"/>single sourcing chapter</phrase>.</p>
+                    <p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase>single sourcing chapter<citation nameref="single_source"/></phrase>.</p>
 
         case: Annotation with language metadata
             description:
@@ -2876,7 +2876,7 @@ tests:(!en) SAM Parser Tests
                     This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the middle of a paragraph. 
 
             markup:
-                This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the middle of a paragraph. 
+                This is an equation `\frac{ \sum_{t=0}^{N}f(t,k) }{N}`(latexmath)(!en) in the middle of a paragraph.
 
             result:
                 ```(xml)
@@ -3013,7 +3013,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(XML)
-                    <p>You can <phrase><citation>Melville, 1851</citation><citation>Daffy, 2017</citation><citation keyref="key.bar12">page 22</citation>call me Ishmael</phrase>.</p>
+                    <p>You can <phrase>call me Ishmael<citation>Melville, 1851</citation><citation>Daffy, 2017</citation><citation keyref="key.bar12">page 22</citation></phrase>.</p>
 
         case: Citation and annotation on one phrase
 
@@ -3029,7 +3029,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(XML)
-                    <p>You can <phrase><citation>Melville, 1851</citation><annotation type="quote">call me Ishmael</annotation></phrase>.</p>
+                    <p>You can <phrase><annotation type="quote">call me Ishmael</annotation><citation>Melville, 1851</citation></phrase>.</p>
 
         case: Citations with compound identifiers
 
@@ -3045,7 +3045,7 @@ tests:(!en) SAM Parser Tests
 
             result:
                 ```(XML)
-                    <p>You can <phrase><citation><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"/></reference-elements>page 1</citation>call me Ishmael</phrase>.</p>
+                    <p>You can <phrase>call me Ishmael<citation><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"/></reference-elements>page 1</citation></phrase>.</p>
         case: Literal square brackets
             description:
                 If you want to enter literal square brackets, rather than create a citation,

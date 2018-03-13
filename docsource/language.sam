@@ -813,15 +813,15 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 ```(xml) 
                     <p>Moby Dick<citation>Melville, 1851</citation> is about a big fish.
 
-                If the citation is attached to a phrase, then the citation will be wrapped around the text of the phrase and nested inside the `<phrase>` element:
+                If the citation is attached to a phrase, then the citation will inserted at the end of the `<phrase>` element:
 
                 ```(xml) 
-                    <p><phrase><citation>Melville, 1851</citation>Moby Dick</phrase> is about a big fish.
+                    <p><phrase>Moby Dick<citation>Melville, 1851</citation></phrase> is about a big fish.
 
-                If citations and annotations are attached to the same phrase, then the citations will be serialized first and then the annotations will be wrapped around the text of the phrase.
+                If citations and annotations are attached to the same phrase,  then the annotations will be wrapped around the text of the phrase and then the citations will be serialized.
 
                 ```(xml) 
-                    <phrase><citation>Melville, 1851</citation><annotation type="novel">Moby Dick</annotation></phrase> is about a big fish.
+                    <phrase><annotation type="novel">Moby Dick</annotation><citation>Melville, 1851</citation></phrase> is about a big fish.
 
 
                 If the citation is attached to a {blockquote}, the citation element will be nested inside the `<blockquote>` element.
@@ -843,7 +843,7 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 If a citation uses a compound identifier, the identifier is broken into pieces and serialized like this:
 
                 ```(sam)
-                    <phrase><citation><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"></reference-elements>page 1</citation>call me Ishmael</phrase>
+                    <phrase>call me Ishmael<citation><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"></reference-elements>page 1</citation></phrase>
 
                 note:
                     Unlike other blocks, the serialization of a {citation} does not include a line feed after the citation tag. This is because a citation can also occur inside a flow, where the addition of a line feed would introduce extra whitespace into the flow. The lack of a linefeed in a block context does not change the semantics of the resulting document, but can make a difference in tests that compare literal XML output to expected output. 

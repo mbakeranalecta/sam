@@ -2791,15 +2791,14 @@ class Phrase(Span):
         yield from self._serialize_attributes(self._attribute_serialization_xml)
         yield '>'
 
-        for i in self.citations:
-            yield from i.serialize_xml()
-
         #Nest annotations for serialization
         if self.annotations:
             ann, *rest = self.annotations
             yield from ann.serialize_xml(rest, escape_for_xml(self.text))
         else:
             yield escape_for_xml(self.text)
+        for i in self.citations:
+            yield from i.serialize_xml()
         yield '</phrase>'
 
     def serialize_html(self, duplicate=False, variables=[]):

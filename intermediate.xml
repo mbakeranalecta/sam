@@ -2193,7 +2193,7 @@ After this paragraph, there is a blockquote:
 <p>After this paragraph, there is a blockquote:</p>
 <blockquote conditions="baz" id="foo" name="bar">
 <p>The quick brown fox jumps over the lazy dog.</p>
-<p>And the <phrase><citation>Mother Goose</citation><annotation type="beast" specifically="bovine">cow</annotation></phrase> jumps over the moon.</p>
+<p>And the <phrase><annotation type="beast" specifically="bovine">cow</annotation><citation>Mother Goose</citation></phrase> jumps over the moon.</p>
 </blockquote>
 </markup>
 <result>
@@ -2201,7 +2201,7 @@ After this paragraph, there is a blockquote:
 &lt;p&gt;After this paragraph, there is a blockquote:&lt;/p&gt;
 &lt;blockquote conditions="baz" id="foo" name="bar"&gt;
 &lt;p&gt;The quick brown fox jumps over the lazy dog.&lt;/p&gt;
-&lt;p&gt;And the &lt;phrase&gt;&lt;citation&gt;Mother Goose&lt;/citation&gt;&lt;annotation type="beast" specifically="bovine"&gt;cow&lt;/annotation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
+&lt;p&gt;And the &lt;phrase&gt;&lt;annotation type="beast" specifically="bovine"&gt;cow&lt;/annotation&gt;&lt;citation&gt;Mother Goose&lt;/citation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
 &lt;/blockquote&gt;
 </codeblock>
 </result>
@@ -2975,7 +2975,7 @@ After this paragraph, there is a blockquote:
 <blockquote conditions="a,b" id="id10" name="name" xml:lang="en-CA">
 <citation idref="cit"/>
 <p>The quick brown fox jumps over the lazy dog.</p>
-<p>And the <phrase><citation>Mother Goose</citation><annotation type="beast" specifically="bovine">cow</annotation></phrase> jumps over the moon.</p>
+<p>And the <phrase><annotation type="beast" specifically="bovine">cow</annotation><citation>Mother Goose</citation></phrase> jumps over the moon.</p>
 </blockquote>
 </markup>
 <result>
@@ -2985,7 +2985,7 @@ After this paragraph, there is a blockquote:
 &lt;citation idref="cit"/&gt;
 &lt;p&gt;The quick brown fox jumps over the lazy dog.&lt;/p&gt;
 
-&lt;p&gt;And the &lt;phrase&gt;&lt;citation&gt;Mother Goose&lt;/citation&gt;&lt;annotation type="beast" specifically="bovine"&gt;cow&lt;/annotation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
+&lt;p&gt;And the &lt;phrase&gt;&lt;annotation type="beast" specifically="bovine"&gt;cow&lt;/annotation&gt;&lt;citation&gt;Mother Goose&lt;/citation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
 &lt;/blockquote&gt;
 </codeblock>
 </result>
@@ -3002,11 +3002,11 @@ After this paragraph, there is a blockquote:
 </codeblock>
 </source>
 <markup>
-<p><phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"><citation idref="cit"/><annotation type="actor" specifically="John Wayne">The Duke</annotation></phrase> plays Rooster Cogburn.</p>
+<p><phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"><annotation type="actor" specifically="John Wayne">The Duke</annotation><citation idref="cit"/></phrase> plays Rooster Cogburn.</p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;&lt;phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"&gt;&lt;citation idref="cit"/&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;The Duke&lt;/annotation&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
+&lt;p&gt;&lt;phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;The Duke&lt;/annotation&gt;&lt;citation idref="cit"/&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3221,11 +3221,11 @@ chapter}[#single_source].
 </codeblock>
 </source>
 <markup>
-<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase><citation nameref="single_source"/>single sourcing chapter</phrase>.</p>
+<p>When using the map approach, it is important to think about how your content will <phrase><annotation type="concept" specifically="single sourcing">single source</annotation></phrase> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <phrase>single sourcing chapter<citation nameref="single_source"/></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;When using the map approach, it is important to think about how your content will &lt;phrase&gt;&lt;annotation type="concept" specifically="single sourcing"&gt;single source&lt;/annotation&gt;&lt;/phrase&gt; to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the &lt;phrase&gt;&lt;citation nameref="single_source"/&gt;single sourcing chapter&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;When using the map approach, it is important to think about how your content will &lt;phrase&gt;&lt;annotation type="concept" specifically="single sourcing"&gt;single source&lt;/annotation&gt;&lt;/phrase&gt; to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the &lt;phrase&gt;single sourcing chapter&lt;citation nameref="single_source"/&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3667,11 +3667,11 @@ You can {call me Ishmael}[Melville, 1851][Daffy, 2017][%key.bar12 page 22].
 </codeblock>
 </source>
 <markup>
-<p>You can <phrase><citation>Melville, 1851</citation><citation>Daffy, 2017</citation><citation keyref="key.bar12">page 22</citation>call me Ishmael</phrase>.</p>
+<p>You can <phrase>call me Ishmael<citation>Melville, 1851</citation><citation>Daffy, 2017</citation><citation keyref="key.bar12">page 22</citation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="XML">
-&lt;p&gt;You can &lt;phrase&gt;&lt;citation&gt;Melville, 1851&lt;/citation&gt;&lt;citation&gt;Daffy, 2017&lt;/citation&gt;&lt;citation keyref="key.bar12"&gt;page 22&lt;/citation&gt;call me Ishmael&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;You can &lt;phrase&gt;call me Ishmael&lt;citation&gt;Melville, 1851&lt;/citation&gt;&lt;citation&gt;Daffy, 2017&lt;/citation&gt;&lt;citation keyref="key.bar12"&gt;page 22&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3687,11 +3687,11 @@ You can {call me Ishmael}(quote)[Melville, 1851].
 </codeblock>
 </source>
 <markup>
-<p>You can <phrase><citation>Melville, 1851</citation><annotation type="quote">call me Ishmael</annotation></phrase>.</p>
+<p>You can <phrase><annotation type="quote">call me Ishmael</annotation><citation>Melville, 1851</citation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="XML">
-&lt;p&gt;You can &lt;phrase&gt;&lt;citation&gt;Melville, 1851&lt;/citation&gt;&lt;annotation type="quote"&gt;call me Ishmael&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;You can &lt;phrase&gt;&lt;annotation type="quote"&gt;call me Ishmael&lt;/annotation&gt;&lt;citation&gt;Melville, 1851&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3707,11 +3707,11 @@ You can {call me Ishmael}[#Melville/*MobyDick page 1].
 </codeblock>
 </source>
 <markup>
-<p>You can <phrase><citation><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"/></reference-elements>page 1</citation>call me Ishmael</phrase>.</p>
+<p>You can <phrase>call me Ishmael<citation><reference-elements><reference-element method="nameref" value="Melville"/><reference-element method="idref" value="MobyDick"/></reference-elements>page 1</citation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="XML">
-&lt;p&gt;You can &lt;phrase&gt;&lt;citation&gt;&lt;reference-elements&gt;&lt;reference-element method="nameref" value="Melville"/&gt;&lt;reference-element method="idref" value="MobyDick"/&gt;&lt;/reference-elements&gt;page 1&lt;/citation&gt;call me Ishmael&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;You can &lt;phrase&gt;call me Ishmael&lt;citation&gt;&lt;reference-elements&gt;&lt;reference-element method="nameref" value="Melville"/&gt;&lt;reference-element method="idref" value="MobyDick"/&gt;&lt;/reference-elements&gt;page 1&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
