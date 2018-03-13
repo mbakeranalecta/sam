@@ -269,8 +269,12 @@ like any other block type.
    * The `~` symbol or referencing an fragment is removed. Fragments should
    be referenced by name or id.
    
-   * The strings feature has been renamed variable. This chiefly affects
+   * The strings feature has been renamed "variable". This chiefly affects
    the serialization of variable definitions and references. 
+   
+* In revision 1f20902624d29dab002353df8374952c63fff81d the serialization of citations has been changed to support 
+compound identifiers and to support easier processing of citations. See the
+language docs for details. 
 
 Please report any other backward incompatibilities you find so they can be added to this list.
 
