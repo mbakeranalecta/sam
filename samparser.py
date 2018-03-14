@@ -3607,6 +3607,7 @@ if __name__ == "__main__":
                                 print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
 
                     if outputfile:
+                        os.makedirs(os.path.dirname(outputfile), exist_ok=True)
                         with open(outputfile, "wb") as outf:
                             if args.regurgitate:
                                 for i in samParser.doc.regurgitate():

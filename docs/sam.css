@@ -52,24 +52,6 @@ pre.codeblock
     border-width: 0 0 0 5px;
 }
 
-pre[data-language=sam] 
-{ 
-    background-color: yellow;
-}
-
-pre[data-language=sam]::before 
-{ 
-    float: left;
-    display: block;
-    background-color: cyan;
-    font-size: 10pt;
-    content: "SAM";
-    font-weight: bold;
-    transform: rotate(270deg);
-    transform-origin: left bottom 0;
-
-}
-
 .title
 {
     font-family: var(--title-font);
