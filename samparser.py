@@ -2572,7 +2572,10 @@ class FlowParser:
                 return "CITATION-START", para
             else:
                 para.retreat(1)
-                return "PHRASE-END", para
+                if type(phrase) is Phrase:
+                    return "PHRASE-END", para
+                else:
+                    return "PARA", para
         else:
             self.current_string += '('
             return "PARA", para
@@ -2784,7 +2787,7 @@ class Phrase(Span):
     @property
     def annotated(self):
         return len([x for x in self.annotations if not x.local]) > 0
-    # FIXME Should the citation count be included here? Don't think so as citations are local.
+
 
     def serialize_xml(self):
         yield '<phrase'
