@@ -334,4 +334,22 @@ article: SAM Recipes
                                 DSC               | 0.9987          | 0.9958              
                         cell: 
 
-        
+    recipe: Stemming support for annotation lookup
+
+        The {annotation lookup} feature allows writers to avoid having to explicitly annotate
+        phrases every time they mention them. If the parser detect an unannotated phrase, it
+        will work its way back through the document, including any included files, looking for
+        the same phrase with an annotation. It then copies the annotation from the first 
+        annotated phrase it finds. The question is, how does it match phrases. The parser
+        provides two {annotation lookup modes}, `case_sensitive` and `case_insensitive`. However, 
+        this does not account for cases where you might want various forms of the word to
+        be annotated the same way, such as "run", "ran", and "running". To match different
+        forms of a word, you need to use a technique called "stemming".
+
+        Stemming is not universal. There are different stemming algorithms with different 
+        strengths and weaknesses, and different languages require different stemming 
+        algorithms. Rather than choosing one, therefore, the parser leaves it open to the
+        user to supply their own annotation lookup mode, which may implement stemming or 
+        any other approach to annotation lookup that the user wants. 
+
+        You can add other {annotation lookup modes} by writing a lookup function and adding it to the dictionary samparser.annotation_lookup_modes.  
