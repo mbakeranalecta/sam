@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SAM Schema Spec</title>
+<meta charset = "UTF-8">
+<link rel="stylesheet" href="sam.css">
+</head>
+<body>
+<div class="spec">
+<h1 class="title">SAM Schema Spec</h1>
+
+<div class="introduction">
+<p class="p">This is the specification for the SAM schema. It consists of a set of rules that specify how a sam schema is written and interpreted.</p>
+</div>
+<div class="rule" data-name="encoding">
+<h2 class="title">Encoding</h2>
+
+<p class="p">A SAM Schemas is encoded in UTF8</p>
+</div>
+<div class="rule" data-name="names">
+<h2 class="title">Names</h2>
+
+<p class="p">Element names must be valid XML names.</p>
+</div>
+<div class="rule" data-name="header">
+<h2 class="title">SAM Schema Header</h2>
+
+<p class="p">A SAM Schema begins with a SAM Schema Header</p>
+<p class="p">A SAM schema header consists of the word "samschema" followed by a colon followed optionally by a namespace URI in curly braces. For example:</p>
+<pre class="codeblock" data-language="samschema"><code class="codeblock" data-language="samschema">samschema:{http://spfeopentoolkit.org/ns/spfe-doc}
+</code></pre>
+<p class="p">If specified, the namespace URI specifies the default namespace of all the elements defined in the schema.</p>
+</div>
+<div class="rule" data-name="namespaces">Namespaces</div>
+<div class="rule" data-name="root">
+<h2 class="title">Root element declaration</h2>
+
+<p class="p">Unlike an XML schema, which declares a collection of elements, several of which might be suitable for document roots, SAM schemas always declare a document root element.</p>
+<p class="p">The document root element is declared as a valid element name beginning in the first column. It is the first element declaration following the SAM schema header and any <span class="phrase"><span class="annotation" data-annotation-type="rule" data-specifically="#include">include statements</span></span>.</p>
+</div>
+<div class="rule" data-name="includes">
+<h2 class="title">Includes</h2>
+
+<p class="p">You can include another samschema in the current samschema document using an include statement.</p>
+<p class="p">Included samschemas are processed as if they were part of the current samschema with the following provisions:</p>
+<ul class="ul">
+<li class="li">
+<p class="p">The included sam schema may not include a <span class="phrase">root element declaration</span>).</p>
+</li>
+</ul>
+<p class="p">This means that any elements declared in an included samschama must be declared inside <span class="phrase">named structures</span>.</p>
+<ul class="ul">
+<li class="li">
+<p class="p">If the included sam schema contains a default namespace, it will be used</p>
+</li>
+</ul>
+<p class="p">as the namespace for the elements defined in the included samschema.</p>
+<ul class="ul">
+<li class="li">
+<p class="p">If the included sam schema does not contain a default namespace declaration,</p>
+</li>
+</ul>
+<p class="p">and the including sam schema does contain a namespace declaration, the elements in the included sameschema will be placed in the declared namespace of the including samschema. This rule is applied down the tree of includes from the top level schema and is evaluated as each include statement is processed from the top down.</p>
+</div>
+<div class="rule" data-name="blocks">
+<h2 class="title">blocks declarations</h2>
+
+<p class="p">An SAM document consists of blocks, fields, record sets, flows, decorations, and annotations. Blocks and fields are declared the same way. The distinction between a block and a field is that a block has children and a field does not.</p>
+<p class="p">For a field, SAM interprets any content after the field tag as the value of the field.</p>
+<p class="p">For a block, SAM interprets any content after the block tag as an implicit <span class="phrase"><span class="annotation" data-annotation-type="rule" data-specifically="#implicit">title</span></span> field.</p>
+</div>
+<div class="rule" data-name="implicit">
+<h2 class="title">Implicit elements</h2>
+
+<p class="p">SAM recognized certain elements by their context in the SAM document. They do not have explicit tags in the content. These implicit elements are delineated either by punctuation or by their position relative to other elements.</p>
+<p class="p">Implicit elements are implicit in the instance. They must be declared in the schema. It is an error if an implicit element occurs in the instance in a position in which it is not permitted in the schema.</p>
+<p class="p">The implicit elements are as follows:</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">p</dt>
+<dd class="ll.li.item"><p class="p">The p element represents a paragraph. It is recognized as a block of</p>
+</dd>
+</div>
+</dl>
+<p class="p">lines with no leading tag. It ends with a blank line. p elements are the only elements that can contain decorations and annotations.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">bold</dt>
+<dd class="ll.li.item"><p class="p">The bold element is a decoration occurring within text and is</p>
+</dd>
+</div>
+</dl>
+<p class="p">indicated by surrounding the text with asterisks.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">italic</dt>
+<dd class="ll.li.item"><p class="p">The italic decoration is indicated by surrounding the text</p>
+</dd>
+</div>
+</dl>
+<p class="p">with underscores.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">mono</dt>
+<dd class="ll.li.item"><p class="p">The mono decoration is indicated by back ticks. It indicates that</p>
+</dd>
+</div>
+</dl>
+<p class="p">the text should be rendered in a monospaced font.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">quotes</dt>
+<dd class="ll.li.item"><p class="p">The quotes decoration is indicated by surrounding the text</p>
+</dd>
+</div>
+</dl>
+<p class="p">in straight double quotes. You can use printers quotes in your document but they will be recognized as plain text, not markup.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">title</dt>
+<dd class="ll.li.item"><p class="p">The title element is implicit if there is text on the same line as</p>
+</dd>
+</div>
+</dl>
+<p class="p">a block tag, and if a title field is allowed as the first filed of the block. Text in this position is an error if a title field is not allowed in this location by a the schema of if the title element that is allowed is a block element rather than a field element.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">blockquote</dt>
+<dd class="ll.li.item"><p class="p">The blockquote block element is indicated by opening</p>
+</dd>
+</div>
+</dl>
+<p class="p">with three double quotes on a line by themselves, plus any parameters on the opening quotes. The quoted material must be indented from the blockquote markers</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">codeblock</dt>
+<dd class="ll.li.item"><p class="p">The codeblock block element is indicated by opening and closing with</p>
+</dd>
+</div>
+</dl>
+<p class="p">three backtick on a line by themselves, plus any attributes on the opening backticks.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">fragment</dt>
+<dd class="ll.li.item"><p class="p">The fragment element contains a set of elements that can be</p>
+</dd>
+</div>
+</dl>
+<p class="p">reused by inserting the fragment into other locations in the document, or other documents. Fragments can also be use to apply conditions to a set of elements that would otherwise lack a common container. Recommended practice it to use fragments to contain only general text elements, which helps ensure that the inserted fragment will be schema compliant in the receiving document (assuming a common definition of general text elements). A fragment is indicated by  three tildes (of the block name "fragment".</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">string</dt>
+<dd class="ll.li.item"><p class="p">The definition of a string, which may be inserted in the</p>
+</dd>
+</div>
+</dl>
+<p class="p">document, but is not intended to be published where defined.</p>
+</div>
+<div class="rule" data-name="ideomatic-annotation-types">
+<h2 class="title">Idiomatic annotations</h2>
+
+<p class="p">Certain annotation types are considered idiomatic. That is, the name is considered bound by convention to a certain meaning. This does not mean that you cannot use the type for other things, or use other names for that function, but editor and tools are entitled to provide enhanced support for the idiomatic meaning of the names.</p>
+<p class="p">In some cases, idiomatic types may have specialized or atypical treatment of the standard attributes. For instance, the link type uses the specifically attribute for the URL to link to, which is an eccentric interpretation of what specifically is intended for.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">link</dt>
+<dd class="ll.li.item"><p class="p">The link type is idiomatically used for inserting explicit hyperlinks. The</p>
+</dd>
+</div>
+</dl>
+<p class="p">specifically attribute is used to specify the url to link to. The namespace attribute remains a namespace. It could be used if the protocol or location is anything other than HTTP/Web.</p>
+<p class="p">A schema can rename an idiomatic type, so that the tool behavior associated with the idiomatic type can be applied to the new type:</p>
+<pre class="codeblock" data-language="samschema"><code class="codeblock" data-language="samschema">href=link
+</code></pre>
+</div>
+<div class="rule" data-name="idiomatic-elements">
+<h2 class="title">Idiomatic elements</h2>
+
+<p class="p">Idiomatic elements are elements with intended meanings. Those meaning are not actually enforced by the SAM parser and the application is free to do what it likes with them. However, users and editing applications are entitled to treat the idiomatic elements as having their intended meanings. In some cases, the annotations of idiomatic elements are interpreted in special ways. The attributes will be assigned names that reflect their idiomatic usage, rather than the standard names.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">blockquote</dt>
+<dd class="ll.li.item"><p class="p">Annotation is recognized as a citation. Annotation type is</p>
+</dd>
+</div>
+</dl>
+<p class="p">recognized as the type of publication (web, book, article, etc.). Specifically the text of the citation is the format specified by the namespace attribute. It specifically attribute will be named "citation", and the namespace attribute will be named format. It is up to the downstream processor to parse the citation into its parts.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">codeblock</dt>
+<dd class="ll.li.item"><p class="p">Annotation type is recognized as a specifying the language and</p>
+</dd>
+</div>
+</dl>
+<p class="p">source of the codeblock. Specifically is recognized as the source and is named "source".</p>
+</div>
+<div class="rule" data-name="implicit-structures">
+<h2 class="title">Implicit structures</h2>
+
+<p class="p">SAM also recognized implicit structures. An implicit structure occurs where more than one element is recognized by context. The implicit structures are:</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">unordered lists</dt>
+<dd class="ll.li.item"><p class="p">Unordered lists are indicated by starting a line with an</p>
+</dd>
+</div>
+</dl>
+<p class="p">asterisk. The root element of the structure in <span class="phrase"><span class="annotation" data-annotation-type="element">ul</span></span>. The container for the list item is <span class="phrase"><span class="annotation" data-annotation-type="element">li</span></span>. The container for the text is <span class="phrase"><span class="annotation" data-annotation-type="element">p</span></span>.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">ordered lists</dt>
+<dd class="ll.li.item"><p class="p">Ordered lists are indicated by starting a line with a number.</p>
+</dd>
+</div>
+</dl>
+<p class="p">Numbers do not have to be sequential. The root element of the structure in <span class="phrase">ol</span>. The container for the list item is <span class="phrase"><span class="annotation" data-annotation-type="element">li</span></span>. The container for the text is <span class="phrase"><span class="annotation" data-annotation-type="element">p</span></span>.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">labeled lists</dt>
+<dd class="ll.li.item"><p class="p">Labeled lists are indicated by surrounding the label text with</p>
+</dd>
+</div>
+</dl>
+<p class="p">pipe characters at the start of a paragraph.  The root element of the structure in <span class="phrase"><span class="annotation" data-annotation-type="element">ll</span></span>. Each labeled list item has the name <span class="phrase"><span class="annotation" data-annotation-type="element">li</span></span> and contains the label and the labeled paragraph.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">block titles</dt>
+<dd class="ll.li.item"><p class="p">When you place text after the name of a block that has nested</p>
+</dd>
+</div>
+</dl>
+<p class="p">content (as opposed to one that is merely a field with a single value), that text is treated as <span class="phrase"><span class="annotation" data-annotation-type="element">title</span></span> for the block.</p>
+</div>
+<div class="rule" data-name="rename-implicit">
+<h2 class="title">Renaming implicit structures</h2>
+
+<p class="p">You can rename the implicit elements so that the output of the SAM parser gives them different names. To rename an implicit element, use the new name followed by an equals sign, followed by the implicit element name.</p>
+<p class="p">Thus, to create a paragraph element named para instead of p, specify the element as follows:</p>
+<pre class="codeblock" data-language="samschema"><code class="codeblock" data-language="samschema">para=p
+</code></pre>
+</div>
+<div class="rule" data-name="create-implicit">Creating implicit structures</div>
+<div class="rule" data-name="order-number">
+<h2 class="title">Order and number of elements in structures</h2>
+
+<p class="p">You can indicate the order and number of elements in a structure.</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">~</dt>
+<dd class="ll.li.item"><p class="p">All the items in the structure in any order.</p>
+</dd>
+</div>
+</dl>
+</div>
+</div>
+</body>
+</html>

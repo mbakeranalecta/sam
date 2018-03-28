@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SAM Recipes</title>
+<meta charset = "UTF-8">
+<link rel="stylesheet" href="sam.css">
+</head>
+<body>
+<div class="article">
+<h1 class="title">SAM Recipes</h1>
+
+<div class="menu">
+<p class="p"><span class="phrase"><a href=index.html class="link">Home</a></span> | <span class="phrase"><a href=quickstart.html class="link">Quickstart</a></span> | <span class="phrase"><a href=language.html class="link">Language</a></span> | <span class="phrase"><a href=recipes.html class="link">Recipes</a></span> | <span class="phrase"><a href=https://github.com/mbakeranalecta/sam class="link">Github</a></span></p>
+</div>
+<p class="p">SAM is an abstract markup language, otherwise known as a meta-language. This means that it is intended, like XML, defining your own markup languages. Unlike XML, however, SAM pre-defines a basic set of structures. SAMs predefined structures provide a simple clear syntax of common text structures, but they don't cover everything you might need. The following recipes are suggestions on how to handle some common markup problems in SAM. But remember, these involve you defining markup for yourself and require you to handle that markup in the application layer.</p>
+<div class="recipe">
+<h2 class="title">Footnotes</h2>
+
+<p class="p">SAM does not have an predefined markup for footnotes, but it does have support for IDs and citations, which provide a reference mechanism for footnotes. The suggested recipe for footnotes is to create a footnote block with an id, and use a citation to reference that id:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This paragraph reqires a footnote.[*1]
+
+footnote:(*1)
+    This is a footnote.
+</code></pre>
+<p class="p">The footnote structure can be anywhere in the document, but it makes sense to place it immediately after the paragraph in which the reference occurs. You can move it to the bottom of the page or the of the chapter or book in the publishing process.</p>
+<p class="p">Note that the footnote structure is not a child of the paragraph but a sibling at the same level of indentation. Paragraphs cannot have block children.</p>
+</div>
+<div class="recipe">
+<h2 class="title">Terminal sessions</h2>
+
+<p class="p">There is no support for SAM markup in the body of a codeblock. This works for code, since it requires no escaping, regardless of language. It does not work so well for terminal sessions if you want to markup the prompt, input, and output. If you need this kind of terminal session support, the suggested recipe is to create a terminal session block and use fields for the sequence of prompt, input, and response. This reads quite clearly and you can easily use it to construct a formatted terminal session illustration when publishing.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">terminal:
+    prompt: $
+    input: dir
+    response: Empty directory.
+</code></pre>
+</div>
+<div class="recipe">
+<h2 class="title">Semantic lists</h2>
+
+<p class="p">Sometimes you have semantic lists. That is, the list and its items are of a specific type. For example:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">filmography:
+    film: Rio Bravo
+    film: The Shootist
+</code></pre>
+<p class="p">If you don't want to have to repeat the item name over and over, you can use a recordset with a single field.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">filmography:: film
+    Rio Bravo
+    The Shootish
+</code></pre>
+<p class="p">Notice that while these two constructions capture the same data and the same semantics, they are not the same structure, and are therefore not interchangeable. You have to decide which one you want in your markup language and provide processing for it accordingly.</p>
+<p class="p">Also note the the XML representation of the two forms is different. The first outputs this:</p>
+<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;filmography&gt;
+&lt;film&gt;Rio Bravo&lt;/film&gt;
+&lt;film&gt;The Shootist&lt;/film&gt;
+&lt;/filmography&gt;
+</code></pre>
+<p class="p">The second outputs this:</p>
+<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;filmography&gt;
+&lt;row&gt;
+&lt;film&gt;Rio Bravo&lt;/film&gt;
+&lt;/row&gt;
+&lt;row&gt;
+&lt;film&gt;The Shootist&lt;/film&gt;
+&lt;/row&gt;
+&lt;/filmography&gt;
+</code></pre>
+<p class="p">Of course, it is easy enough to transform the second output into the first in post-processing.</p>
+</div>
+<div class="recipe">
+<h2 class="title">Subscripts and superscripts</h2>
+
+<p class="p">SAM does not have predefined support for superscripts and subscripts. If you need then, you need to define a tagging language the provides them. You would do this with annotations:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">H{2}(super)S0{4}(super)
+</code></pre>
+</div>
+<div class="recipe">
+<h2 class="title">Conditional paragraphs</h2>
+
+<p class="p">You can't apply attributes to a paragraph. If you want to make paragraphs conditional, support fragments in your tagging language and put the conditions on the fragments.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">~~~(?novice)
+    Be very careful and ask for help if you need it.
+
+Push the big red button and run.
+</code></pre>
+</div>
+<div class="recipe">
+<h2 class="title">Use a lookup file to make annotations easier</h2>
+
+<p class="p">SAM allows you to omit the annotations on a phrase after you have annotated it the first time in a file. When the parser sees a phrase with no annotation or citation, it looks back through the file an finds the last instance of that phrase and copies its annotation.</p>
+<p class="p">This is a time saver. If you have a set of phrases that are commonly annotated the same way across a number of documents, you can create a lookup file in which those phrases are annotated and import it into each document. You with then not need to annotate any of those phrases in the document. Just mark them up as phrases using curly braces and the parser will fill in the annotations.</p>
+<p class="p">You need to make sure that the contents of the lookup file do not become part of the published document. To do this, simply create a structure in the lookup file to hold the list of annotations and suppress that structure in the application layer.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">dont-publish-this:
+    {Enter}(key)
+    {the Duke}(actor "John Wayne" (SAG))
+</code></pre>
+</div>
+<div class="recipe">
+<h2 class="title">Complex labeled lists</h2>
+
+<p class="p">SAM provides a simple labeled list format that allows only one paragraph attached to a label. For anything more complex than this, construct a labeled list structured with blocks and fields.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">ll:
+    li:
+        lable: Item label
+        item:
+            The text of the item, including:
+
+            * paragraphs
+            * lists
+            * etc
+</code></pre>
+</div>
+<div class="recipe">
+<h2 class="title">Single sourcing via attribute substitution</h2>
+
+<p class="p">You can provide single sourcing support via attribute chaining. That is, you can provide both an HTTP link and a subject annotation. But if you use the trick of importing a file of annotation definitions and relying on annotation lookup to add them to the content, you can also substitute in different annotation lookup sets for different media (or different anything else). This will get easier when we add catalog support.</p>
+</div>
+<div class="recipe">
+<h2 class="title">Index markers</h2>
+
+<p class="p">There are a number of ways to implement index markers in SAM. The first it to avoid the use of explict index marker altogether and to generate an index based on semantic annotation.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{The Duke}(actor "John Wayne") plays an ex-Union colonel.
+</code></pre>
+<p class="p">In this case you could generate an index entry for <code class="code">John Wayne</code>, and a categorized entry for <code class="code">Actor:John Wayne</code> from this annotation.</p>
+<p class="p">Note that you don't have to generate an index entry for every instance of and annotated phrase. You can choose to generate an entry only for the first occurrence of an annotated phrase in a section or chapter, for instance.</p>
+<p class="p">To implement explicit index markers, you can use annotations with a type <code class="code">index</code>:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{The Duke}(index "John Wayne; Actor:John Wayne") plays an ex-Union colonel.
+</code></pre>
+<p class="p">To implement index markers that span a passage, you can use a field on a block:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">bio: John Wayne
+    index: John Wayne; Actor:John Wayne
+
+    John Wayne was an actor known for his roles in westerns.
+</code></pre>
+<p class="p">To implement index markers that span an arbitrary passage within a block, you can use a field on a fragment:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">~~~
+    index: John Wayne; Actor:John Wayne
+
+    Jimmy Stewart also made a number of films with John Wayne.
+    ...
+</code></pre>
+<p class="p">Remember that these are suggestions as to how you might implement index markers in a tagging language based on SAM. SAM does not provide explicit support for index markers.</p>
+</div>
+<div class="recipe">
+<h2 class="title">Code callouts</h2>
+
+<p class="p">There is no way to insert markup into a regular codeblock. If you want to do callouts in code, you can use lines for the code and citations for the callouts. (The presumptive semantics for citations is that what they produce is base on the thing they refer to.)</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam"></code></pre>
+<div class="codesample">
+<div class="language">python</div>
+<div class="code">
+<pre class="line">print("Hello World")</pre>
+<pre class="line">print ("Goodbye, cruel World")</pre>
+</div>
+<div class="callouts">
+<div class="callout" id="c1">This prints "Hello World".</div>
+<div class="callout" id="c2">This prints "Goodbye, cruel World".</div>
+</div>
+</div>
+</div>
+<div class="recipe">
+<h2 class="title">Markdown style deferred links</h2>
+
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Look it up in {Wikipedia}[*wikipedia]
+
+link(*wikipedia): http://wikipedia.org
+</code></pre>
+</div>
+<div class="recipe">
+<h2 class="title">Complex</h2>
+
+<p class="p">Sam <span class="phrase">grids</span> do not support spanning rows and columns in a table. However, you could provide for spanning rows and columns in grids at the application layer if you wanted to. This allows you to adopt a syntax for spanning rows and columns that works for your markup language.</p>
+<p class="p">One possible way to do this as to indicate spanning rows and columns as follows. The example here is based on <span class="phrase"><span class="annotation" data-annotation-type="url">https://tex.stackexchange.com/questions/368176/i-badly-need-to-generate-the-following-table</span></span> which has shots of layout.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">+++
+    Paper Title | Performance Measure                                    ||| Image Type
+         _      | Evaluation Metric | Proposed Method | traditional method |      _
+                | DC                | 0.0019          | 0.0021             | 
+                | JS                | 0.9975          | 0.9916             | 
+                | DSC               | 0.9987          | 0.9958             | 
+</code></pre>
+<p class="p">Here the column spanning in indicated by stacking all of the vertical bars that separate the columns together at the end of the spanned column while the row spanning is indicated by placing a single underscore character in the row to be spanned.</p>
+<p class="p">This will result in XML output where the cells to be column-spanned with contain and empty string and those to be row-spanned contain a single underscore. The application layer processing can then create the column and row spans accordingly.</p>
+<p class="p">You could also do a complex table in fully explicit markup something like this:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">table:
+    header:
+        row:
+            cell: Paper Title
+            cell: Performance Measure
+            cell: #hspan
+            cell: #hspan
+            cell: Image Type
+        row: 
+            cell: #vspan
+            cell: Evaluation Metric
+            cell: Proposed Method
+            cell: traditional method
+            cell: #vspan
+    body:
+        row:
+            cell: #empty
+            cell: DC
+            cell: 0.0019
+            cell: 0.0021
+            cell: #empty
+
+        row:
+            cell: #empty
+            cell: JS
+            cell: 0.9975
+            cell: 0.9916
+            cell: #empty
+
+        row:
+            cell: #empty
+            cell: DSC
+            cell: 0.9987
+            cell: 0.9958
+            cell: #empty 
+</code></pre>
+<p class="p">Because SAM does not support arbitrary attributes, this approach uses special cell content to indicate spanning. The application layer has to interpret the <code class="code">#vsapn</code> and <code class="code">#hspan</code>. <code class="code">#empty</code> is really just semantic sugar.</p>
+<p class="p">Another alternative, it to use nested tables, though this will produce a slightly different layout:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">table:
+    header:
+        row:
+            cell: Paper Title
+            cell: Performance Measure
+            cell: Image Type
+    body:
+        row: 
+            cell: 
+            cell:
+                table:
+                    header:
+                            cell: Evaluation Metric
+                            cell: Proposed Method
+                            cell: traditional method
+                    body:
+                        row:
+                            cell: DC
+                            cell: 0.0019
+                            cell: 0.0021
+
+                        row:
+                            cell: JS
+                            cell: 0.9975
+                            cell: 0.9916
+
+                        row:
+                            cell: DSC
+                            cell: 0.9987
+                            cell: 0.9958
+            cell: 
+</code></pre>
+<p class="p">This can be expressed more compactly like this:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">table:
+    header:
+        row:
+            cell: Paper Title
+            cell: Performance Measure
+            cell: Image Type
+    body:
+        row: 
+            cell: 
+            cell:
+                +++
+                    Evaluation Metric | Proposed Method | traditional method      
+                    DC                | 0.0019          | 0.0021             
+                    JS                | 0.9975          | 0.9916              
+                    DSC               | 0.9987          | 0.9958              
+            cell: 
+</code></pre>
+</div>
+<div class="recipe">
+<h2 class="title">Stemming support for annotation lookup</h2>
+
+<p class="p">The <span class="phrase">annotation lookup</span> feature allows writers to avoid having to explicitly annotate phrases every time they mention them. If the parser detect an unannotated phrase, it will work its way back through the document, including any included files, looking for the same phrase with an annotation. It then copies the annotation from the first annotated phrase it finds. The question is, how does it match phrases. The parser provides two <span class="phrase">annotation lookup modes</span>, <code class="code">case_sensitive</code> and <code class="code">case_insensitive</code>. However, this does not account for cases where you might want various forms of the word to be annotated the same way, such as "run", "ran", and "running". To match different forms of a word, you need to use a technique called "stemming".</p>
+<p class="p">Stemming is not universal. There are different stemming algorithms with different strengths and weaknesses, and different languages require different stemming algorithms. Rather than choosing one, therefore, the parser leaves it open to the user to supply their own annotation lookup mode, which may implement stemming or any other approach to annotation lookup that the user wants.</p>
+<p class="p">You can add other <span class="phrase">annotation lookup modes</span> by writing a lookup function and adding it to the dictionary samparser.annotation<span class="phrase"><i class="italic">lookup</i></span>modes.</p>
+</div>
+</div>
+</body>
+</html>
