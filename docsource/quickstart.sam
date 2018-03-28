@@ -1,5 +1,7 @@
 article: SAM Quick Start
 
+    <<<(menu.sami)
+
     SAM is a markup language for semantic authoring. It is not a fixed language like Markdown. It is a meta-language like XML. Markdown has a fixed set of document structures that you can use. SAM, like XML, lets you define and create your own structures to suit your own needs. Unlike XML, however, and like Markdown, SAM is designed to be easy to write in a plain text editor. SAM also provides a set of basic default structures that are shared by all SAM document types. This base set is deliberately basic. It is designed to make certain common structures easy to create. There are other document structures you will probably need that you will have to design for your self using SAM's blocks and annotations. See the {SAM Recipes} document for some suggestions on how to create some
     commonly used document structures.
 
@@ -133,11 +135,11 @@ article: SAM Quick Start
         
         Citations come in two forms. Citations of internal names/ids, and citations of external resources. Citations can be applied to:
 
-            * a point in a flow
+        * a point in a flow
 
-            * a phrase
+        * a phrase
 
-            * a blockquote
+        * a blockquote
 
         To cite a resource that has an id within the current SAM document, reference the id like this: 
 
@@ -452,7 +454,7 @@ article: SAM Quick Start
 
         You can apply multiple attributes to a block:
 
-       ```(sam)
+        ```(sam)
             note:(*note.waterproof)(?basic)
                 Do not immerse you Basic model Widget in Water. Only higher
                 trim levels are waterproof.

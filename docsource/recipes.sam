@@ -1,5 +1,7 @@
 article: SAM Recipes
 
+    <<<(menu.sami)
+
     SAM is an abstract markup language, otherwise known as a meta-language. This means that it is intended, like XML,
     defining your own markup languages. Unlike XML, however, SAM pre-defines a basic set of structures.
     SAMs predefined structures provide a simple clear syntax of common text structures, but they don't cover

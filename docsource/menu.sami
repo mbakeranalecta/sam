@@ -1,0 +1,2 @@
+menu:
+    {Home}(link "index.html") | {Quickstart}(link "quickstart.html") | {Language}(link "language.html") | {Recipes}(link "recipes.html") | {Github}(https://github.com/mbakeranalecta/sam)

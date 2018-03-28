@@ -3407,7 +3407,9 @@ def multi_replace(string, subs):
 def SAM_parser_warning(warning):
     print("SAM parser warning: {0}".format(warning), file=sys.stderr)
 
-def SAM_parser_info(info):
+def SAM_parser_info(info, blank_line = False):
+    if blank_line:
+        print('\n', file=sys.stderr)
     print("SAM parser information: {0}".format(info), file=sys.stderr)
 
 def SAM_parser_debug(message):
@@ -3491,7 +3493,7 @@ if __name__ == "__main__":
     intermediategroup.add_argument("-intermediatedir", "-id",
                                    help="name of directory to dump intermediate XML to when using -xslt")
     argparser.add_argument("-xsd", help="Specify an XSD schema to validate generated XML")
-    argparser.add_argument("-outputextension", "-oext",  nargs='?', const='.xml', default='.xml')
+    argparser.add_argument("-outputextension", "-oext",  nargs='?')
     argparser.add_argument("-intermediateextension", "-iext",  nargs='?', const='.xml', default='.xml')
     argparser.add_argument("-regurgitate", "-r", help="regurgitate the input in normalized form",
                            action="store_true")
@@ -3514,6 +3516,17 @@ if __name__ == "__main__":
     try:
 
         samParser = SamParser()
+
+        if not args.outputextension:
+            output_extension = '.xml'
+            if args.html:
+                output_extension = '.html'
+        else:
+            if args.outputextension[0] == '.':
+                output_extension = args.outputextension
+            else:
+                output_extension = '.' + args.outputextension
+
 
         if (args.intermediatefile or args.intermediatedir) and not args.xslt:
             raise SAMParserError("Do not specify an intermediate file or directory if an XSLT file is not specified.")
@@ -3545,13 +3558,13 @@ if __name__ == "__main__":
             try:
                 with open(inputfile, "r", encoding="utf-8-sig") as inf:
 
-                    SAM_parser_info("Parsing " + os.path.abspath(inf.name))
+                    SAM_parser_info("Parsing " + os.path.abspath(inf.name), blank_line=True)
                     samParser.parse(inf)
 
                     if args.outdir:
                         outputfile = os.path.join(args.outdir,
                                                   os.path.splitext(
-                                                      os.path.basename(inputfile))[0] + args.outputextension)
+                                                      os.path.basename(inputfile))[0] + output_extension)
                     else:
                         outputfile = args.outfile
 

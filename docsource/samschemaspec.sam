@@ -1,91 +1,91 @@
 spec: SAM Schema Spec
 
-introduction:
+    introduction:
 
-    This is the specification for the SAM schema. It consists of a set of rules
-    that specify how a sam schema is written and interpreted.
+        This is the specification for the SAM schema. It consists of a set of rules
+        that specify how a sam schema is written and interpreted.
 
-rule:(#encoding) Encoding
+    rule:(#encoding) Encoding
 
-    A SAM Schemas is encoded in UTF8
+        A SAM Schemas is encoded in UTF8
 
-rule:(#names) Names
+    rule:(#names) Names
 
-    Element names must be valid XML names.
+        Element names must be valid XML names.
 
-rule:(#header) SAM Schema Header
+    rule:(#header) SAM Schema Header
 
-    A SAM Schema begins with a SAM Schema Header
+        A SAM Schema begins with a SAM Schema Header
 
-    A SAM schema header consists of the word "samschema" followed by a colon
-    followed optionally by a namespace URI in curly braces. For example:
+        A SAM schema header consists of the word "samschema" followed by a colon
+        followed optionally by a namespace URI in curly braces. For example:
 
-    ```(samschema)
-        samschema:{http://spfeopentoolkit.org/ns/spfe-doc}
-
-
-    If specified, the namespace URI specifies the default namespace of all the
-    elements defined in the schema.
-
-rule:(#namespaces) Namespaces
+        ```(samschema)
+            samschema:{http://spfeopentoolkit.org/ns/spfe-doc}
 
 
-rule:(#root) Root element declaration
+        If specified, the namespace URI specifies the default namespace of all the
+        elements defined in the schema.
 
-    Unlike an XML schema, which declares a collection of elements, several of which
-    might be suitable for document roots, SAM schemas always declare a document
-    root element.
+    rule:(#namespaces) Namespaces
 
-    The document root element is declared as a valid element name beginning in the
-    first column. It is the first element declaration following the SAM schema
-    header and any [include statements](rule "#include").
 
-rule:(#includes) Includes
+    rule:(#root) Root element declaration
 
-    You can include another samschema in the current samschema document using
-    an include statement.
+        Unlike an XML schema, which declares a collection of elements, several of which
+        might be suitable for document roots, SAM schemas always declare a document
+        root element.
 
-    Included samschemas are processed as if they were part of the current
-    samschema with the following provisions:
+        The document root element is declared as a valid element name beginning in the
+        first column. It is the first element declaration following the SAM schema
+        header and any {include statements}(rule "#include").
 
-    * The included sam schema may not include a {root element declaration}[#root]).
-    This means that any elements declared in an included samschama must be
-    declared inside {named structures}[#stuctures].
+    rule:(#includes) Includes
 
-    * If the included sam schema contains a default namespace, it will be used
-    as the namespace for the elements defined in the included samschema.
+        You can include another samschema in the current samschema document using
+        an include statement.
 
-    * If the included sam schema does not contain a default namespace declaration,
-    and the including sam schema does contain a namespace declaration,
-    the elements in the included sameschema will be placed in the declared namespace
-    of the including samschema. This rule is applied down the tree of includes from
-    the top level schema and is evaluated as each include statement is processed
-    from the top down.
+        Included samschemas are processed as if they were part of the current
+        samschema with the following provisions:
 
-rule:(#blocks) blocks declarations
+        * The included sam schema may not include a {root element declaration}[#root]).
+        This means that any elements declared in an included samschama must be
+        declared inside {named structures}[#stuctures].
 
-    An SAM document consists of blocks, fields, record sets, flows, decorations,
-    and annotations. Blocks and
-    fields are declared the same way. The distinction between a block and a
-    field is that a block has children and a field does not.
+        * If the included sam schema contains a default namespace, it will be used
+        as the namespace for the elements defined in the included samschema.
 
-    For a field, SAM interprets any content after the field tag as the value of
-    the field.
+        * If the included sam schema does not contain a default namespace declaration,
+        and the including sam schema does contain a namespace declaration,
+        the elements in the included sameschema will be placed in the declared namespace
+        of the including samschema. This rule is applied down the tree of includes from
+        the top level schema and is evaluated as each include statement is processed
+        from the top down.
 
-    For a block, SAM interprets any content after the block tag as an
-    implicit [title](rule "#implicit") field.
+    rule:(#blocks) blocks declarations
 
-rule:(#implicit) Implicit elements
+        An SAM document consists of blocks, fields, record sets, flows, decorations,
+        and annotations. Blocks and
+        fields are declared the same way. The distinction between a block and a
+        field is that a block has children and a field does not.
 
-    SAM recognized certain elements by their context in the SAM document. They
-    do not have explicit tags in the content. These implicit elements are delineated
-    either by punctuation or by their position relative to other elements.
+        For a field, SAM interprets any content after the field tag as the value of
+        the field.
 
-    Implicit elements are implicit in the instance. They must be declared in the
-    schema. It is an error if an implicit element occurs in the instance in a
-    position in which it is not permitted in the schema.
+        For a block, SAM interprets any content after the block tag as an
+        implicit {title}(rule "#implicit") field.
 
-    The implicit elements are as follows:
+    rule:(#implicit) Implicit elements
+
+        SAM recognized certain elements by their context in the SAM document. They
+        do not have explicit tags in the content. These implicit elements are delineated
+        either by punctuation or by their position relative to other elements.
+
+        Implicit elements are implicit in the instance. They must be declared in the
+        schema. It is an error if an implicit element occurs in the instance in a
+        position in which it is not permitted in the schema.
+
+        The implicit elements are as follows:
 
         |p| The p element represents a paragraph. It is recognized as a block of
         lines with no leading tag. It ends with a blank line. p elements are the
@@ -132,95 +132,95 @@ rule:(#implicit) Implicit elements
         |string| The definition of a string, which may be inserted in the
         document, but is not intended to be published where defined.
 
-rule:(#ideomatic-annotation-types) Idiomatic annotations
-    Certain annotation types are considered idiomatic. That is, the name
-    is considered bound by convention to a certain meaning. This does not
-    mean that you cannot use the type for other things, or use other names
-    for that function, but editor and tools are entitled to provide enhanced
-    support for the idiomatic meaning of the names.
+    rule:(#ideomatic-annotation-types) Idiomatic annotations
+        Certain annotation types are considered idiomatic. That is, the name
+        is considered bound by convention to a certain meaning. This does not
+        mean that you cannot use the type for other things, or use other names
+        for that function, but editor and tools are entitled to provide enhanced
+        support for the idiomatic meaning of the names.
 
-    In some cases, idiomatic types may have specialized or atypical treatment
-    of the standard attributes. For instance, the link type uses the
-    specifically attribute for the URL to link to, which is an eccentric
-    interpretation of what specifically is intended for.
+        In some cases, idiomatic types may have specialized or atypical treatment
+        of the standard attributes. For instance, the link type uses the
+        specifically attribute for the URL to link to, which is an eccentric
+        interpretation of what specifically is intended for.
 
-    |link| The link type is idiomatically used for inserting explicit hyperlinks. The
-    specifically attribute is used to specify the url to link to. The
-    namespace attribute remains a namespace. It could be used if the protocol
-    or location is anything other than HTTP/Web.
+        |link| The link type is idiomatically used for inserting explicit hyperlinks. The
+        specifically attribute is used to specify the url to link to. The
+        namespace attribute remains a namespace. It could be used if the protocol
+        or location is anything other than HTTP/Web.
 
-    A schema can rename an idiomatic type, so that the tool behavior associated
-    with the idiomatic type can be applied to the new type:
+        A schema can rename an idiomatic type, so that the tool behavior associated
+        with the idiomatic type can be applied to the new type:
 
-    ```(samschema)
-        href=link
-
-
-rule:(#idiomatic-elements) Idiomatic elements
-
-    Idiomatic elements are elements with intended meanings. Those meaning are
-    not actually enforced by the SAM parser and the application is free to
-    do what it likes with them. However, users and editing applications are
-    entitled to treat the idiomatic elements as having their intended meanings.
-    In some cases, the annotations of idiomatic elements are interpreted in
-    special ways. The attributes will be assigned names that reflect their idiomatic usage,
-    rather than the standard names.
-
-    |blockquote| Annotation is recognized as a citation. Annotation type is
-    recognized as the type of publication (web, book, article, etc.). Specifically
-    the text of the citation is the format specified by the namespace attribute.
-    It specifically attribute will be named "citation", and the namespace attribute
-    will be named format.
-    It is up to the downstream processor to parse the citation into its parts.
+        ```(samschema)
+            href=link
 
 
-    |codeblock| Annotation type is recognized as a specifying the language and
-    source of the codeblock. Specifically is recognized as the source and is
-    named "source".
+    rule:(#idiomatic-elements) Idiomatic elements
+
+        Idiomatic elements are elements with intended meanings. Those meaning are
+        not actually enforced by the SAM parser and the application is free to
+        do what it likes with them. However, users and editing applications are
+        entitled to treat the idiomatic elements as having their intended meanings.
+        In some cases, the annotations of idiomatic elements are interpreted in
+        special ways. The attributes will be assigned names that reflect their idiomatic usage,
+        rather than the standard names.
+
+        |blockquote| Annotation is recognized as a citation. Annotation type is
+        recognized as the type of publication (web, book, article, etc.). Specifically
+        the text of the citation is the format specified by the namespace attribute.
+        It specifically attribute will be named "citation", and the namespace attribute
+        will be named format.
+        It is up to the downstream processor to parse the citation into its parts.
 
 
-rule:(#implicit-structures) Implicit structures
-    SAM also recognized implicit structures. An implicit structure occurs where
-    more than one element is recognized by context. The implicit structures are:
-
-    |unordered lists| Unordered lists are indicated by starting a line with an
-    asterisk. The root element of the structure in [ul](element).
-    The container for the list item is [li](element). The container for
-    the text is [p](element).
-
-    |ordered lists| Ordered lists are indicated by starting a line with a number.
-    Numbers do not have to be sequential. The root element of the structure in [ol].
-    The container for the list item is [li]. The container for the text is [p].
-
-    |labeled lists| Labeled lists are indicated by surrounding the label text with
-    pipe characters at the start of a paragraph.  The root element of the structure
-    in [ll](element). Each labeled list item has the name [li] and contains the label
-    and the labeled paragraph.
-
-    |block titles| When you place text after the name of a block that has nested
-    content (as opposed to one that is merely a field with a single value), that
-    text is treated as [title](element) for the block.
-
-rule:(#rename-implicit) Renaming implicit structures
-
-    You can rename the implicit elements so that the output of the SAM parser
-    gives them different names. To rename an implicit element, use the new name
-    followed by an equals sign, followed by the implicit element name.
-
-    Thus, to create a paragraph element named para instead of p, specify the
-    element as follows:
-
-    ```(samschema)
-        para=p
+        |codeblock| Annotation type is recognized as a specifying the language and
+        source of the codeblock. Specifically is recognized as the source and is
+        named "source".
 
 
-rule:(#create-implicit) Creating implicit structures
+    rule:(#implicit-structures) Implicit structures
+        SAM also recognized implicit structures. An implicit structure occurs where
+        more than one element is recognized by context. The implicit structures are:
 
-rule:(#order-number) Order and number of elements in structures
+        |unordered lists| Unordered lists are indicated by starting a line with an
+        asterisk. The root element of the structure in {ul}(element).
+        The container for the list item is {li}(element). The container for
+        the text is {p}(element).
 
-    You can indicate the order and number of elements in a structure.
+        |ordered lists| Ordered lists are indicated by starting a line with a number.
+        Numbers do not have to be sequential. The root element of the structure in {ol}.
+        The container for the list item is {li}. The container for the text is {p}.
 
-    |~| All the items in the structure in any order.
+        |labeled lists| Labeled lists are indicated by surrounding the label text with
+        pipe characters at the start of a paragraph.  The root element of the structure
+        in {ll}(element). Each labeled list item has the name {li} and contains the label
+        and the labeled paragraph.
+
+        |block titles| When you place text after the name of a block that has nested
+        content (as opposed to one that is merely a field with a single value), that
+        text is treated as {title}(element) for the block.
+
+    rule:(#rename-implicit) Renaming implicit structures
+
+        You can rename the implicit elements so that the output of the SAM parser
+        gives them different names. To rename an implicit element, use the new name
+        followed by an equals sign, followed by the implicit element name.
+
+        Thus, to create a paragraph element named para instead of p, specify the
+        element as follows:
+
+        ```(samschema)
+            para=p
+
+
+    rule:(#create-implicit) Creating implicit structures
+
+    rule:(#order-number) Order and number of elements in structures
+
+        You can indicate the order and number of elements in a structure.
+
+        |~| All the items in the structure in any order.
 
 
 
