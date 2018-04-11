@@ -3254,6 +3254,11 @@ class SAMParserError(Exception):
     Raised if the SAM parser encounters an error.
     """
 
+class SAMXSLTError(Exception):
+    """
+    Raised if the SAM parser encounters an error.
+    """
+
 class SAMParserStructureError(Exception):
     """
     Raised if the DocStructure encounters an invalid structure.
@@ -3512,6 +3517,7 @@ if __name__ == "__main__":
     transformed = None
     parser_error_count = 0
     xml_error_count = 0
+    xslt_error_count = 0
 
     try:
 
@@ -3598,7 +3604,7 @@ if __name__ == "__main__":
                         try:
                             transformed = transform(xml_input)
                         except etree.XSLTError as e:
-                            raise SAMParserError("XSLT processor reported error: " + str(e))
+                            raise SAMXSLTError("XSLT processor reported error: " + str(e))
                         finally:
                             if transform.error_log:
                                 SAM_parser_warning("Messages from the XSLT transformation:")
@@ -3677,6 +3683,20 @@ if __name__ == "__main__":
         sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
         parser_error_count += 1
 
-    print('Process completed with {0} parser errors and {1} XML schema errors.'.format(parser_error_count, xml_error_count), file=sys.stderr)
-    if parser_error_count + xml_error_count > 0:
-        sys.exit(1)
+    except SAMXSLTError as e:
+        sys.stderr.write('XSLT ERROR: ' + str(e) + "\n")
+        xslt_error_count += 1
+
+    error_count_total = parser_error_count + xml_error_count + xslt_error_count
+    if error_count_total == 0:
+        print ("Process completed with 0 errors.", file=sys.stderr)
+        sys.exit(0)
+    else:
+        print('Process completed with {0} errors.\n'
+              '{1} SAM parser errors.\n{2} XSL schema errors.\n{3} XSLT Errors'.format(error_count_total,
+                                                                                     parser_error_count,
+                                                                                     xml_error_count,
+                                                                                     xslt_error_count
+                                                                                     ), file=sys.stderr)
+        if parser_error_count + xml_error_count > 0:
+            sys.exit(1)
