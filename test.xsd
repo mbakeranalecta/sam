@@ -5,17 +5,20 @@
     <xs:element name="tests">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="title"> </xs:element>
+                <xs:element name="title"/> 
+                <xs:element name="variable" type="Variable" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element name="description"/>
                 <xs:element maxOccurs="unbounded" name="test">
                     <xs:complexType>
                         <xs:sequence>
                             <xs:element name="title"/>
+                            <xs:element name="variable" type="Variable" minOccurs="0" maxOccurs="unbounded"/>
                             <xs:element name="description"/>
                             <xs:element maxOccurs="unbounded" name="case">
                                 <xs:complexType>
                                     <xs:sequence>
                                         <xs:element name="title"/>
+                                        <xs:element name="variable" type="Variable" minOccurs="0" maxOccurs="unbounded"/>
                                         <xs:element name="description"/>
                                         <xs:element name="source"/>
                                         <xs:element name="markup"/>
@@ -30,4 +33,13 @@
             <xs:attribute ref="xml:lang"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:complexType name="Variable">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="name" type="xs:string"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
 </xs:schema>

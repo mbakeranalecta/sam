@@ -2535,6 +2535,8 @@ class FlowParser:
     def _annotation_start(self, para):
         match = flow_patterns['annotation'].match(para.rest_of_para)
         phrase = self.flow.children[-1]
+        if not isinstance(phrase, (Phrase, Code)):
+            raise SAMParserError("A {0} cannot have an annotation. At:\n{1}".format(type(phrase).__name__, match.group(0)))
         if match:
             annotation_type = match.group('type')
             is_local = bool(match.group('plus'))
