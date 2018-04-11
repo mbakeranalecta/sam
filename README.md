@@ -11,9 +11,9 @@ Semantic Authoring Markdown brings the ideas behind Markdown -- a natural syntax
 structured writing. It creates a syntax that captures structure, like XML, but is easy to write in a text editor
 -- like markdown.
 
-### Docuemtnation
+### Documentation
 
-See the documentation at https://mbakeranalecta.github.io/sam/
+See the documentation at https://mbakeranalecta.github.io/sam/.
 
 ### NOTE
 
