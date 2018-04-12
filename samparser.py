@@ -3487,28 +3487,56 @@ if __name__ == "__main__":
 
     import glob
     import os.path
-    argparser = argparse.ArgumentParser()
 
-    argparser.add_argument("infile", help="the SAM file to be parsed")
-    outputgroup = argparser.add_mutually_exclusive_group()
+    def xml_output():
+        pass
+
+    def html_output():
+        pass
+
+    def regurgitate_output():
+        pass
+
+    # Main parser
+    argparser = argparse.ArgumentParser()
+    subparsers = argparser.add_subparsers()
+
+    # I/O parser
+    io_parser = argparse.ArgumentParser(add_help=False)
+    io_parser.add_argument("infile", help="the SAM file to be parsed")
+    io_parser.add_argument("-smartquotes", "-sq",
+                           help="the path to a file containing smartquote patterns and substitutions")
+    outputgroup = io_parser.add_mutually_exclusive_group()
     outputgroup.add_argument("-outfile", "-o", help="the name of the output file")
     outputgroup.add_argument("-outdir", "-od", help="the name of output directory")
-    argparser.add_argument("-xslt", "-x", help="name of xslt file for postprocessing output")
-    intermediategroup = argparser.add_mutually_exclusive_group()
+    io_parser.add_argument("-outputextension", "-oext", nargs='?')
+
+
+    # XML sub
+    xml_parser = subparsers.add_parser("xml", parents=[io_parser])
+    xml_parser.add_argument("-xslt", "-x", help="name of xslt file for postprocessing output")
+    xml_parser.add_argument("-xsd", help="Specify an XSD schema to validate generated XML")
+    intermediategroup = xml_parser.add_mutually_exclusive_group()
     intermediategroup.add_argument("-intermediatefile", "-i",
                                    help="name of file to dump intermediate XML to when using -xslt")
     intermediategroup.add_argument("-intermediatedir", "-id",
                                    help="name of directory to dump intermediate XML to when using -xslt")
-    argparser.add_argument("-xsd", help="Specify an XSD schema to validate generated XML")
-    argparser.add_argument("-outputextension", "-oext",  nargs='?')
-    argparser.add_argument("-intermediateextension", "-iext",  nargs='?', const='.xml', default='.xml')
-    argparser.add_argument("-regurgitate", "-r", help="regurgitate the input in normalized form",
-                           action="store_true")
-    argparser.add_argument("-smartquotes", "-sq",
-                           help="the path to a file containing smartquote patterns and substitutions")
-    argparser.add_argument("-html", action="store_true", help="Output HTML instead of XML. Use with -css and -script")
-    argparser.add_argument("-css",  nargs='+', help="Add a call to a CSS stylesheet in HTML output mode.")
-    argparser.add_argument("-javascript", nargs='+', help="Add a call to a script in HTML output mode.")
+    xml_parser.add_argument("-intermediateextension", "-iext", nargs='?', const='.xml', default='.xml')
+    xml_parser.set_defaults(func=xml_output)
+
+    # Regurgitate
+    regurgitate_parser = subparsers.add_parser("regurgitate", parents=[io_parser])
+    regurgitate_parser.set_defaults(func=regurgitate_output)
+    #argparser.add_argument("-regurgitate", "-r", help="regurgitate the input in normalized form", action="store_true")
+
+
+    # HTML
+    html_parser = subparsers.add_parser("html", parents=[io_parser])
+    html_parser.add_argument("-html", action="store_true", help="Output HTML instead of XML. Use with -css and -script")
+    html_parser.add_argument("-css",  nargs='+', help="Add a call to a CSS stylesheet in HTML output mode.")
+    html_parser.add_argument("-javascript", nargs='+', help="Add a call to a script in HTML output mode.")
+    html_parser.set_defaults(func=html_output)
+
 
     args = argparser.parse_args()
 
@@ -3520,6 +3548,7 @@ if __name__ == "__main__":
     parser_error_count = 0
     xml_error_count = 0
     xslt_error_count = 0
+
 
     try:
 
