@@ -3550,38 +3550,36 @@ if __name__ == "__main__":
                     else:
                         transformedfile = args.transformedoutputfile
                     try:
-                        transformed = etree.XSLT(etree.parse(args.xslt))
+                        transformer = etree.XSLT(etree.parse(args.xslt))
+                        xml_input = etree.parse(open(outputfile, 'r', encoding="utf-8-sig"))
+                        try:
+                            transformed = transformer(xml_input)
+                        except etree.XSLTError as e:
+                            raise SAMXSLTError("XSLT processor reported error: " + str(e))
+                        finally:
+                            if transformer.error_log:
+                                SAM_parser_warning("Messages from the XSLT transformation:")
+                                for entry in transformed.error_log:
+                                    print('message from line %s, col %s: %s' % (
+                                        entry.line, entry.column, entry.message), file=sys.stderr)
+                                    print('domain: %s (%d)' % (entry.domain_name, entry.domain), file=sys.stderr)
+                                    print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
+                                    print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
+
+                        if transformer.error_log:
+                            SAM_parser_warning("Messages from the XSLT transformation:")
+                            for entry in transformed.error_log:
+                                print('message from line %s, col %s: %s' % (
+                                    entry.line, entry.column, entry.message), file=sys.stderr)
+                                print('domain: %s (%d)' % (entry.domain_name, entry.domain), file=sys.stderr)
+                                print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
+                                print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
                         if transformedfile:
                             with open(transformedfile, "wb") as tf:
                                 tf.write(transformed)
 
                     except FileNotFoundError as e:
                         raise SAMParserError(e.strerror + ' ' + e.filename)
-
-                    xml_input = etree.parse(open(outputfile, 'r', encoding="utf-8-sig"))
-                    try:
-                        transformed = transform(xml_input)
-                    except etree.XSLTError as e:
-                        raise SAMXSLTError("XSLT processor reported error: " + str(e))
-                    finally:
-                        if transform.error_log:
-                            SAM_parser_warning("Messages from the XSLT transformation:")
-                            for entry in transform.error_log:
-                                print('message from line %s, col %s: %s' % (
-                                    entry.line, entry.column, entry.message), file=sys.stderr)
-                                print('domain: %s (%d)' % (entry.domain_name, entry.domain), file=sys.stderr)
-                                print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
-                                print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
-
-                    if transform.error_log:
-                        SAM_parser_warning("Messages from the XSLT transformation:")
-                        for entry in transform.error_log:
-                            print('message from line %s, col %s: %s' % (
-                                entry.line, entry.column, entry.message), file=sys.stderr)
-                            print('domain: %s (%d)' % (entry.domain_name, entry.domain), file=sys.stderr)
-                            print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
-                            print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
-
 
                 if args.xsd:
                     try:
