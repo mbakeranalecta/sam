@@ -26,6 +26,11 @@
 <pre class="codeblock" data-language="terminal"><code class="codeblock" data-language="terminal">SAM parser warning: Unannotated phrase found: {should be reported} If you are trying to insert curly braces into the document, use \{should be reported}.
 </code></pre>
 <p class="p">This is a test to make sure unannotated phrases are being reported correctly.</p>
+<p class="p">The following lines exist to anchor ids used for idref examples in the tests:</p>
+<pre class="line" id="cit">Cit</pre>
+<pre class="line" id="MobyDick">Moby Dick</pre>
+<pre class="line" id="bing">bing</pre>
+<pre class="line" id="my-table">my-table</pre>
 </div>
 <div class="test">
 <h2 class="title">Includes</h2>
@@ -2154,7 +2159,7 @@ multiple lines.
 <pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;After this paragraph, there is a blockquote:&lt;/p&gt;
 &lt;blockquote conditions="baz" id="foo" name="bar"&gt;
 &lt;p&gt;The quick brown fox jumps over the lazy dog.&lt;/p&gt;
-&lt;p&gt;And the &lt;phrase&gt;&lt;citation&gt;Mother Goose&lt;/citation&gt;&lt;annotation type="beast" specifically="bovine"&gt;cow&lt;/annotation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
+&lt;p&gt;And the &lt;phrase&gt;&lt;annotation type="beast" specifically="bovine"&gt;cow&lt;/annotation&gt;&lt;citation&gt;Mother Goose&lt;/citation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
 &lt;/blockquote&gt;
 </code></pre>
 </div>
@@ -2904,7 +2909,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 &lt;citation idref="cit"/&gt;
 &lt;p&gt;The quick brown fox jumps over the lazy dog.&lt;/p&gt;
 
-&lt;p&gt;And the &lt;phrase&gt;&lt;citation&gt;Mother Goose&lt;/citation&gt;&lt;annotation type="beast" specifically="bovine"&gt;cow&lt;/annotation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
+&lt;p&gt;And the &lt;phrase&gt;&lt;annotation type="beast" specifically="bovine"&gt;cow&lt;/annotation&gt;&lt;citation&gt;Mother Goose&lt;/citation&gt;&lt;/phrase&gt; jumps over the moon.&lt;/p&gt;
 &lt;/blockquote&gt;
 </code></pre>
 </div>
@@ -2923,7 +2928,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 <p class="p"><span class="phrase" data-conditions="a,b" id="id11" data-name="name" lang="en-CA"><a href="#cit"><span class="annotation" data-annotation-type="actor" data-specifically="John Wayne">The Duke</span></a></span> plays Rooster Cogburn.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;&lt;phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"&gt;&lt;citation idref="cit"/&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;The Duke&lt;/annotation&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;&lt;phrase conditions="a,b" id="id11" name="name" xml:lang="en-CA"&gt;&lt;annotation type="actor" specifically="John Wayne"&gt;The Duke&lt;/annotation&gt;&lt;citation idref="cit"/&gt;&lt;/phrase&gt; plays Rooster Cogburn.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -3125,7 +3130,7 @@ chapter}[#single_source].
 <p class="p">When using the map approach, it is important to think about how your content will <span class="phrase"><span class="annotation" data-annotation-type="concept" data-specifically="single sourcing">single source</span></span> to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the <span class="phrase">single sourcing chapter</span>.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;When using the map approach, it is important to think about how your content will &lt;phrase&gt;&lt;annotation type="concept" specifically="single sourcing"&gt;single source&lt;/annotation&gt;&lt;/phrase&gt; to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the &lt;phrase&gt;&lt;citation nameref="single_source"/&gt;single sourcing chapter&lt;/phrase&gt;.&lt;/p&gt;
+<pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;When using the map approach, it is important to think about how your content will &lt;phrase&gt;&lt;annotation type="concept" specifically="single sourcing"&gt;single source&lt;/annotation&gt;&lt;/phrase&gt; to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the &lt;phrase&gt;single sourcing chapter&lt;citation nameref="single_source"/&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -3529,7 +3534,7 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 <p class="p">You can <span class="phrase"><cite>Melville, 1851</cite><cite>Daffy, 2017</cite>call me Ishmael</span>.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;citation&gt;Melville, 1851&lt;/citation&gt;&lt;citation&gt;Daffy, 2017&lt;/citation&gt;&lt;citation keyref="key.bar12"&gt;page 22&lt;/citation&gt;call me Ishmael&lt;/phrase&gt;.&lt;/p&gt;
+<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;call me Ishmael&lt;citation&gt;Melville, 1851&lt;/citation&gt;&lt;citation&gt;Daffy, 2017&lt;/citation&gt;&lt;citation keyref="key.bar12"&gt;page 22&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -3547,7 +3552,7 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 <p class="p">You can <span class="phrase"><cite>Melville, 1851</cite><span class="annotation" data-annotation-type="quote">call me Ishmael</span></span>.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;citation&gt;Melville, 1851&lt;/citation&gt;&lt;annotation type="quote"&gt;call me Ishmael&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;annotation type="quote"&gt;call me Ishmael&lt;/annotation&gt;&lt;citation&gt;Melville, 1851&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -3565,7 +3570,7 @@ Belize}(link "https://en.wikipedia.org/wiki/R%C3%ADo_Bravo_(disambiguation)"))
 <p class="p">You can <span class="phrase">call me Ishmael</span>.</p>
 </div>
 <div class="result">
-<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;&lt;citation&gt;&lt;reference-elements&gt;&lt;reference-element method="nameref" value="Melville"/&gt;&lt;reference-element method="idref" value="MobyDick"/&gt;&lt;/reference-elements&gt;page 1&lt;/citation&gt;call me Ishmael&lt;/phrase&gt;.&lt;/p&gt;
+<pre class="codeblock" data-language="XML"><code class="codeblock" data-language="XML">&lt;p&gt;You can &lt;phrase&gt;call me Ishmael&lt;citation&gt;&lt;reference-elements&gt;&lt;reference-element method="nameref" value="Melville"/&gt;&lt;reference-element method="idref" value="MobyDick"/&gt;&lt;/reference-elements&gt;page 1&lt;/citation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </code></pre>
 </div>
 </div>
@@ -4024,7 +4029,8 @@ that you can define string substitutions whenever you insert a fragment into you
 </div>
 <div class="markup">
 <p class="p">Because you often want to <span class="insert" data-conditions="baz,bat" id="circle"><object data="circle.png"></object></span>
- change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <span class="phrase"><span class="annotation" data-annotation-type="feature">strings</span></span>. Any <span class="phrase"><span class="annotation" data-annotation-type="feature">string references</span></span> inside a fragment will be resolved by looking first at local-strings defined in the  fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+ change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <span class="phrase"><span class="annotation" data-annotation-type="feature">strings</span></span>. Any <span class="phrase"><span class="annotation" data-annotation-type="feature">string references</span></span> inside a fragment will be resolved by looking first at local-strings defined in the <pre class="line" data-copied-from-id="my-table">my-table</pre>
+ fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 </div>
 <div class="result">
 <pre class="codeblock" data-language="xml"><code class="codeblock" data-language="xml">&lt;p&gt;Because you often want to &lt;inline-insert conditions="baz,bat" id="circle" item="circle.png" type="image"/&gt; change some part of a text when it is being reused, &amp;lt;fragments&amp;gt; &amp;amp; fragment references can both define local &lt;phrase&gt;&lt;annotation type="feature"&gt;strings&lt;/annotation&gt;&lt;/phrase&gt;. Any &lt;phrase&gt;&lt;annotation type="feature"&gt;string references&lt;/annotation&gt;&lt;/phrase&gt; inside a fragment will be resolved by looking first at local-strings defined in the &lt;inline-insert idref="my-table"/&gt; fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.&lt;/p&gt;

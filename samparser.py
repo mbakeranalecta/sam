@@ -680,9 +680,6 @@ class SamParser:
 
         raise SAMParserError("I'm confused")
 
-    def serialize(self, serialize_format):
-        yield from self.doc.serialize(serialize_format)
-
 
 class Block(ABC):
     _attribute_serialization_xml = [('conditions', 'conditions'),
@@ -2342,20 +2339,11 @@ class DocStructure:
                 pass
         return None
 
-    def serialize(self, serialize_format):
-        """
-        Creates an serialization of the document structure in the specified format. At present, 
-        the only serialization format supported is XML.
-        :param serialize_format: Must be "XML"
-        :return: A generator that generates the serialized output. 
-        """
-        if serialize_format.upper() == 'XML':
-            yield from self.root.serialize_xml()
-        elif serialize_format.upper() == 'HTML':
-            yield from self.root.serialize_html()
-        else:
-            raise SAMParserError("Unknown serialization protocol {0}".format(serialize_format))
+    def serialize_html(self):
+        yield from self.root.serialize_html()
 
+    def serialize_xml(self):
+        yield from self.root.serialize_xml()
 
 class Include(Block):
     def __init__(self, doc, content, href, indent):
@@ -2732,9 +2720,12 @@ class Span(ABC):
         Get an object with a given id.
         :return: The object with the specified id or None.
         """
-        if self.ID == id:
-            return self
-        else:
+        try:
+            if self.ID == id:
+                return self
+            else:
+                return None
+        except AttributeError:
             return None
 
     def object_by_name(self, name):
@@ -2742,9 +2733,12 @@ class Span(ABC):
         Get an object with a given name.
         :return: The object with the specified name or None.
         """
-        if self.name == name:
-            return self
-        else:
+        try:
+            if self.name == name:
+                return self
+            else:
+                return None
+        except AttributeError:
             return None
 
 
@@ -3507,6 +3501,25 @@ if __name__ == "__main__":
             raise SAMParserError("No input file(s) found.")
         return inputfiles
 
+    def write_output(inputfile, output_extension, source_func):
+        if args.outdir:
+            outputfile = os.path.join(args.outdir,
+                                      os.path.splitext(
+                                          os.path.basename(inputfile))[0] + output_extension)
+        else:
+            outputfile = args.outfile
+
+        if outputfile:
+            os.makedirs(os.path.dirname(outputfile), exist_ok=True)
+            with open(outputfile, "wb") as outf:
+                for i in source_func():
+                    outf.write(i.encode('utf-8'))
+        else:
+            for i in source_func():
+                sys.stdout.buffer.write(i.encode('utf-8'))
+        return outputfile
+
+
     def xml_output():
         if not args.outputextension:
             output_extension = '.xml'
@@ -3516,34 +3529,34 @@ if __name__ == "__main__":
             else:
                 output_extension = '.' + args.outputextension
 
+
         for inputfile in get_input_list():
             try:
                 samParser = SamParser()
                 samParser.parse_file(inputfile)
+                outputfile = write_output(inputfile, output_extension, samParser.doc.serialize_xml)
 
-                if args.outdir:
-                    outputfile = os.path.join(args.outdir,
-                                              os.path.splitext(
-                                                  os.path.basename(inputfile))[0] + output_extension)
-                else:
-                    outputfile = args.outfile
-
-                xml_string = "".join(samParser.serialize('xml')).encode('utf-8')
-
-                if outputfile:
-                    os.makedirs(os.path.dirname(outputfile), exist_ok=True)
-                    with open(outputfile, "wb") as outf:
-                        for i in samParser.serialize('xml'):
-                                outf.write(i.encode('utf-8'))
-                else:
-                    if args.regurgitate:
-                        for i in samParser.doc.regurgitate():
-                            sys.stdout.buffer.write(i.encode('utf-8'))
+                if args.xsd:
+                    try:
+                        xmlschema = etree.XMLSchema(file=args.xsd)
+                    except etree.XMLSchemaParseError as e:
+                        print(e, file=sys.stderr)
+                        exit(1)
+                    SAM_parser_info("Validating output using " + args.xsd)
+                    xml_input = etree.parse(open(outputfile, 'r', encoding="utf-8-sig"))
+                    try:
+                        xmlschema.assertValid(xml_input)
+                    except etree.DocumentInvalid as e:
+                        print('XML SCHEMA ERROR in {0}: {1}'.format(outputfile, str(e)), file=sys.stderr)
+                        xml_error_count += 1
                     else:
-                        for i in samParser.serialize('xml'):
-                            sys.stdout.buffer.write(i.encode('utf-8'))
+                        SAM_parser_info("Validation successful.")
 
                 if args.xslt:
+                    if not (args.transformedoutputfile or args.transformedoutputdir):
+                        raise SAMParserError(
+                            "A transformed output file or directory must be specified if an XSLT file is specified.")
+
                     if args.transformedoutputdir:
                         transformedfile = os.path.join(args.transformedoutputdir, os.path.splitext(
                             os.path.basename(inputfile))[0] + args.transformedextension)
@@ -3576,26 +3589,11 @@ if __name__ == "__main__":
                                 print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
                         if transformedfile:
                             with open(transformedfile, "wb") as tf:
-                                tf.write(transformed)
+                                tf.write(str(transformed).encode(encoding='utf-8'))
 
                     except FileNotFoundError as e:
                         raise SAMParserError(e.strerror + ' ' + e.filename)
 
-                if args.xsd:
-                    try:
-                        xmlschema = etree.XMLSchema(file=args.xsd)
-                    except etree.XMLSchemaParseError as e:
-                        print(e, file=sys.stderr)
-                        exit(1)
-                    SAM_parser_info("Validating output using " + args.xsd)
-                    xml_doc = etree.fromstring(xml_string)
-                    try:
-                        xmlschema.assertValid(xml_doc)
-                    except etree.DocumentInvalid as e:
-                        print('XML SCHEMA ERROR in {0}: {1}'.format(intermediatefile, str(e)), file=sys.stderr)
-                        xml_error_count += 1
-                    else:
-                        SAM_parser_info("Validation successful.")
 
             except SAMParserError as e:
                 sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
@@ -3605,87 +3603,30 @@ if __name__ == "__main__":
 
     def html_output():
         output_extension = '.html'
-        if args.outdir:
-            outputfile = os.path.join(args.outdir,
-                                      os.path.splitext(
-                                          os.path.basename(inputfile))[0] + output_extension)
-        else:
-            outputfile = args.outfile
-
         for inputfile in get_input_list():
             try:
                 samParser = SamParser()
                 samParser.parse_file(inputfile)
                 samParser.doc.css = args.css
                 samParser.doc.javascript = args.javascript
-                html_string = "".join(samParser.serialize('html')).encode('utf-8')
+                write_output(inputfile, output_extension, samParser.doc.serialize_html)
             except SAMParserError as e:
                 sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
                 parser_error_count += 1
                 continue
 
-            if outputfile:
-                os.makedirs(os.path.dirname(outputfile), exist_ok=True)
-                with open(outputfile, "wb") as outf:
-                    if args.regurgitate:
-                        for i in samParser.doc.regurgitate():
-                            outf.write(i.encode('utf-8'))
-                    elif args.html:
-                        outf.write(html_string)
-                    elif transformed:
-                        outf.write(str(transformed).encode(encoding='utf-8'))
-                    else:
-                        for i in samParser.serialize('xml'):
-                            outf.write(i.encode('utf-8'))
-            else:
-                if args.regurgitate:
-                    for i in samParser.doc.regurgitate():
-                        sys.stdout.buffer.write(i.encode('utf-8'))
-                elif args.html:
-                    sys.stdout.buffer.write(html_string)
-                elif transformed:
-                    sys.stdout.buffer.write(transformed)
-
-
-                else:
-                    for i in samParser.serialize('xml'):
-                        sys.stdout.buffer.write(i.encode('utf-8'))
 
     def regurgitate_output():
-        if args.outdir:
-            outputfile = os.path.join(args.outdir,
-                                      os.path.splitext(
-                                          os.path.basename(inputfile))[0] + output_extension)
-        else:
-            outputfile = args.outfile
-
-        if outputfile:
-            os.makedirs(os.path.dirname(outputfile), exist_ok=True)
-            with open(outputfile, "wb") as outf:
-                if args.regurgitate:
-                    for i in samParser.doc.regurgitate():
-                        outf.write(i.encode('utf-8'))
-                elif args.html:
-                    outf.write(html_string)
-                elif transformed:
-                    outf.write(str(transformed).encode(encoding='utf-8'))
-                else:
-                    for i in samParser.serialize('xml'):
-                        outf.write(i.encode('utf-8'))
-        else:
-            if args.regurgitate:
-                for i in samParser.doc.regurgitate():
-                    sys.stdout.buffer.write(i.encode('utf-8'))
-            elif args.html:
-                sys.stdout.buffer.write(html_string)
-            elif transformed:
-                sys.stdout.buffer.write(transformed)
-
-
-            else:
-                for i in samParser.serialize('xml'):
-                    sys.stdout.buffer.write(i.encode('utf-8'))
-
+        output_extension = '.sam'
+        for inputfile in get_input_list():
+            try:
+                samParser = SamParser()
+                samParser.parse_file(inputfile)
+                write_output(inputfile, output_extension, samParser.doc.regurgitate)
+            except SAMParserError as e:
+                sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
+                parser_error_count += 1
+                continue
 
     # Main parser
     argparser = argparse.ArgumentParser()
@@ -3729,8 +3670,6 @@ if __name__ == "__main__":
     try:
         args = argparser.parse_args()
 
-        if args.xslt and not (args.transformedoutputfile or args.transformedoutputdir):
-            raise SAMParserError("A transformed output file or directory must be specified if an XSLT file is specified.")
 
         if args.infile == args.outfile:
             raise SAMParserError('Input and output files cannot have the same name.')
