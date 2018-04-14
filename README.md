@@ -66,8 +66,10 @@ Regurgitate mode does not take any additional options.
        
 Short forms of the options are available as follows
 
-|-outfile|-o|
-|-outdir|-od|
+| option | short form |
+|--------|------------|
+| -outfile | -o |
+| -outdir | -od |
 |-outputextension|-oext|
 |-smartquotes|-sq|
 |-xslt|-x|
