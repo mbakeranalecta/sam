@@ -3672,7 +3672,6 @@ if __name__ == "__main__":
     # Regurgitate
     regurgitate_parser = subparsers.add_parser("regurgitate", parents=[io_parser])
     regurgitate_parser.set_defaults(func=regurgitate_output)
-    #argparser.add_argument("-regurgitate", "-r", help="regurgitate the input in normalized form", action="store_true")
 
     # HTML
     html_parser = subparsers.add_parser("html", parents=[io_parser])

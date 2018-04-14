@@ -38,23 +38,45 @@ the easiest way to get one with the required libraries installed is to install
 
 SAM Parser is invoked as follows:
 
-    samparser <infile> [-outfile <output-file>] [-xslt <xslt-file> [-intermediate <intermediate-file>]] -smartquotes
+    samparser <output_mode> <options>
     
-    
-The meaning of each parameter is as follows:
-    
- * `<infile>`: The path of the SAM file to be parsed.
+Three output modes are available:
+
+* `xml` outputs a version of the document in XML. You can use an XSD schema to validate the output file and/or an XSLT 1.0 stylesheet to transform it into another format. 
+* `html` outputs a version of the document in HTML with embedded semantic markup. You can supply one of more CSS stylesheets and/or one or more JavaScrip files to include. 
+* `regurgitate` outputs a version of the document in SAM with various references resolved and normalized. 
+
+All output modes take the following options:
+
+* `<infile>` The path the SAM file or files to be processed. (required)
+* `[-outfile <output file>]|[-outdir <output directory> [-outputextension <output extension>]]` Specifies either an output file or a directory to place output files and the file extension to apply those files. (optional, defaults to the console)
+* `-smartquotes <smartquote_rules>` The path to a file containing smartquote rules. 
+
+XML output mode takes the following options: 
  
- * `-outfile <output-file>`: (optional) The name and path of the output file to be created. If `-xslt` is 
-   specified, this will be the output of the XSLT stylesheet. Otherwise, it will 
-   be the default XML representation of the SAM document. (short form: `-o`)
- 
- * `-xslt <xslt-file>`: (optional) The name of an XSLT 1.0 stylesheet to be used to post process the 
-   normal SAM XML output. (short form: `-x`)
-   
- * `-intermediate <intermediate-file>`: (optional, requires that `-xslt` be specified) The name and path of 
-   a file to which the default XML representation of the SAM file will be written if
-   `xslt-file` is specified. This may be useful for debugging purposes. (short form `-i`)
+* `[-xslt <xslt-file> [-transformedoutputfile <transformed file>]\[-transformedoutputdir <tansformed ouput dir> [-transformedextension <transformed files extension]]` Specifies an XSL 1.0 stylesheet to use to transform the XML output into a final format, along with the file name or directory and extension to use for the transformed output. 
+* `[-xsd <XSD schema file>]` Specifies an XSD schema file to use to validate the XML output file. 
+
+HTML output mode takes the follow options:
+
+* `-css <css file location>` Specifies the path to a CSS file to include in the HTML output file. (optional, repeatable)
+* `-javascipt <javascript file location>` Specifies the path to a JavaScript file to include in the HTML output file. (optional, repeatable)
+
+Regurgitate mode does not take any additional options. 
+       
+Short forms of the options are available as follows
+
+|-outfile|-o|
+|-outdir|-od|
+|-outputextension|-oext|
+|-smartquotes|-sq|
+|-xslt|-x|
+|-xsd||
+|-transformedoutputfile|-to|
+|-transformedoutputdir|-tod|
+|-transformedextension|-toext|
+|-css||
+|-javascript|
 
 ### Validating with an XML schema
 
@@ -84,7 +106,7 @@ way as the original. Some of the difference are:
 * Smart quote processing will be performed and any `!smart-quotes` declaration
   will be removed. 
 
-To regurgitate, use the `-regurgitate` option, which may be abbreviated as `-r`. 
+To regurgitate, use the `regurgitate` output mode. 
 
 ### Smart quotes
 
@@ -184,7 +206,7 @@ attributes are ouput as HTML `lang` attributes. Other attributes are output as H
 * An HTML `head` element is generated which includes the `title` elements if the root block of the 
 SAM document has a title. It also includes `<meta charset = "UTF-8">`.
 
-To generate HTML output, use the `-html` flag on the command line.
+To generate HTML output, use the `html` output mode the command line.
 
 To specify a stylesheet to be imported by the resulting HTML file, use the `-css` option with the 
 URL of the css file to be included (relative to the location of the HTML file). You can specify the
@@ -201,13 +223,13 @@ can specify the `-javascript` option more than once.
 
 To run SAM Parser on Windows, use the `samparser` batch file:
 
-    samparser foo.sam -o foo.html -x foo2html.xslt -i foo.xml
+    samparser xml foo.sam -o foo.xml -x foo2html.xslt -to foo.html
     
 ### Running SAM Parser on Xnix and Mac
 
 To run SAM Parser on Xnix or Mac, invoke Python 3 as appropriate on your system. For example:
 
-    python3 samparser.py foo.sam -o foo.html -x foo2html.xslt -i foo.xml
+    python3 samparser.py xml foo.sam -o foo.xml -x foo2html.xslt -to foo.html
 
 
 
@@ -279,6 +301,9 @@ like any other block type.
 * In revision 1f20902624d29dab002353df8374952c63fff81d the serialization of citations has been changed to support 
 compound identifiers and to support easier processing of citations. See the
 language docs for details. 
+
+* In revision defbc97c9bd592ab454296852c3d9a65e1007996 the command line options changed to support three different 
+output modes as subcommands. Other options changed as well. See above for the new command line options. 
 
 Please report any other backward incompatibilities you find so they can be added to this list.
 
