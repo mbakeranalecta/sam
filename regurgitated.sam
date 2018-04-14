@@ -1686,7 +1686,7 @@ tests:(!en) SAM Parser Tests
                 """(?baz)(*foo)(#bar)
                     The quick brown fox jumps over the lazy dog.
 
-                    And the {cow}(beast "bovine") jumps over the moon.
+                    And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
 
 
             result:
@@ -2295,7 +2295,7 @@ tests:(!en) SAM Parser Tests
                 """(?a)(?b)(*id10)(#name)(!en-CA)[*cit]
                     The quick brown fox jumps over the lazy dog.
 
-                    And the {cow}(beast "bovine") jumps over the moon.
+                    And the {cow}(beast "bovine")[Mother Goose] jumps over the moon.
 
 
             result:
@@ -2317,7 +2317,7 @@ tests:(!en) SAM Parser Tests
                     {The Duke}(actor "John Wayne")(!en-CA)(*id11)(#name)(?a)(?b)[*cit] plays Rooster Cogburn.
 
             markup:
-                {The Duke}(actor "John Wayne")(?a)(?b)(*id11)(#name)(!en-CA) plays Rooster Cogburn.
+                {The Duke}(actor "John Wayne")[*cit](?a)(?b)(*id11)(#name)(!en-CA) plays Rooster Cogburn.
 
             result:
                 ```(xml)
@@ -2493,7 +2493,7 @@ tests:(!en) SAM Parser Tests
                     chapter}[#single_source].
 
             markup:
-                When using the map approach, it is important to think about how your content will {single source}(concept "single sourcing") to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the {single sourcing chapter}.
+                When using the map approach, it is important to think about how your content will {single source}(concept "single sourcing") to paper-like media and hypertext-media. Some people will output the same map to to both media. In hyper-text media that usually results in the map being turned into a table of contents, often displayed in a separate pane as in a help system. This may be fine if you are creating a help system, but it is not how Web content is usually displayed. Another approach to single sourcing content that uses the assemble from pieces approach is to create completely separate maps – or even to use completely different assembly techniques that don’t involve maps at all – to produce paper-like and hypertext outputs. This can help you to work around some of the design limitations that we talked about in the {single sourcing chapter}[#single_source].
 
             result:
                 ```(xml)
@@ -2830,7 +2830,7 @@ tests:(!en) SAM Parser Tests
                     You can {call me Ishmael}[Melville, 1851][Daffy, 2017][%key.bar12 page 22].
 
             markup:
-                You can {call me Ishmael}.
+                You can {call me Ishmael}[Melville, 1851][Daffy, 2017][%key.bar12 page 22].
 
             result:
                 ```(XML)
@@ -2845,7 +2845,7 @@ tests:(!en) SAM Parser Tests
                     You can {call me Ishmael}(quote)[Melville, 1851].
 
             markup:
-                You can {call me Ishmael}(quote).
+                You can {call me Ishmael}(quote)[Melville, 1851].
 
             result:
                 ```(XML)
@@ -2860,7 +2860,7 @@ tests:(!en) SAM Parser Tests
                     You can {call me Ishmael}[#Melville/*MobyDick page 1].
 
             markup:
-                You can {call me Ishmael}.
+                You can {call me Ishmael}[#Melville/*MobyDick page 1].
 
             result:
                 ```(XML)

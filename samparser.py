@@ -2786,6 +2786,8 @@ class Phrase(Span):
         yield u'{{{0:s}}}'.format(escape_for_sam(self.text))
         for x in self.annotations:
             yield from x.regurgitate()
+        for x in self.citations:
+            yield from x.regurgitate()
         yield from self._regurgitate_attributes(self._attribute_regurgitation)
 
     @property
