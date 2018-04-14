@@ -3502,6 +3502,18 @@ if __name__ == "__main__":
         return inputfiles
 
     def write_output(inputfile, output_extension, source_func):
+        """
+        Calculates the name of the output file using the input file name
+        and the output file extension, then writes the output file by
+        calling the output generating function passed to it.
+
+        The output directory name is read from the arguments.
+
+        :param inputfile: The name of the input file.
+        :param output_extension: The extension to be used on the output file.
+        :param source_func: The output function to call.
+        :return: The name of the output file (in case the caller needs to read it).
+        """
         if args.outdir:
             outputfile = os.path.join(args.outdir,
                                       os.path.splitext(
@@ -3521,6 +3533,7 @@ if __name__ == "__main__":
 
 
     def xml_output():
+        global xml_error_count, parser_error_count, xslt_error_count
         if not args.outputextension:
             output_extension = '.xml'
         else:
@@ -3531,6 +3544,7 @@ if __name__ == "__main__":
 
 
         for inputfile in get_input_list():
+
             try:
                 samParser = SamParser()
                 samParser.parse_file(inputfile)
@@ -3602,6 +3616,7 @@ if __name__ == "__main__":
 
 
     def html_output():
+        global parser_error_count
         output_extension = '.html'
         for inputfile in get_input_list():
             try:
@@ -3617,6 +3632,7 @@ if __name__ == "__main__":
 
 
     def regurgitate_output():
+        global parser_error_count
         output_extension = '.sam'
         for inputfile in get_input_list():
             try:
@@ -3667,41 +3683,26 @@ if __name__ == "__main__":
     html_parser.add_argument("-javascript", nargs='+', help="Add a call to a script in HTML output mode.")
     html_parser.set_defaults(func=html_output)
 
-    try:
-        args = argparser.parse_args()
+    args = argparser.parse_args()
 
+    if args.infile == args.outfile:
+        raise SAMParserError('Input and output files cannot have the same name.')
 
-        if args.infile == args.outfile:
-            raise SAMParserError('Input and output files cannot have the same name.')
+    if args.smartquotes:
+        with open(args.smartquotes, encoding="utf8") as sqf:
+            try:
+                substitution_sets = etree.parse(sqf)
+            except etree.XMLSyntaxError as e:
+                raise SAMParserError("Smart quotes file {0} contains XML error {1}: " + str(e))
 
-        if args.smartquotes:
-            with open(args.smartquotes, encoding="utf8") as sqf:
-                try:
-                    substitution_sets = etree.parse(sqf)
-                except etree.XMLSyntaxError as e:
-                    raise SAMParserError("Smart quotes file {0} contains XML error {1}: " + str(e))
+            for x in substitution_sets.iterfind(".//subset"):
+                subs = {}
+                for y in x.iterfind("sub"):
+                    r = re.compile(y.find("pattern").text)
+                    subs.update({r: y.find("replace").text})
+                smart_quote_sets.update({x.find("name").text: subs})
 
-                for x in substitution_sets.iterfind(".//subset"):
-                    subs = {}
-                    for y in x.iterfind("sub"):
-                        r = re.compile(y.find("pattern").text)
-                        subs.update({r: y.find("replace").text})
-                    smart_quote_sets.update({x.find("name").text: subs})
-
-        args.func()
-
-
-
-
-
-
-    except SAMParserError as e:
-        sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
-        parser_error_count += 1
-
-    except SAMXSLTError as e:
-        sys.stderr.write('XSLT ERROR: ' + str(e) + "\n")
-        xslt_error_count += 1
+    args.func()
 
     error_count_total = parser_error_count + xml_error_count + xslt_error_count
     if error_count_total == 0:
