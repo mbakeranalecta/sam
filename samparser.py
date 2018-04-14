@@ -3501,7 +3501,7 @@ if __name__ == "__main__":
             raise SAMParserError("No input file(s) found.")
         return inputfiles
 
-    def write_output(inputfile, output_extension, source_func):
+    def write_output(inputfile, default_output_extension, source_func):
         """
         Calculates the name of the output file using the input file name
         and the output file extension, then writes the output file by
@@ -3510,10 +3510,18 @@ if __name__ == "__main__":
         The output directory name is read from the arguments.
 
         :param inputfile: The name of the input file.
-        :param output_extension: The extension to be used on the output file.
+        :param default_output_extension: The extension to be used on the output file unless overridden on the command line.
         :param source_func: The output function to call.
         :return: The name of the output file (in case the caller needs to read it).
         """
+        if not args.outputextension:
+            output_extension = default_output_extension
+        else:
+            if args.outputextension[0] == '.':
+                output_extension = args.outputextension
+            else:
+                output_extension = '.' + args.outputextension
+
         if args.outdir:
             outputfile = os.path.join(args.outdir,
                                       os.path.splitext(
@@ -3534,21 +3542,13 @@ if __name__ == "__main__":
 
     def xml_output():
         global xml_error_count, parser_error_count, xslt_error_count
-        if not args.outputextension:
-            output_extension = '.xml'
-        else:
-            if args.outputextension[0] == '.':
-                output_extension = args.outputextension
-            else:
-                output_extension = '.' + args.outputextension
-
 
         for inputfile in get_input_list():
 
             try:
                 samParser = SamParser()
                 samParser.parse_file(inputfile)
-                outputfile = write_output(inputfile, output_extension, samParser.doc.serialize_xml)
+                outputfile = write_output(inputfile, '.xml', samParser.doc.serialize_xml)
 
                 if args.xsd:
                     try:
@@ -3617,14 +3617,13 @@ if __name__ == "__main__":
 
     def html_output():
         global parser_error_count
-        output_extension = '.html'
         for inputfile in get_input_list():
             try:
                 samParser = SamParser()
                 samParser.parse_file(inputfile)
                 samParser.doc.css = args.css
                 samParser.doc.javascript = args.javascript
-                write_output(inputfile, output_extension, samParser.doc.serialize_html)
+                write_output(inputfile, '.html', samParser.doc.serialize_html)
             except SAMParserError as e:
                 sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
                 parser_error_count += 1
@@ -3633,12 +3632,11 @@ if __name__ == "__main__":
 
     def regurgitate_output():
         global parser_error_count
-        output_extension = '.sam'
         for inputfile in get_input_list():
             try:
                 samParser = SamParser()
                 samParser.parse_file(inputfile)
-                write_output(inputfile, output_extension, samParser.doc.regurgitate)
+                write_output(inputfile, '.sam', samParser.doc.regurgitate)
             except SAMParserError as e:
                 sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
                 parser_error_count += 1
