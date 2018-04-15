@@ -305,7 +305,10 @@ compound identifiers and to support easier processing of citations. See the
 language docs for details. 
 
 * In revision defbc97c9bd592ab454296852c3d9a65e1007996 the command line options changed to support three different 
-output modes as subcommands. Other options changed as well. See above for the new command line options. 
+output modes as subcommands. Other options changed as well. See above for the new command line options. Also, 
+the serialization interface to the parser changed. When calling the parser from a python program you no longer
+call `samparser.serialize('xml')` or `samparser.serialize('html')` but `samparser.doc.serialize_xml()` 
+and `samparser.doc.serialize_html()` respectively. 
 
 Please report any other backward incompatibilities you find so they can be added to this list.
 
