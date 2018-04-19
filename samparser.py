@@ -191,6 +191,14 @@ def get_idrefs(this):
             result.extend(x.idrefs)
     return result
 
+def get_full_resource_url(resource_url, source_url):
+    if bool(urllib.parse.urlparse(resource_url).netloc):  # An absolute URL
+        fullhref = resource_url
+    elif os.path.isabs(resource_url):  # An absolute file path
+        fullhref = pathlib.Path(resource_url).as_uri()
+    else:
+        fullhref = urllib.parse.urljoin(source_url, resource_url)
+    return fullhref
 
 def get_object_with_id(this, ID):
     """
@@ -240,20 +248,20 @@ class SamParser:
         self.current_text_block = None
         self.doc = None
         self.source = None
-        self.sourceurl = None
+        self.source_url = None
         self.flow_parser = FlowParser()
 
 
     def parse(self, source):
         self.source = StringSource(source)
         try:
-            self.sourceurl = source.geturl()
+            self.source_url = source.geturl()
         except AttributeError:
             try:
-                self.sourceurl = pathlib.Path(os.path.abspath(source.name)).as_uri()
+                self.source_url = pathlib.Path(os.path.abspath(source.name)).as_uri()
             except AttributeError:
-                self.sourceurl = None
-        self.doc = DocStructure(self.sourceurl)
+                self.source_url = None
+        self.doc = DocStructure(self.source_url)
         try:
             self.stateMachine.run((self.source, None))
         except SAMParserStructureError as err:
@@ -462,15 +470,19 @@ class SamParser:
         if href.strip() == "":
             SAM_parser_warning("No HREF specified for include.")
             return "SAM", context
-        elif bool(urllib.parse.urlparse(href).netloc):  # An absolute URL
-            fullhref = href
-        elif os.path.isabs(href):  # An absolute file path
-            fullhref = pathlib.Path(href).as_uri()
-        elif self.sourceurl:
-            fullhref = urllib.parse.urljoin(self.sourceurl, href)
-        else:
-            SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known.")
-            return "SAM", context
+
+        fullhref = get_full_resource_url(href, self.source_url)
+
+        # elif bool(urllib.parse.urlparse(href).netloc):  # An absolute URL
+        #     fullhref = href
+        # elif os.path.isabs(href):  # An absolute file path
+        #     fullhref = pathlib.Path(href).as_uri()
+        # elif self.source_url:
+        #     fullhref = urllib.parse.urljoin(self.source_url, href)
+
+        # else:
+        #     SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known.")
+        #     return "SAM", context
 
         if fullhref in included_files:
             raise SAMParserError("Duplicate file inclusion detected with file: " + fullhref)
@@ -478,7 +490,7 @@ class SamParser:
             included_files.append(fullhref)
 
         reader = codecs.getreader("utf-8")
-        SAM_parser_info("Parsing include " + href)
+        SAM_parser_info("Parsing include " + fullhref)
         try:
             includeparser = SamParser()
             with urllib.request.urlopen(fullhref) as response:
@@ -996,11 +1008,13 @@ class BlockInsert(Block):
             attributes[self.reference_parts[0][0]] = self.reference_parts[0][1]
         else:
             attributes['type'] = self.reference_parts[0][0]
-            source_dir = self._doc().source_url  # <-- absolute dir of the source file
-            rel_path = self.reference_parts[0][1]
-            insert_url = urljoin(source_dir, rel_path)
+            attributes['item'] = get_full_resource_url(self.reference_parts[0][1], self._doc().source_url)
 
-            attributes['item'] = insert_url
+            # source_dir = self._doc().source_url  # <-- absolute dir of the source file
+            # rel_path = self.reference_parts[0][1]
+            # insert_url = urljoin(source_dir, rel_path)
+
+            #attributes['item'] = insert_url
         if self.conditions:
             attributes['conditions'] =','.join(self.conditions)
         if self.ID:
@@ -3190,11 +3204,11 @@ class InlineInsert(Span):
             else:
                 attributes['type'] = self.reference_parts[0][0]
 
-                source_dir = self._doc().source_url  # <-- absolute dir of the source file
-                rel_path = self.reference_parts[0][1]
-                insert_url = urljoin(source_dir, rel_path)
+                # source_dir = self._doc().source_url  # <-- absolute dir of the source file
+                # rel_path = self.reference_parts[0][1]
+                # insert_url = urljoin(source_dir, rel_path)
 
-                attributes['item'] = insert_url
+                attributes['item'] = get_full_resource_url(self.reference_parts[0][1], self._doc().source_url )
         if self.conditions:
             attributes['conditions'] =','.join(self.conditions)
         if self.ID:
