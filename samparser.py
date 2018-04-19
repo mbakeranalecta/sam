@@ -5,6 +5,7 @@ import xml.parsers.expat
 import html
 import argparse
 import urllib.request
+from urllib.parse import urljoin
 import pathlib
 import codecs
 import os
@@ -245,7 +246,6 @@ class SamParser:
 
     def parse(self, source):
         self.source = StringSource(source)
-        self.doc = DocStructure()
         try:
             self.sourceurl = source.geturl()
         except AttributeError:
@@ -253,6 +253,7 @@ class SamParser:
                 self.sourceurl = pathlib.Path(os.path.abspath(source.name)).as_uri()
             except AttributeError:
                 self.sourceurl = None
+        self.doc = DocStructure(self.sourceurl)
         try:
             self.stateMachine.run((self.source, None))
         except SAMParserStructureError as err:
@@ -995,7 +996,11 @@ class BlockInsert(Block):
             attributes[self.reference_parts[0][0]] = self.reference_parts[0][1]
         else:
             attributes['type'] = self.reference_parts[0][0]
-            attributes['item'] = self.reference_parts[0][1]
+            source_dir = self._doc().source_url  # <-- absolute dir of the source file
+            rel_path = self.reference_parts[0][1]
+            insert_url = urljoin(source_dir, rel_path)
+
+            attributes['item'] = insert_url
         if self.conditions:
             attributes['conditions'] =','.join(self.conditions)
         if self.ID:
@@ -2101,7 +2106,8 @@ class DocStructure:
     Each part of the SAM concrete syntax, such as Grids, RecordSets, and Lines has
     its own object type. Names blocks are represented by a generic Block object. 
     """
-    def __init__(self):
+    def __init__(self, source_url):
+        self.source_url = source_url
         self.root = Root(self)
         self.current_block = self.root
         self.default_namespace = None
@@ -3183,7 +3189,12 @@ class InlineInsert(Span):
                 attributes[self.reference_parts[0][0]] = self.reference_parts[0][1]
             else:
                 attributes['type'] = self.reference_parts[0][0]
-                attributes['item'] = self.reference_parts[0][1]
+
+                source_dir = self._doc().source_url  # <-- absolute dir of the source file
+                rel_path = self.reference_parts[0][1]
+                insert_url = urljoin(source_dir, rel_path)
+
+                attributes['item'] = insert_url
         if self.conditions:
             attributes['conditions'] =','.join(self.conditions)
         if self.ID:

@@ -3087,7 +3087,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </codeblock>
 </source>
 <markup>
-<insert conditions="a,b" id="id15" item="foo.gif" name="name" type="image"/>
+<insert conditions="a,b" id="id15" item="file:///C:/Users/Mark/foo.gif" name="name" type="image"/>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3107,7 +3107,7 @@ n_{\mathrm{offset}} = \sum_{k=0}^{N-1} s_k n_k
 </codeblock>
 </source>
 <markup>
-<insert item="bar.png" name="baz" type="image"/>
+<insert item="file:///C:/Users/Mark/bar.png" name="baz" type="image"/>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4125,7 +4125,7 @@ There is a `_` in _this \_ italic_ decoration.
 </codeblock>
 </source>
 <markup>
-<insert conditions="goo" item="foo.gif" type="image"/>
+<insert conditions="goo" item="file:///C:/Users/Mark/foo.gif" type="image"/>
 </markup>
 <result>
 <codeblock language="xml">
@@ -4205,7 +4205,7 @@ that you can define string substitutions whenever you insert a fragment into you
 </codeblock>
 </source>
 <markup>
-<p>Because you often want to <inline-insert conditions="baz,bat" id="circle" item="circle.png" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
+<p>Because you often want to <inline-insert conditions="baz,bat" id="circle" item="file:///C:/Users/Mark/circle.png" type="image"/> change some part of a text when it is being reused, &lt;fragments&gt; &amp; fragment references can both define local <phrase><annotation type="feature">strings</annotation></phrase>. Any <phrase><annotation type="feature">string references</annotation></phrase> inside a fragment will be resolved by looking first at local-strings defined in the <inline-insert idref="my-table"/> fragment reference, then at local strings defined in the fragment definition, and then at global strings. In effect, this means that you can define string substitutions whenever you insert a fragment into your content.</p>
 </markup>
 <result>
 <codeblock language="xml">
