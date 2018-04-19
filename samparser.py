@@ -8,6 +8,7 @@ import urllib.request
 import pathlib
 import codecs
 import os
+import io
 from abc import ABC, abstractmethod
 
 from urllib.parse import urlparse
@@ -874,17 +875,21 @@ class Block(ABC):
                 attr_value = getattr(self, attr_name)
                 if attr_value:
                     if duplicate and attr_name == "ID":
-                        yield ' data-copied-from-id="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
+                        yield ' data-copied-from-id="{1}"'.format(tag, escape_for_xml_attribute(attr_value)).encode('utf-8')
                     elif type(attr_value) is list:
-                        yield ' {0}="{1}"'.format(tag, ','.join([escape_for_xml_attribute(x) for x in attr_value]))
+                        yield ' {0}="'.format(tag).encode('utf-8')
+                        yield b','.join([escape_for_xml_attribute(x) for x in attr_value])
+                        yield b'"'
                     else:
-                        yield ' {0}="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
+                        yield ' {0}="'.format(tag).encode('utf-8')
+                        yield escape_for_xml_attribute(attr_value)
+                        yield b'"'
             except AttributeError:
                 pass
 
     def serialize_xml(self):
 
-        yield '<{0}'.format(self.block_type)
+        yield '<{0}'.format(self.block_type).encode('utf-8')
 
         yield from self._serialize_attributes(self._attribute_serialization_xml)
 
@@ -894,32 +899,32 @@ class Block(ABC):
                                "Perhaps this was intended as plain text:\n\n{0}".format(self))
 
         if self.children or self.citations:
-            yield ">"
+            yield b">"
 
             if self.citations:
                 for x in self.citations:
-                    yield '\n'
+                    yield b'\n'
                     yield from x.serialize_xml()
 
             if self.content:
-                yield "\n<title>"
+                yield b"\n<title>"
                 yield from self.content.serialize_xml()
-                yield "</title>\n".format(self.content)
+                yield "</title>\n".format(self.content).encode('utf-8')
 
             if type(self.children[0]) is not Flow:
-                yield "\n"
+                yield b"\n"
 
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_xml()
-            yield "</{0}>\n".format(self.block_type)
+            yield "</{0}>\n".format(self.block_type).encode('utf-8')
         else:
             if self.content is None:
-                yield "/>\n"
+                yield b"/>\n"
             else:
-                yield '>'
+                yield b'>'
                 yield from self.content.serialize_xml()
-                yield "</{0}>\n".format(self.block_type)
+                yield "</{0}>\n".format(self.block_type).encode('utf-8')
 
     def serialize_html(self, duplicate=False, variables=[]):
         yield '<{0} class="{1}"'.format(self.html_tag, self.block_type)
@@ -987,10 +992,10 @@ class BlockInsert(Block):
     def serialize_xml(self, attrs=None, payload=None):
         attributes = {}
         if self.reference_parts[0][0] in insert_reference_symbols:
-            attributes[self.reference_parts[0][0]] = escape_for_xml_attribute(self.reference_parts[0][1])
+            attributes[self.reference_parts[0][0]] = self.reference_parts[0][1]
         else:
             attributes['type'] = self.reference_parts[0][0]
-            attributes['item'] = escape_for_xml_attribute(self.reference_parts[0][1])
+            attributes['item'] = self.reference_parts[0][1]
         if self.conditions:
             attributes['conditions'] =','.join(self.conditions)
         if self.ID:
@@ -1003,28 +1008,29 @@ class BlockInsert(Block):
         if self.language_code:
             attributes['xml:lang']= self.language_code
 
-        yield '<insert'
+        yield b'<insert'
 
         for key, value in sorted(attributes.items()):
-            yield ' {0}="{1}"'.format(key, value)
-
+            yield ' {0}="'.format(key).encode('utf-8')
+            yield escape_for_xml_attribute(value)
+            yield b'"'
 
         if len(self.reference_parts) > 1:
-            yield '><reference-elements>'
+            yield b'><reference-elements>'
             for method, value in self.reference_parts:
-                yield '<reference-element method="{0}" value="{1}"/>'.format(method, escape_for_xml(value))
-            yield '</reference-elements>'
+                yield '<reference-element method="{0}" value="{1}"/>'.format(method, escape_for_xml(value)).encode('utf-8')
+            yield b'</reference-elements>'
 
         if self.citations or self.children:
-            yield '>\n'
+            yield b'>\n'
             for cit in self.citations:
                 yield from cit.serialize_xml()
 
             for c in self.children:
                 yield from c.serialize_xml()
-            yield '</insert>\n'
+            yield b'</insert>\n'
         else:
-            yield '/>\n'
+            yield b'/>\n'
 
 
     def serialize_html(self, duplicate=False, variables=[]):
@@ -1138,22 +1144,22 @@ class Codeblock(Block):
         yield '\n'
 
     def serialize_xml(self):
-        yield '<codeblock'
+        yield b'<codeblock'
         yield from self._serialize_attributes(self._attribute_serialization_xml)
 
         if self.citations or self.children:
-            yield ">\n"
+            yield b">\n"
             if self.citations:
                 for x in self.citations:
                     yield from x.serialize_xml()
-                    yield '\n'
+                    yield b'\n'
             if self.children:
                 for x in self.children:
                     if x is not None:
                         yield from x.serialize_xml()
-            yield "</codeblock>\n"
+            yield b"</codeblock>\n"
         else:
-            yield '/>'
+            yield b'/>'
 
     def serialize_html(self, duplicate=False, variables=[]):
         yield '<pre class="codeblock"'
@@ -1215,38 +1221,38 @@ class Embedblock(Block):
 
     def serialize_xml(self):
         attrs = []
-        yield '<embedblock'
+        yield b'<embedblock'
 
         yield from self._serialize_attributes(self._attribute_serialization_xml)
         if self.children:
-            yield ">"
+            yield b">"
 
             if type(self.children[0]) is not Flow:
-                yield "\n"
+                yield b"\n"
 
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_xml()
-            yield "</embedblock>\n"
+            yield b"</embedblock>\n"
         else:
-            yield '/>\n'
+            yield b'/>\n'
 
     def serialize_html(self, duplicate=False, variables=[]):
-        yield '<div class="embed" hidden '
+        yield b'<div class="embed" hidden '
 
         yield from self._serialize_attributes(self._attribute_serialization_html)
         if self.children:
-            yield ">"
+            yield b">"
 
             if type(self.children[0]) is not Flow:
-                yield "\n"
+                yield b"\n"
 
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html()
-            yield "</div>\n"
+            yield b"</div>\n"
         else:
-            yield '/>\n'
+            yield b'/>\n'
 
 
 class Remark(Block):
@@ -1454,15 +1460,15 @@ class Record(Block):
 
     def serialize_xml(self):
         record = list(zip(self.parent.field_names, self.field_values))
-        yield '<record'
+        yield b'<record'
         yield from self._serialize_attributes(self._attribute_serialization_xml)
-        yield ">\n"
+        yield b">\n"
         if record:
             for name, value in zip(self.parent.field_names, self.field_values):
-                yield "<{0}>".format(name)
+                yield "<{0}>".format(name).encode('utf-8')
                 yield from value.serialize_xml()
-                yield "</{0}>\n".format(name)
-        yield "</record>\n"
+                yield "</{0}>\n".format(name).encode('utf-8')
+        yield b"</record>\n"
 
     def serialize_html(self, duplicate=False, variables=[]):
         if not self.preceding_sibling():
@@ -1617,29 +1623,29 @@ class LabeledListItem(ListItem):
             yield from x.regurgitate()
 
     def serialize_xml(self):
-        yield '<{0}'.format(self.block_type)
+        yield '<{0}'.format(self.block_type).encode('utf-8')
         yield from self._serialize_attributes(self._attribute_serialization_xml)
-        yield ">\n<label>"
+        yield b">\n<label>"
         yield from self.label.serialize_xml()
-        yield "</label>\n"
+        yield b"</label>\n"
 
         if self.citations:
             for x in self.citations:
-                yield '\n'
+                yield b'\n'
                 yield from x.serialize_xml()
 
         if self.content:
-            yield "\n<title>"
+            yield b"\n<title>"
             yield from self.content.serialize_xml()
-            yield "</title>\n".format(self.content)
+            yield b"</title>\n".format(self.content)
 
         if type(self.children[0]) is not Flow:
-            yield "\n"
+            yield b"\n"
 
         for x in self.children:
             if x is not None:
                 yield from x.serialize_xml()
-        yield "</{0}>\n".format(self.block_type)
+        yield "</{0}>\n".format(self.block_type).encode('utf-8')
 
 
     def serialize_html(self, duplicate=False, variables=[]):
@@ -1741,7 +1747,7 @@ class Comment(Block):
         yield u"#{0}\n".format(self.content)
 
     def serialize_xml(self):
-        yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
+        yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-')).encode('utf-8')
 
     def serialize_html(self, duplicate=False, variables=[]):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
@@ -1758,9 +1764,9 @@ class VariableDef(Block):
         yield "{0}${1}={2}\n".format(" " * int(self.indent), self.block_type, self.content)
 
     def serialize_xml(self):
-        yield '<variable name="{0}">'.format(self.block_type)
+        yield '<variable name="{0}">'.format(self.block_type).encode('utf-8')
         yield from self.content.serialize_xml()
-        yield "</variable>\n"
+        yield b"</variable>\n"
 
     def serialize_html(self, duplicate=False, variables=[]):
         yield '<div class="variable" data-name="{0}" hidden>'.format(self.block_type, self.content)
@@ -1781,7 +1787,7 @@ class Root(Block):
             yield from x.regurgitate()
 
     def serialize_xml(self):
-        yield '<?xml version="1.0" encoding="UTF-8"?>\n'
+        yield b'<?xml version="1.0" encoding="UTF-8"?>\n'
         for x in self.children:
             yield from x.serialize_xml()
 
@@ -2106,12 +2112,26 @@ class DocStructure:
         # Used by HTML output mode
         self.css = None
         self.javascript = None
+        self._xml_serialization = None
+        self._etree = None
 
     def __str__(self):
         return ''.join(self.regurgitate())
 
     def regurgitate(self):
         yield from self.root.regurgitate()
+
+    @property
+    def xml(self):
+        if not self._xml_serialization:
+            self._xml_serialization = io.BytesIO(b''.join(self.serialize_xml()))
+        return self._xml_serialization
+
+    @property
+    def etree(self):
+        if not self._etree:
+            self._etree = etree.parse(self.xml)
+        return self._etree
 
     def _doc(self):
         return self
@@ -2761,11 +2781,17 @@ class Span(ABC):
                 attr_value = getattr(self, attr_name)
                 if attr_value:
                     if duplicate and attr_name == "ID":
-                        yield ' data-copied-from-ID="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
+                        yield b' data-copied-from-ID="'
+                        yield escape_for_xml_attribute(attr_value)
+                        yield b'"'
                     elif type(attr_value) is list:
-                        yield ' {0}="{1}"'.format(tag, ','.join([escape_for_xml_attribute(x) for x in attr_value]))
+                        yield ' {0}="'.format(tag).encode('utf-8')
+                        yield b','.join([escape_for_xml_attribute(x) for x in attr_value])
+                        yield b'"'
                     else:
-                        yield ' {0}="{1}"'.format(tag, escape_for_xml_attribute(attr_value))
+                        yield ' {0}="'.format(tag).encode('utf-8')
+                        yield escape_for_xml_attribute(attr_value)
+                        yield b'"'
             except AttributeError:
                 pass
 
@@ -2796,9 +2822,9 @@ class Phrase(Span):
 
 
     def serialize_xml(self):
-        yield '<phrase'
+        yield b'<phrase'
         yield from self._serialize_attributes(self._attribute_serialization_xml)
-        yield '>'
+        yield b'>'
 
         #Nest annotations for serialization
         if self.annotations:
@@ -2808,7 +2834,7 @@ class Phrase(Span):
             yield escape_for_xml(self.text)
         for i in self.citations:
             yield from i.serialize_xml()
-        yield '</phrase>'
+        yield b'</phrase>'
 
     def serialize_html(self, duplicate=False, variables=[]):
         yield '<span class="phrase"'
@@ -2892,18 +2918,18 @@ class Code(Phrase):
             yield from x.regurgitate()
 
     def serialize_xml(self):
-        yield '<code'
+        yield b'<code'
         yield from self._serialize_attributes(self.attribute_serialization_xml)
-        yield '>'
+        yield b'>'
         yield escape_for_xml(self.text)
-        yield '</code>'
+        yield b'</code>'
 
     def serialize_html(self, duplicate=False, variables=[]):
-        yield '<code class="code"'
+        yield b'<code class="code"'
         yield from self._serialize_attributes(self.attribute_serialization_html)
-        yield '>'
+        yield b'>'
         yield escape_for_xml(self.text)
-        yield '</code>'
+        yield b'</code>'
 
     def append(self, thing):
         raise SAMParserStructureError("Inline code cannot have typed annotations.")
@@ -2914,18 +2940,18 @@ class Embed(Code):
         super().__init__(text)
 
     def serialize_xml(self):
-        yield '<embed'
+        yield b'<embed'
         yield from self._serialize_attributes(self.attribute_serialization_xml)
-        yield '>'
+        yield b'>'
         yield escape_for_xml(self.text)
-        yield '</embed>'
+        yield b'</embed>'
 
     def serialize_html(self, duplicate=False, variables=[]):
-        yield '<span class="embed" hidden'
+        yield b'<span class="embed" hidden'
         yield from self._serialize_attributes(self.attribute_serialization_html)
-        yield '>'
+        yield b'>'
         yield escape_for_xml(self.text)
-        yield '</span>'
+        yield b'</span>'
 
 class FlowSource:
     def __init__(self, para, strip=True):
@@ -2975,26 +3001,28 @@ class Annotation:
         yield ')'
 
     def serialize_xml(self, annotations=None, payload=None):
-        yield '<annotation'
+        yield b'<annotation'
         if self.type:
-            yield ' type="{0}"'.format(self.type)
+            yield ' type="{0}"'.format(self.type).encode('utf-8')
         if self.specifically:
-            yield ' specifically="{0}"'.format(escape_for_xml_attribute(self.specifically))
+            yield b' specifically="'
+            yield escape_for_xml_attribute(self.specifically)
+            yield b'"'
         if self.namespace:
-            yield ' namespace="{0}"'.format(self.namespace)
+            yield ' namespace="{0}"'.format(self.namespace).encode('utf-8')
 
         #Nest annotations for serialization
         if annotations:
             anns, *rest = annotations
-            yield '>'
+            yield b'>'
             yield from anns.serialize_xml(rest, payload)
-            yield '</annotation>'
+            yield b'</annotation>'
         elif payload:
-            yield '>'
+            yield b'>'
             yield payload
-            yield '</annotation>'
+            yield b'</annotation>'
         else:
-            yield '/>'
+            yield b'/>'
 
     def serialize_html(self, annotations=None, payload=None):
 
@@ -3061,33 +3089,38 @@ class Citation(Span):
 
     def serialize_xml(self):
         has_children= False
-        yield '<citation'
+        yield b'<citation'
 
         if len(self.reference_parts) > 1:
             has_children = True
-            yield '><reference-elements>'
+            yield b'><reference-elements>'
             for method, value in self.reference_parts:
-                yield '<reference-element method="{0}" value="{1}"/>'.format(method, escape_for_xml(value))
-            yield '</reference-elements>'
+                yield '<reference-element method="{0}" value="'.format(method).encode('utf-8')
+                yield escape_for_xml(value)
+                yield b'"/>'
+            yield b'</reference-elements>'
             if self.reference_extra:
                 has_children = True
-                yield '{0}'.format(escape_for_xml(self.reference_extra))
+                yield escape_for_xml(self.reference_extra)
 
         if len(self.reference_parts) == 1:
             if self.reference_parts[0][0] != 'value':
-                yield ' {0}="{1}"'.format(self.reference_parts[0][0], escape_for_xml_attribute(self.reference_parts[0][1]))
-
+                yield ' {0}="'.format(self.reference_parts[0][0]).encode('utf-8')
+                yield escape_for_xml_attribute(self.reference_parts[0][1])
+                yield b'"'
                 if self.reference_extra:
                     has_children = True
-                    yield '>{0}'.format(escape_for_xml(self.reference_extra))
+                    yield b'>'
+                    yield escape_for_xml(self.reference_extra)
             else:
                 has_children = True
-                yield '>{0}'.format(escape_for_xml(self.reference_parts[0][1]))
+                yield b'>'
+                yield escape_for_xml(self.reference_parts[0][1])
 
         if has_children:
-            yield '</citation>'
+            yield b'</citation>'
         else:
-            yield '/>'
+            yield b'/>'
 
     def serialize_html(self, duplicate=False, variables=[]):
 
@@ -3143,14 +3176,14 @@ class InlineInsert(Span):
             yield '>({0} {1})'.format(self.reference_parts[0][0], self.reference_parts[0][1])
         yield from self._regurgitate_attributes(self._attribute_regurgitation)
 
-    def serialize_xml(self, attrs=None, payload=None):
+    def serialize_xml(self):
         attributes = {}
         if len(self.reference_parts) == 1:
             if self.reference_parts[0][0] in insert_reference_symbols:
-                attributes[self.reference_parts[0][0]] = escape_for_xml_attribute(self.reference_parts[0][1])
+                attributes[self.reference_parts[0][0]] = self.reference_parts[0][1]
             else:
                 attributes['type'] = self.reference_parts[0][0]
-                attributes['item'] = escape_for_xml_attribute(self.reference_parts[0][1])
+                attributes['item'] = self.reference_parts[0][1]
         if self.conditions:
             attributes['conditions'] =','.join(self.conditions)
         if self.ID:
@@ -3163,25 +3196,28 @@ class InlineInsert(Span):
         if self.language_code:
             attributes['xml:lang']= self.language_code
 
-        yield '<inline-insert'
+        yield b'<inline-insert'
 
         for key, value in sorted(attributes.items()):
-            yield ' {0}="{1}"'.format(key, value)
-
+            yield ' {0}="'.format(key).encode('utf-8')
+            yield escape_for_xml_attribute(value)
+            yield b'"'
 
         if len(self.reference_parts) > 1:
-            yield '><reference-elements>'
+            yield b'><reference-elements>'
             for method, value in self.reference_parts:
-                yield '<reference-element method="{0}" value="{1}"/>'.format(method, escape_for_xml(value))
-            yield '</reference-elements>'
+                yield '<reference-element method="{0}" '.format(method).encode('utf-8')
+                yield escape_for_xml(value)
+                yield b'"/>'
+            yield b'</reference-elements>'
 
         if self.citations:
-            yield '>'
+            yield b'>'
             for c in self.citations:
                 yield from c.serialize_xml()
-            yield '</inline-insert>'
+            yield b'</inline-insert>'
         else:
-            yield '/>'
+            yield b'/>'
 
     def serialize_html(self, duplicate=False, variables=[]):
 
@@ -3397,16 +3433,16 @@ def escape_for_sam_code(s):
 def escape_for_xml(s):
     t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
     try:
-        return s.translate(t)
+        return s.translate(t).encode('utf-8')
     except AttributeError:
-        return s
+        return s.encode('utf-8')
 
 def escape_for_xml_attribute(s):
     t = dict(zip([ord('<'), ord('>'), ord('&'), ord('"')], ['&lt;', '&gt;', '&amp;', '&quot;']))
     try:
-        return s.translate(t)
+        return s.translate(t).encode('utf-8')
     except AttributeError:
-        return s
+        return s.encode('utf-8')
 
 
 def multi_replace(string, subs):
@@ -3503,7 +3539,7 @@ if __name__ == "__main__":
             raise SAMParserError("No input file(s) found.")
         return inputfiles
 
-    def write_output(inputfile, default_output_extension, source_func):
+    def write_output(input_file, default_output_extension, source_func):
         """
         Calculates the name of the output file using the input file name
         and the output file extension, then writes the output file by
@@ -3511,7 +3547,7 @@ if __name__ == "__main__":
 
         The output directory name is read from the arguments.
 
-        :param inputfile: The name of the input file.
+        :param input_file: The name of the input file.
         :param default_output_extension: The extension to be used on the output file unless overridden on the command line.
         :param source_func: The output function to call.
         :return: The name of the output file (in case the caller needs to read it).
@@ -3525,21 +3561,21 @@ if __name__ == "__main__":
                 output_extension = '.' + args.outputextension
 
         if args.outdir:
-            outputfile = os.path.join(args.outdir,
+            output_file = os.path.join(args.outdir,
                                       os.path.splitext(
-                                          os.path.basename(inputfile))[0] + output_extension)
+                                          os.path.basename(input_file))[0] + output_extension)
         else:
-            outputfile = args.outfile
+            output_file = args.outfile
 
-        if outputfile:
-            os.makedirs(os.path.dirname(outputfile), exist_ok=True)
-            with open(outputfile, "wb") as outf:
+        if output_file:
+            os.makedirs(os.path.dirname(output_file), exist_ok=True)
+            with open(output_file, "wb") as outf:
                 for i in source_func():
-                    outf.write(i.encode('utf-8'))
+                    outf.write(i)
         else:
             for i in source_func():
                 sys.stdout.buffer.write(i.encode('utf-8'))
-        return outputfile
+        return output_file
 
 
     def xml_output():
@@ -3553,17 +3589,12 @@ if __name__ == "__main__":
                 outputfile = write_output(inputfile, '.xml', samParser.doc.serialize_xml)
 
                 if args.xsd:
+                    SAM_parser_info("Validating XML output using " + args.xsd)
+                    xmlschema = etree.XMLSchema(file=args.xsd)
                     try:
-                        xmlschema = etree.XMLSchema(file=args.xsd)
-                    except etree.XMLSchemaParseError as e:
-                        print(e, file=sys.stderr)
-                        exit(1)
-                    SAM_parser_info("Validating output using " + args.xsd)
-                    xml_input = etree.parse(open(outputfile, 'r', encoding="utf-8-sig"))
-                    try:
-                        xmlschema.assertValid(xml_input)
+                        xmlschema.assertValid(samParser.doc.etree)
                     except etree.DocumentInvalid as e:
-                        print('XML SCHEMA ERROR in {0}: {1}'.format(outputfile, str(e)), file=sys.stderr)
+                        print('XML SCHEMA ERROR {0} in {1}'.format(str(e), outputfile), file=sys.stderr)
                         xml_error_count += 1
                     else:
                         SAM_parser_info("Validation successful.")
@@ -3580,24 +3611,26 @@ if __name__ == "__main__":
                         transformedfile = args.transformedoutputfile
                     try:
                         transformer = etree.XSLT(etree.parse(args.xslt))
-                        xml_input = etree.parse(open(outputfile, 'r', encoding="utf-8-sig"))
+                        # We need to transform the file from the file system as it may
+                        # contain references to resources on the file system locally.
+                        to_be_transformed = etree.parse(outputfile)
                         try:
-                            transformed = transformer(xml_input)
+                            transformed = transformer(to_be_transformed)
                         except etree.XSLTError as e:
-                            raise SAMXSLTError("XSLT processor reported error: " + str(e))
-                        finally:
+                            print('XSLT TRANSFORMER ERROR {0} in {1}'.format(str(e), outputfile), file=sys.stderr)
                             if transformer.error_log:
-                                SAM_parser_warning("Messages from the XSLT transformation:")
-                                for entry in transformed.error_log:
+                                SAM_parser_warning("Messages from the XSLT transformation of {0}:".format(outputfile))
+                                for entry in transformer.error_log:
                                     print('message from line %s, col %s: %s' % (
                                         entry.line, entry.column, entry.message), file=sys.stderr)
                                     print('domain: %s (%d)' % (entry.domain_name, entry.domain), file=sys.stderr)
                                     print('type: %s (%d)' % (entry.type_name, entry.type), file=sys.stderr)
                                     print('level: %s (%d)' % (entry.level_name, entry.level), file=sys.stderr)
-
+                            raise SAMXSLTError(e)
+                        # For XSLT warnings that don't cause an exception
                         if transformer.error_log:
                             SAM_parser_warning("Messages from the XSLT transformation:")
-                            for entry in transformed.error_log:
+                            for entry in transformer.error_log:
                                 print('message from line %s, col %s: %s' % (
                                     entry.line, entry.column, entry.message), file=sys.stderr)
                                 print('domain: %s (%d)' % (entry.domain_name, entry.domain), file=sys.stderr)
@@ -3614,6 +3647,11 @@ if __name__ == "__main__":
             except SAMParserError as e:
                 sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
                 parser_error_count += 1
+                continue
+
+            except SAMXSLTError as e:
+                sys.stderr.write('XSLT ERROR: ' + str(e) + "\n")
+                xslt_error_count += 1
                 continue
 
 
@@ -3709,10 +3747,10 @@ if __name__ == "__main__":
         sys.exit(0)
     else:
         print('Process completed with {0} errors.\n'
-              '{1} SAM parser errors.\n{2} XSL schema errors.\n{3} XSLT Errors'.format(error_count_total,
+              '{1} SAM parser errors.\n{2} XSL schema errors.\n{3} XSLT Errors.'.format(error_count_total,
                                                                                      parser_error_count,
                                                                                      xml_error_count,
                                                                                      xslt_error_count
                                                                                      ), file=sys.stderr)
-        if parser_error_count + xml_error_count > 0:
+        if error_count_total > 0:
             sys.exit(1)
