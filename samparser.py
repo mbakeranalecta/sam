@@ -196,6 +196,10 @@ def get_full_resource_url(resource_url, source_url):
         fullhref = resource_url
     elif os.path.isabs(resource_url):  # An absolute file path
         fullhref = pathlib.Path(resource_url).as_uri()
+    elif resource_url.strip == '':
+        raise SAMParserFileError ("No resource URL specified.")
+    elif source_url.strip == '':
+        raise SAMParserFileError ("Source file URL not known. Can't resolve relative resource URL. ")
     else:
         fullhref = urllib.parse.urljoin(source_url, resource_url)
     return fullhref
@@ -467,22 +471,10 @@ class SamParser:
         indent = match.end("indent")
         href=match.group("attributes")[1:-1]
 
-        if href.strip() == "":
-            SAM_parser_warning("No HREF specified for include.")
-            return "SAM", context
-
-        fullhref = get_full_resource_url(href, self.source_url)
-
-        # elif bool(urllib.parse.urlparse(href).netloc):  # An absolute URL
-        #     fullhref = href
-        # elif os.path.isabs(href):  # An absolute file path
-        #     fullhref = pathlib.Path(href).as_uri()
-        # elif self.source_url:
-        #     fullhref = urllib.parse.urljoin(self.source_url, href)
-
-        # else:
-        #     SAM_parser_warning("Unable to resolve relative URL of include as source of parsed document not known.")
-        #     return "SAM", context
+        try:
+            fullhref = get_full_resource_url(href, self.source_url)
+        except SAMParserFileError as e:
+            raise SamParserError (" at ".join(str(e), match.group(0)))
 
         if fullhref in included_files:
             raise SAMParserError("Duplicate file inclusion detected with file: " + fullhref)
@@ -3319,6 +3311,10 @@ class InlineInsert(Span):
 class SAMParserError(Exception):
     """
     Raised if the SAM parser encounters an error.
+    """
+class SAMParserFileError:
+    """
+    Raised if the SAM parser cannot find a file.
     """
 
 class SAMXSLTError(Exception):
