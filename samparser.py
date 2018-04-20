@@ -253,6 +253,7 @@ class SamParser:
         self.doc = None
         self.source = None
         self.source_url = None
+        self.expand_relative_paths = False
         self.flow_parser = FlowParser()
 
 
@@ -1002,11 +1003,12 @@ class BlockInsert(Block):
             attributes['type'] = self.reference_parts[0][0]
             attributes['item'] = get_full_resource_url(self.reference_parts[0][1], self._doc().source_url)
 
-            # source_dir = self._doc().source_url  # <-- absolute dir of the source file
-            # rel_path = self.reference_parts[0][1]
-            # insert_url = urljoin(source_dir, rel_path)
+            # FIXME: Can get_full_resource_url be replaced by urllib.parse.urljoin?
 
-            #attributes['item'] = insert_url
+            # FIXME: Need a check to determine if parser.expand_relative_paths is True or False, but
+            # these functions don't currently have access to parser properties.
+
+
         if self.conditions:
             attributes['conditions'] =','.join(self.conditions)
         if self.ID:
@@ -3553,6 +3555,7 @@ if __name__ == "__main__":
     parser_error_count = 0
     xml_error_count = 0
     xslt_error_count = 0
+    samParser = SamParser()
 
     def get_input_list():
         inputfiles=glob.glob(args.infile)
@@ -3605,7 +3608,6 @@ if __name__ == "__main__":
         for inputfile in get_input_list():
 
             try:
-                samParser = SamParser()
                 samParser.parse_file(inputfile)
                 outputfile = write_output(inputfile, '.xml', samParser.doc.serialize_xml)
 
@@ -3712,6 +3714,7 @@ if __name__ == "__main__":
     io_parser.add_argument("infile", help="the SAM file to be parsed")
     io_parser.add_argument("-smartquotes", "-sq",
                            help="the path to a file containing smartquote patterns and substitutions")
+    io_parser.add_argument("-expandrelativepaths", '-xrp', action="store_true", help="expand relative paths on serialization")
     outputgroup = io_parser.add_mutually_exclusive_group()
     outputgroup.add_argument("-outfile", "-o", help="the name of the output file")
     outputgroup.add_argument("-outdir", "-od", help="the name of output directory")
@@ -3736,7 +3739,6 @@ if __name__ == "__main__":
 
     # HTML
     html_parser = subparsers.add_parser("html", parents=[io_parser])
-    html_parser.add_argument("-html", action="store_true", help="Output HTML instead of XML. Use with -css and -script")
     html_parser.add_argument("-css",  nargs='+', help="Add a call to a CSS stylesheet in HTML output mode.")
     html_parser.add_argument("-javascript", nargs='+', help="Add a call to a script in HTML output mode.")
     html_parser.set_defaults(func=html_output)
@@ -3745,6 +3747,9 @@ if __name__ == "__main__":
 
     if args.infile == args.outfile:
         raise SAMParserError('Input and output files cannot have the same name.')
+
+    if args.expandrelativepaths:
+        samParser.expand_relative_paths = True
 
     if args.smartquotes:
         with open(args.smartquotes, encoding="utf8") as sqf:
