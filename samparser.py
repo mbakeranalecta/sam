@@ -191,18 +191,18 @@ def get_idrefs(this):
             result.extend(x.idrefs)
     return result
 
-def get_full_resource_url(resource_url, source_url):
-    if bool(urllib.parse.urlparse(resource_url).netloc):  # An absolute URL
-        fullhref = resource_url
-    elif os.path.isabs(resource_url):  # An absolute file path
-        fullhref = pathlib.Path(resource_url).as_uri()
-    elif resource_url.strip == '':
-        raise SAMParserFileError ("No resource URL specified.")
-    elif source_url.strip == '':
-        raise SAMParserFileError ("Source file URL not known. Can't resolve relative resource URL. ")
-    else:
-        fullhref = urllib.parse.urljoin(source_url, resource_url)
-    return fullhref
+# def get_full_resource_url(resource_url, source_url):
+#     if bool(urllib.parse.urlparse(resource_url).netloc):  # An absolute URL
+#         fullhref = resource_url
+#     elif os.path.isabs(resource_url):  # An absolute file path
+#         fullhref = pathlib.Path(resource_url).as_uri()
+#     elif resource_url.strip == '':
+#         raise SAMParserFileError ("No resource URL specified.")
+#     elif source_url.strip == '':
+#         raise SAMParserFileError ("Source file URL not known. Can't resolve relative resource URL. ")
+#     else:
+#         fullhref = urllib.parse.urljoin(source_url, resource_url)
+#     return fullhref
 
 def get_object_with_id(this, ID):
     """
@@ -473,7 +473,7 @@ class SamParser:
         href=match.group("attributes")[1:-1]
 
         try:
-            fullhref = get_full_resource_url(href, self.source_url)
+            fullhref = urllib.parse.urljoin(self.source_url, href)
         except SAMParserFileError as e:
             raise SamParserError (" at ".join(str(e), match.group(0)))
 
@@ -1001,7 +1001,7 @@ class BlockInsert(Block):
             attributes[self.reference_parts[0][0]] = self.reference_parts[0][1]
         else:
             attributes['type'] = self.reference_parts[0][0]
-            attributes['item'] = get_full_resource_url(self.reference_parts[0][1], self._doc().source_url)
+            attributes['item'] = urllib.parse.urljoin(self._doc().source_url, self.reference_parts[0][1])
 
             # FIXME: Can get_full_resource_url be replaced by urllib.parse.urljoin?
 
@@ -3202,7 +3202,7 @@ class InlineInsert(Span):
                 # rel_path = self.reference_parts[0][1]
                 # insert_url = urljoin(source_dir, rel_path)
 
-                attributes['item'] = get_full_resource_url(self.reference_parts[0][1], self._doc().source_url )
+                attributes['item'] = urllib.parse.urljoin(self._doc().source_url, self.reference_parts[0][1])
         if self.conditions:
             attributes['conditions'] =','.join(self.conditions)
         if self.ID:
