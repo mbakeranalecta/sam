@@ -89,6 +89,22 @@ schema, not a SAM schema). To invoke schema validation, use the `-xsd` option
 on the command line:
 
      -xsd <scehma.xsd>
+     
+### Expanding relative paths
+
+The SAM parser can expand relative paths of insert statements in the source document 
+while serializing the 
+output. This can be useful if the location of the output file is not the same relative 
+to the included resources as the location of the source file. To tell the parser to 
+expand relative paths into absolute URLs, use the `-expandrelativepaths` option. The 
+short form is `-xrp`.
+
+    - xrp
+
+Note that this applies to paths in SAM insert statements only. If you include paths in 
+custom structures in your markup, they will not be expanded as the parser has no way
+of knowing that the value of a custom structure is a path. 
+
 
 ### Regurgitating the SAM document
 

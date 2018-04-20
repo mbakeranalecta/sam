@@ -3635,9 +3635,6 @@ if __name__ == "__main__":
                         transformedfile = args.transformedoutputfile
                     try:
                         transformer = etree.XSLT(etree.parse(args.xslt))
-                        # We need to transform the file from the file system as it may
-                        # contain references to resources on the file system locally.
-                        #to_be_transformed = etree.parse(outputfile)
                         try:
                             if samParser.expand_relative_paths:
                                 # We can use the internal tree because all paths have been expanded.
