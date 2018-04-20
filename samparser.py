@@ -266,7 +266,7 @@ class SamParser:
                 self.source_url = pathlib.Path(os.path.abspath(source.name)).as_uri()
             except AttributeError:
                 self.source_url = None
-        self.doc = DocStructure(self.source_url)
+        self.doc = DocStructure(self.source_url, self.expand_relative_paths)
         try:
             self.stateMachine.run((self.source, None))
         except SAMParserStructureError as err:
@@ -842,8 +842,9 @@ class Block(ABC):
                     return y
         return None
 
-    def _doc(self):
-        return self.parent._doc()
+    @property
+    def docstructure(self):
+        return self.parent.docstructure
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -1001,13 +1002,10 @@ class BlockInsert(Block):
             attributes[self.reference_parts[0][0]] = self.reference_parts[0][1]
         else:
             attributes['type'] = self.reference_parts[0][0]
-            attributes['item'] = urllib.parse.urljoin(self._doc().source_url, self.reference_parts[0][1])
-
-            # FIXME: Can get_full_resource_url be replaced by urllib.parse.urljoin?
-
-            # FIXME: Need a check to determine if parser.expand_relative_paths is True or False, but
-            # these functions don't currently have access to parser properties.
-
+            if self.docstructure.expand_relative_paths:
+                attributes['item'] = urllib.parse.urljoin(self.docstructure.source_url, self.reference_parts[0][1])
+            else:
+                attributes['item'] = self.reference_parts[0][1]
 
         if self.conditions:
             attributes['conditions'] =','.join(self.conditions)
@@ -1056,7 +1054,7 @@ class BlockInsert(Block):
                     SAM_parser_warning('Inserting variables with block inserts is not supported in HTML output mode. '
                                        'Variable will be omitted from HTML output. At: {0}'.format(reference_value))
                 elif reference_method == 'idref':
-                    ob = self._doc().object_by_id(reference_value)
+                    ob = self.docstructure.object_by_id(reference_value)
                     if ob:
                         variables = [x for x in self.children if type(x) is VariableDef]
                         yield from ob.serialize_html(duplicate=True, variables=variables)
@@ -1064,7 +1062,7 @@ class BlockInsert(Block):
                         SAM_parser_warning('ID reference "{0}" could not be resolved. '
                                            'It will be omitted from HTML output. At: {1}'.format(reference_value, str(self).strip()))
                 elif reference_method == 'nameref':
-                    ob = self._doc().object_by_name(reference_value)
+                    ob = self.docstructure.object_by_name(reference_value)
                     if ob:
                         variables = [x for x in self.children if type(x) is VariableDef]
                         yield from ob.serialize_html(duplicate=True, variables=variables)
@@ -1969,8 +1967,9 @@ class Flow():
     def __str__(self):
         return ''.join(self.regurgitate())
 
-    def _doc(self):
-        return self.parent._doc()
+    @property
+    def docstructure(self):
+        return self.parent.docstructure
 
     def regurgitate(self):
 
@@ -2114,7 +2113,7 @@ class DocStructure:
     Each part of the SAM concrete syntax, such as Grids, RecordSets, and Lines has
     its own object type. Names blocks are represented by a generic Block object. 
     """
-    def __init__(self, source_url):
+    def __init__(self, source_url, expand_relative_paths = False):
         self.source_url = source_url
         self.root = Root(self)
         self.current_block = self.root
@@ -2128,6 +2127,7 @@ class DocStructure:
         self.javascript = None
         self._xml_serialization = None
         self._etree = None
+        self.expand_relative_paths = expand_relative_paths
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -2147,7 +2147,8 @@ class DocStructure:
             self._etree = etree.parse(self.xml)
         return self._etree
 
-    def _doc(self):
+    @property
+    def docstructure(self):
         return self
 
     def find_all(self, find_function, **kwargs):
@@ -3171,8 +3172,9 @@ class InlineInsert(Span):
         for key, value in attributes.items():
             setattr(self, key, value)
 
-    def _doc(self):
-        return self.parent._doc()
+    @property
+    def docstructure(self):
+        return self.parent.docstructure
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -3197,12 +3199,11 @@ class InlineInsert(Span):
                 attributes[self.reference_parts[0][0]] = self.reference_parts[0][1]
             else:
                 attributes['type'] = self.reference_parts[0][0]
+                if self.docstructure.expand_relative_paths:
+                    attributes['item'] = urllib.parse.urljoin(self.docstructure.source_url, self.reference_parts[0][1])
+                else:
+                    attributes['item'] = self.reference_parts[0][1]
 
-                # source_dir = self._doc().source_url  # <-- absolute dir of the source file
-                # rel_path = self.reference_parts[0][1]
-                # insert_url = urljoin(source_dir, rel_path)
-
-                attributes['item'] = urllib.parse.urljoin(self._doc().source_url, self.reference_parts[0][1])
         if self.conditions:
             attributes['conditions'] =','.join(self.conditions)
         if self.ID:
@@ -3252,7 +3253,7 @@ class InlineInsert(Span):
                         SAM_parser_warning('Variable reference "{0}" could not be resolved. '
                                            'It will be omitted from HTML output.'.format(self.item))
                 elif reference_method == 'idref':
-                    ob = self._doc().object_by_id(reference_value)
+                    ob = self.docstructure.object_by_id(reference_value)
                     if ob:
                         yield from ob.serialize_html(duplicate=True)
                     else:
@@ -3260,7 +3261,7 @@ class InlineInsert(Span):
                             'ID reference "{0}" could not be resolved. It will be omitted from HTML output. At: {1}'.format(
                                 reference_value, str(self).strip()))
                 elif reference_method == 'nameref':
-                    ob = self._doc().object_by_name(reference_value)
+                    ob = self.docstructure.object_by_name(reference_value)
                     if ob:
                         yield from ob.serialize_html(duplicate=True)
                     else:
@@ -3638,7 +3639,11 @@ if __name__ == "__main__":
                         # contain references to resources on the file system locally.
                         #to_be_transformed = etree.parse(outputfile)
                         try:
-                            transformed = transformer(samParser.doc.etree)
+                            if samParser.expand_relative_paths:
+                                # We can use the internal tree because all paths have been expanded.
+                                transformed = transformer(samParser.doc.etree)
+                            else: # May be local paths so have to parse from disk.
+                                transformed = transformer(etree.parse(outputfile))
                         except etree.XSLTError as e:
                             print('XSLT TRANSFORMER ERROR {0} in {1}'.format(str(e), outputfile), file=sys.stderr)
                             if transformer.error_log:
