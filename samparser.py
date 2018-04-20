@@ -3634,9 +3634,9 @@ if __name__ == "__main__":
                         transformer = etree.XSLT(etree.parse(args.xslt))
                         # We need to transform the file from the file system as it may
                         # contain references to resources on the file system locally.
-                        to_be_transformed = etree.parse(outputfile)
+                        #to_be_transformed = etree.parse(outputfile)
                         try:
-                            transformed = transformer(to_be_transformed)
+                            transformed = transformer(samParser.doc.etree)
                         except etree.XSLTError as e:
                             print('XSLT TRANSFORMER ERROR {0} in {1}'.format(str(e), outputfile), file=sys.stderr)
                             if transformer.error_log:
