@@ -116,6 +116,132 @@ article: SAM Quick Start
     section: Phrases:
         A phrase is a piece of text within a paragraph that you want to apply metadata to. A phrase is marked up with curly braces. In the recipe example, the words "Cobb Salad" are marked up as a phrase: `{Cobb Salad}`. We mark up phrases so that we can add semantic information to them with {annotations} and {citations}. 
 
+    section: Characters
+
+        SAM documents are {Unicode} documents encoded in {UTF-8}. You can therefore enter any character you like as literal text. However, there are two circumstances where you may need to enter characters in a different way: 
+
+        * You want to enter a character, such as an open curly brace, that is a SAM markup character. 
+
+        * You want to enter a character that is not on your keyboard or that is hard to type. 
+
+        To enter a character that is a SAM markup character, precede it with a backslash: 
+
+        ```(sam)
+            The curly brace \{ is not a commonly used character.
+
+        Note that characters such as the curly brace are only recognized as markup in SAM if they form part of a complete SAM markup structure. Because there is no closing curly brace in the above sentence, the curly brace by itself would still be recognized as text. However, using the backslash character escape is probably still a good idea to prevent accidentally creating markup sequences without realizing it. 
+
+        To enter characters that are not on your keyboard, you can either type unicode character using whatever keyboard sequence your OS provides or you can enter an XML/HTML style character entity. For example, to enter the symbol for a British pound, you can use the `&pound` character entity. 
+
+        ```(sam)
+            The doggy in the window costs &pound;5.00.
+
+        SAM recognizes all of the HTML character entities. (Note, however, that the recognition of HTML character entities could vary based on the SAM parser used. The current SAM Parser uses the Python html library to do character entity decoding. Running the parser with a different version of the html library might result in a different set of named entities being recognized.) 
+
+        You can also use XML style numeric and hexadecimal character entities:
+
+        ```(sam)
+            The doggy in the window costs &#163;5.00.
+
+        and\:
+
+        ```(sam)
+            The doggy in the window costs &#xA3;5.00.
+
+        Note that the use of character entities is an alternative to using backslash character escapes, so you can do: 
+
+
+        ```(sam)
+            The curly brace &lbrace; is not a commonly used character.
+
+        instead of
+
+        ```(sam)
+            The curly brace \{ is not a commonly used character.
+
+        If you wish.
+
+        To enter a literal backslash into your text you can either do:
+
+        ```(sam)
+            \\
+
+        or
+
+        ```(sam)
+            &bsol;
+
+        or, if the backslash is not preceding any SAM markup character, you can just enter it alone:
+
+        ```(sam)
+            \
+
+        To enter a literal character escape sequence, you can escape the leading `&` either with a backslash:
+
+        ```(sam)
+            \&pound;
+
+        or with a character escape:
+
+        ```(sam)
+            &amp;pound;
+
+    section: Decorations
+        A decoration is a shortcut for entering common types of format related annotation in a paragraph. SAM supports two decorations, for bold, italic. Bold text is contained between asterisks: 
+
+        ```(sam)
+            This text *is in bold* type.
+
+        This is equivalent to:
+
+        ```(sam)
+            This text {is in bold}(bold) type.
+
+        Italic text is contained between underscores:
+
+        ```(sam)
+            This text _is in italic_ type.
+
+        This is equivalent to:
+
+        ```(sam)
+            This text {is in italic}(italic) type.
+
+
+    section: Attributes
+        SAM does not have a general attribute mechanism like XML. XML attributes are one of the things that make it hard to write in, even in a structured editor. However, SAM does provide some basic attributes that are commonly needed for content management purposes. 
+
+        You can attach attributes to blocks and block-like things and to phrases. An attribute looks like an annotation, in the sense that it is contained in parentheses, but attributes as distinguished by an initial character the specifies their type. Thus a condition starts with a question mark `(?deluxe)`. 
+
+        To attach an attribute to a block, place it directly after the colon of the block header:
+
+        ```(sam)
+            note:(?basic)
+                Do not immerse you Basic model Widget in Water. Only higher
+                trim levels are waterproof.
+
+
+        The types are:
+
+        |ID| An identifier for the block or field. An ID must be unique in the document. An ID is preceded by an asterisk: `*my-id`. 
+
+        |Name| A name also identifies a block or field but it has wider scope. Names are used when you want to identify something across a set of documents. SAM does not check that names are unique across a set of documents (it has no way of knowing what that set might be). Resolution of names is up to the processing software. A name is preceded by a `#` symbol: `#my-name`. 
+
+        |Condition| Specifying a condition token is a way of telling the publishing software to include this block only when a certain condition is true. How the publishing software determines if a condition is true is entirely up to the application layer. A condition attribute is preceded by a `?`. 
+
+        |Language| You can specify the language of a block using a language attribute. The language attribute should a {W3C language tag}(https://www.w3.org/International/articles/language-tags/). It is preceded by a `!`: `!en-CA`. 
+
+        You can apply multiple attributes to a block:
+
+        ```(sam)
+            note:(*note.waterproof)(?basic)
+                Do not immerse you Basic model Widget in Water. Only higher
+                trim levels are waterproof.
+
+        You can only apply one each of the {id}, {name}, and {language} {attributes}, but you can apply as many condition attributes to a {block} as you need. 
+
+        Note that if you wish to add other forms of management domain metadata to your blocks you can do so using fields within the block. SAM's set of management domain annotations are just a convenience feature. You can add any management domain metadata you like using regular fields. As a semantic format, there is nothing in SAM that says that all of the content of blocks or fields has to appear in print. Blocks and fields can contain any kind of data or metadata you like. It is up to the publishing algorithms to decide which content to publish and which to use for management purposes. 
+
     section: Annotations
         An annotation is a way of adding descriptive labels or metadata to individual phrases within a text. Annotations can cover anything from formatting (bold, italic) to linking to semantic annotation. Annotations are applied to phrases. In the example above, the phrase "Cobb Salad" has an annotation "recipe" (`{Cobb Salad}(recipe)`) which tells us that the phrase is the name of a recipe. There is no fixed set of annotations in SAM. It is up to you to determine what annotations you need for your content. 
 
@@ -281,6 +407,34 @@ article: SAM Quick Start
 
         The content of a code block is not processed as SAM markup. This means that you do not have to escape any of the characters in your code sample. It also means that you can quote SAM markup itself without it being parsed as SAM markup. (Every example in this document uses exactly this technique.) 
 
+    section: Inline code
+
+        Inline code is contained between backticks:
+
+        ```(sam)
+            Python uses the `print()` function to print output.
+
+        Note that this is not a generic monospaced type decoration. It is intended specifically for code. Text in a code decoration is not parsed the way ordinary SAM markup is parsed. Character escapes are not recognized. The text is presented verbatim. Thus if you want to insert the code for a character entity, you can do it like this:
+
+        ```(sam)
+            In XML use `&quot;` to enter a & character.
+
+        The only character escaping that is done in inline code is for the back tick symbol. To enter a literal back tick into inline code, use two back ticks in a row. 
+
+        ```(sam)
+            Sam creates inline code like this: ```&quot```.
+
+        This will render as:
+
+        """
+            Sam creates inline code like this: ```&quot```.
+
+        Inline code can be annotated in the same way as a codeblock, so if you want to specify the language of a piece of inline code you can do this:
+
+        ```(sam)
+            Python uses the `print()`(code (python)) function to print output.
+
+
     section: Blockquotes
 
         A block quote is a quotation from another document that is set apart from the main text. In SAM, a block quote is introduced by three quotation marks in a row. You can use either double or single quotation marks. The body of the block quote is indented under the block quote header: 
@@ -309,159 +463,7 @@ article: SAM Quick Start
                 | All mimsy were the borogoves,
                 | And the mome raths outgrabe.
 
-    section: Characters
 
-        SAM documents are {Unicode} documents encoded in {UTF-8}. You can therefore enter any character you like as literal text. However, there are two circumstances where you may need to enter characters in a different way: 
-
-        * You want to enter a character, such as an open curly brace, that is a SAM markup character. 
-
-        * You want to enter a character that is not on your keyboard or that is hard to type. 
-
-        To enter a character that is a SAM markup character, precede it with a backslash: 
-
-        ```(sam)
-            The curly brace \{ is not a commonly used character.
-
-        Note that characters such as the curly brace are only recognized as markup in SAM if they form part of a complete SAM markup structure. Because there is no closing curly brace in the above sentence, the curly brace by itself would still be recognized as text. However, using the backslash character escape is probably still a good idea to prevent accidentally creating markup sequences without realizing it. 
-
-        To enter characters that are not on your keyboard, you can either type unicode character using whatever keyboard sequence your OS provides or you can enter an XML/HTML style character entity. For example, to enter the symbol for a British pound, you can use the `&pound` character entity. 
-
-        ```(sam)
-            The doggy in the window costs &pound;5.00.
-
-        SAM recognizes all of the HTML character entities. (Note, however, that the recognition of HTML character entities could vary based on the SAM parser used. The current SAM Parser uses the Python html library to do character entity decoding. Running the parser with a different version of the html library might result in a different set of named entities being recognized.) 
-
-        You can also use XML style numeric and hexadecimal character entities:
-
-        ```(sam)
-            The doggy in the window costs &#163;5.00.
-
-        and:
-
-        ```(sam)
-            The doggy in the window costs &#xA3;5.00.
-
-        Note that the use of character entities is an alternative to using backslash character escapes, so you can do: 
-
-
-        ```(sam)
-            The curly brace &lbrace; is not a commonly used character.
-
-        instead of
-
-        ```(sam)
-            The curly brace \{ is not a commonly used character.
-
-        If you wish.
-
-        To enter a literal backslash into your text you can either do:
-
-        ```(sam)
-            \\
-
-        or
-
-        ```(sam)
-            &bsol;
-
-        or, if the backslash is not preceding any SAM markup character, you can just enter it alone:
-
-        ```(sam)
-            \
-
-        To enter a literal character escape sequence, you can escape the leading `&` either with a backslash:
-
-        ```(sam)
-            \&pound;
-
-        or with a character escape:
-
-        ```(sam)
-            &amp;pound;
-
-    section: Decorations
-        A decoration is a shortcut for entering common types of format related annotation in a paragraph. SAM supports three decorations, for bold, italic, and code. Bold text is contained between asterisks: 
-
-        ```(sam)
-            This text *is in bold* type.
-
-        This is equivalent to:
-
-        ```(sam)
-            This text {is in bold}(bold) type.
-
-        Italic text is contained between underscores:
-
-        ```(sam)
-            This text _is in italic_ type.
-
-        This is equivalent to:
-
-        ```(sam)
-            This text {is in italic}(italic) type.
-
-        Code is contained between backticks:
-
-        ```(sam)
-            Python uses the `print()` function to print output.
-
-        This is almost but not quite equivalent to:
-
-        ```(sam)
-            Python uses the {print()}(code) function to print output.
-
-        Note that the code decoration is not a generic monospaced type decoration. It is intended specifically for code. Text in a code decoration is not parsed the way ordinary SAM markup is parsed. Character escapes are not recognized. The text is presented verbatim. The only character escaping that is done is for the back tick symbol. To enter a literal back tick into a code decoration, use two back ticks in a row. 
-
-        If you want to specify the language of a piece of inline code, use the full annotation format:
-
-        ```(sam)
-            Python uses the {print()}(code (python)) function to print output.
-
-        But note that in this format, the content of the annotated phrase is parsed like normal SAM content and you need to escape any characters that could be interpreted as SAM markup. Thus if you were referring to the code for a character entity in a code decoration, you would do it like this: 
-
-        ```(sam)
-            In XML use `&quot;` to enter a & character.
-
-        This will print the character escape literally. But if you were using the full annotation format, you would need to escape the `&`:
-
-        ```(sam)
-            In XML use {\&quot;}(code (XML)) to enter a & character.
-
-        Also note that the `&` by itself does not need to be escaped in SAM. It only needs to be escaped if it is part of a complete character entity code. 
-
-    section: Attributes
-        SAM does not have a general attribute mechanism like XML. XML attributes are one of the things that make it hard to write in, even in a structured editor. However, SAM does provide some basic attributes that are commonly needed for content management purposes. 
-
-        You can attach attributes to blocks and block-like things and to phrases. An attribute looks like an annotation, in the sense that it is contained in parentheses, but attributes as distinguished by an initial character the specifies their type. Thus a condition starts with a question mark `(?deluxe)`. 
-
-        To attach an attribute to a block, place it directly after the colon of the block header:
-
-        ```(sam)
-            note:(?basic)
-                Do not immerse you Basic model Widget in Water. Only higher
-                trim levels are waterproof.
-
-
-        The types are:
-
-        |ID| An identifier for the block or field. An ID must be unique in the document. An ID is preceded by an asterisk: `*my-id`. 
-
-        |Name| A name also identifies a block or field but it has wider scope. Names are used when you want to identify something across a set of documents. SAM does not check that names are unique across a set of documents (it has no way of knowing what that set might be). Resolution of names is up to the processing software. A name is preceded by a `#` symbol: `#my-name`. 
-
-        |Condition| Specifying a condition token is a way of telling the publishing software to include this block only when a certain condition is true. How the publishing software determines if a condition is true is entirely up to the application layer. A condition attribute is preceded by a `?`. 
-
-        |Language| You can specify the language of a block using a language attribute. The language attribute should a {W3C language tag}(https://www.w3.org/International/articles/language-tags/). It is preceded by a `!`: `!en-CA`. 
-
-        You can apply multiple attributes to a block:
-
-        ```(sam)
-            note:(*note.waterproof)(?basic)
-                Do not immerse you Basic model Widget in Water. Only higher
-                trim levels are waterproof.
-
-        You can only apply one each of the {id}, {name}, and {language} {attributes}, but you can apply as many condition attributes to a {block} as you need. 
-
-        Note that if you wish to add other forms of management domain metadata to your blocks you can do so using fields within the block. SAM's set of management domain annotations are just a convenience feature. You can add any management domain metadata you like using regular fields. As a semantic format, there is nothing in SAM that says that all of the content of blocks or fields has to appear in print. Blocks and fields can contain any kind of data or metadata you like. It is up to the publishing algorithms to decide which content to publish and which to use for management purposes. 
 
     section: Inserts
 

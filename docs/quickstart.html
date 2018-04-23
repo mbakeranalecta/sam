@@ -114,6 +114,112 @@
 <p class="p">A phrase is a piece of text within a paragraph that you want to apply metadata to. A phrase is marked up with curly braces. In the recipe example, the words "Cobb Salad" are marked up as a phrase: <code class="code">{Cobb Salad}</code>. We mark up phrases so that we can add semantic information to them with <span class="phrase">annotations</span> and <span class="phrase">citations</span>.</p>
 </div>
 <div class="section">
+<h2 class="title">Characters</h2>
+
+<p class="p">SAM documents are <span class="phrase">Unicode</span> documents encoded in <span class="phrase">UTF-8</span>. You can therefore enter any character you like as literal text. However, there are two circumstances where you may need to enter characters in a different way:</p>
+<ul class="ul">
+<li class="li">
+<p class="p">You want to enter a character, such as an open curly brace, that is a SAM markup character.</p>
+</li>
+<li class="li">
+<p class="p">You want to enter a character that is not on your keyboard or that is hard to type.</p>
+</li>
+</ul>
+<p class="p">To enter a character that is a SAM markup character, precede it with a backslash:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The curly brace \{ is not a commonly used character.
+</code></pre>
+<p class="p">Note that characters such as the curly brace are only recognized as markup in SAM if they form part of a complete SAM markup structure. Because there is no closing curly brace in the above sentence, the curly brace by itself would still be recognized as text. However, using the backslash character escape is probably still a good idea to prevent accidentally creating markup sequences without realizing it.</p>
+<p class="p">To enter characters that are not on your keyboard, you can either type unicode character using whatever keyboard sequence your OS provides or you can enter an XML/HTML style character entity. For example, to enter the symbol for a British pound, you can use the <code class="code">&amp;pound</code> character entity.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The doggy in the window costs &amp;pound;5.00.
+</code></pre>
+<p class="p">SAM recognizes all of the HTML character entities. (Note, however, that the recognition of HTML character entities could vary based on the SAM parser used. The current SAM Parser uses the Python html library to do character entity decoding. Running the parser with a different version of the html library might result in a different set of named entities being recognized.)</p>
+<p class="p">You can also use XML style numeric and hexadecimal character entities:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The doggy in the window costs &amp;#163;5.00.
+</code></pre>
+<p class="p">and:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The doggy in the window costs &amp;#xA3;5.00.
+</code></pre>
+<p class="p">Note that the use of character entities is an alternative to using backslash character escapes, so you can do:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The curly brace &amp;lbrace; is not a commonly used character.
+</code></pre>
+<p class="p">instead of</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The curly brace \{ is not a commonly used character.
+</code></pre>
+<p class="p">If you wish.</p>
+<p class="p">To enter a literal backslash into your text you can either do:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">\\
+</code></pre>
+<p class="p">or</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">&amp;bsol;
+</code></pre>
+<p class="p">or, if the backslash is not preceding any SAM markup character, you can just enter it alone:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">\
+</code></pre>
+<p class="p">To enter a literal character escape sequence, you can escape the leading <code class="code">&amp;</code> either with a backslash:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">\&amp;pound;
+</code></pre>
+<p class="p">or with a character escape:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">&amp;amp;pound;
+</code></pre>
+</div>
+<div class="section">
+<h2 class="title">Decorations</h2>
+
+<p class="p">A decoration is a shortcut for entering common types of format related annotation in a paragraph. SAM supports two decorations, for bold, italic. Bold text is contained between asterisks:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text *is in bold* type.
+</code></pre>
+<p class="p">This is equivalent to:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text {is in bold}(bold) type.
+</code></pre>
+<p class="p">Italic text is contained between underscores:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text _is in italic_ type.
+</code></pre>
+<p class="p">This is equivalent to:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text {is in italic}(italic) type.
+</code></pre>
+</div>
+<div class="section">
+<h2 class="title">Attributes</h2>
+
+<p class="p">SAM does not have a general attribute mechanism like XML. XML attributes are one of the things that make it hard to write in, even in a structured editor. However, SAM does provide some basic attributes that are commonly needed for content management purposes.</p>
+<p class="p">You can attach attributes to blocks and block-like things and to phrases. An attribute looks like an annotation, in the sense that it is contained in parentheses, but attributes as distinguished by an initial character the specifies their type. Thus a condition starts with a question mark <code class="code">(?deluxe)</code>.</p>
+<p class="p">To attach an attribute to a block, place it directly after the colon of the block header:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">note:(?basic)
+    Do not immerse you Basic model Widget in Water. Only higher
+    trim levels are waterproof.
+</code></pre>
+<p class="p">The types are:</p>
+<dl class="ll">
+<div class="ll.li">
+<dt class="ll.li.label">ID</dt>
+<dd class="ll.li.item"><p class="p">An identifier for the block or field. An ID must be unique in the document. An ID is preceded by an asterisk: <code class="code">*my-id</code>.</p>
+</dd>
+</div>
+<div class="ll.li">
+<dt class="ll.li.label">Name</dt>
+<dd class="ll.li.item"><p class="p">A name also identifies a block or field but it has wider scope. Names are used when you want to identify something across a set of documents. SAM does not check that names are unique across a set of documents (it has no way of knowing what that set might be). Resolution of names is up to the processing software. A name is preceded by a <code class="code">#</code> symbol: <code class="code">#my-name</code>.</p>
+</dd>
+</div>
+<div class="ll.li">
+<dt class="ll.li.label">Condition</dt>
+<dd class="ll.li.item"><p class="p">Specifying a condition token is a way of telling the publishing software to include this block only when a certain condition is true. How the publishing software determines if a condition is true is entirely up to the application layer. A condition attribute is preceded by a <code class="code">?</code>.</p>
+</dd>
+</div>
+<div class="ll.li">
+<dt class="ll.li.label">Language</dt>
+<dd class="ll.li.item"><p class="p">You can specify the language of a block using a language attribute. The language attribute should a <span class="phrase"><a href=https://www.w3.org/International/articles/language-tags/ class="link">W3C language tag</a></span>. It is preceded by a <code class="code">!</code>: <code class="code">!en-CA</code>.</p>
+</dd>
+</div>
+</dl>
+<p class="p">You can apply multiple attributes to a block:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">note:(*note.waterproof)(?basic)
+    Do not immerse you Basic model Widget in Water. Only higher
+    trim levels are waterproof.
+</code></pre>
+<p class="p">You can only apply one each of the <span class="phrase">id</span>, <span class="phrase">name</span>, and <span class="phrase"><a href=language.html class="link">language</a></span> <span class="phrase">attributes</span>, but you can apply as many condition attributes to a <span class="phrase">block</span> as you need.</p>
+<p class="p">Note that if you wish to add other forms of management domain metadata to your blocks you can do so using fields within the block. SAM's set of management domain annotations are just a convenience feature. You can add any management domain metadata you like using regular fields. As a semantic format, there is nothing in SAM that says that all of the content of blocks or fields has to appear in print. Blocks and fields can contain any kind of data or metadata you like. It is up to the publishing algorithms to decide which content to publish and which to use for management purposes.</p>
+</div>
+<div class="section">
 <h2 class="title">Annotations</h2>
 
 <p class="p">An annotation is a way of adding descriptive labels or metadata to individual phrases within a text. Annotations can cover anything from formatting (bold, italic) to linking to semantic annotation. Annotations are applied to phrases. In the example above, the phrase "Cobb Salad" has an annotation "recipe" (<code class="code">{Cobb Salad}(recipe)</code>) which tells us that the phrase is the name of a recipe. There is no fixed set of annotations in SAM. It is up to you to determine what annotations you need for your content.</p>
@@ -248,6 +354,26 @@ footnote:(*moby)
 <p class="p">The content of a code block is not processed as SAM markup. This means that you do not have to escape any of the characters in your code sample. It also means that you can quote SAM markup itself without it being parsed as SAM markup. (Every example in this document uses exactly this technique.)</p>
 </div>
 <div class="section">
+<h2 class="title">Inline code</h2>
+
+<p class="p">Inline code is contained between backticks:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Python uses the `print()` function to print output.
+</code></pre>
+<p class="p">Note that this is not a generic monospaced type decoration. It is intended specifically for code. Text in a code decoration is not parsed the way ordinary SAM markup is parsed. Character escapes are not recognized. The text is presented verbatim. Thus if you want to insert the code for a character entity, you can do it like this:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">In XML use `&amp;quot;` to enter a &amp; character.
+</code></pre>
+<p class="p">The only character escaping that is done in inline code is for the back tick symbol. To enter a literal back tick into inline code, use two back ticks in a row.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Sam creates inline code like this: ```&amp;quot```.
+</code></pre>
+<p class="p">This will render as:</p>
+<blockquote class="blockquote">
+<p class="p">Sam creates inline code like this: <code class="code">`&amp;quot`</code>.</p>
+</blockquote>
+<p class="p">Inline code can be annotated in the same way as a codeblock, so if you want to specify the language of a piece of inline code you can do this:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Python uses the `print()`(code (python)) function to print output.
+</code></pre>
+</div>
+<div class="section">
 <h2 class="title">Blockquotes</h2>
 
 <p class="p">A block quote is a quotation from another document that is set apart from the main text. In SAM, a block quote is introduced by three quotation marks in a row. You can use either double or single quotation marks. The body of the block quote is indented under the block quote header:</p>
@@ -272,129 +398,6 @@ footnote:(*moby)
     | All mimsy were the borogoves,
     | And the mome raths outgrabe.
 </code></pre>
-</div>
-<div class="section">
-<h2 class="title">Characters</h2>
-
-<p class="p">SAM documents are <span class="phrase">Unicode</span> documents encoded in <span class="phrase">UTF-8</span>. You can therefore enter any character you like as literal text. However, there are two circumstances where you may need to enter characters in a different way:</p>
-<ul class="ul">
-<li class="li">
-<p class="p">You want to enter a character, such as an open curly brace, that is a SAM markup character.</p>
-</li>
-<li class="li">
-<p class="p">You want to enter a character that is not on your keyboard or that is hard to type.</p>
-</li>
-</ul>
-<p class="p">To enter a character that is a SAM markup character, precede it with a backslash:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The curly brace \{ is not a commonly used character.
-</code></pre>
-<p class="p">Note that characters such as the curly brace are only recognized as markup in SAM if they form part of a complete SAM markup structure. Because there is no closing curly brace in the above sentence, the curly brace by itself would still be recognized as text. However, using the backslash character escape is probably still a good idea to prevent accidentally creating markup sequences without realizing it.</p>
-<p class="p">To enter characters that are not on your keyboard, you can either type unicode character using whatever keyboard sequence your OS provides or you can enter an XML/HTML style character entity. For example, to enter the symbol for a British pound, you can use the <code class="code">&amp;pound</code> character entity.</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The doggy in the window costs &amp;pound;5.00.
-</code></pre>
-<p class="p">SAM recognizes all of the HTML character entities. (Note, however, that the recognition of HTML character entities could vary based on the SAM parser used. The current SAM Parser uses the Python html library to do character entity decoding. Running the parser with a different version of the html library might result in a different set of named entities being recognized.)</p>
-<p class="p">You can also use XML style numeric and hexadecimal character entities:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The doggy in the window costs &amp;#163;5.00.
-</code></pre>
-<div class="and"></div>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The doggy in the window costs &amp;#xA3;5.00.
-</code></pre>
-<p class="p">Note that the use of character entities is an alternative to using backslash character escapes, so you can do:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The curly brace &amp;lbrace; is not a commonly used character.
-</code></pre>
-<p class="p">instead of</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The curly brace \{ is not a commonly used character.
-</code></pre>
-<p class="p">If you wish.</p>
-<p class="p">To enter a literal backslash into your text you can either do:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">\\
-</code></pre>
-<p class="p">or</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">&amp;bsol;
-</code></pre>
-<p class="p">or, if the backslash is not preceding any SAM markup character, you can just enter it alone:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">\
-</code></pre>
-<p class="p">To enter a literal character escape sequence, you can escape the leading <code class="code">&amp;</code> either with a backslash:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">\&amp;pound;
-</code></pre>
-<p class="p">or with a character escape:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">&amp;amp;pound;
-</code></pre>
-</div>
-<div class="section">
-<h2 class="title">Decorations</h2>
-
-<p class="p">A decoration is a shortcut for entering common types of format related annotation in a paragraph. SAM supports three decorations, for bold, italic, and code. Bold text is contained between asterisks:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text *is in bold* type.
-</code></pre>
-<p class="p">This is equivalent to:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text {is in bold}(bold) type.
-</code></pre>
-<p class="p">Italic text is contained between underscores:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text _is in italic_ type.
-</code></pre>
-<p class="p">This is equivalent to:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text {is in italic}(italic) type.
-</code></pre>
-<p class="p">Code is contained between backticks:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Python uses the `print()` function to print output.
-</code></pre>
-<p class="p">This is almost but not quite equivalent to:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Python uses the {print()}(code) function to print output.
-</code></pre>
-<p class="p">Note that the code decoration is not a generic monospaced type decoration. It is intended specifically for code. Text in a code decoration is not parsed the way ordinary SAM markup is parsed. Character escapes are not recognized. The text is presented verbatim. The only character escaping that is done is for the back tick symbol. To enter a literal back tick into a code decoration, use two back ticks in a row.</p>
-<p class="p">If you want to specify the language of a piece of inline code, use the full annotation format:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Python uses the {print()}(code (python)) function to print output.
-</code></pre>
-<p class="p">But note that in this format, the content of the annotated phrase is parsed like normal SAM content and you need to escape any characters that could be interpreted as SAM markup. Thus if you were referring to the code for a character entity in a code decoration, you would do it like this:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">In XML use `&amp;quot;` to enter a &amp; character.
-</code></pre>
-<p class="p">This will print the character escape literally. But if you were using the full annotation format, you would need to escape the <code class="code">&amp;</code>:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">In XML use {\&amp;quot;}(code (XML)) to enter a &amp; character.
-</code></pre>
-<p class="p">Also note that the <code class="code">&amp;</code> by itself does not need to be escaped in SAM. It only needs to be escaped if it is part of a complete character entity code.</p>
-</div>
-<div class="section">
-<h2 class="title">Attributes</h2>
-
-<p class="p">SAM does not have a general attribute mechanism like XML. XML attributes are one of the things that make it hard to write in, even in a structured editor. However, SAM does provide some basic attributes that are commonly needed for content management purposes.</p>
-<p class="p">You can attach attributes to blocks and block-like things and to phrases. An attribute looks like an annotation, in the sense that it is contained in parentheses, but attributes as distinguished by an initial character the specifies their type. Thus a condition starts with a question mark <code class="code">(?deluxe)</code>.</p>
-<p class="p">To attach an attribute to a block, place it directly after the colon of the block header:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">note:(?basic)
-    Do not immerse you Basic model Widget in Water. Only higher
-    trim levels are waterproof.
-</code></pre>
-<p class="p">The types are:</p>
-<dl class="ll">
-<div class="ll.li">
-<dt class="ll.li.label">ID</dt>
-<dd class="ll.li.item"><p class="p">An identifier for the block or field. An ID must be unique in the document. An ID is preceded by an asterisk: <code class="code">*my-id</code>.</p>
-</dd>
-</div>
-<div class="ll.li">
-<dt class="ll.li.label">Name</dt>
-<dd class="ll.li.item"><p class="p">A name also identifies a block or field but it has wider scope. Names are used when you want to identify something across a set of documents. SAM does not check that names are unique across a set of documents (it has no way of knowing what that set might be). Resolution of names is up to the processing software. A name is preceded by a <code class="code">#</code> symbol: <code class="code">#my-name</code>.</p>
-</dd>
-</div>
-<div class="ll.li">
-<dt class="ll.li.label">Condition</dt>
-<dd class="ll.li.item"><p class="p">Specifying a condition token is a way of telling the publishing software to include this block only when a certain condition is true. How the publishing software determines if a condition is true is entirely up to the application layer. A condition attribute is preceded by a <code class="code">?</code>.</p>
-</dd>
-</div>
-<div class="ll.li">
-<dt class="ll.li.label">Language</dt>
-<dd class="ll.li.item"><p class="p">You can specify the language of a block using a language attribute. The language attribute should a <span class="phrase"><a href=https://www.w3.org/International/articles/language-tags/ class="link">W3C language tag</a></span>. It is preceded by a <code class="code">!</code>: <code class="code">!en-CA</code>.</p>
-</dd>
-</div>
-</dl>
-<p class="p">You can apply multiple attributes to a block:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">note:(*note.waterproof)(?basic)
-    Do not immerse you Basic model Widget in Water. Only higher
-    trim levels are waterproof.
-</code></pre>
-<p class="p">You can only apply one each of the <span class="phrase">id</span>, <span class="phrase">name</span>, and <span class="phrase"><a href=language.html class="link">language</a></span> <span class="phrase">attributes</span>, but you can apply as many condition attributes to a <span class="phrase">block</span> as you need.</p>
-<p class="p">Note that if you wish to add other forms of management domain metadata to your blocks you can do so using fields within the block. SAM's set of management domain annotations are just a convenience feature. You can add any management domain metadata you like using regular fields. As a semantic format, there is nothing in SAM that says that all of the content of blocks or fields has to appear in print. Blocks and fields can contain any kind of data or metadata you like. It is up to the publishing algorithms to decide which content to publish and which to use for management purposes.</p>
 </div>
 <div class="section">
 <h2 class="title">Inserts</h2>

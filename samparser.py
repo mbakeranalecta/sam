@@ -3553,7 +3553,7 @@ if __name__ == "__main__":
             raise SAMParserError("No input file(s) found.")
         return inputfiles
 
-    def write_output(input_file, default_output_extension, source_func):
+    def write_output(input_file, default_output_extension, source_func, mode="binary"):
         """
         Calculates the name of the output file using the input file name
         and the output file extension, then writes the output file by
@@ -3581,14 +3581,25 @@ if __name__ == "__main__":
         else:
             output_file = args.outfile
 
-        if output_file:
-            os.makedirs(os.path.dirname(output_file), exist_ok=True)
-            with open(output_file, "wb") as outf:
+        if mode=="binary":
+            if output_file:
+                os.makedirs(os.path.dirname(output_file), exist_ok=True)
+                with open(output_file, "wb") as outf:
+                    for i in source_func():
+                        outf.write(i)
+            else:
                 for i in source_func():
-                    outf.write(i)
+                    sys.stdout.buffer.write(i.decode("utf-8"))
         else:
-            for i in source_func():
-                sys.stdout.buffer.write(i.encode('utf-8'))
+            if output_file:
+                os.makedirs(os.path.dirname(output_file), exist_ok=True)
+                with open(output_file, "wt", encoding="utf-8") as outf:
+                    for i in source_func():
+                        outf.write(i)
+            else:
+                for i in source_func():
+                    sys.stdout.buffer.write(i)
+
         return output_file
 
 
@@ -3690,7 +3701,7 @@ if __name__ == "__main__":
             try:
                 samParser = SamParser()
                 samParser.parse_file(inputfile)
-                write_output(inputfile, '.sam', samParser.doc.regurgitate)
+                write_output(inputfile, '.sam', samParser.doc.regurgitate, mode='text')
             except SAMParserError as e:
                 sys.stderr.write('SAM parser ERROR: ' + str(e) + "\n")
                 parser_error_count += 1

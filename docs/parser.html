@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>SAM Parser</title>
+<meta charset = "UTF-8">
+<link rel="stylesheet" href="sam.css">
+</head>
+<body>
+<div class="article">
+<h1 class="title">SAM Parser</h1>
+
+<div class="menu">
+<p class="p"><span class="phrase"><a href=index.html class="link">Home</a></span> | <span class="phrase"><a href=quickstart.html class="link">Quickstart</a></span> | <span class="phrase"><a href=parser.html class="link">Parser</a></span> | <span class="phrase"><a href=language.html class="link">Language</a></span> | <span class="phrase"><a href=recipes.html class="link">Recipes</a></span> | <span class="phrase"><a href=https://github.com/mbakeranalecta/sam class="link">Github</a></span></p>
+</div>
+<p class="p">SAM Parser is an application to process SAM files into an equivalent XML representation which you can then further process in any desired form of output.</p>
+<p class="p">SAM Parser allows to specify an XSLT 1.0 stylesheet to post-process the output XML into a desired output format. In particular, it only allows for processing individual SAM files to individual output files. It does not support any kind of assembly or linking of multiple source files. This facility is not intended to meet all output needs, but it provides a simple way to create basic outputs.</p>
+<p class="p">SAM Parser is a Python 3 program that requires the regex and libxml libraries that are not distributed with the default Python distribution. If you don't already have a Python 3 install, the easiest way to get one with the required libraries installed is to install <span class="phrase"><a href=https://www.continuum.io/downloads class="link">Anaconda</a></span>.</p>
+<p class="p">SAM Parser is invoked as follows:</p>
+<pre class="codeblock" data-language="console"><code class="codeblock" data-language="console">samparser &lt;output_mode&gt; &lt;options&gt;
+</code></pre>
+<p class="p">Three output modes are available:</p>
+<ul class="ul">
+<li class="li">
+<p class="p"><code class="code">xml</code> outputs a version of the document in XML. You can use an XSD schema to validate the output file and/or an XSLT 1.0 stylesheet to transform it into another format.</p>
+</li>
+<li class="li">
+<p class="p"><code class="code">html</code> outputs a version of the document in HTML with embedded semantic markup. You can supply one of more CSS stylesheets and/or one or more JavaScrip files to include.</p>
+</li>
+<li class="li">
+<p class="p"><code class="code">regurgitate</code> outputs a version of the document in SAM with various references resolved and normalized.</p>
+</li>
+</ul>
+<p class="p">All output modes take the following options:</p>
+<ul class="ul">
+<li class="li">
+<p class="p"><code class="code">&lt;infile&gt;</code> The path the SAM file or files to be processed. (required)</p>
+</li>
+<li class="li">
+<p class="p"><code class="code">[-outfile &lt;output file&gt;]|[-outdir &lt;output directory&gt; [-outputextension &lt;output extension&gt;]]</code> Specifies either an output file or a directory to place output files and the file extension to apply those files. (optional, defaults to the console)</p>
+</li>
+<li class="li">
+<p class="p"><code class="code">-smartquotes &lt;smartquote_rules&gt;</code> The path to a file containing smartquote rules.</p>
+</li>
+<li class="li">
+<p class="p"><code class="code">-expandrelativepaths</code> Causes the parser to expand relative paths in SAM insert statements when serializing output. Use this if you want paths relative to the source file to be made portable</p>
+</li>
+</ul>
+<p class="p">in the output file.</p>
+<p class="p">XML output mode takes the following options:</p>
+<ul class="ul">
+<li class="li">
+<p class="p"><code class="code">[-xslt &lt;xslt-file&gt; [-transformedoutputfile &lt;transformed file&gt;]\[-transformedoutputdir &lt;tansformed ouput dir&gt; [-transformedextension &lt;transformed files extension]]</code> Specifies an XSL 1.0 stylesheet to use to transform the XML output into a final format, along with the file name or directory and extension to use for the transformed output.</p>
+</li>
+<li class="li">
+<p class="p"><code class="code">[-xsd &lt;XSD schema file&gt;]</code> Specifies an XSD schema file to use to validate the XML output file.</p>
+</li>
+</ul>
+<p class="p">HTML output mode takes the follow options:</p>
+<ul class="ul">
+<li class="li">
+<p class="p"><code class="code">-css &lt;css file location&gt;</code> Specifies the path to a CSS file to include in the HTML output file. (optional, repeatable)</p>
+</li>
+<li class="li">
+<p class="p"><code class="code">-javascipt &lt;javascript file location&gt;</code> Specifies the path to a JavaScript file to include in the HTML output file. (optional, repeatable)</p>
+</li>
+</ul>
+<p class="p">Regurgitate mode does not take any additional options.</p>
+<p class="p">Short forms of the options are available as follows</p>
+<table class="grid">
+<tr class="row">
+<td class="cell"><span class="phrase"><b class="bold">option</b></span></td>
+<td class="cell"><span class="phrase"><b class="bold">short form</b></span></td>
+</tr>
+<tr class="row">
+<td class="cell">-outfile</td>
+<td class="cell">-o</td>
+</tr>
+<tr class="row">
+<td class="cell">-outdir</td>
+<td class="cell">-od</td>
+</tr>
+<tr class="row">
+<td class="cell">-expandrelativepaths</td>
+<td class="cell">-xrp</td>
+</tr>
+<tr class="row">
+<td class="cell">-outputextension</td>
+<td class="cell">-oext</td>
+</tr>
+<tr class="row">
+<td class="cell">-smartquotes</td>
+<td class="cell">-sq</td>
+</tr>
+<tr class="row">
+<td class="cell">-xslt</td>
+<td class="cell">-x</td>
+</tr>
+<tr class="row">
+<td class="cell">-xsd</td>
+<td class="cell"></td>
+</tr>
+<tr class="row">
+<td class="cell">-transformedoutputfile</td>
+<td class="cell">-to</td>
+</tr>
+<tr class="row">
+<td class="cell">-transformedoutputdir</td>
+<td class="cell">-tod</td>
+</tr>
+<tr class="row">
+<td class="cell">-transformedextension</td>
+<td class="cell">-toext</td>
+</tr>
+<tr class="row">
+<td class="cell">-css</td>
+<td class="cell"></td>
+</tr>
+<tr class="row">
+<td class="cell">-javascript</td>
+<td class="cell"></td>
+</tr>
+</table>
+<div class="section">
+<h2 class="title">Validating with an XML schema</h2>
+
+<p class="p">Eventually, SAM is going to have its own schema language, but until that is available (and probably afterward) you can validate your document against an XML schema. Schema validation is done on the XML output format, not the input (because it is an XML schema, not a SAM schema). To invoke schema validation, use the <code class="code">-xsd</code> option on the command line:</p>
+<pre class="codeblock" data-language="console"><code class="codeblock" data-language="console">-xsd &lt;scehma.xsd&gt;
+</code></pre>
+</div>
+<div class="section">
+<h2 class="title">Expanding relative paths</h2>
+
+<p class="p">The SAM parser can expand relative paths of insert statements in the source document while serializing the output. This can be useful if the location of the output file is not the same relative to the included resources as the location of the source file. To tell the parser to expand relative paths into absolute URLs, use the <code class="code">-expandrelativepaths</code> option. The short form is <code class="code">-xrp</code>.</p>
+<pre class="codeblock" data-language="console"><code class="codeblock" data-language="console">- xrp
+</code></pre>
+<p class="p">Note that this applies to paths in SAM insert statements only. If you include paths in custom structures in your markup, they will not be expanded as the parser has no way of knowing that the value of a custom structure is a path.</p>
+</div>
+<div class="section">
+<h2 class="title">Regurgitating the SAM document</h2>
+
+<p class="p">The parser can also regurgitate the SAM document (that is, create a SAM serialization of the structure defined by the original SAM document). The regurgitated version may be different in small ways from the input document but will create the same structures internally and will serialize the same way as the original. Some of the difference are:</p>
+<ul class="ul">
+<li class="li">
+<p class="p">Character entities will be replaced by Unicode characters.</p>
+</li>
+<li class="li">
+<p class="p">Paragraphs will be all on one line</p>
+</li>
+<li class="li">
+<p class="p">Bold and italic decorations will be replaced with equivalent annotations.</p>
+</li>
+<li class="li">
+<p class="p">Some non-essential character escapes may be included.</p>
+</li>
+<li class="li">
+<p class="p">Annotation lookups will be performed and any <code class="code">!annotation-lookup</code> declaration will be removed.</p>
+</li>
+<li class="li">
+<p class="p">Smart quote processing will be performed and any <code class="code">!smart-quotes</code> declaration will be removed.</p>
+</li>
+</ul>
+<p class="p">To regurgitate, use the <code class="code">regurgitate</code> output mode.</p>
+</div>
+<div class="section">
+<h2 class="title">Smart quotes</h2>
+
+<p class="p">The parser incorporates a smart quotes feature. The writer can specify that they want smartquotes processing for their document by including the smartquotes declaration at the start of their document.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">!smart-quotes: on
+</code></pre>
+<p class="p">By default, the parser supports two values for the smart quotes declaration, <code class="code">on</code> and <code class="code">off</code> (the default). The built-in <code class="code">on</code> setting supports the following translations:</p>
+<ul class="ul">
+<li class="li">
+<p class="p">single quotes to curly quotes</p>
+</li>
+<li class="li">
+<p class="p">double quotes to curly double quotes</p>
+</li>
+<li class="li">
+<p class="p">single quotes as apostrophe to curly quotes</p>
+</li>
+<li class="li">
+<p class="p">&lt;space&gt;--&lt;space&gt; to en-dash</p>
+</li>
+<li class="li">
+<p class="p">--- to em-dash</p>
+</li>
+</ul>
+<p class="p">Note that no smart quote algorithm is perfect. This option will miss some instances and may get some wrong. To ensure you always get the characters you want, enter the unicode characters directly or use a character entity.</p>
+<p class="p">Smart quote processing is not applied to code phrases or to codeblocks or embedded markup.</p>
+<p class="p">Because different writers may want different smart quote rules, or different rules may be appropriate to different kinds of materials. the parser lets you specify your own sets of smart quote rules. Essentially this lets you detect any pattern in the text and define a substitution for it. You can use it for any characters substitutions that you find useful, even those having nothing to do with quotes.</p>
+<p class="p">To define a set of smart quote substitutions, create a XML file like the <code class="code">sq.xml</code> file included with the parser. This file includes two alternate sets of smart quote rules, <code class="code">justquotes</code> and <code class="code">justdashes</code>, which contains rulesets which process just quotes and just dashes respectively. The dashes and quotes rules in this file are the same as those built in to the parser. Note, however, that the parser does not use these files by default.</p>
+<p class="p">To invoke the <code class="code">justquotes</code> rule set:</p>
+<ol class="ol">
+<li class="li">
+<p class="p">Add the declaration <code class="code">!smart-quotes: justquotes</code> to the document.</p>
+</li>
+<li class="li">
+<p class="p">Use the command line parameter <code class="code">-sq &lt;path-to-sam-directory&gt;/sq.xml</code>.</p>
+</li>
+</ol>
+<p class="p">To add a custom rule set, create your own rule set file and invoke it in the same way.</p>
+<p class="p">Note that the rules in each rule set are represented by regular expressions. The rules detect characters based on their surroundings. They do not detect quotations by finding the opening and closing quotes as a pair. They find them separately. This means that the order of rules in the rule file may be important. In the default rules, close quote rules are listed first. Reversing the order might result in some close quotes being detected as open quotes.</p>
+</div>
+<div class="section">
+<h2 class="title">HTML Output Mode</h2>
+
+<p class="p">Normally SAM is serialized to XML which you can then process to produce HTML or any other output you want. However, the parser also supports outputting HTML directly. The attraction of this is that it allows you to have a semantically constrained input format that can be validated with a schema but which can still output to HTML5 directly.</p>
+<p class="p">SAM structures are output to HTML as follows:</p>
+<ul class="ul">
+<li class="li">
+<p class="p">Named blocks are output as HTML <code class="code">&lt;div&gt;</code> elements. The SAM block</p>
+</li>
+</ul>
+<p class="p">name is output as the <code class="code">class</code> attribute of the DIV elements, allowing you to attach specific CSS styling to each type of block.</p>
+<ul class="ul">
+<li class="li">
+<p class="p">Codeblocks are output as <code class="code">pre</code> elements with the language attribute output as a <code class="code">data-language</code></p>
+</li>
+</ul>
+<p class="p">and the <code class="code">class</code> as <code class="code">codeblock</code>. Code is wrapped in <code class="code">code</code> tags, also with <code class="code">class</code> as <code class="code">codeblock</code>.</p>
+<ul class="ul">
+<li class="li">
+<p class="p">Embedded data is ignored and a warning is issued.</p>
+</li>
+<li class="li">
+<p class="p">Paragraphs, ordered lists, and unordered lists are output as their HTML equivalents.</p>
+</li>
+<li class="li">
+<p class="p">Labelled lists are output as definition lists.</p>
+</li>
+<li class="li">
+<p class="p">Grids are output as tables.</p>
+</li>
+<li class="li">
+<p class="p">Record sets are output as tables with the field names as table headers.</p>
+</li>
+<li class="li">
+<p class="p">Inserts by URL become <code class="code">object</code> elements. String inserts are resolved if the named string is available.</p>
+</li>
+</ul>
+<p class="p">Inserts by ID are resolved by inserting the object with the specified ID. A warning will be raised and the insert will be ignored if you try to insert a block element with an inline insert or and inline element with a block insert. All other inserts are ignored and a warning is raised.</p>
+<ul class="ul">
+<li class="li">
+<p class="p">Phrases are output as spans with the <code class="code">class</code> attribute <code class="code">phrase</code>.</p>
+</li>
+<li class="li">
+<p class="p">Annotations are output as spans nested within the phrase spans they annotate. The specifically and</p>
+</li>
+</ul>
+<p class="p">namespace attributes of an annotation are output as <code class="code">data-*</code> attributes.</p>
+<ul class="ul">
+<li class="li">
+<p class="p">Attributes are output as HTML attributes. ID attributes are output as HTML <code class="code">id</code> attributes. Language-code</p>
+</li>
+</ul>
+<p class="p">attributes are ouput as HTML <code class="code">lang</code> attributes. Other attributes are output as HTML <code class="code">data-*</code> attributes.</p>
+<ul class="ul">
+<li class="li">
+<p class="p">An HTML <code class="code">head</code> element is generated which includes the <code class="code">title</code> elements if the root block of the</p>
+</li>
+</ul>
+<p class="p">SAM document has a title. It also includes <code class="code">&lt;meta charset = "UTF-8"&gt;</code>.</p>
+<p class="p">To generate HTML output, use the <code class="code">html</code> output mode the command line.</p>
+<p class="p">To specify a stylesheet to be imported by the resulting HTML file, use the <code class="code">-css</code> option with the URL of the css file to be included (relative to the location of the HTML file). You can specify the <code class="code">-css</code> option more than once.</p>
+<p class="p">To specify a javascript file to be imported by the resulting HTML file, use the <code class="code">-javascript</code> option with the URL of the javascript file to be included (relative to the location of the HTML file). You can specify the <code class="code">-javascript</code> option more than once.</p>
+</div>
+<div class="section">
+<h2 class="title">Running SAM Parser on Windows</h2>
+
+<p class="p">To run SAM Parser on Windows, use the <code class="code">samparser</code> batch file:</p>
+<pre class="codeblock" data-language="console"><code class="codeblock" data-language="console">samparser xml foo.sam -o foo.xml -x foo2html.xslt -to foo.html
+</code></pre>
+<!-- ## Running SAM Parser on Xnix and Mac -->
+<p class="p">To run SAM Parser on Xnix or Mac, invoke Python 3 as appropriate on your system. For example:</p>
+<pre class="codeblock" data-language="console"><code class="codeblock" data-language="console">python3 samparser.py xml foo.sam -o foo.xml -x foo2html.xslt -to foo.html
+
+
+
+</code></pre>
+</div>
+</div>
+</body>
+</html>

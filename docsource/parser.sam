@@ -32,6 +32,8 @@ article: SAM Parser
     * `<infile>` The path the SAM file or files to be processed. (required)
     * `[-outfile <output file>]|[-outdir <output directory> [-outputextension <output extension>]]` Specifies either an output file or a directory to place output files and the file extension to apply those files. (optional, defaults to the console)
     * `-smartquotes <smartquote_rules>` The path to a file containing smartquote rules.
+    * `-expandrelativepaths` Causes the parser to expand relative paths in SAM insert statements when serializing output. Use this if you want paths relative to the source file to be made portable 
+    in the output file. 
 
     XML output mode takes the following options:
 
@@ -48,18 +50,19 @@ article: SAM Parser
     Short forms of the options are available as follows
 
     +++
-        | *option* | *short form* |
-        | -outfile | -o |
-        | -outdir | -od |
-        |-outputextension|-oext|
-        |-smartquotes|-sq|
-        |-xslt|-x|
-        |-xsd||
-        |-transformedoutputfile|-to|
-        |-transformedoutputdir|-tod|
-        |-transformedextension|-toext|
-        |-css||
-        |-javascript||
+        *option*                   | *short form* 
+        -outfile                   | -o 
+        -outdir                    | -od 
+        -expandrelativepaths       | -xrp
+        -outputextension           |-oext
+        -smartquotes               |-sq
+        -xslt                      |-x
+        -xsd                       |
+        -transformedoutputfile     |-to
+        -transformedoutputdir      |-tod
+        -transformedextension      |-toext
+        -css                       |
+        -javascript                |
 
     section: Validating with an XML schema
 
