@@ -869,11 +869,11 @@ class Block(ABC):
                         yield ' data-copied-from-id="{1}"'.format(tag, escape_for_xml_attribute(attr_value)).encode('utf-8')
                     elif type(attr_value) is list:
                         yield ' {0}="'.format(tag).encode('utf-8')
-                        yield b','.join([escape_for_xml_attribute(x) for x in attr_value])
+                        yield ','.join([escape_for_xml_attribute(x) for x in attr_value]).encode('utf-8')
                         yield b'"'
                     else:
                         yield ' {0}="'.format(tag).encode('utf-8')
-                        yield escape_for_xml_attribute(attr_value)
+                        yield escape_for_xml_attribute(attr_value).encode('utf-8')
                         yield b'"'
             except AttributeError:
                 pass
@@ -918,11 +918,11 @@ class Block(ABC):
                 yield "</{0}>\n".format(self.block_type).encode('utf-8')
 
     def serialize_html(self, duplicate=False, variables=[]):
-        yield '<{0} class="{1}"'.format(self.html_tag, self.block_type)
+        yield '<{0} class="{1}"'.format(self.html_tag, self.block_type).encode('utf-8')
 
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
 
-        yield '>'
+        yield b'>'
 
         if not self.children and not self.content:
             SAM_parser_warning("Block with neither content not children detected. "
@@ -931,27 +931,27 @@ class Block(ABC):
 
         if self.citations:
             for x in self.citations:
-                yield '\n'
+                yield b'\n'
                 yield from x.serialize_html()
 
         if self.content:
             if self.children:
                 title_depth = len(list(x for x in self.ancestors_and_self() if x.content))
                 heading_level = title_depth if title_depth < 6 else 6
-                yield '\n<h{0} class="title">'.format(heading_level)
+                yield '\n<h{0} class="title">'.format(heading_level).encode('utf-8')
                 yield from self.content.serialize_html(duplicate, variables)
-                yield "</h{0}>\n".format(heading_level)
+                yield "</h{0}>\n".format(heading_level).encode('utf-8')
             else:
                 yield from self.content.serialize_html(duplicate, variables)
 
         if self.children:
             if type(self.children[0]) is not Flow:
-                yield "\n"
+                yield b"\n"
 
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html(duplicate, variables)
-        yield '</{0}>\n'.format(self.html_tag)
+        yield '</{0}>\n'.format(self.html_tag).encode('utf-8')
 
 class BlockInsert(Block):
     def __init__(self, indent, reference_parts, attributes={}, citations=[], namespace=None):
@@ -1007,7 +1007,7 @@ class BlockInsert(Block):
 
         for key, value in sorted(attributes.items()):
             yield ' {0}="'.format(key).encode('utf-8')
-            yield escape_for_xml_attribute(value)
+            yield escape_for_xml_attribute(value).encode('utf-8')
             yield b'"'
 
         if len(self.reference_parts) > 1:
@@ -1060,18 +1060,18 @@ class BlockInsert(Block):
                                        "They will be omitted. At: {0}".format(str(self).strip))
 
             else:
-                yield '<div class="insert"'
+                yield b'<div class="insert"'
                 if self.conditions:
-                    yield ' data-conditions="{0}"'.format(','.join(self.conditions))
+                    yield ' data-conditions="{0}"'.format(','.join(self.conditions)).encode('utf-8')
                 if self.ID:
-                    yield ' id="{0}"'.format(self.ID)
+                    yield ' id="{0}"'.format(self.ID).encode('utf-8')
                 if self.name:
-                    yield ' data-name="{0}"'.format(self.name)
+                    yield ' data-name="{0}"'.format(self.name).encode('utf-8')
                 if self.namespace is not None:
                     SAM_parser_warning("Namespaces are ignored in HTML output mode.")
                 if self.language_code:
-                    yield ' lang="{0}"'.format(self.language_code)
-                yield ">"
+                    yield ' lang="{0}"'.format(self.language_code).encode('utf-8')
+                yield b">"
                 if self.citations or self.children:
 
                     for cit in self.citations:
@@ -1082,7 +1082,7 @@ class BlockInsert(Block):
 
                 _, item_extension = os.path.splitext(reference_value)
                 if reference_method in known_insert_types and item_extension.lower() in known_file_types:
-                    yield '<object data="{0}"></object>'.format(reference_value)
+                    yield '<object data="{0}"></object>'.format(reference_value).encode('utf-8')
                 else:
                     if not reference_method in known_insert_types:
                         SAM_parser_warning('HTML output mode does not support the "{0}" insert type. '
@@ -1091,7 +1091,7 @@ class BlockInsert(Block):
                         SAM_parser_warning('HTML output mode does not support the "{0}" file type. '
                                            'They will be omitted.At: {1}'.format(item_extension, str(self).strip()))
 
-                yield '</div>\n'
+                yield b'</div>\n'
 
         else:
             SAM_parser_warning("HTML output mode does not support block inserts that use compound identifiers. "
@@ -1157,26 +1157,26 @@ class Codeblock(Block):
             yield b'/>'
 
     def serialize_html(self, duplicate=False, variables=[]):
-        yield '<pre class="codeblock"'
+        yield b'<pre class="codeblock"'
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
         if self.citations or self.children:
-            yield ">"
+            yield b">"
 
         if self.citations:
             for x in self.citations:
                 yield from x.serialize_html()
-                yield '\n'
+                yield b'\n'
         if self.children:
             if self.code_language:
-                yield '<code class="codeblock" data-language="{0}">'.format(self.code_language)
+                yield '<code class="codeblock" data-language="{0}">'.format(self.code_language).encode('utf-8')
             for x in self.children:
                 if x is not None:
                     yield from x.serialize_html(duplicate, variables)
             if self.code_language:
-                yield '</code>'
-            yield "</pre>\n"
+                yield b'</code>'
+            yield b"</pre>\n"
         else:
-            yield '/>\n'
+            yield b'/>\n'
 
 
 class Embedblock(Block):
@@ -1467,25 +1467,25 @@ class Record(Block):
 
     def serialize_html(self, duplicate=False, variables=[]):
         if not self.preceding_sibling():
-            yield '<thead class="recordset-header">\n<tr class="recordset-header-row">\n'
+            yield b'<thead class="recordset-header">\n<tr class="recordset-header-row">\n'
             for fn in self.parent.field_names:
-                yield '<th class ="recordset-field" data-field-name="{0}"></th >\n'.format(fn)
-            yield '</tr>\n</thead>\n<tbody class="recordset-body">\n'
+                yield '<th class ="recordset-field" data-field-name="{0}"></th >\n'.format(fn).encode('utf-8')
+            yield b'</tr>\n</thead>\n<tbody class="recordset-body">\n'
 
         record = list(zip(self.parent.field_names, self.field_values))
-        yield '<tr class="record"'
+        yield b'<tr class="record"'
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
-        yield ">\n"
+        yield b">\n"
 
         if record:
             for name, value in zip(self.parent.field_names, self.field_values):
-                yield '<td class="record-field" data-field-name="{0}">'.format(name)
+                yield '<td class="record-field" data-field-name="{0}">'.format(name).encode('utf-8')
                 yield from value.serialize_html()
-                yield "</td>\n"
-        yield "</tr>\n"
+                yield b"</td>\n"
+        yield b"</tr>\n"
 
         if not self.following_sibling():
-            yield "</tbody>\n"
+            yield b"</tbody>\n"
 
 
 class List(Block):
@@ -1644,17 +1644,17 @@ class LabeledListItem(ListItem):
 
 
     def serialize_html(self, duplicate=False, variables=[]):
-        yield '<div class="ll.li"'
+        yield b'<div class="ll.li"'
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
-        yield '>\n'
-        yield '<dt class="ll.li.label">'
+        yield b'>\n'
+        yield b'<dt class="ll.li.label">'
         yield from self.label.serialize_html()
-        yield '</dt>\n<dd class="ll.li.item">'
+        yield b'</dt>\n<dd class="ll.li.item">'
         for x in self.children:
             if x is not None:
                 yield from x.serialize_html(duplicate, variables)
-        yield "</dd>\n"
-        yield "</div>\n"
+        yield b"</dd>\n"
+        yield b"</div>\n"
 
 
 class LabeledList(List):
@@ -1745,7 +1745,7 @@ class Comment(Block):
         yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-')).encode('utf-8')
 
     def serialize_html(self, duplicate=False, variables=[]):
-        yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-'))
+        yield '<!-- {0} -->\n'.format(self.content.replace('--', '-\-')).encode('utf-8')
 
 
 class VariableDef(Block):
@@ -1764,9 +1764,9 @@ class VariableDef(Block):
         yield b"</variable>\n"
 
     def serialize_html(self, duplicate=False, variables=[]):
-        yield '<div class="variable" data-name="{0}" hidden>'.format(self.block_type, self.content)
+        yield '<div class="variable" data-name="{0}" hidden>'.format(self.block_type, self.content).encode('utf-8')
         yield from self.content.serialize_html()
-        yield "</div>\n"
+        yield b"</div>\n"
 
 class Root(Block):
     def __init__(self, doc):
@@ -1787,7 +1787,7 @@ class Root(Block):
             yield from x.serialize_xml()
 
     def serialize_html(self, duplicate=False, variables=[]):
-        yield '<!DOCTYPE html>\n'
+        yield b'<!DOCTYPE html>\n'
         try:
             title = [x.content for x in self.children if type(x) is Block][0]
         except IndexError:
@@ -1796,23 +1796,23 @@ class Root(Block):
             lang = [x.language_code for x in self.children if x.language_code is not None][0]
         except IndexError:
             lang=None
-        yield '<html'
+        yield b'<html'
         if lang:
-            yield ' lang="{}"'.format(lang)
-        yield '>\n<head>\n'
+            yield ' lang="{}"'.format(lang).encode('utf-8')
+        yield b'>\n<head>\n'
         if title:
-            yield '<title>{0}</title>\n'.format(title)
-        yield '<meta charset = "UTF-8">\n'
+            yield '<title>{0}</title>\n'.format(title).encode('utf-8')
+        yield b'<meta charset = "UTF-8">\n'
         if self.parent.css:
             for c in self.parent.css:
-                yield '<link rel="stylesheet" href="{0}">\n'.format(c)
+                yield '<link rel="stylesheet" href="{0}">\n'.format(c).encode('utf-8')
         if self.parent.javascript:
             for j in self.parent.javascript:
-                yield '<script src="js/all.min.js"></script>\n'.format(j)
-        yield '</head>\n<body>\n'
+                yield '<script src="js/all.min.js"></script>\n'.format(j).encode('utf-8')
+        yield b'</head>\n<body>\n'
         for x in self.children:
             yield from x.serialize_html(duplicate, variables)
-        yield '</body>\n</html>'
+        yield b'</body>\n</html>'
 
     def _add_child(self, b):
         # This is a test to catch the creation of a second root-level block.
@@ -2008,14 +2008,14 @@ class Flow():
     def serialize_xml(self):
         for x in self.children:
             if type(x) is str:
-                yield escape_for_xml(x)
+                yield escape_for_xml(x).encode('utf-8')
             else:
                 yield from x.serialize_xml()
 
     def serialize_html(self, duplicate=False, variables=[]):
         for x in self.children:
             if type(x) is str:
-                yield escape_for_xml(x)
+                yield escape_for_xml(x).encode('utf-8')
             else:
                 yield from x.serialize_html(duplicate, variables)
 
@@ -2080,11 +2080,11 @@ class Pre(Flow):
 
     def serialize_xml(self):
         for x in self.lines:
-            yield escape_for_xml(x)
+            yield escape_for_xml(x).encode('utf-8')
 
     def serialize_html(self, duplicate=False, variables=[]):
         for x in self.lines:
-            yield escape_for_xml(x)
+            yield escape_for_xml(x).encode('utf-8')
 
 class DocStructure:
     """
@@ -2786,15 +2786,15 @@ class Span(ABC):
                 if attr_value:
                     if duplicate and attr_name == "ID":
                         yield b' data-copied-from-ID="'
-                        yield escape_for_xml_attribute(attr_value)
+                        yield escape_for_xml_attribute(attr_value).encode('utf-8')
                         yield b'"'
                     elif type(attr_value) is list:
                         yield ' {0}="'.format(tag).encode('utf-8')
-                        yield b','.join([escape_for_xml_attribute(x) for x in attr_value])
+                        yield ','.join([escape_for_xml_attribute(x) for x in attr_value]).encode('utf-8')
                         yield b'"'
                     else:
                         yield ' {0}="'.format(tag).encode('utf-8')
-                        yield escape_for_xml_attribute(attr_value)
+                        yield escape_for_xml_attribute(attr_value).encode('utf-8')
                         yield b'"'
             except AttributeError:
                 pass
@@ -2835,15 +2835,15 @@ class Phrase(Span):
             ann, *rest = self.annotations
             yield from ann.serialize_xml(rest, escape_for_xml(self.text))
         else:
-            yield escape_for_xml(self.text)
+            yield escape_for_xml(self.text).encode('utf-8')
         for i in self.citations:
             yield from i.serialize_xml()
         yield b'</phrase>'
 
     def serialize_html(self, duplicate=False, variables=[]):
-        yield '<span class="phrase"'
+        yield b'<span class="phrase"'
         yield from self._serialize_attributes(self._attribute_serialization_html, duplicate)
-        yield '>'
+        yield b'>'
 
         link_made = False
         for cit in self.citations:
@@ -2853,7 +2853,7 @@ class Phrase(Span):
                                        'Only the first ID was made into a link. At: {0}'.format(str(self).strip()))
                 else:
                     link_made = True
-                    yield '<a href="#{0}">'.format(cit.reference_parts[0][1])
+                    yield '<a href="#{0}">'.format(cit.reference_parts[0][1]).encode('utf-8')
             else:
                 yield from cit.serialize_html()
 
@@ -2862,10 +2862,10 @@ class Phrase(Span):
             ann, *rest = self.annotations
             yield from ann.serialize_html(rest, escape_for_xml(self.text))
         else:
-            yield escape_for_xml(self.text)
+            yield escape_for_xml(self.text).encode('utf-8')
         if link_made:
-            yield '</a>'
-        yield '</span>'
+            yield b'</a>'
+        yield b'</span>'
 
 
     def append(self, thing):
@@ -2925,14 +2925,14 @@ class Code(Phrase):
         yield b'<code'
         yield from self._serialize_attributes(self.attribute_serialization_xml)
         yield b'>'
-        yield escape_for_xml(self.text)
+        yield escape_for_xml(self.text).encode('utf-8')
         yield b'</code>'
 
     def serialize_html(self, duplicate=False, variables=[]):
         yield b'<code class="code"'
         yield from self._serialize_attributes(self.attribute_serialization_html)
         yield b'>'
-        yield escape_for_xml(self.text)
+        yield escape_for_xml(self.text).encode('utf-8')
         yield b'</code>'
 
     def append(self, thing):
@@ -2947,14 +2947,14 @@ class Embed(Code):
         yield b'<embed'
         yield from self._serialize_attributes(self.attribute_serialization_xml)
         yield b'>'
-        yield escape_for_xml(self.text)
+        yield escape_for_xml(self.text).encode('utf-8')
         yield b'</embed>'
 
     def serialize_html(self, duplicate=False, variables=[]):
         yield b'<span class="embed" hidden'
         yield from self._serialize_attributes(self.attribute_serialization_html)
         yield b'>'
-        yield escape_for_xml(self.text)
+        yield escape_for_xml(self.text).encode('utf-8')
         yield b'</span>'
 
 class FlowSource:
@@ -3010,7 +3010,7 @@ class Annotation:
             yield ' type="{0}"'.format(self.type).encode('utf-8')
         if self.specifically:
             yield b' specifically="'
-            yield escape_for_xml_attribute(self.specifically)
+            yield escape_for_xml_attribute(self.specifically).encode('utf-8')
             yield b'"'
         if self.namespace:
             yield ' namespace="{0}"'.format(self.namespace).encode('utf-8')
@@ -3023,7 +3023,7 @@ class Annotation:
             yield b'</annotation>'
         elif payload:
             yield b'>'
-            yield payload
+            yield payload.encode('utf-8')
             yield b'</annotation>'
         else:
             yield b'/>'
@@ -3036,31 +3036,31 @@ class Annotation:
                 anns, *rest = annotations
                 yield from anns.serialize_html(rest, payload)
             elif payload:
-                yield payload
+                yield payload.encode('utf-8')
 
         if self.type == 'link':
-            yield '<a href={0} class="link">'.format(escape_for_xml_attribute(self.specifically))
+            yield '<a href={0} class="link">'.format(escape_for_xml_attribute(self.specifically)).encode('utf-8')
             yield from recurse()
-            yield '</a>'
+            yield b'</a>'
         elif self.type == 'bold' :
-            yield '<b class="bold">'.format(escape_for_xml_attribute(self.specifically))
+            yield '<b class="bold">'.format(escape_for_xml_attribute(self.specifically)).encode('utf-8')
             yield from recurse()
-            yield '</b>'
+            yield b'</b>'
         elif self.type == 'italic':
-            yield '<i class="italic">'.format(escape_for_xml_attribute(self.specifically))
+            yield '<i class="italic">'.format(escape_for_xml_attribute(self.specifically)).encode('utf-8')
             yield from recurse()
-            yield '</i>'
+            yield b'</i>'
         else:
-            yield '<span'
+            yield b'<span'
             if self.type:
-                yield ' class="annotation" data-annotation-type="{0}"'.format(self.type)
+                yield ' class="annotation" data-annotation-type="{0}"'.format(self.type).encode('utf-8')
             if self.specifically:
-                yield ' data-specifically="{0}"'.format(escape_for_xml_attribute(self.specifically))
+                yield ' data-specifically="{0}"'.format(escape_for_xml_attribute(self.specifically)).encode('utf-8')
             if self.namespace:
-                yield ' data-namespace="{0}"'.format(self.namespace)
-            yield '>'
+                yield ' data-namespace="{0}"'.format(self.namespace).encode('utf-8')
+            yield b'>'
             yield from recurse()
-            yield '</span>'
+            yield b'</span>'
 
     def append(self, thing):
         if not self.child:
@@ -3100,26 +3100,26 @@ class Citation(Span):
             yield b'><reference-elements>'
             for method, value in self.reference_parts:
                 yield '<reference-element method="{0}" value="'.format(method).encode('utf-8')
-                yield escape_for_xml(value)
+                yield escape_for_xml(value).encode('utf-8')
                 yield b'"/>'
             yield b'</reference-elements>'
             if self.reference_extra:
                 has_children = True
-                yield escape_for_xml(self.reference_extra)
+                yield escape_for_xml(self.reference_extra).encode('utf-8')
 
         if len(self.reference_parts) == 1:
             if self.reference_parts[0][0] != 'value':
                 yield ' {0}="'.format(self.reference_parts[0][0]).encode('utf-8')
-                yield escape_for_xml_attribute(self.reference_parts[0][1])
+                yield escape_for_xml_attribute(self.reference_parts[0][1]).encode('utf-8')
                 yield b'"'
                 if self.reference_extra:
                     has_children = True
                     yield b'>'
-                    yield escape_for_xml(self.reference_extra)
+                    yield escape_for_xml(self.reference_extra).encode('utf-8')
             else:
                 has_children = True
                 yield b'>'
-                yield escape_for_xml(self.reference_parts[0][1])
+                yield escape_for_xml(self.reference_parts[0][1]).encode('utf-8')
 
         if has_children:
             yield b'</citation>'
@@ -3132,7 +3132,7 @@ class Citation(Span):
             citation_method, citation_value = self.reference_parts[0]
 
             if citation_method == 'value':
-                yield '<cite>{0}</cite>'.format(citation_value)
+                yield '<cite>{0}</cite>'.format(citation_value).encode('utf-8')
             else:
                 SAM_parser_warning("HTML output mode does not support citations by reference except for citations "
                                    "by ID that are attached to a phrase. "
@@ -3209,14 +3209,14 @@ class InlineInsert(Span):
 
         for key, value in sorted(attributes.items()):
             yield ' {0}="'.format(key).encode('utf-8')
-            yield escape_for_xml_attribute(value)
+            yield escape_for_xml_attribute(value).encode('utf-8')
             yield b'"'
 
         if len(self.reference_parts) > 1:
             yield b'><reference-elements>'
             for method, value in self.reference_parts:
                 yield '<reference-element method="{0}" '.format(method).encode('utf-8')
-                yield escape_for_xml(value)
+                yield escape_for_xml(value).encode('utf-8')
                 yield b'"/>'
             yield b'</reference-elements>'
 
@@ -3262,21 +3262,21 @@ class InlineInsert(Span):
                                        "They will be omitted. At: {0}".format(self))
 
             else:
-                yield '<span class="insert"'
+                yield b'<span class="insert"'
                 if self.conditions:
-                    yield ' data-conditions="{0}"'.format(','.join(self.conditions))
+                    yield ' data-conditions="{0}"'.format(','.join(self.conditions)).encode('utf-8')
                 if self.ID:
                     if duplicate:
-                        yield ' data-copied-from-id="{0}"'.format(self.ID)
+                        yield ' data-copied-from-id="{0}"'.format(self.ID).encode('utf-8')
                     else:
-                        yield ' id="{0}"'.format(self.ID)
+                        yield ' id="{0}"'.format(self.ID).encode('utf-8')
                 if self.name:
-                    yield ' data-name="{0}"'.format(self.name)
+                    yield ' data-name="{0}"'.format(self.name).encode('utf-8')
                 if self.namespace is not None:
                     SAM_parser_warning("Namespaces are ignored in HTML output mode.")
                 if self.language_code:
-                    yield ' lang="{0}"'.format(self.language_code)
-                yield ">"
+                    yield ' lang="{0}"'.format(self.language_code).encode('utf-8')
+                yield b">"
                 if self.citations:
 
                     for cit in self.citations:
@@ -3284,7 +3284,7 @@ class InlineInsert(Span):
 
                 _, item_extension = os.path.splitext(reference_value)
                 if reference_method in known_insert_types and item_extension.lower() in known_file_types:
-                    yield '<object data="{0}"></object>'.format(reference_value)
+                    yield '<object data="{0}"></object>'.format(reference_value).encode('utf-8')
                 else:
                     if not reference_method in known_insert_types:
                         SAM_parser_warning('HTML output mode does not support the "{0}" insert type. '
@@ -3293,7 +3293,7 @@ class InlineInsert(Span):
                         SAM_parser_warning('HTML output mode does not support the "{0}" file type. '
                                            'They will be omitted.'.format(item_extension))
 
-                yield '</span>\n'
+                yield b'</span>\n'
 
         else:
             SAM_parser_warning("HTML output mode does not support inline inserts that use compound identifiers. "
@@ -3446,16 +3446,16 @@ def escape_for_sam_code(s):
 def escape_for_xml(s):
     t = dict(zip([ord('<'), ord('>'), ord('&')], ['&lt;', '&gt;', '&amp;']))
     try:
-        return s.translate(t).encode('utf-8')
+        return s.translate(t)
     except AttributeError:
-        return s.encode('utf-8')
+        return s
 
 def escape_for_xml_attribute(s):
     t = dict(zip([ord('<'), ord('>'), ord('&'), ord('"')], ['&lt;', '&gt;', '&amp;', '&quot;']))
     try:
-        return s.translate(t).encode('utf-8')
+        return s.translate(t)
     except AttributeError:
-        return s.encode('utf-8')
+        return s
 
 
 def multi_replace(string, subs):

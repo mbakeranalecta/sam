@@ -14,7 +14,7 @@ article: SAM Parser
     SAM Parser is a Python 3 program that requires the regex and libxml libraries that are not
     distributed with the default Python distribution. If you don't already have a Python 3 install,
     the easiest way to get one with the required libraries installed is to install
-    [Anaconda](https://www.continuum.io/downloads).
+    {Anaconda}(https://www.continuum.io/downloads).
 
     SAM Parser is invoked as follows:
 
