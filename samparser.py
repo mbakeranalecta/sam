@@ -191,19 +191,6 @@ def get_idrefs(this):
             result.extend(x.idrefs)
     return result
 
-# def get_full_resource_url(resource_url, source_url):
-#     if bool(urllib.parse.urlparse(resource_url).netloc):  # An absolute URL
-#         fullhref = resource_url
-#     elif os.path.isabs(resource_url):  # An absolute file path
-#         fullhref = pathlib.Path(resource_url).as_uri()
-#     elif resource_url.strip == '':
-#         raise SAMParserFileError ("No resource URL specified.")
-#     elif source_url.strip == '':
-#         raise SAMParserFileError ("Source file URL not known. Can't resolve relative resource URL. ")
-#     else:
-#         fullhref = urllib.parse.urljoin(source_url, resource_url)
-#     return fullhref
-
 def get_object_with_id(this, ID):
     """
     Gets the first object in the document structure with the id matching the ID parameter.
@@ -225,7 +212,6 @@ included_files = []
 
 class SamParser:
     def __init__(self):
-
         self.stateMachine = StateMachine()
         self.stateMachine.add_state("SAM", self._sam)
         self.stateMachine.add_state("BLOCK", self._block)
@@ -253,9 +239,7 @@ class SamParser:
         self.doc = None
         self.source = None
         self.source_url = None
-        self.expand_relative_paths = False
         self.flow_parser = FlowParser()
-
 
     def parse(self, source):
         self.source = StringSource(source)
@@ -266,7 +250,7 @@ class SamParser:
                 self.source_url = pathlib.Path(os.path.abspath(source.name)).as_uri()
             except AttributeError:
                 self.source_url = None
-        self.doc = DocStructure(self.source_url, self.expand_relative_paths)
+        self.doc = DocStructure(self.source_url)
         try:
             self.stateMachine.run((self.source, None))
         except SAMParserStructureError as err:
@@ -2111,9 +2095,14 @@ class DocStructure:
     
     The document structure object is a tree of objects starting with a Root object. 
     Each part of the SAM concrete syntax, such as Grids, RecordSets, and Lines has
-    its own object type. Names blocks are represented by a generic Block object. 
+    its own object type. Names blocks are represented by a generic Block object.
+
+    :param expand_relative_paths: Tells the parser to expand relative paths when serializing the document. Note
+    that this must be set before calling the parse() method. Changing it after the parse method is called will
+    not effect the serialization.
+
     """
-    def __init__(self, source_url, expand_relative_paths = False):
+    def __init__(self, source_url, ):
         self.source_url = source_url
         self.root = Root(self)
         self.current_block = self.root
@@ -2127,7 +2116,7 @@ class DocStructure:
         self.javascript = None
         self._xml_serialization = None
         self._etree = None
-        self.expand_relative_paths = expand_relative_paths
+        self.expand_relative_paths = False
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -3554,7 +3543,7 @@ if __name__ == "__main__":
 
     transformed = None
     parser_error_count = 0
-    xml_error_count = 0
+    xsd_error_count = 0
     xslt_error_count = 0
     samParser = SamParser()
 
@@ -3604,7 +3593,7 @@ if __name__ == "__main__":
 
 
     def xml_output():
-        global xml_error_count, parser_error_count, xslt_error_count
+        global xsd_error_count, parser_error_count, xslt_error_count
 
         for inputfile in get_input_list():
 
@@ -3618,8 +3607,8 @@ if __name__ == "__main__":
                     try:
                         xmlschema.assertValid(samParser.doc.etree)
                     except etree.DocumentInvalid as e:
-                        print('XML SCHEMA ERROR {0} in {1}'.format(str(e), outputfile), file=sys.stderr)
-                        xml_error_count += 1
+                        print('XSD SCHEMA ERROR {0} in {1}'.format(str(e), outputfile), file=sys.stderr)
+                        xsd_error_count += 1
                     else:
                         SAM_parser_info("Validation successful.")
 
@@ -3636,7 +3625,7 @@ if __name__ == "__main__":
                     try:
                         transformer = etree.XSLT(etree.parse(args.xslt))
                         try:
-                            if samParser.expand_relative_paths:
+                            if samParser.doc.expand_relative_paths:
                                 # We can use the internal tree because all paths have been expanded.
                                 transformed = transformer(samParser.doc.etree)
                             else: # May be local paths so have to parse from disk.
@@ -3769,16 +3758,16 @@ if __name__ == "__main__":
 
     args.func()
 
-    error_count_total = parser_error_count + xml_error_count + xslt_error_count
+    error_count_total = parser_error_count + xsd_error_count + xslt_error_count
     if error_count_total == 0:
         print ("Process completed with 0 errors.", file=sys.stderr)
         sys.exit(0)
     else:
         print('Process completed with {0} errors.\n'
-              '{1} SAM parser errors.\n{2} XSL schema errors.\n{3} XSLT Errors.'.format(error_count_total,
-                                                                                     parser_error_count,
-                                                                                     xml_error_count,
-                                                                                     xslt_error_count
-                                                                                     ), file=sys.stderr)
+              '{1} SAM parser errors.\n{2} XSD schema errors.\n{3} XSLT Errors.'.format(error_count_total,
+                                                                                        parser_error_count,
+                                                                                        xsd_error_count,
+                                                                                        xslt_error_count
+                                                                                        ), file=sys.stderr)
         if error_count_total > 0:
             sys.exit(1)
