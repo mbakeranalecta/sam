@@ -6,7 +6,7 @@ article: SAM Quick Start
 
     To make it easier to write, SAM provides a set of common text structures, such as paragraphs and lists, that are shared by all SAM document types. These common structures deliberately basic. There are other document structures you will probably need that you will have to design for your self using SAM's generic structures: blocks and annotations. See the {SAM Recipes} document for some suggestions on how to create some commonly used document structures.
 
-    SAM is designed for structured writing. That is, writing that obeys a specific defined structure that tells you what goes into a document and how it is expressed. A structured document isn't designed to be read directly by the reader. It must be processed with algorithms to produce readable output. But it also supports using algorithms to perform many other functions, such as guiding the writer, validating the content, linking the content, managing the content, creating new forms of content, or publishing the content to different media and for different purposes. 
+    SAM is designed for structured writing. That is, writing that obeys a specific defined structure that tells you what goes into a document and how it is expressed. A structured document isn't designed to be read directly by the reader. It must be processed with algorithms to produce readable output. But it also supports using algorithms to perform many other functions, such as guiding the writer, validating the content, linking the content, managing the content, creating new forms of content, or publishing the content to different media and for different purposes. (In this document I refer to such algorithms collectively as "the application layer".)
 
     To enable all these algorithms, the writers must obey the structure of the markup language and must embed certain items of metadata into the content for the algorithms to work with. To do this easily and effectively, the writer must be able to clearly see the structure as they are writing. That is {not the case with XML}(https://everypageispageone.com/2016/01/28/why-does-xml-suck/), whether you write it in a plain text editor or in a sophisticated XML editor that make it look like a Word document. Verbose XML tags obscure structure and Word-like interfaces hide structure behind an approximation of final formatting. SAM is designed to make the structure of structured documents clear and explicit to the writer, while also making them simple and straightforward to type. 
 
@@ -250,35 +250,50 @@ article: SAM Quick Start
 
         ```(sam)
             {Clint Eastwood}(actor)(director) stared in and directed {Gran Torino}(movie).
-
-        You can also chain {annotations} and {citations}.
         
     section: Annotation lookup
         You do not have to repeat the full annotation of a phrase that occurs multiple times in a document. If you have already annotated a phrase once in a document, you can simply mark it as a phrase (by wrapping it in curly braces) and the parser will look back through the document for the last time that phrase was annotated and copy the most recent annotation to the current phrase. In no annotation of that phrase is found, the parser will raise a warning. This is informational only, it is not an error to have an unannotated phrase.  
 
     section: Links
-        Links are a form of annotation. As a meta-language, SAM does not support links itself. It is up to you to decide if your markup language includes support for links or not. However, SAM does reserve the annotation type `link` for creating links if you want them, and has a shortcut for creating links, which looks like this: `{Cobb Salad}(http://allrecipes.com/recipe/14415/cobb-salad/)`. That is, if the first thing in the annotation is recognized as a URL, it is assumed to be a link annotation pointing to that URL. 
-
-    section: Decorations
-        A decoration is a shortcut for entering common types of format related annotation in a paragraph. SAM supports two decorations, for bold, italic. Bold text is contained between asterisks: 
+        Links are a form of annotation. As a meta-language, SAM does not support links itself. It is up to you to decide if your markup language includes support for links or not. However, SAM does reserve the annotation type `link` for creating links, and has a shortcut for creating links, which looks like this: 
 
         ```(sam)
-            This text *is in bold* type.
+            {Cobb Salad}(http://allrecipes.com/recipe/14415/cobb-salad/)
 
-        This is equivalent to:
+        That is, if the first thing in the annotation is recognized as a URL, it is assumed to be a link annotation pointing to that URL. This the example above is equivalent to:
+
+        ```(sam)
+
+            {Cobb Salad}(link "http://allrecipes.com/recipe/14415/cobb-salad/") 
+
+    section: Bold and Italic
+
+        You can indicate bold and italic text with annotations, like this:
 
         ```(sam)
             This text {is in bold}(bold) type.
 
-        Italic text is contained between underscores:
+            This text {is in italic}(italic) type.
+
+        However, SAM provides shortcuts for bold and italic, as follows:
 
         ```(sam)
+            This text *is in bold* type.
+
             This text _is in italic_ type.
 
-        This is equivalent to:
+        These forms are equivalent, but notice that the shortcut forms don't support the other annotation attributes and that you cannot chain other annotations with the shortcuts. Thus if you wanted to annotate a book title as both italic and a title, you would have to do it like this:
 
         ```(sam)
-            This text {is in italic}(italic) type.
+            {Moby Dick}(italic)(book-title) is a long book. 
+
+        (But note that you should not actually mark up book titles like this as the fact that the phrase is marked up as a book-title is enough to tell the formatting algorithm to format it in italic.)
+
+        Also note that the bold and italic shortcuts cannot be nested. If you want to mark some text as both bold and italic, you have to use regular annotations:
+
+        ```(sam)
+            This information is _really_, *really*, {really}(bold)(italic) important.
+
 
     section: Attributes
         SAM does not have a general attribute mechanism like XML. XML attributes are one of the things that make it hard to write in, even in a structured editor. However, SAM does provide some basic attributes that are commonly needed for content management purposes. 
@@ -299,7 +314,7 @@ article: SAM Quick Start
 
         |Name| A name also identifies a block or field but it has wider scope. Names are used when you want to identify something across a set of documents. SAM does not check that names are unique across a set of documents (it has no way of knowing what that set might be). Resolution of names is up to the processing software. A name is preceded by a `#` symbol: `#my-name`. 
 
-        |Condition| Specifying a condition token is a way of telling the publishing software to include this block only when a certain condition is true. How the publishing software determines if a condition is true is entirely up to the application layer. A condition attribute is preceded by a `?`. 
+        |Condition| Specifying a condition token is a way of telling the publishing software to include this block only when a certain condition is true. How the publishing software determines if a condition is true is entirely up to the application layer. A condition attribute is preceded by a `?`: `?my-condition`. 
 
         |Language| You can specify the language of a block using a language attribute. The language attribute should a {W3C language tag}(https://www.w3.org/International/articles/language-tags/). It is preceded by a `!`: `!en-CA`. 
 
@@ -316,11 +331,11 @@ article: SAM Quick Start
 
 
     section: Citations
-        Citations are used in cases where you want to refer to another resource. The expectation is that on output the citation markup will be replaced by text that creates a reference to that resource. (Note that this is different from an annotation which might lead to a link being created on a phrase, but will not change the content of the phrase.
+        Citations are used to refer to another resource. The expectation is that on output the citation markup will be replaced by text that creates a reference to that resource. (Note that this is different from an annotation which might lead to a link being created on a phrase, but will not change the content of the phrase.)
         
         Citations come in two forms. Citations of internal names/ids, and citations of external resources. Citations can be applied to:
 
-        * a point in a flow
+        * an arbitrary point in a paragraph
 
         * a phrase
 
@@ -352,7 +367,7 @@ article: SAM Quick Start
         The advantage of applying the citation to a phrase is that it allows
         you to turn the citation into a link in online content.
 
-        This assumes that there is a bibliographic entry with the named `MobyDick` somewhere in your content set. 
+        This example is using a name citation as a means of referencing a bibliographical entry that could be used by a publishing algorithm to build a citation in the desired format on output. This assumes that there is a bibliographic entry with the named `MobyDick` somewhere in your content set. 
 
         To cite an external work without referring to another resource in your content set, use a standard reference syntax. 
 
@@ -364,6 +379,8 @@ article: SAM Quick Start
 
         The application layer is responsible for all processing of references. Since the syntax does not make any distinction between the types of references being made (`*foo` could be the name of any block, such as a graphic, a footnote, or a bibliographic entry) the presumed semantics of a tagging language that uses citations is that the treatment of the citation is based on the type of object that the citation references, not the type of the citation. Thus in the example above, `[*whale]` is a figure reference because the block with the ID `*whale` is a figure and `[*moby]` is a footnote reference because the block with the ID `*moby` is a footnote.
 
+        You can chain {citations} the same way you chain {annotations} and you can also chain citations and annotations together.
+
 
     section: Record sets
 
@@ -373,9 +390,10 @@ article: SAM Quick Start
         table, but it could also be presented in other ways or queried like a
         database table.
 
-        A record set consists of a block containing records. A record is a
-        set of fields. Each record in a record set has the same set of fields of
-        the same type, like a record in a database table. In the recipe example, the ingredients are specified using a record set, with each ingredient forming a record.
+        A record set consists of records, one per line. A record is a
+        set of field values separated by commas. Each record in a record set has the 
+        same set of fields of the same type, like a record in a database table. The names of 
+        the fields are specified in the record set header. In the recipe example, the ingredients are specified using a record set, with each ingredient forming a record.
 
         ```(sam)
             ingredients:: ingredient, quantity
@@ -411,7 +429,8 @@ article: SAM Quick Start
                     cell: water
                     cell: 2qt
 
-        However, here the semantics of the content has been lost.
+        However, here the semantics of the content has been lost. Record sets exist to 
+        allow you to retain and express the semantics of tabular data. 
 
     section: Grids
 
@@ -447,7 +466,7 @@ article: SAM Quick Start
         There are no advanced table features like table heads or row and column spanning in grids. SAM is intended for semantic authoring rather than complex layout effects. For suggestions on how to handle complex tables in SAM, see the {SAM Recipes} document. 
 
     section: Code Blocks
-        A code block is a piece of computer code or perhaps the text of a terminal display. Code blocks are usually presented literally as written, often in a fixed space font and with line breaks in the same place as in the source. Most code blocks are in a specific programming or data structure language which the processing routine may need to know to do things like color coding the syntax. In SAM, a codeblock is introduced with three back ticks. (```````). 
+        A code block is a piece of computer code or perhaps the text of a terminal display. Code blocks are usually presented literally as written, often in a fixed space font and with line breaks in the same place as in the source. Most code blocks are in a specific programming or data structure language which the processing routine may need to know to do things like color coding the syntax. In SAM, a codeblock is introduced with three back ticks. (````````). 
 
 
 
@@ -456,8 +475,7 @@ article: SAM Quick Start
                 for i in range(1,10):
                     print("Hello World " + str(i))
 
-        The code block must be intended under the codeblock header (the three backticks). The indentation of the code in the code block will be calculated based on the least indented line. Thus in the example above, the line `for i in range(1,10):` will be treated as having and indent of 0, and the line `print("Hello World " + str(i))` will have an indent of 4. 
-
+        The code block must be intended under the codeblock header (the three backticks). The indentation of the code in the code block will be calculated based on the least indented line. Thus in the example above, the line `for i in range(1,10):` will be treated as having an indent of 0, and the line `print("Hello World " + str(i))` will be treated as having an indent of 4. 
 
         The language of the codeblock is given in the annotation immediately following the three back ticks of the header. 
 
@@ -488,8 +506,7 @@ article: SAM Quick Start
         Inline code can be annotated in the same way as a codeblock, so if you want to specify the language of a piece of inline code you can do this:
 
         ```(sam)
-            Python uses the `print()`(code (python)) function to print output.
-
+            Python uses the `print()`(python) function to print output.
 
     section: Blockquotes
 
@@ -507,7 +524,7 @@ article: SAM Quick Start
 
 
     section: Lines
-        A line is a piece of text with a fixed line ending. Poetry, for example, is a set of lines. Normally, SAM runs the lines of a paragraph together and leaves it up to the publishing software to determine line breaks a publishing time. To preserve the line breaks in your text, use lines. In SAM, lines are created by preceding each line with a pipe character followed by a space (the space is important!): 
+        A line is a piece of text with a fixed line ending. Poetry, for example, is a set of lines. Normally, SAM runs the lines of a paragraph together and leaves it up to the publishing software to determine line breaks at publishing time. To preserve the line breaks in your text, use lines. In SAM, lines are created by preceding each line with a pipe character followed by a space (the space is important!): 
 
         ```(sam)
             Jabberwocky is a nonsense poem by Lewis Carroll.
@@ -519,8 +536,6 @@ article: SAM Quick Start
                 | All mimsy were the borogoves,
                 | And the mome raths outgrabe.
 
-
-
     section: Inserts
 
         An insert is an instruction to the {application layer} to insert a resource into the document output.
@@ -530,23 +545,27 @@ article: SAM Quick Start
         ```(sam)
             >>>(image foo.png)
 
-        Inside a flow, an insert is indicated by a single greater-than followed the the identification of the resource in parentheses: 
+        Inside a paragraph or field value, an insert is indicated by a single greater-than followed the the identification of the resource in parentheses: 
 
         ```(sam)
             My favorite flavor of ice cream is >($favorite-flavor).
 
-        The resource to be inserted may be identified either by type and url as in the block example above or by reference to an id, name, fragment, string, or key as in the flow example. 
+        The resource to be inserted may be identified either by type and url as in the block example above or by reference to an id, name, fragment, variable, or key (see below for information on variables and keys) as in the inline example, which inserts the value of a variable. 
+
+        When a insert in indicated by URL, the type of the insert must be indicated (as it is with the word `image`) in the example above. SAM reserves the following instert type names: image, video, audio, feed, app, and object. You can also add your own insert type names.
+
+        Note that SAM does not process inserts. That is entirely up to the applications layer. SAM just provides standardized syntax for specifying an insert. 
 
         You can also assign names, conditions, or ids to an insert. 
         
         ```(sam)
             >>>(image fancy.png)(?model=deluxe)
 
-        Remember that it is up to the application layer to implement such inserts.
+        Remember that it is up to the application layer to implement such conditions.
 
     section: Includes
 
-        You can include one SAM file in another. The included file must be a complete SAM file, with SAM declaration. Its structured is included in the structure of the included file at the indent level of the include statement.
+        You can include one SAM file in another. The included file must be a complete SAM file. Its structured is included in the structure of the included file at the indent level of the include statement.
 
         ```(sam)
             <<<(foo.sam)
@@ -555,25 +574,27 @@ article: SAM Quick Start
 
         The ID uniqueness constraint that applies to individual SAM document also applies to included files. The IDs must be unique across the entire document parsed from the source file and any included files. 
 
-        Includes cannot be made conditional, since conditions are parsed by the application layer. If you want a conditional include in your tagging language, add a field for this purpose to your tagging language. 
+        Includes cannot be made conditional, since conditions are parsed by the application layer, not the parser. If you want a conditional include in your tagging language, add a field for this purpose to your tagging language. 
 
         ```(sam)
             my-include:(?bar) foo.sam
 
         Naturally, this include must be processed by the application layer.
 
-        For similar reasons, an include cannot have a {name}, {id}, or {language} attribute, since it does not produce a artifact in the output. If you need to apply any of these things to the included content, you can wrap the include statement in another structure such as a {block} or a {fragment} and apply the attributes to that. This will result in the included content being wrapped in that block or fragment in the output where the application layer can deal with it appropriately. 
+        For similar reasons, an include cannot have a {name}, {id}, or {language} attribute, since it does not produce an artifact in the output. If you need to apply any of these things to the included content, you can wrap the include statement in another structure such as a {block} or a {fragment} and apply the attributes to that. This will result in the included content being wrapped in that block or fragment in the output where the application layer can deal with it appropriately. 
         
-    section: String
+    section: Variables
     
-        You can define a string variable using the form:
+        You can define a variable using the form:
         
         ```(sam)
             $foo=bar
+
+        The value of a variable may contains annotations and/or citations. 
             
-        To insert the value of a string, use an insert (block level or inline) with the variable name:
+        To insert the value of a variable, use an insert (block level or inline) with the variable name:
         
         ```(sam)
             >($title)
             
-        Note that the SAM parser does not resolve strings. The string definitions and string insert instructions are passed through to the application layer and must be resolved by the processing application. This allows the processing application to determine the scope within which string names will be resolved. 
+        Note that the SAM parser does not resolve variables. The variable definitions and variable insert instructions are passed through to the application layer and must be resolved by the processing application. This allows the processing application to determine the scope within which variable names will be resolved. 
