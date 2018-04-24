@@ -5,6 +5,7 @@ page: SAM Documentation Home
     SAM is an extensible markup language with syntax similar to Markdown but semantic capability similar to XML.
 
     * For a quick introduction to SAM, see {Quickstart}(link "quickstart.html").
-    * For a full descripition of the language, see {Language}(link "language.html").
-    * For some recipies for solving common markup issues with SAM, see {Recipes}(link "recipes.html").
+    * For a full description of the language, see {Language}(link "language.html").
+    * For some recipes for solving common markup issues with SAM, see {Recipes}(link "recipes.html").
+    * To run the SAM parser, see {Parser}(link "parser.html").
     * To install the SAM parser, see the {Github page}(https://github.com/mbakeranalecta/sam).
