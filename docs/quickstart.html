@@ -12,9 +12,11 @@
 <div class="menu">
 <p class="p"><span class="phrase"><a href=index.html class="link">Home</a></span> | <span class="phrase"><a href=quickstart.html class="link">Quickstart</a></span> | <span class="phrase"><a href=parser.html class="link">Parser</a></span> | <span class="phrase"><a href=language.html class="link">Language</a></span> | <span class="phrase"><a href=recipes.html class="link">Recipes</a></span> | <span class="phrase"><a href=https://github.com/mbakeranalecta/sam class="link">Github</a></span></p>
 </div>
-<p class="p">SAM is a markup language for semantic authoring. It is not a fixed language like Markdown. It is a meta-language like XML. Markdown has a fixed set of document structures that you can use. SAM, like XML, lets you define and create your own structures to suit your own needs. Unlike XML, however, and like Markdown, SAM is designed to be easy to write in a plain text editor. SAM also provides a set of basic default structures that are shared by all SAM document types. This base set is deliberately basic. It is designed to make certain common structures easy to create. There are other document structures you will probably need that you will have to design for your self using SAM's blocks and annotations. See the <span class="phrase">SAM Recipes</span> document for some suggestions on how to create some commonly used document structures.</p>
-<p class="p">SAM is designed for structured writing. That is, writing that obeys a specific defined structure that tells you what goes into a document and how it is expressed. A structured document is also one that you can process with algorithms in order to validate the content, create new forms of content, or publish the content to different media and for different purposes. The key to successful structured writing is that the writer must be able to clearly see the structure as they are writing. That is not the case with XML, whether you write it in a plain text editor or in a sophisticated XML editor that make it look like a Word document. Verbose XML tags obscure structure and Word-like interfaces hide structure behind an approximation of final formatting.</p>
-<p class="p">Structured writing essentially divides content into a set of nested names blocks. SAM introduces blocks with a one word label followed by a colon. It shows the nesting of one block inside another by indenting the nested block under its parent. Here is an example of a structured document, a recipe, written in SAM:</p>
+<p class="p">SAM is a markup language for semantic authoring. It is not a fixed language like Markdown. It is a meta-language like XML. Markdown has a fixed set of document structures that you can use. SAM, like XML, lets you define and create your own structures to suit your own needs. Unlike XML, and like Markdown, SAM is designed to be easy to write in a plain text editor.</p>
+<p class="p">To make it easier to write, SAM provides a set of common text structures, such as paragraphs and lists, that are shared by all SAM document types. These common structures deliberately basic. There are other document structures you will probably need that you will have to design for your self using SAM's generic structures: blocks and annotations. See the <span class="phrase">SAM Recipes</span> document for some suggestions on how to create some commonly used document structures.</p>
+<p class="p">SAM is designed for structured writing. That is, writing that obeys a specific defined structure that tells you what goes into a document and how it is expressed. A structured document isn't designed to be read directly by the reader. It must be processed with algorithms to produce readable output. But it also supports using algorithms to perform many other functions, such as guiding the writer, validating the content, linking the content, managing the content, creating new forms of content, or publishing the content to different media and for different purposes. (In this document I refer to such algorithms collectively as "the application layer".)</p>
+<p class="p">To enable all these algorithms, the writers must obey the structure of the markup language and must embed certain items of metadata into the content for the algorithms to work with. To do this easily and effectively, the writer must be able to clearly see the structure as they are writing. That is <span class="phrase"><a href=https://everypageispageone.com/2016/01/28/why-does-xml-suck/ class="link">not the case with XML</a></span>, whether you write it in a plain text editor or in a sophisticated XML editor that make it look like a Word document. Verbose XML tags obscure structure and Word-like interfaces hide structure behind an approximation of final formatting. SAM is designed to make the structure of structured documents clear and explicit to the writer, while also making them simple and straightforward to type.</p>
+<p class="p">Structured writing essentially divides content into a set of nested named blocks. SAM introduces blocks with a one word label followed by a colon. It shows the nesting of one block inside another by indenting the nested block under its parent. Here is an example of a structured document, a recipe, written in SAM:</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">recipe: Hard Boiled Egg
     introduction:
         A hard boiled egg is simple and nutritious. It makes
@@ -51,15 +53,18 @@
         sugar: 0.6 g
         protein: 6 g
 </code></pre>
-<p class="p">All SAM documents consist of a single root block, in this case the block labeled "recipe". That block contains a number of other blocks with labels like "ingredients" and "nutrition". Some of these block also contain other blocks.  Thus the individual fields that make up the nutrition information are indented under the <code class="code">nutrition:</code> label. (Blocks that contain just a single value are called "fields".</p>
+<p class="p">All SAM documents consist of a single root block, in this case the block labeled "recipe". That block contains a number of other blocks with labels like "ingredients" and "nutrition". Some of these block also contain other blocks. For example, the <code class="code">preparation</code> block contain a list block (the list is one of SAM's default block types). Some blocks may contain just a single value. These blocks are called "fields". The individual fields that make up the <code class="code">nutrition</code> block are indented are fields.</p>
 <p class="p">This is a semantic version of a recipe. It does not tell you how the recipe should be formatted. It does not even contain the section headings that will probably be used when the recipe is printed on paper or screen. To actually make a printed recipe, the semantic version needs to be processed by an algorithm that decides which pieces of information to publish, what order to publish them in, what titles to use for the sections, how to format the text, and which media to publish to. However, the semantic version lets you do cool stuff like make a collection of recipes with less than 80 calories per serving that can be prepared in less than 20 minutes, because it makes those pieces of information clearly available to algorithms for querying and processing. It also helps to make sure the people writing recipes provide all the information we need in the order and form we want it in.</p>
 <p class="p">The main parts of a SAM document as as follows.</p>
 <div class="section">
 <h2 class="title">Blocks</h2>
 
-<p class="p">A block is a container for other structures. It has a label. It may also have a title. In the example above, <code class="code">recipe:</code> starts a block that contains the entire recipe document. <code class="code">nutrition:</code> starts a block that contains the nutrition information. Blocks are delimited by indentation. Everything indented under the block tag is part of the block. Every SAM document must have a single root block that contains all the content of the document.</p>
+<p class="p">A block is a container for other structures. In the example above, <code class="code">recipe:</code> starts a block that contains the entire recipe document. <code class="code">nutrition:</code> starts a block that contains the nutrition information. Blocks are delimited by indentation. Everything indented under the block tag is part of the block. Every SAM document must have a single root block that contains all the content of the document.</p>
 <p class="p">The recipe block has a title, "Hard Boiled Egg", which is the text after the colon in <code class="code">recipe:</code>.</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">recipe: Hard Boiled Egg
+    introduction:
+        A hard boiled egg is simple and nutritious. It makes
+        a quick and delicious addition to any breakfast.
 </code></pre>
 <p class="p">This is a shortcut and is exactly equivalent to this (provided there is nothing indented under the <code class="code">title</code> tag):</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">recipe:
@@ -72,7 +77,7 @@
 <div class="section">
 <h2 class="title">Fields</h2>
 
-<p class="p">A field is a container for a single value. Each of the lines in the nutrition block is a field. For example, <code class="code">sugar: 0.6 g</code> is a field with the label <code class="code">sugar</code> and the value <code class="code">0.6 g</code>. A field has the same format as a block except that there is nothing indented under it. If you indent something under a field it will become a block and its value will become the title of the block.</p>
+<p class="p">A field is a container for a single value. Each of the lines in the <code class="code">nutrition</code> block is a field. For example, <code class="code">sugar: 0.6 g</code> is a field with the label <code class="code">sugar</code> and the value <code class="code">0.6 g</code>. A field has the same format as a block except that there is nothing indented under it. If you indent something under a field it will become a block and its value will become the title of the block.</p>
 </div>
 <div class="section">
 <h2 class="title">Paragraphs</h2>
@@ -107,11 +112,35 @@
     &lt;/li&gt;
 &lt;/ul&gt;
 </code></pre>
+<p class="p">Since paragraphs cannot have children, when you create a list following a paragraph, the number or asterisk that starts the list items must be at the same indent level as the paragraph above.</p>
+<p class="p">Lists can be nested:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">1. Cats
+    * Tabby
+    * Manx
+    * Siamese
+2. Dogs
+    * Collie
+    * Beagle
+    * Spaniel
+</code></pre>
+<p class="p">You can create more than one paragraph in a list item by indenting the second paragraph to match the indent of the first one:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">1. Cats are fluffy.
+
+   Dogs are silly.
+
+   Cows fly over the moon.
+
+2. Rocks are hard.
+
+   Earth is round.
+
+   The moon is made of green cheese. 
+</code></pre>
 </div>
 <div class="section">
 <h2 class="title">Phrases:</h2>
 
-<p class="p">A phrase is a piece of text within a paragraph that you want to apply metadata to. A phrase is marked up with curly braces. In the recipe example, the words "Cobb Salad" are marked up as a phrase: <code class="code">{Cobb Salad}</code>. We mark up phrases so that we can add semantic information to them with <span class="phrase">annotations</span> and <span class="phrase">citations</span>.</p>
+<p class="p">A phrase is a piece of text within a paragraph that you want to apply metadata to. A phrase is marked up with curly braces. In the recipe example, the words "Cobb Salad" are marked up as a phrase: <code class="code">{Cobb Salad}</code>. We mark up phrases so that we can add metadata to them with <span class="phrase">annotations</span> and <span class="phrase">citations</span>.</p>
 </div>
 <div class="section">
 <h2 class="title">Characters</h2>
@@ -145,14 +174,13 @@
 <p class="p">instead of</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">The curly brace \{ is not a commonly used character.
 </code></pre>
-<p class="p">If you wish.</p>
 <p class="p">To enter a literal backslash into your text you can either do:</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">\\
 </code></pre>
 <p class="p">or</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">&amp;bsol;
 </code></pre>
-<p class="p">or, if the backslash is not preceding any SAM markup character, you can just enter it alone:</p>
+<p class="p">or, if the backslash is not preceding a SAM markup character, you can just enter it alone:</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">\
 </code></pre>
 <p class="p">To enter a literal character escape sequence, you can escape the leading <code class="code">&amp;</code> either with a backslash:</p>
@@ -163,19 +191,64 @@
 </code></pre>
 </div>
 <div class="section">
-<h2 class="title">Decorations</h2>
+<h2 class="title">Annotations</h2>
 
-<p class="p">A decoration is a shortcut for entering common types of format related annotation in a paragraph. SAM supports two decorations, for bold, italic. Bold text is contained between asterisks:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text *is in bold* type.
+<p class="p">An annotation is a way of adding descriptive labels or metadata to individual phrases within a text. Annotations can cover anything from formatting (bold, italic) to linking to semantic annotation. Annotations are applied to phrases. In the example above, the phrase "Cobb Salad" has an annotation "recipe" (<code class="code">{Cobb Salad}(recipe)</code>) which tells us that the phrase is the name of a recipe. There is no fixed set of annotations in SAM. It is up to you to determine what annotations you need for your content.</p>
+<p class="p">Annotations have three parts, the second and third parts being optional.</p>
+<p class="p">The first part is the type. It asserts that the annotated phrase contains a certain type of information or performs a certain type of role in the document.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{John Wayne}(actor) plays an ex-Union Colonel out for revenge. 
 </code></pre>
-<p class="p">This is equivalent to:</p>
+<p class="p">This annotation asserts that the phrase "John Wayne" is the name of an actor (its type).</p>
+<p class="p">The second part is the "specifically" attribute. Sometimes the meaning of the phrase is not clear from the words of the phrase itself. In this case you can make the meaning clear using the "specifically" attribute, which is contained in quotation marks after the type:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{The Duke}(actor "John Wayne") plays an ex-Union Colonel out for revenge. 
+</code></pre>
+<p class="p">In this case the phrase itself is not the canonical name of the actor it refers to, so we add the specifically attribute <code class="code">"John Wayne"</code> to clarify the meaning of the annotated phrase.</p>
+<p class="p">The third part of the annotation is the namespace attribute. In some cases the type and specifically attributes may not be enough to uniquely identify the phrase being annotated because the same phrase, even it its canonical form, my refer to the same type of object in another context. In this case we can use the namespace attribute, which is contained in a second set of parentheses, to specify the context in which the annotated phrase should be understood.</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{The Duke}(actor "John Wayne" (SAG)) plays an ex-Union Colonel out for revenge. 
+</code></pre>
+<p class="p">In this case, the names of American actors are governed by the Screen Actors Guild. It is possible there could be another actor in another jurisdiction who also uses the name "John Wayne". So here we specify that the name, as we are using it, belongs to the namespace of actors that is governed by SAG.</p>
+</div>
+<div class="section">
+<h2 class="title">Annotation chaining</h2>
+
+<p class="p">You cannot markup one phrase inside another phrase, however, you can add more than one annotation to a phrase. To add additional annotations, simply follow one with another without any space between them:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{Clint Eastwood}(actor)(director) stared in and directed {Gran Torino}(movie).
+</code></pre>
+</div>
+<div class="section">
+<h2 class="title">Annotation lookup</h2>
+
+<p class="p">You do not have to repeat the full annotation of a phrase that occurs multiple times in a document. If you have already annotated a phrase once in a document, you can simply mark it as a phrase (by wrapping it in curly braces) and the parser will look back through the document for the last time that phrase was annotated and copy the most recent annotation to the current phrase. In no annotation of that phrase is found, the parser will raise a warning. This is informational only, it is not an error to have an unannotated phrase.</p>
+</div>
+<div class="section">
+<h2 class="title">Links</h2>
+
+<p class="p">Links are a form of annotation. As a meta-language, SAM does not support links itself. It is up to you to decide if your markup language includes support for links or not. However, SAM does reserve the annotation type <code class="code">link</code> for creating links, and has a shortcut for creating links, which looks like this:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{Cobb Salad}(http://allrecipes.com/recipe/14415/cobb-salad/)
+</code></pre>
+<p class="p">That is, if the first thing in the annotation is recognized as a URL, it is assumed to be a link annotation pointing to that URL. This the example above is equivalent to:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{Cobb Salad}(link "http://allrecipes.com/recipe/14415/cobb-salad/") 
+</code></pre>
+</div>
+<div class="section">
+<h2 class="title">Bold and Italic</h2>
+
+<p class="p">You can indicate bold and italic text with annotations, like this:</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text {is in bold}(bold) type.
+
+This text {is in italic}(italic) type.
 </code></pre>
-<p class="p">Italic text is contained between underscores:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text _is in italic_ type.
+<p class="p">However, SAM provides shortcuts for bold and italic, as follows:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text *is in bold* type.
+
+This text _is in italic_ type.
 </code></pre>
-<p class="p">This is equivalent to:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text {is in italic}(italic) type.
+<p class="p">These forms are equivalent, but notice that the shortcut forms don't support the other annotation attributes and that you cannot chain other annotations with the shortcuts. Thus if you wanted to annotate a book title as both italic and a title, you would have to do it like this:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{Moby Dick}(italic)(book-title) is a long book. 
+</code></pre>
+<p class="p">(But note that you should not actually mark up book titles like this as the fact that the phrase is marked up as a book-title is enough to tell the formatting algorithm to format it in italic.)</p>
+<p class="p">Also note that the bold and italic shortcuts cannot be nested. If you want to mark some text as both bold and italic, you have to use regular annotations:</p>
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This information is _really_, *really*, {really}(bold)(italic) important.
 </code></pre>
 </div>
 <div class="section">
@@ -185,10 +258,10 @@
 <p class="p">You can attach attributes to blocks and block-like things and to phrases. An attribute looks like an annotation, in the sense that it is contained in parentheses, but attributes as distinguished by an initial character the specifies their type. Thus a condition starts with a question mark <code class="code">(?deluxe)</code>.</p>
 <p class="p">To attach an attribute to a block, place it directly after the colon of the block header:</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">note:(?basic)
-    Do not immerse you Basic model Widget in Water. Only higher
+    Do not immerse your Basic model Widget in water. Only higher
     trim levels are waterproof.
 </code></pre>
-<p class="p">The types are:</p>
+<p class="p">The supported attribute types are:</p>
 <dl class="ll">
 <div class="ll.li">
 <dt class="ll.li.label">ID</dt>
@@ -202,7 +275,7 @@
 </div>
 <div class="ll.li">
 <dt class="ll.li.label">Condition</dt>
-<dd class="ll.li.item"><p class="p">Specifying a condition token is a way of telling the publishing software to include this block only when a certain condition is true. How the publishing software determines if a condition is true is entirely up to the application layer. A condition attribute is preceded by a <code class="code">?</code>.</p>
+<dd class="ll.li.item"><p class="p">Specifying a condition token is a way of telling the publishing software to include this block only when a certain condition is true. How the publishing software determines if a condition is true is entirely up to the application layer. A condition attribute is preceded by a <code class="code">?</code>: <code class="code">?my-condition</code>.</p>
 </dd>
 </div>
 <div class="ll.li">
@@ -220,31 +293,13 @@
 <p class="p">Note that if you wish to add other forms of management domain metadata to your blocks you can do so using fields within the block. SAM's set of management domain annotations are just a convenience feature. You can add any management domain metadata you like using regular fields. As a semantic format, there is nothing in SAM that says that all of the content of blocks or fields has to appear in print. Blocks and fields can contain any kind of data or metadata you like. It is up to the publishing algorithms to decide which content to publish and which to use for management purposes.</p>
 </div>
 <div class="section">
-<h2 class="title">Annotations</h2>
-
-<p class="p">An annotation is a way of adding descriptive labels or metadata to individual phrases within a text. Annotations can cover anything from formatting (bold, italic) to linking to semantic annotation. Annotations are applied to phrases. In the example above, the phrase "Cobb Salad" has an annotation "recipe" (<code class="code">{Cobb Salad}(recipe)</code>) which tells us that the phrase is the name of a recipe. There is no fixed set of annotations in SAM. It is up to you to determine what annotations you need for your content.</p>
-</div>
-<div class="section">
-<h2 class="title">Annotation chaining</h2>
-
-<p class="p">You cannot markup one phrase inside another phrase, however, you can add more than one annotation to a phrase. To add additional annotations, simply follow one with another without any space between them:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{Clint Eastwood}(actor)(director) stared in and directed {Gran Torino}(movie).
-</code></pre>
-<p class="p">You can also chain <span class="phrase">annotations</span> and <span class="phrase">citations</span>.</p>
-</div>
-<div class="section">
-<h2 class="title">Annotation lookup</h2>
-
-<p class="p">You do not have to repeat the full annotation of a phrase that occurs multiple times in a document. If you have already annotated a phrase once in a document, you can simply mark it as a phrase (by wrapping it in curly braces) and the parser will look back through the document for the last time that phrase was annotated and copy the most recent annotation to the current phrase. In no annotation of that phrase is found, the parser will raise a warning. This is informational only, it is not an error to have an unannotated phrase.</p>
-</div>
-<div class="section">
 <h2 class="title">Citations</h2>
 
-<p class="p">Citations are used in cases where you want to refer to another resource. The expectation is that on output the citation markup will be replaced by text that creates a reference to that resource. (Note that this is different from an annotation which might lead to a link being created on a phrase, but will not change the content of the phrase.</p>
+<p class="p">Citations are used to refer to another resource. The expectation is that on output the citation markup will be replaced by text that creates a reference to that resource. (Note that this is different from an annotation which might lead to a link being created on a phrase, but will not change the content of the phrase.)</p>
 <p class="p">Citations come in two forms. Citations of internal names/ids, and citations of external resources. Citations can be applied to:</p>
 <ul class="ul">
 <li class="li">
-<p class="p">a point in a flow</p>
+<p class="p">an arbitrary point in a paragraph</p>
 </li>
 <li class="li">
 <p class="p">a phrase</p>
@@ -270,23 +325,19 @@ footnote:(*moby)
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{Moby Dick}[#MobyDick] is about a big fish.
 </code></pre>
 <p class="p">The advantage of applying the citation to a phrase is that it allows you to turn the citation into a link in online content.</p>
-<p class="p">This assumes that there is a bibliographic entry with the named <code class="code">MobyDick</code> somewhere in your content set.</p>
+<p class="p">This example is using a name citation as a means of referencing a bibliographical entry that could be used by a publishing algorithm to build a citation in the desired format on output. This assumes that there is a bibliographic entry with the named <code class="code">MobyDick</code> somewhere in your content set.</p>
 <p class="p">To cite an external work without referring to another resource in your content set, use a standard reference syntax.</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Moby Dick[Melville, 1851] is about a big fish.
 </code></pre>
 <p class="p">SAM does not attempt to decode the format of this style of citation. It just delivers it as a string to the application layer.</p>
 <p class="p">The application layer is responsible for all processing of references. Since the syntax does not make any distinction between the types of references being made (<code class="code">*foo</code> could be the name of any block, such as a graphic, a footnote, or a bibliographic entry) the presumed semantics of a tagging language that uses citations is that the treatment of the citation is based on the type of object that the citation references, not the type of the citation. Thus in the example above, <code class="code">[*whale]</code> is a figure reference because the block with the ID <code class="code">*whale</code> is a figure and <code class="code">[*moby]</code> is a footnote reference because the block with the ID <code class="code">*moby</code> is a footnote.</p>
-</div>
-<div class="section">
-<h2 class="title">Links</h2>
-
-<p class="p">Links are a form of annotation. As a meta-language, SAM does not support links itself. It is up to you to decide if your markup language includes support for links or not. However, SAM does reserve the annotation type <code class="code">link</code> for creating links if you want them, and has a shortcut for creating links, which looks like this: <code class="code">{Cobb Salad}(http://allrecipes.com/recipe/14415/cobb-salad/)</code>. That is, if the first thing in the annotation is recognized as a URL, it is assumed to be a link annotation pointing to that URL.</p>
+<p class="p">You can chain <span class="phrase">citations</span> the same way you chain <span class="phrase">annotations</span> and you can also chain citations and annotations together.</p>
 </div>
 <div class="section">
 <h2 class="title">Record sets</h2>
 
 <p class="p">A record set is a kind of table. But because SAM is designed for semantic authoring, record sets are designed more like a database table than a formatted table. The content in a record set could be presented in a table, but it could also be presented in other ways or queried like a database table.</p>
-<p class="p">A record set consists of a block containing records. A record is a set of fields. Each record in a record set has the same set of fields of the same type, like a record in a database table. In the recipe example, the ingredients are specified using a record set, with each ingredient forming a record.</p>
+<p class="p">A record set consists of records, one per line. A record is a set of field values separated by commas. Each record in a record set has the same set of fields of the same type, like a record in a database table. The names of the fields are specified in the record set header. In the recipe example, the ingredients are specified using a record set, with each ingredient forming a record.</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">ingredients:: ingredient, quantity
     eggs, 12
     water, 2qt
@@ -314,7 +365,7 @@ footnote:(*moby)
         cell: water
         cell: 2qt
 </code></pre>
-<p class="p">However, here the semantics of the content has been lost.</p>
+<p class="p">However, here the semantics of the content has been lost. Record sets exist to allow you to retain and express the semantics of tabular data.</p>
 </div>
 <div class="section">
 <h2 class="title">Grids</h2>
@@ -344,12 +395,12 @@ footnote:(*moby)
 <div class="section">
 <h2 class="title">Code Blocks</h2>
 
-<p class="p">A code block is a piece of computer code or perhaps the text of a terminal display. Code blocks are usually presented literally as written, often in a fixed space font and with line breaks in the same place as in the source. Most code blocks are in a specific programming or data structure language which the processing routine may need to know to do things like color coding the syntax. In SAM, a codeblock is introduced with three back ticks. (<code class="code">``</code>`).</p>
+<p class="p">A code block is a piece of computer code or perhaps the text of a terminal display. Code blocks are usually presented literally as written, often in a fixed space font and with line breaks in the same place as in the source. Most code blocks are in a specific programming or data structure language which the processing routine may need to know to do things like color coding the syntax. In SAM, a codeblock is introduced with three back ticks. (<code class="code">```</code>).</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">```(python)
     for i in range(1,10):
         print("Hello World " + str(i))
 </code></pre>
-<p class="p">The code block must be intended under the codeblock header (the three backticks). The indentation of the code in the code block will be calculated based on the least indented line. Thus in the example above, the line <code class="code">for i in range(1,10):</code> will be treated as having and indent of 0, and the line <code class="code">print("Hello World " + str(i))</code> will have an indent of 4.</p>
+<p class="p">The code block must be intended under the codeblock header (the three backticks). The indentation of the code in the code block will be calculated based on the least indented line. Thus in the example above, the line <code class="code">for i in range(1,10):</code> will be treated as having an indent of 0, and the line <code class="code">print("Hello World " + str(i))</code> will be treated as having an indent of 4.</p>
 <p class="p">The language of the codeblock is given in the annotation immediately following the three back ticks of the header.</p>
 <p class="p">The content of a code block is not processed as SAM markup. This means that you do not have to escape any of the characters in your code sample. It also means that you can quote SAM markup itself without it being parsed as SAM markup. (Every example in this document uses exactly this technique.)</p>
 </div>
@@ -370,7 +421,7 @@ footnote:(*moby)
 <p class="p">Sam creates inline code like this: <code class="code">`&amp;quot`</code>.</p>
 </blockquote>
 <p class="p">Inline code can be annotated in the same way as a codeblock, so if you want to specify the language of a piece of inline code you can do this:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Python uses the `print()`(code (python)) function to print output.
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Python uses the `print()`(python) function to print output.
 </code></pre>
 </div>
 <div class="section">
@@ -388,7 +439,7 @@ footnote:(*moby)
 <div class="section">
 <h2 class="title">Lines</h2>
 
-<p class="p">A line is a piece of text with a fixed line ending. Poetry, for example, is a set of lines. Normally, SAM runs the lines of a paragraph together and leaves it up to the publishing software to determine line breaks a publishing time. To preserve the line breaks in your text, use lines. In SAM, lines are created by preceding each line with a pipe character followed by a space (the space is important!):</p>
+<p class="p">A line is a piece of text with a fixed line ending. Poetry, for example, is a set of lines. Normally, SAM runs the lines of a paragraph together and leaves it up to the publishing software to determine line breaks at publishing time. To preserve the line breaks in your text, use lines. In SAM, lines are created by preceding each line with a pipe character followed by a space (the space is important!):</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">Jabberwocky is a nonsense poem by Lewis Carroll.
 
 """[Lewis Carroll, Through the Looking-Glass, and What Alice Found There (1871)]
@@ -406,39 +457,42 @@ footnote:(*moby)
 <p class="p">Inserts may be created at the <span class="phrase">block</span> level or inside a paragraph or field value. At the block level, and insert is placed on a line by itself and is indicated by three greater-than signs:</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">&gt;&gt;&gt;(image foo.png)
 </code></pre>
-<p class="p">Inside a flow, an insert is indicated by a single greater-than followed the the identification of the resource in parentheses:</p>
+<p class="p">Inside a paragraph or field value, an insert is indicated by a single greater-than followed the the identification of the resource in parentheses:</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">My favorite flavor of ice cream is &gt;($favorite-flavor).
 </code></pre>
-<p class="p">The resource to be inserted may be identified either by type and url as in the block example above or by reference to an id, name, fragment, string, or key as in the flow example.</p>
+<p class="p">The resource to be inserted may be identified either by type and url as in the block example above or by reference to an id, name, fragment, variable, or key (see below for information on variables and keys) as in the inline example, which inserts the value of a variable.</p>
+<p class="p">When a insert in indicated by URL, the type of the insert must be indicated (as it is with the word <code class="code">image</code>) in the example above. SAM reserves the following instert type names: image, video, audio, feed, app, and object. You can also add your own insert type names.</p>
+<p class="p">Note that SAM does not process inserts. That is entirely up to the applications layer. SAM just provides standardized syntax for specifying an insert.</p>
 <p class="p">You can also assign names, conditions, or ids to an insert.</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">&gt;&gt;&gt;(image fancy.png)(?model=deluxe)
 </code></pre>
-<p class="p">Remember that it is up to the application layer to implement such inserts.</p>
+<p class="p">Remember that it is up to the application layer to implement such conditions.</p>
 </div>
 <div class="section">
 <h2 class="title">Includes</h2>
 
-<p class="p">You can include one SAM file in another. The included file must be a complete SAM file, with SAM declaration. Its structured is included in the structure of the included file at the indent level of the include statement.</p>
+<p class="p">You can include one SAM file in another. The included file must be a complete SAM file. Its structured is included in the structure of the included file at the indent level of the include statement.</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">&lt;&lt;&lt;(foo.sam)
 </code></pre>
 <p class="p">Unlike inserts, which are simply parsed by the parser and passed on to the application layer for processing, includes are executed by the parser. The result of the include is presented to the application layer as part of the parsed document.</p>
 <p class="p">The ID uniqueness constraint that applies to individual SAM document also applies to included files. The IDs must be unique across the entire document parsed from the source file and any included files.</p>
-<p class="p">Includes cannot be made conditional, since conditions are parsed by the application layer. If you want a conditional include in your tagging language, add a field for this purpose to your tagging language.</p>
+<p class="p">Includes cannot be made conditional, since conditions are parsed by the application layer, not the parser. If you want a conditional include in your tagging language, add a field for this purpose to your tagging language.</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">my-include:(?bar) foo.sam
 </code></pre>
 <p class="p">Naturally, this include must be processed by the application layer.</p>
-<p class="p">For similar reasons, an include cannot have a <span class="phrase">name</span>, <span class="phrase">id</span>, or <span class="phrase"><a href=language.html class="link">language</a></span> attribute, since it does not produce a artifact in the output. If you need to apply any of these things to the included content, you can wrap the include statement in another structure such as a <span class="phrase">block</span> or a <span class="phrase">fragment</span> and apply the attributes to that. This will result in the included content being wrapped in that block or fragment in the output where the application layer can deal with it appropriately.</p>
+<p class="p">For similar reasons, an include cannot have a <span class="phrase">name</span>, <span class="phrase">id</span>, or <span class="phrase"><a href=language.html class="link">language</a></span> attribute, since it does not produce an artifact in the output. If you need to apply any of these things to the included content, you can wrap the include statement in another structure such as a <span class="phrase">block</span> or a <span class="phrase">fragment</span> and apply the attributes to that. This will result in the included content being wrapped in that block or fragment in the output where the application layer can deal with it appropriately.</p>
 </div>
 <div class="section">
-<h2 class="title">String</h2>
+<h2 class="title">Variables</h2>
 
-<p class="p">You can define a string variable using the form:</p>
+<p class="p">You can define a variable using the form:</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">$foo=bar
 </code></pre>
-<p class="p">To insert the value of a string, use an insert (block level or inline) with the variable name:</p>
+<p class="p">The value of a variable may contains annotations and/or citations.</p>
+<p class="p">To insert the value of a variable, use an insert (block level or inline) with the variable name:</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">&gt;($title)
 </code></pre>
-<p class="p">Note that the SAM parser does not resolve strings. The string definitions and string insert instructions are passed through to the application layer and must be resolved by the processing application. This allows the processing application to determine the scope within which string names will be resolved.</p>
+<p class="p">Note that the SAM parser does not resolve variables. The variable definitions and variable insert instructions are passed through to the application layer and must be resolved by the processing application. This allows the processing application to determine the scope within which variable names will be resolved.</p>
 </div>
 </div>
 </body>
