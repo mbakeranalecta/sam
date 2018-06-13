@@ -76,7 +76,7 @@ flow_patterns = {
             'annotation': re.compile(
                 r'''
                 (
-                    (?P<plus>\+?)                            #conditional flag
+                    (?P<flag>[-\+]?)                         #flag
                     \(                                       #open paren
                         \s*                                  #any spaces
                         (?P<type>\S*?)                       #any non-space characters = annotation type
@@ -2027,16 +2027,16 @@ class Flow():
 def _annotation_lookup_case_sensitive(flow, text):
     for i in reversed(flow):
         if type(i) is Phrase:
-            if [x for x in i.annotations if not x.local] and i.text == text:
-                return [x for x in i.annotations if not x.local]
+            if i.annotated and i.text == text:
+                return i.global_annotations
     return None
 
 
 def _annotation_lookup_case_insensitive(flow, text):
     for i in reversed(flow.children):
         if type(i) is Phrase:
-            if [x for x in i.annotations if not x.local] and i.text.lower() == text.lower():
-                return [x for x in i.annotations if not x.local]
+            if i.annotated and i.text.lower() == text.lower():
+                return i.global_annotations
     return None
 
 
@@ -2540,7 +2540,7 @@ class FlowParser:
             if previous is not None:
                 for a in previous:
                     if a not in phrase.annotations:
-                        phrase.annotations.append(a)
+                        phrase.add_annotation(a)
             # Else output a warning.
             else:
                 SAM_parser_warning(
@@ -2559,7 +2559,17 @@ class FlowParser:
             raise SAMParserError("A {0} cannot have an annotation. At:\n{1}".format(type(phrase).__name__, match.group(0)))
         if match:
             annotation_type = match.group('type')
-            is_local = bool(match.group('plus'))
+            is_local = False
+            cancel = False
+            flag = match.group('flag')
+            if flag:
+                if flag == '+':
+                    is_local = True
+                elif flag =='-':
+                    cancel = True
+                else:
+                    raise SAMParserStructureError("Unknown annotation flag '{0}'. At: {1}".format(flag, match.group(0)))
+
 
             # Check for link shortcut
             if urlparse(annotation_type, None).scheme is not None:
@@ -2586,7 +2596,7 @@ class FlowParser:
                 if type(self.flow.children[-1]) is Code:
                     phrase.code_language = unescape(annotation_type)
                 else:
-                    phrase.annotations.append(Annotation(annotation_type, unescape(specifically), namespace, is_local))
+                    phrase.add_annotation(Annotation(annotation_type, unescape(specifically), namespace, is_local, cancel))
             para.advance(len(match.group(0)))
             if flow_patterns['annotation'].match(para.rest_of_para):
                 return "ANNOTATION-START", para
@@ -2822,7 +2832,18 @@ class Phrase(Span):
 
     @property
     def annotated(self):
-        return len([x for x in self.annotations if not x.local]) > 0
+        return len(self.global_annotations) > 0
+
+    @property
+    def global_annotations(self):
+        return [x for x in self.annotations if not (x.local or x.cancel)]
+
+    def add_annotation(self, annotation):
+        cancel_types = [x.type for x in self.annotations if x.cancel]
+        if annotation.type in cancel_types and not annotation.local:
+            pass
+        else:
+            self.annotations.append(annotation)
 
 
     def serialize_xml(self):
@@ -2868,11 +2889,11 @@ class Phrase(Span):
         yield b'</span>'
 
 
-    def append(self, thing):
-        if not self.child:
-            self.child = thing
-        else:
-            self.child.append(thing)
+    # def append(self, thing):
+    #     if not self.child:
+    #         self.child = thing
+    #     else:
+    #         self.child.append(thing)
 
 class Code(Phrase):
     attribute_serialization_xml = [('encoding', 'encoding'),
@@ -2983,11 +3004,12 @@ class FlowSource:
 
 
 class Annotation:
-    def __init__(self, type, specifically='', namespace='', local=False):
+    def __init__(self, type, specifically='', namespace='', local=False, cancel=False):
         self.type = type.strip()
         self.specifically = specifically
         self.namespace = namespace
         self.local = local
+        self.cancel = cancel
 
     def __str__(self):
         return ''.join(self.regurgitate())
@@ -3005,28 +3027,37 @@ class Annotation:
         yield ')'
 
     def serialize_xml(self, annotations=None, payload=None):
-        yield b'<annotation'
-        if self.type:
-            yield ' type="{0}"'.format(self.type).encode('utf-8')
-        if self.specifically:
-            yield b' specifically="'
-            yield escape_for_xml_attribute(self.specifically).encode('utf-8')
-            yield b'"'
-        if self.namespace:
-            yield ' namespace="{0}"'.format(self.namespace).encode('utf-8')
-
-        #Nest annotations for serialization
-        if annotations:
-            anns, *rest = annotations
-            yield b'>'
-            yield from anns.serialize_xml(rest, payload)
-            yield b'</annotation>'
-        elif payload:
-            yield b'>'
-            yield payload.encode('utf-8')
-            yield b'</annotation>'
+        if self.cancel:
+            if annotations:
+                anns, *rest = annotations
+                yield from anns.serialize_xml(rest, payload)
+            elif payload:
+                yield payload.encode('utf-8')
+            else:
+                pass
         else:
-            yield b'/>'
+            yield b'<annotation'
+            if self.type:
+                yield ' type="{0}"'.format(self.type).encode('utf-8')
+            if self.specifically:
+                yield b' specifically="'
+                yield escape_for_xml_attribute(self.specifically).encode('utf-8')
+                yield b'"'
+            if self.namespace:
+                yield ' namespace="{0}"'.format(self.namespace).encode('utf-8')
+
+            #Nest annotations for serialization
+            if annotations:
+                anns, *rest = annotations
+                yield b'>'
+                yield from anns.serialize_xml(rest, payload)
+                yield b'</annotation>'
+            elif payload:
+                yield b'>'
+                yield payload.encode('utf-8')
+                yield b'</annotation>'
+            else:
+                yield b'/>'
 
     def serialize_html(self, annotations=None, payload=None):
 
@@ -3050,6 +3081,8 @@ class Annotation:
             yield '<i class="italic">'.format(escape_for_xml_attribute(self.specifically)).encode('utf-8')
             yield from recurse()
             yield b'</i>'
+        elif self.cancel:
+            yield from recurse()
         else:
             yield b'<span'
             if self.type:
