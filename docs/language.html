@@ -870,6 +870,8 @@ worst of times.
 </div>
 </dl>
 <p class="p">If you are annotating the same phrase more than one in the same file. You can skip the annotation metadata and just use curly braces around the phrase. The parser will copy the metadata from the last occurring instance of that same phrase.</p>
+<p class="p">You can create a local annotation, one that applies to this instance of a phrase and will not be copied by the annotation lookup mechanism. To create a local annotation, precede the opening parentheses with a a <code class="code">+</code>.</p>
+<p class="p">You can cancel a looked-up annotation (one that would normally be added by the annotation lookup feature). To cancel an annotation, create a cancel annotation, which consists of an annotation with an minus sign (<code class="code">-</code>) before the opening parenthesis. The type name of the cancel annotation specifies the annotation type to be canceled. Cancel annotations cannot have specifically or namespace attributes. They cancel all instances of the canceled type.</p>
 </div>
 <div class="semantics">
 <p class="p">The specific semantics of individual annotation depend on the language designer, however, in order to maintain consistency across languages, it is important to use the specifically and namespace attributes for their intended purposes and not to hijack them to express some other semantics.</p>
