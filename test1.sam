@@ -46,63 +46,6 @@ tests:(!en) SAM Parser Tests
         description:
             Include content from another SAM file.
 
-        case: Local only annotations
-
-            description:
-                A local-only annotation is one which applies only to the current phrase.
-                It is not taken into consideration in annotation lookup, so the lookup
-                search will proceed to the next phrase with the same text. Annotation lookup will
-                occur for a phrase with a local-only annotation, and the local annotation will
-                be added to the looked up annotations, if any.
-
-            source:
-                ```(sam)
-                    Testing {XML}(language) testing {XML}+(index) testing {XML}.
-
-            markup:
-                Testing {XML}(language) testing {XML}+(index) testing {XML}.
-
-            result:
-                ```(xml)
-                    <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
-
-        case: Cancel annotations
-
-            description:
-                A cancel annotation is one which cancels the addition of annotations of a specific type
-                added through annotation lookup for the current phrase.
-                It is not taken into consideration in annotation lookup, so the lookup
-                search will proceed to the next phrase with the same text. Annotation lookup will
-                occur for a phrase with a cancel annotation, and the cancel annotation will
-                be subtracted from to the looked up annotations, if any.
-
-            source:
-                ```(sam)
-                    Testing {XML}(language) testing {XML}-(language)+(index) testing {XML}.
-
-            markup:
-                Testing {XML}(language) testing {XML}-(language)+(index) testing {XML}.
-
-            result:
-                ```(xml)
-                    <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
-
-        case: Cancel and replace
-
-            description:
-                Cancel a global annotation and replace it with one of the same type.
-
-            source:
-                ```(sam)
-                    Testing {XML}(language "eggs hem hell") testing {XML}-(language)+(language "heck's that smell?") testing {XML}.
-
-            markup:
-                Testing {XML}(language "eggs hem hell") testing {XML}-(language)+(language "heck's that smell?") testing {XML}.
-
-            result:
-                ```(xml)
-                    <p>Testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="heck's that smell?">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase>.</p>
-
         case: Simple include
             description:
                 An include statement.
@@ -2802,6 +2745,7 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p>This <phrase>should be reported</phrase>.</p>
 
+
         case: Local only annotations
 
             description:
@@ -2813,14 +2757,73 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
+                    Testing {XML}(language) testing {XML}+(index) testing {XML}.
+
                     Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 
             markup:
+                Testing {XML}(language) testing {XML}+(index) testing {XML}.
+
                 Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 
             result:
                 ```(xml)
                     <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+                    <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+
+        case: Cancel annotations
+
+            description:
+                A cancel annotation is one which cancels the addition of annotations of a specific type
+                added through annotation lookup for the current phrase.
+                It is not taken into consideration in annotation lookup, so the lookup
+                search will proceed to the next phrase with the same text. Annotation lookup will
+                occur for a phrase with a cancel annotation, and the cancel annotation will
+                be subtracted from to the looked up annotations, if any.
+
+            source:
+                ```(sam)
+                    Testing {XML}(language) testing {XML}-(language)+(index) testing {XML}.
+
+            markup:
+                Testing {XML}(language) testing {XML}-(language)+(index) testing {XML}.
+
+            result:
+                ```(xml)
+                    <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+
+        case: Cancel and replace
+
+            description:
+                Cancel a global annotation and replace it with one of the same type.
+
+            source:
+                ```(sam)
+                    Testing {XML}(language "eggs hem hell") testing {XML}-(language)+(language "heck's that smell?") testing {XML}.
+
+            markup:
+                Testing {XML}(language "eggs hem hell") testing {XML}-(language)+(language "heck's that smell?") testing {XML}.
+
+            result:
+                ```(xml)
+                    <p>Testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="heck's that smell?">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase>.</p>
+
+        case: Define, cancel, and replace
+
+            description:
+                Define a global annotation, then cancel it and replace it with one of the same type. Not something that
+                makes sense to do normally, but we need to define the behavior.
+
+            source:
+                ```(sam)
+                    Testing {XML}(language "Hex Hem Elle") testing {XML}(language "eggs hem hell")-(language)+(language "heck's that smell?") testing {XML}.
+
+            markup:
+                Testing {XML}(language "Hex Hem Elle") testing {XML}-(language)(language "eggs hem hell")+(language "heck's that smell?") testing {XML}.
+
+            result:
+                ```(xml)
+                    <p>Testing <phrase><annotation type="language" specifically="Hex Hem Elle">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="heck's that smell?">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="Hex Hem Elle">XML</annotation></phrase>.</p>
 
         case: Attribute annotations
             description:

@@ -2540,7 +2540,7 @@ class FlowParser:
             if previous is not None:
                 for a in previous:
                     if a not in phrase.annotations:
-                        phrase.add_annotation(a)
+                        phrase.add_looked_up_annotation(a)
             # Else output a warning.
             else:
                 SAM_parser_warning(
@@ -2578,6 +2578,9 @@ class FlowParser:
             else:
                 specifically = match.group('specifically') if match.group('specifically') is not None else None
             namespace = match.group('namespace').strip() if match.group('namespace') is not None else None
+
+            if cancel and (specifically or namespace):
+                raise SAMParserStructureError("A cancel attribute cannot have a specifically or namespace attribute.")
 
             if annotation_type[0] == '=':
                 if type(phrase) is Code:
@@ -2838,12 +2841,24 @@ class Phrase(Span):
     def global_annotations(self):
         return [x for x in self.annotations if not (x.local or x.cancel)]
 
-    def add_annotation(self, annotation):
+    def add_looked_up_annotation(self, annotation):
         cancel_types = [x.type for x in self.annotations if x.cancel]
         if annotation.type in cancel_types and not annotation.local:
             pass
         else:
             self.annotations.append(annotation)
+
+
+    def add_annotation(self, annotation):
+        cancel_types = [x.type for x in self.annotations if x.cancel]
+
+        if annotation.cancel and self.annotated:
+            raise SAMParserStructureError("A cancel annotation cannot occur on a phrase that is annotated directly.")
+
+        if not (annotation.cancel or annotation.local) and cancel_types:
+            raise SAMParserStructureError("A cancel annotation cannot occur on a phrase that is annotated directly.")
+
+        self.annotations.append(annotation)
 
 
     def serialize_xml(self):
@@ -3028,6 +3043,7 @@ class Annotation:
 
     def serialize_xml(self, annotations=None, payload=None):
         if self.cancel:
+            # don't serialize the cancel annotation
             if annotations:
                 anns, *rest = annotations
                 yield from anns.serialize_xml(rest, payload)
@@ -3082,6 +3098,7 @@ class Annotation:
             yield from recurse()
             yield b'</i>'
         elif self.cancel:
+            # Don't serialize the cancel annotation.
             yield from recurse()
         else:
             yield b'<span'

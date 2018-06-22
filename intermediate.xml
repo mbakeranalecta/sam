@@ -34,66 +34,6 @@ SAM parser warning: Unannotated phrase found: {should be reported} If you are tr
 <p>Include content from another SAM file.</p>
 </description>
 <case>
-<title>Local only annotations</title>
-
-<description>
-<p>A local-only annotation is one which applies only to the current phrase. It is not taken into consideration in annotation lookup, so the lookup search will proceed to the next phrase with the same text. Annotation lookup will occur for a phrase with a local-only annotation, and the local annotation will be added to the looked up annotations, if any.</p>
-</description>
-<source>
-<codeblock language="sam">
-Testing {XML}(language) testing {XML}+(index) testing {XML}.
-</codeblock>
-</source>
-<markup>
-<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
-</markup>
-<result>
-<codeblock language="xml">
-&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
-</codeblock>
-</result>
-</case>
-<case>
-<title>Cancel annotations</title>
-
-<description>
-<p>A cancel annotation is one which cancels the addition of annotations of a specific type added through annotation lookup for the current phrase. It is not taken into consideration in annotation lookup, so the lookup search will proceed to the next phrase with the same text. Annotation lookup will occur for a phrase with a cancel annotation, and the cancel annotation will be subtracted from to the looked up annotations, if any.</p>
-</description>
-<source>
-<codeblock language="sam">
-Testing {XML}(language) testing {XML}-(language)+(index) testing {XML}.
-</codeblock>
-</source>
-<markup>
-<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
-</markup>
-<result>
-<codeblock language="xml">
-&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
-</codeblock>
-</result>
-</case>
-<case>
-<title>Cancel and replace</title>
-
-<description>
-<p>Cancel a global annotation and replace it with one of the same type.</p>
-</description>
-<source>
-<codeblock language="sam">
-Testing {XML}(language "eggs hem hell") testing {XML}-(language)+(language "heck's that smell?") testing {XML}.
-</codeblock>
-</source>
-<markup>
-<p>Testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="heck's that smell?">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase>.</p>
-</markup>
-<result>
-<codeblock language="xml">
-&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language" specifically="eggs hem hell"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language" specifically="heck's that smell?"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language" specifically="eggs hem hell"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
-</codeblock>
-</result>
-</case>
-<case>
 <title>Simple include</title>
 
 <description>
@@ -3437,15 +3377,79 @@ This {should be reported}.
 </description>
 <source>
 <codeblock language="sam">
+Testing {XML}(language) testing {XML}+(index) testing {XML}.
+
 Testing {XML}(language) testing {XML}+(index) testing {XML}+(language).
 </codeblock>
 </source>
 <markup>
 <p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
 &lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Cancel annotations</title>
+
+<description>
+<p>A cancel annotation is one which cancels the addition of annotations of a specific type added through annotation lookup for the current phrase. It is not taken into consideration in annotation lookup, so the lookup search will proceed to the next phrase with the same text. Annotation lookup will occur for a phrase with a cancel annotation, and the cancel annotation will be subtracted from to the looked up annotations, if any.</p>
+</description>
+<source>
+<codeblock language="sam">
+Testing {XML}(language) testing {XML}-(language)+(index) testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index">XML</annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="index"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Cancel and replace</title>
+
+<description>
+<p>Cancel a global annotation and replace it with one of the same type.</p>
+</description>
+<source>
+<codeblock language="sam">
+Testing {XML}(language "eggs hem hell") testing {XML}-(language)+(language "heck's that smell?") testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="heck's that smell?">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language" specifically="eggs hem hell"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language" specifically="heck's that smell?"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language" specifically="eggs hem hell"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
+</codeblock>
+</result>
+</case>
+<case>
+<title>Define, cancel, and replace</title>
+
+<description>
+<p>Define a global annotation, then cancel it and replace it with one of the same type. Not something that makes sense to do normally, but we need to define the behavior.</p>
+</description>
+<source>
+<codeblock language="sam">
+Testing {XML}(language "Hex Hem Elle") testing {XML}(language "eggs hem hell")-(language)+(language "heck's that smell?") testing {XML}.
+</codeblock>
+</source>
+<markup>
+<p>Testing <phrase><annotation type="language" specifically="Hex Hem Elle">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="eggs hem hell"><annotation type="language" specifically="heck's that smell?">XML</annotation></annotation></phrase> testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase>.</p>
+</markup>
+<result>
+<codeblock language="xml">
+&lt;p&gt;Testing &lt;phrase&gt;&lt;annotation type="language" specifically="Hex Hem Elle"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language" specifically="heck's that smell?"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt; testing &lt;phrase&gt;&lt;annotation type="language" specifically="Hex Hem Elle"&gt;XML&lt;/annotation&gt;&lt;/phrase&gt;.&lt;/p&gt;
 </codeblock>
 </result>
 </case>
@@ -3461,7 +3465,7 @@ Testing {XML}+(*foot) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase id="foot"><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
+<p>Testing <phrase id="foot"><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language" specifically="eggs hem hell">XML</annotation></annotation></phrase> testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
