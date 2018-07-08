@@ -2640,7 +2640,7 @@ class FlowParser:
             self.current_string = ''
             p = Phrase(unescape(match.group("text")))
             self.flow.append(p)
-            p.annotations.append(Annotation('bold'))
+            p.annotations.append(Annotation('bold', local=True))
             para.advance(len(match.group(0)))
         else:
             self.current_string += '*'
@@ -2661,7 +2661,7 @@ class FlowParser:
             self.current_string = ''
             p = Phrase(unescape(match.group("text")))
             self.flow.append(p)
-            p.annotations.append(Annotation('italic'))
+            p.annotations.append(Annotation('italic', local=True))
             para.advance(len(match.group(0)))
         else:
             self.current_string += '_'

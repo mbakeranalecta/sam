@@ -1724,14 +1724,15 @@ a female deer
 <div class="structure" data-name="decoration">
 <h2 class="title">Bold and italic decorations</h2>
 
-<p class="p">A decoration is a shortcut for creating an annotated phrase. They are used for common text formatting features  bold, and italic. Decorations are shortcuts, so</p>
+<p class="p">A decoration is a shortcut for creating an annotated phrase. They are used for common text formatting features  bold, and italic. Decorations are shortcuts.</p>
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text is in *important* type.
 </code></pre>
 <p class="p">is a shortcut for</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text is {important}(bold).
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">This text is {important}+(bold).
 </code></pre>
+<p class="p">Decorations are always local (they create local annotations). Thus the equivalent explicit annotation in the example above is local.</p>
 <div class="syntax">
-<p class="p">Decoration are indicated by charters in the text that bracket phrases. The decorations are as follows:</p>
+<p class="p">Decoration are indicated by characters in the text that bracket phrases. The decorations are as follows:</p>
 <ul class="ul">
 <li class="li">
 <p class="p"><code class="code">*</code> is a decoration for bold.</p>
@@ -1769,10 +1770,10 @@ a female deer
 <pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">_Moby Dick_ is about a whale.
 </code></pre>
 <p class="p">Which is equivalent to:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{Moby Dick}(italic) is about a whale.
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{Moby Dick}+(italic) is about a whale.
 </code></pre>
 <p class="p">And we should note in this case that the abstract <code class="code">emphasis</code> is not only vague, it is actually incorrect. This is not a case of emphasizing a word, but of formatting a book title according to the commonly accepted convention. If you actually want an emphasis annotation in your tagging language, you should do it like this:</p>
-<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{Moby Dick}(italic) is a {very}(emphasis) good book.
+<pre class="codeblock" data-language="sam"><code class="codeblock" data-language="sam">{Moby Dick}+(italic) is a {very}+(emphasis) good book.
 </code></pre>
 </div>
 <div class="xml-serialization">

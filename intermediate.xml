@@ -3153,7 +3153,7 @@ This `foo`(bar) baz.
 </result>
 </case>
 <case>
-<title>Consecutive Annotations on decorations</title>
+<title>Consecutive annotations</title>
 
 <description>
 <p>Two separate annotations with no space between them.</p>
@@ -3441,11 +3441,11 @@ Testing {XML}(language "eggs hem hell") testing {XML}-(language)+(language "heck
 </description>
 <source>
 <codeblock language="sam">
-Testing {XML}(language "Hex Hem Elle") testing {XML}(language "eggs hem hell")-(language)+(language "heck's that smell?") testing {XML}.
+Testing {XML}(language "Hex Hem Elle") testing {XML}-(language)+(language "heck's that smell?") testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase><annotation type="language" specifically="Hex Hem Elle">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="eggs hem hell"><annotation type="language" specifically="heck's that smell?">XML</annotation></annotation></phrase> testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase>.</p>
+<p>Testing <phrase><annotation type="language" specifically="Hex Hem Elle">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="heck's that smell?">XML</annotation></phrase> testing <phrase><annotation type="language" specifically="Hex Hem Elle">XML</annotation></phrase>.</p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3461,11 +3461,11 @@ Testing {XML}(language "Hex Hem Elle") testing {XML}(language "eggs hem hell")-(
 </description>
 <source>
 <codeblock language="sam">
-Testing {XML}+(*foot) testing {XML}+(index) testing {XML}.
+Testing {XML}(language)(*foot) testing {XML}+(index) testing {XML}.
 </codeblock>
 </source>
 <markup>
-<p>Testing <phrase id="foot"><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language" specifically="eggs hem hell">XML</annotation></annotation></phrase> testing <phrase><annotation type="language" specifically="eggs hem hell">XML</annotation></phrase>.</p>
+<p>Testing <phrase id="foot"><annotation type="language">XML</annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>. This text is <phrase><annotation type="bold"><annotation type="italic">important</annotation></annotation></phrase></p>
 </markup>
 <result>
 <codeblock language="xml">
@@ -3518,7 +3518,7 @@ Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
 <title>Decorations</title>
 
 <description>
-<p>A decoration is a shortcut for a <phrase><annotation type="concept">media domain</annotation></phrase> annotation. Three decorations are supported, bold, italic, and code.</p>
+<p>A decoration is a shortcut for a <phrase><annotation type="concept">media domain</annotation></phrase> annotation. Three decorations are supported, bold, and italic. Code looks a lot like a decoration but is actually a separate structure. Included here for completeness. The phrase for bold and code are then repeated to test that the decorations are only being applied locally.</p>
 </description>
 <case>
 <title>Bold, italic, and code</title>
@@ -3528,15 +3528,15 @@ Testing {XML}+(foobar)+(verbiage) testing {XML}+(index) testing {XML}.
 </description>
 <source>
 <codeblock language="sam">
-This sentence contains decorations for *bold*, _italic_, and `code`.
+This sentence contains decorations for *bold*, _italic_, and `code`. Say {bold} again. Say {code} again.
 </codeblock>
 </source>
 <markup>
-<p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <code>code</code>.</p>
+<p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <code>code</code>. Say <phrase>bold</phrase> again. Say <phrase>code</phrase> again.</p>
 </markup>
 <result>
 <codeblock language="xml">
-&lt;p&gt;This sentence contains decorations for &lt;phrase&gt;&lt;annotation type="bold"&gt;bold&lt;/annotation&gt;&lt;/phrase&gt;, &lt;phrase&gt;&lt;annotation type="italic"&gt;italic&lt;/annotation&gt;&lt;/phrase&gt;, and &lt;code&gt;code&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;This sentence contains decorations for &lt;phrase&gt;&lt;annotation type="bold"&gt;bold&lt;/annotation&gt;&lt;/phrase&gt;, &lt;phrase&gt;&lt;annotation type="italic"&gt;italic&lt;/annotation&gt;&lt;/phrase&gt;, and &lt;code&gt;code&lt;/code&gt;. Say &lt;phrase&gt;bold&lt;/phrase&gt; again. Say &lt;phrase&gt;code&lt;/phrase&gt; again.&lt;/p&gt;
 </codeblock>
 </result>
 </case>

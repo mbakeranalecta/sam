@@ -1708,7 +1708,8 @@ specification:(!en) Semantic Authoring Markdown (SAM)
 
         structure:(#decoration) Bold and italic decorations
 
-            A decoration is a shortcut for creating an annotated phrase. They are used for common text formatting features  bold, and italic. Decorations are shortcuts, so
+            A decoration is a shortcut for creating an annotated phrase. They are used for common text formatting
+            features  bold, and italic. Decorations are shortcuts.
 
             ```(sam)
                 This text is in *important* type.
@@ -1716,10 +1717,13 @@ specification:(!en) Semantic Authoring Markdown (SAM)
             is a shortcut for
 
             ```(sam)
-                This text is {important}(bold).
+                This text is {important}+(bold).
+
+           Decorations are always local (they create local annotations). Thus the equivalent explicit annotation in the
+           example above is local.
 
            syntax:
-                Decoration are indicated by charters in the text that bracket phrases. The decorations are as follows:
+                Decoration are indicated by characters in the text that bracket phrases. The decorations are as follows:
 
                 * `*` is a decoration for bold.
 
@@ -1751,9 +1755,11 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 ```(sam)
                     This text is {_important_}(bold).
 
-                Decorations are not recognized inside of {phrase}s, since decorations are shorcuts for phrases and phrases cannot be nested. Decoration characters inside annotations are read as plain text. 
+                Decorations are not recognized inside of {phrase}s, since decorations are shorcuts for phrases and
+                phrases cannot be nested. Decoration characters inside annotations are read as plain text.
 
-                {Annotation}(structure "annotation") chaining is supported for decorations. Therefore if you want to make text both both and italic, you could use:
+                {Annotation}(structure "annotation") chaining is supported for decorations. Therefore if you want
+                to make text both both and italic, you could use:
 
                 ```(sam)
                     This text is *important*(italic)
@@ -1763,14 +1769,26 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 ```(sam)
                     This text is {important}(bold)(italic)
 
+
+
+
             semantics:
 
-                In SAM, the bold and italic decorations are media domain structures calling for the use of bold and italic typefaces respectively. This is in contrast to most lightweight markup languages which use them (or similar markup) to mean an abstraction like "emphasis" or "strong". The problem with these abstractions is that their meaning in not clear. Bold and italic type are conventionally used for specific purposes and should not be abstracted out without some definite indication of the purpose. Thus in SAM, you would normally expect a tagging language that expected the titles of books to occur regularly in content would provide a suitable `title` annotation to mark them up. 
+                In SAM, the bold and italic decorations are media domain structures calling for the use of
+                bold and italic typefaces respectively. This is in contrast to most lightweight markup languages
+                which use them (or similar markup) to mean an abstraction like "emphasis" or "strong". The problem
+                with these abstractions is that their meaning in not clear. Bold and italic type are conventionally
+                used for specific purposes and should not be abstracted out without some definite indication of the
+                purpose. Thus in SAM, you would normally expect a tagging language that expected the titles of books
+                to occur regularly in content would provide a suitable `title` annotation to mark them up.
 
                 ```(sam)
                     {Moby Dick}(book) is about a whale.
 
-                But if there the tagging language provides no such support, because books are not a significant subject for that language, then the writer who needs to mention a book should not be forced to use a vague and unreliable abstraction like `emphasis` in order to ensure proper formatting of the title. They should be able to specify the correct media domain formatting choice:
+                But if there the tagging language provides no such support, because books are not a significant
+                subject for that language, then the writer who needs to mention a book should not be forced to
+                use a vague and unreliable abstraction like `emphasis` in order to ensure proper formatting of
+                the title. They should be able to specify the correct media domain formatting choice:
 
                 ```(sam)
                     _Moby Dick_ is about a whale.
@@ -1778,12 +1796,15 @@ specification:(!en) Semantic Authoring Markdown (SAM)
                 Which is equivalent to:
 
                 ```(sam)
-                    {Moby Dick}(italic) is about a whale.
+                    {Moby Dick}+(italic) is about a whale.
 
-                And we should note in this case that the abstract `emphasis` is not only vague, it is actually incorrect. This is not a case of emphasizing a word, but of formatting a book title according to the commonly accepted convention. If you actually want an emphasis annotation in your tagging language, you should do it like this:
+                And we should note in this case that the abstract `emphasis` is not only vague, it is actually
+                incorrect. This is not a case of emphasizing a word, but of formatting a book title according
+                to the commonly accepted convention. If you actually want an emphasis annotation in your tagging
+                language, you should do it like this:
 
                 ```(sam)
-                    {Moby Dick}(italic) is a {very}(emphasis) good book.
+                    {Moby Dick}+(italic) is a {very}+(emphasis) good book.
 
             xml-serialization:
 

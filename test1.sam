@@ -2539,7 +2539,7 @@ tests:(!en) SAM Parser Tests
                 ```(xml)
                     <p><phrase><annotation type="actor" specifically="John Wayne"><annotation type="if" specifically="1969">The Duke</annotation></annotation></phrase><phrase><annotation type="actor"><annotation type="if" specifically="2010">Jeff Bridges</annotation></annotation></phrase> plays Rooster Cogburn.</p>
 
-        case: Consecutive Annotations on decorations
+        case: Consecutive annotations
 
             description:
                 Two separate annotations with no space between them.
@@ -2816,10 +2816,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    Testing {XML}(language "Hex Hem Elle") testing {XML}(language "eggs hem hell")-(language)+(language "heck's that smell?") testing {XML}.
+                    Testing {XML}(language "Hex Hem Elle") testing {XML}-(language)+(language "heck's that smell?") testing {XML}.
 
             markup:
-                Testing {XML}(language "Hex Hem Elle") testing {XML}-(language)(language "eggs hem hell")+(language "heck's that smell?") testing {XML}.
+                Testing {XML}(language "Hex Hem Elle") testing {XML}-(language)+(language "heck's that smell?") testing {XML}.
 
             result:
                 ```(xml)
@@ -2831,10 +2831,10 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    Testing {XML}+(*foot) testing {XML}+(index) testing {XML}.
+                    Testing {XML}(language)(*foot) testing {XML}+(index) testing {XML}.
 
             markup:
-                Testing {XML}+(*foot) testing {XML}+(index) testing {XML}.
+                Testing {XML}(language)(*foot) testing {XML}+(index) testing {XML}.
 
             result:
                 ```(xml)
@@ -2870,7 +2870,9 @@ tests:(!en) SAM Parser Tests
                     <p>Testing <phrase><annotation type="foobar"><annotation type="verbiage"><annotation type="language">XML</annotation></annotation></annotation></phrase> testing <phrase><annotation type="index"><annotation type="language">XML</annotation></annotation></phrase> testing <phrase><annotation type="language">XML</annotation></phrase>.</p>
     test: Decorations
         description:
-            A decoration is a shortcut for a {media domain}(concept) annotation. Three decorations are supported, bold, italic, and code.
+            A decoration is a shortcut for a {media domain}(concept) annotation. Three decorations are supported, bold, and italic. Code looks a lot like
+            a decoration but is actually a separate structure. Included here for completeness. The phrase for bold and code are
+            then repeated to test that the decorations are only being applied locally.
 
         case: Bold, italic, and code
 
@@ -2879,14 +2881,14 @@ tests:(!en) SAM Parser Tests
 
             source:
                 ```(sam)
-                    This sentence contains decorations for *bold*, _italic_, and `code`.
+                    This sentence contains decorations for *bold*, _italic_, and `code`. Say {bold} again. Say {code} again.
 
             markup:
-                This sentence contains decorations for *bold*, _italic_, and `code`.
+                This sentence contains decorations for *bold*, _italic_, and `code`. Say {bold} again. Say {code} again.
             
             result:
                 ```(xml)
-                    <p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <code>code</code>.</p>
+                    <p>This sentence contains decorations for <phrase><annotation type="bold">bold</annotation></phrase>, <phrase><annotation type="italic">italic</annotation></phrase>, and <code>code</code>. Say <phrase>bold</phrase> again. Say <phrase>code</phrase> again.</p>
 
         case: Unbalanced decorations and escapes
             description:
