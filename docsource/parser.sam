@@ -179,11 +179,11 @@ article: SAM Parser
         SAM structures are output to HTML as follows:
 
         * Named blocks are output as HTML `<div>` elements. The SAM block
-        name is output as the `class` attribute of the DIV elements, allowing you to attach
-        specific CSS styling to each type of block.
+          name is output as the `class` attribute of the DIV elements, allowing you to attach
+          specific CSS styling to each type of block.
 
         * Codeblocks are output as `pre` elements with the language attribute output as a `data-language`
-        and the `class` as `codeblock`. Code is wrapped in `code` tags, also with `class` as `codeblock`.
+          and the `class` as `codeblock`. Code is wrapped in `code` tags, also with `class` as `codeblock`.
 
         * Embedded data is ignored and a warning is issued.
 
@@ -196,20 +196,20 @@ article: SAM Parser
         * Record sets are output as tables with the field names as table headers.
 
         * Inserts by URL become `object` elements. String inserts are resolved if the named string is available.
-        Inserts by ID are resolved by inserting the object with the specified ID. A warning will be raised and
-        the insert will be ignored if you try to insert a block element with an inline insert or and inline
-        element with a block insert. All other inserts are ignored and a warning is raised.
+          Inserts by ID are resolved by inserting the object with the specified ID. A warning will be raised and
+          the insert will be ignored if you try to insert a block element with an inline insert or and inline
+          element with a block insert. All other inserts are ignored and a warning is raised.
 
         * Phrases are output as spans with the `class` attribute `phrase`.
 
         * Annotations are output as spans nested within the phrase spans they annotate. The specifically and
-        namespace attributes of an annotation are output as `data-*` attributes.
+          namespace attributes of an annotation are output as `data-*` attributes.
 
         * Attributes are output as HTML attributes. ID attributes are output as HTML `id` attributes. Language-code
-        attributes are ouput as HTML `lang` attributes. Other attributes are output as HTML `data-*` attributes.
+          attributes are ouput as HTML `lang` attributes. Other attributes are output as HTML `data-*` attributes.
 
         * An HTML `head` element is generated which includes the `title` elements if the root block of the
-        SAM document has a title. It also includes `<meta charset = "UTF-8">`.
+          SAM document has a title. It also includes `<meta charset = "UTF-8">`.
 
         To generate HTML output, use the `html` output mode the command line.
 

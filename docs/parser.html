@@ -208,17 +208,11 @@
 <p class="p">SAM structures are output to HTML as follows:</p>
 <ul class="ul">
 <li class="li">
-<p class="p">Named blocks are output as HTML <code class="code">&lt;div&gt;</code> elements. The SAM block</p>
+<p class="p">Named blocks are output as HTML <code class="code">&lt;div&gt;</code> elements. The SAM block name is output as the <code class="code">class</code> attribute of the DIV elements, allowing you to attach specific CSS styling to each type of block.</p>
 </li>
-</ul>
-<p class="p">name is output as the <code class="code">class</code> attribute of the DIV elements, allowing you to attach specific CSS styling to each type of block.</p>
-<ul class="ul">
 <li class="li">
-<p class="p">Codeblocks are output as <code class="code">pre</code> elements with the language attribute output as a <code class="code">data-language</code></p>
+<p class="p">Codeblocks are output as <code class="code">pre</code> elements with the language attribute output as a <code class="code">data-language</code> and the <code class="code">class</code> as <code class="code">codeblock</code>. Code is wrapped in <code class="code">code</code> tags, also with <code class="code">class</code> as <code class="code">codeblock</code>.</p>
 </li>
-</ul>
-<p class="p">and the <code class="code">class</code> as <code class="code">codeblock</code>. Code is wrapped in <code class="code">code</code> tags, also with <code class="code">class</code> as <code class="code">codeblock</code>.</p>
-<ul class="ul">
 <li class="li">
 <p class="p">Embedded data is ignored and a warning is issued.</p>
 </li>
@@ -235,31 +229,21 @@
 <p class="p">Record sets are output as tables with the field names as table headers.</p>
 </li>
 <li class="li">
-<p class="p">Inserts by URL become <code class="code">object</code> elements. String inserts are resolved if the named string is available.</p>
+<p class="p">Inserts by URL become <code class="code">object</code> elements. String inserts are resolved if the named string is available. Inserts by ID are resolved by inserting the object with the specified ID. A warning will be raised and the insert will be ignored if you try to insert a block element with an inline insert or and inline element with a block insert. All other inserts are ignored and a warning is raised.</p>
 </li>
-</ul>
-<p class="p">Inserts by ID are resolved by inserting the object with the specified ID. A warning will be raised and the insert will be ignored if you try to insert a block element with an inline insert or and inline element with a block insert. All other inserts are ignored and a warning is raised.</p>
-<ul class="ul">
 <li class="li">
 <p class="p">Phrases are output as spans with the <code class="code">class</code> attribute <code class="code">phrase</code>.</p>
 </li>
 <li class="li">
-<p class="p">Annotations are output as spans nested within the phrase spans they annotate. The specifically and</p>
+<p class="p">Annotations are output as spans nested within the phrase spans they annotate. The specifically and namespace attributes of an annotation are output as <code class="code">data-*</code> attributes.</p>
 </li>
-</ul>
-<p class="p">namespace attributes of an annotation are output as <code class="code">data-*</code> attributes.</p>
-<ul class="ul">
 <li class="li">
-<p class="p">Attributes are output as HTML attributes. ID attributes are output as HTML <code class="code">id</code> attributes. Language-code</p>
+<p class="p">Attributes are output as HTML attributes. ID attributes are output as HTML <code class="code">id</code> attributes. Language-code attributes are ouput as HTML <code class="code">lang</code> attributes. Other attributes are output as HTML <code class="code">data-*</code> attributes.</p>
 </li>
-</ul>
-<p class="p">attributes are ouput as HTML <code class="code">lang</code> attributes. Other attributes are output as HTML <code class="code">data-*</code> attributes.</p>
-<ul class="ul">
 <li class="li">
-<p class="p">An HTML <code class="code">head</code> element is generated which includes the <code class="code">title</code> elements if the root block of the</p>
+<p class="p">An HTML <code class="code">head</code> element is generated which includes the <code class="code">title</code> elements if the root block of the SAM document has a title. It also includes <code class="code">&lt;meta charset = "UTF-8"&gt;</code>.</p>
 </li>
 </ul>
-<p class="p">SAM document has a title. It also includes <code class="code">&lt;meta charset = "UTF-8"&gt;</code>.</p>
 <p class="p">To generate HTML output, use the <code class="code">html</code> output mode the command line.</p>
 <p class="p">To specify a stylesheet to be imported by the resulting HTML file, use the <code class="code">-css</code> option with the URL of the css file to be included (relative to the location of the HTML file). You can specify the <code class="code">-css</code> option more than once.</p>
 <p class="p">To specify a javascript file to be imported by the resulting HTML file, use the <code class="code">-javascript</code> option with the URL of the javascript file to be included (relative to the location of the HTML file). You can specify the <code class="code">-javascript</code> option more than once.</p>
