@@ -4,7 +4,7 @@ article: SAM Recipes
 
     SAM is an abstract markup language, otherwise known as a meta-language. This means that it is intended, like XML,
     defining your own markup languages. Unlike XML, however, SAM pre-defines a basic set of structures.
-    SAMs predefined structures provide a simple clear syntax of common text structures, but they don't cover
+    SAM's predefined structures provide a simple clear syntax for common text structures, but they don't cover
     everything you might need. The following recipes are suggestions on how to handle some common markup
     problems in SAM. But remember, these involve you defining markup for yourself and require you to handle that
     markup in the application layer.
@@ -32,7 +32,7 @@ article: SAM Recipes
 
         There is no support for SAM markup in the body of a codeblock. This works for code, since it
         requires no escaping, regardless of language. It does not work so well for terminal sessions
-        if you want to markup the prompt, input, and output. If you need this kind of terminal session
+        if you want to mark up the prompt, input, and output. If you need this kind of terminal session
         support, the suggested recipe is to create a terminal session block and use fields for
         the sequence of prompt, input, and response. This reads quite clearly and you can easily
         use it to construct a formatted terminal session illustration when publishing.
@@ -111,7 +111,7 @@ article: SAM Recipes
 
         This is a time saver. If you have a set of phrases that are commonly annotated
         the same way across a number of documents, you can create a lookup file in which those
-        phrases are annotated and import it into each document. You with then not need to
+        phrases are annotated and import it into each document. Then you will not need to
         annotate any of those phrases in the document. Just mark them up as phrases using
         curly braces and the parser will fill in the annotations.
 
@@ -160,7 +160,7 @@ article: SAM Recipes
 
 
         Note that you don't have to generate an index entry for every instance of
-        and annotated phrase. You can choose to generate an entry only for the first occurrence of
+        an annotated phrase. You can choose to generate an entry only for the first occurrence of
         an annotated phrase in a section or chapter, for instance.
 
         To implement explicit index markers, you can use annotations with a type `index`:
@@ -194,7 +194,7 @@ article: SAM Recipes
 
         There is no way to insert markup into a regular codeblock. If you want to do callouts
         in code, you can use lines for the code and citations for the callouts. (The presumptive
-        semantics for citations is that what they produce is base on the thing they refer to.)
+        semantics for citations is that what they produce is based on the thing they refer to.)
 
         ```(sam)
         codesample:
@@ -210,9 +210,9 @@ article: SAM Recipes
         ```(sam)
             Look it up in {Wikipedia}[*wikipedia]
 
-            link(*wikipedia): http://wikipedia.org
+            link:(*wikipedia) http://wikipedia.org
 
-    recipe: Complex
+    recipe: Complex tables
 
         Sam {grids} do not support spanning rows and columns in a table. However, you 
         could provide for spanning rows and columns in grids at the application 
@@ -342,7 +342,7 @@ article: SAM Recipes
         phrases every time they mention them. If the parser detect an unannotated phrase, it
         will work its way back through the document, including any included files, looking for
         the same phrase with an annotation. It then copies the annotation from the first 
-        annotated phrase it finds. The question is, how does it match phrases. The parser
+        annotated phrase it finds. The question is, how does it match phrases? The parser
         provides two {annotation lookup modes}, `case_sensitive` and `case_insensitive`. However, 
         this does not account for cases where you might want various forms of the word to
         be annotated the same way, such as "run", "ran", and "running". To match different
@@ -354,4 +354,4 @@ article: SAM Recipes
         user to supply their own annotation lookup mode, which may implement stemming or 
         any other approach to annotation lookup that the user wants. 
 
-        You can add other {annotation lookup modes} by writing a lookup function and adding it to the dictionary samparser.annotation_lookup_modes.  
+        You can add other {annotation lookup modes} by writing a lookup function and adding it to the dictionary `samparser.annotation_lookup_modes`.
