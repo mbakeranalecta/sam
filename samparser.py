@@ -3759,7 +3759,7 @@ if __name__ == "__main__":
 
     # Main parser
     argparser = argparse.ArgumentParser()
-    subparsers = argparser.add_subparsers()
+    subparsers = argparser.add_subparsers(title="subcommands")
 
     # I/O parser
     io_parser = argparse.ArgumentParser(add_help=False)
@@ -3796,6 +3796,11 @@ if __name__ == "__main__":
     html_parser.set_defaults(func=html_output)
 
     args = argparser.parse_args()
+    
+    # If no subcommand was chosen
+    if not hasattr(args, "func"):
+        argparser.print_help()
+        sys.exit(1)
 
     if args.infile == args.outfile:
         raise SAMParserError('Input and output files cannot have the same name.')
